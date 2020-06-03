@@ -1,0 +1,295 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
+
+package org.watto.ge.plugin.archive;
+
+import java.io.File;
+import org.watto.datatype.Resource;
+import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
+import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
+
+/**
+**********************************************************************************************
+
+**********************************************************************************************
+**/
+public class Plugin_FUK_XV4 extends ArchivePlugin {
+
+  Resource[] resources = null;
+  int realNumFiles = 0;
+  int currentEntry = 0;
+  long[] lengths = null;
+  long[] offsets = null;
+  long[] decompLengths = null;
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public Plugin_FUK_XV4() {
+
+    super("FUK_XV4", "FUK_XV4");
+
+    //         read write replace rename
+    setProperties(true, false, false, false);
+
+    setGames("Demonicon",
+        "Grand Ages: Medieval");
+    setExtensions("fuk"); // MUST BE LOWER CASE
+    setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  @Override
+  public int getMatchRating(FileManipulator fm) {
+    try {
+
+      int rating = 0;
+
+      if (FieldValidator.checkExtension(fm, extensions)) {
+        rating += 25;
+      }
+
+      // Header
+      if (fm.readString(3).equals("xV4")) {
+        rating += 45;
+      }
+      if (fm.readByte() == 18) {
+        rating += 5;
+      }
+
+      // 4 - Unknown (32)
+      if (fm.readInt() == 32) {
+        rating += 5;
+      }
+
+      // Number Of Files
+      if (FieldValidator.checkNumFiles(fm.readInt())) {
+        rating += 5;
+      }
+
+      // Number Of Files
+      if (FieldValidator.checkNumFiles(fm.readInt())) {
+        rating += 5;
+      }
+
+      long arcSize = fm.getLength();
+
+      // Directory Length
+      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+        rating += 5;
+      }
+
+      return rating;
+
+    }
+    catch (Throwable t) {
+      return 0;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads an [archive] File into the Resources
+   **********************************************************************************************
+   **/
+  @Override
+  public Resource[] read(File path) {
+    try {
+
+      // NOTE - Compressed files MUST know their DECOMPRESSED LENGTH
+      //      - Uncompressed files MUST know their LENGTH
+
+      addFileTypes();
+
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
+
+      // RESETTING GLOBAL VARIABLES
+      resources = null;
+      realNumFiles = 0;
+      lengths = null;
+      offsets = null;
+      decompLengths = null;
+      currentEntry = 0;
+
+      FileManipulator fm = new FileManipulator(path, false);
+
+      long arcSize = fm.getLength();
+
+      // 4 - Header ("xV4" + (byte)18)
+      // 4 - Unknown (32)
+      fm.skip(8);
+
+      // 4 - Number of Files + Folders
+      int numEntries = fm.readInt();
+      FieldValidator.checkNumFiles(numEntries);
+
+      // 4 - Number of Files
+      int numFiles = fm.readInt();
+      FieldValidator.checkNumFiles(numFiles);
+
+      // 4 - Filename Directory Length
+      int filenameDirLength = fm.readInt();
+      FieldValidator.checkLength(filenameDirLength, arcSize);
+
+      // 4 - Unknown (2)
+      fm.skip(4);
+
+      resources = new Resource[numFiles];
+      TaskProgressManager.setMaximum(numFiles);
+
+      lengths = new long[numEntries];
+      offsets = new long[numFiles];
+      decompLengths = new long[numEntries];
+
+      // Go read all the names
+      fm.seek(24 + (numEntries * 16) + (numEntries * 12) + (numFiles * 4));
+      byte[] nameBytes = fm.readBytes(filenameDirLength);
+      FileManipulator filenameFM = new FileManipulator(new ByteBuffer(nameBytes));
+
+      // go back and read the file entries
+      fm.seek(24 + (numEntries * 16));
+
+      for (int i = 0; i < numEntries; i++) {
+        // 4 - Decompressed File Length
+        int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
+        decompLengths[i] = decompLength;
+
+        // 4 - Compressed File Length
+        int length = fm.readInt();
+        FieldValidator.checkLength(length, arcSize);
+        lengths[i] = length;
+
+        // 4 - Unknown
+        fm.skip(4);
+        TaskProgressManager.setValue(i);
+      }
+
+      for (int i = 0; i < numFiles; i++) {
+        // 4 - File Offset [*16]
+        long offset = IntConverter.unsign(fm.readInt() * 16);
+        FieldValidator.checkOffset(offset, arcSize);
+        offsets[i] = offset;
+        TaskProgressManager.setValue(i);
+      }
+
+      // go back and read the file+folder entries
+      fm.seek(24);
+
+      int[] numSubEntries = new int[numEntries];
+      int[] parentIDs = new int[numEntries];
+      String[] names = new String[numEntries];
+      for (int i = 0; i < numEntries; i++) {
+        // 4 - File ID? (-1 for a folder?)
+        fm.skip(4);
+
+        // 4 - Number of Files+Folders in this Folder (or -1 if this is a file entry)
+        numSubEntries[i] = fm.readInt();
+
+        // 4 - Parent Folder ID? (-1 for no parent, 0 = first folder, etc)
+        parentIDs[i] = fm.readInt();
+
+        // 4 - Filename Offset (relative to the start of the filename directory)
+        int filenameOffset = fm.readInt();
+        FieldValidator.checkOffset(filenameOffset, filenameFM.getLength());
+
+        filenameFM.seek(filenameOffset);
+        names[i] = filenameFM.readNullString();
+        //System.out.println(currentEntry + "\t" + parentFileID + "\t" + names[currentEntry]);
+
+        TaskProgressManager.setValue(i);
+      }
+
+      // now set the parent names for the directories
+      for (int i = 0; i < numEntries; i++) {
+        int numSubs = numSubEntries[i];
+
+        if (numSubs != -1) {
+          // a folder
+          // set the name so that it includes the parent
+
+          int parentID = parentIDs[i];
+          if (parentID != -1) {
+            names[i] = names[parentID] + names[i] + "\\";
+          }
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      // now set the parent names for the files, and create the actual file Resources
+      realNumFiles = 0;
+      for (int i = 0; i < numEntries; i++) {
+        int numSubs = numSubEntries[i];
+
+        if (numSubs == -1) {
+          // a file
+          // set the name so that it includes the parent
+
+          int parentID = parentIDs[i];
+          if (parentID != -1) {
+            names[i] = names[parentID] + names[i];
+          }
+
+          // create the Resource
+          //path,name,offset,length,decompLength,exporter
+          long length = lengths[i];
+          long decompLength = decompLengths[i];
+
+          if (length == decompLength) {
+            // no compression
+            resources[realNumFiles] = new Resource(path, names[i], offsets[realNumFiles], length);
+          }
+          else {
+            // compression
+            resources[realNumFiles] = new Resource(path, names[i], offsets[realNumFiles], length, decompLength, exporter);
+          }
+
+          realNumFiles++;
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      filenameFM.close();
+      fm.close();
+
+      return resources;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      return null;
+    }
+  }
+
+}
