@@ -1,0 +1,18 @@
+<WSPanel code="SidePanel_Search" layout="BorderLayout" vertical-gap="6">
+	
+	<WSPanel layout="BorderLayout" position="NORTH" vertical-gap="6">
+	
+		<WSTextField code="SidePanel_Search_InputText" showLabel="true" position="NORTH" />
+		
+		<WSPanel code="SidePanel_Search_ColumnsHolder_Label" showLabel="true" showBorder="true" border-width="3" position="CENTER">
+			<WSPanel showBorder="true" code="SidePanel_Search_ColumnsHolder" position="CENTER" opaque="false" />
+		</WSPanel>
+	
+		<WSPanel layout="GridLayout" rows="1" columns="2" position="SOUTH">
+			<WSButton code="SidePanel_Search_FindNextButton" showText="true" />
+			<WSButton code="SidePanel_Search_SelectAllButton" showText="true" />
+		</WSPanel>
+		
+	</WSPanel>
+	
+</WSPanel>

@@ -1,0 +1,18 @@
+<pluginPreferences>
+  <prefixes>
+    <prefix>DirectoryList_</prefix>
+    <prefix>SidePanel_</prefix>
+    <prefix>FileListPanel_</prefix>
+    <prefix>Plugin_</prefix>
+    <prefix>Scanner_</prefix>
+    <prefix>Renamer_</prefix>
+    <prefix>Viewer_</prefix>
+    <prefix>Options_</prefix>
+    <prefix>FileListExporter_</prefix>
+  </prefixes>
+  <locations>
+    <location type="zip">GameExtractor.jar</location>
+    <location type="directory" traverse="true">plugins</location>
+    <location type="directory"></location>
+  </locations>
+</pluginPreferences>

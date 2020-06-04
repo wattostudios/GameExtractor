@@ -1,0 +1,23 @@
+<WSPanel code="SidePanel_Options_General_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_General_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel position="NORTH" vertical-gap="6">
+				<WSPanel layout="GridLayout" position="NORTH" rows="3" columns="1" vertical-gap="6">
+					<WSOptionTextField code="Option_General_HexEditorFileSizeLimit" setting="HexEditorFileSizeLimit" />
+					<WSOptionTextField code="Option_General_NumberOfRecentFiles" setting="NumberOfRecentFiles" />
+					<WSOptionTextField code="Option_General_NumberOfUndoTasks" setting="NumberOfUndoTasks" />
+				</WSPanel>
+				<WSPanel layout="BorderLayout" code="Option_General_DragDropOption_Label" position="CENTER" showLabel="true" showBorder="true">
+					<WSOptionComboBox_DragDropOption opaque="false" code="Option_General_DragDropOption" setting="DragDropOption" position="CENTER" />
+				</WSPanel>
+				<WSPanel layout="GridLayout" position="SOUTH" rows="3" columns="1">
+					<WSOptionCheckBox code="Option_General_AutoResizeTableColumns" setting="AutoResizeTableColumns" />
+					<WSOptionCheckBox code="Option_General_AllowInlineFileListEditing" setting="AllowInlineFileListEditing" />
+					<WSOptionCheckBox code="Option_General_DebugMode" setting="DebugMode" />
+				</WSPanel>
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

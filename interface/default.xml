@@ -1,0 +1,133 @@
+<WSPanel code="OverlayFrame" layout="LayeredLayout">
+	<WSPanel code="PopupOverlay" opaque="false" visible="false" layout="CenteredLayout" />
+	<WSPanel code="MainWindowFrame" layout="BorderLayout">
+		<WSMenuBar code="MainMenuBar" position="NORTH">
+			<WSMenu code="File" opaque="false" underline="F">
+				<WSMenuItem code="NewArchive" opaque="false" underline="A" shortcut="ctrl N" />
+				<WSMenu code="ReadArchive" opaque="false" underline="O">
+					<WSMenuItem code="ReadArchive_Normal" opaque="false" underline="E" shortcut="ctrl O" />
+					<WSMenuItem code="ReadArchive_OpenWith" opaque="false" underline="A" />
+					<WSMenuItem code="ReadArchive_Script" opaque="false" underline="I" />
+					<WSMenuItem code="ReadArchive_Scanner" opaque="false" underline="R" />
+				</WSMenu>
+				<WSMenu code="ExtractResources" opaque="false" underline="E">
+					<WSMenuItem code="ExtractSelectedResources" opaque="false" underline="X" />
+					<WSMenuItem code="ExtractAllResources" opaque="false" underline="T" shortcut="ctrl E" />
+				</WSMenu>
+				<WSMenu code="WriteArchive" opaque="false" underline="W">
+					<WSMenuItem code="CutArchive" opaque="false" repository="false" underline="U" />
+					<WSMenuItem code="WriteArchive" opaque="false" underline="W" shortcut="ctrl S" />
+					<WSMenuItem code="ConvertArchive" opaque="false" underline="C" />
+				</WSMenu>
+				<WSPopupMenuSeparator />
+				<WSRecentFileMenu code="RecentFileMenu" opaque="false" />
+				<WSPopupMenuSeparator />
+				<WSMenuItem code="CloseProgram" opaque="false" repository="false" underline="L" shortcut="F12" />
+			</WSMenu>
+			<WSMenu code="Manipulate" opaque="false" underline="M">
+				<WSMenuItem code="AddResources" opaque="false" underline="A" shortcut="F5" />
+				<WSMenuItem code="RemoveResources" opaque="false" underline="R" shortcut="F6" />
+				<WSMenuItem code="RenameResources" opaque="false" underline="E" shortcut="F7" />
+				<WSMenuItem code="ReplaceResources" opaque="false" underline="L" shortcut="F8" />
+				<WSPopupMenuSeparator />
+				<WSUndoTaskMenu code="UndoMenu" opaque="false" manager="TaskManager" />
+				<WSRedoTaskMenu code="RedoMenu" opaque="false" manager="TaskManager" />
+			</WSMenu>
+			<WSMenu code="Select" opaque="false" underline="S">
+				<WSMenuItem code="SelectResources_All" opaque="false" repository="false" underline="L" />
+				<WSMenuItem code="SelectResources_None" opaque="false" underline="C" />
+				<WSMenuItem code="SelectResources_Inverse" opaque="false" underline="T" />
+			</WSMenu>
+			<WSMenu code="View" opaque="false" underline="V">
+				<WSMenuItem code="FileListView_Table" opaque="false" repository="false" underline="A" />
+				<WSMenuItem code="FileListView_Tree" opaque="false" repository="false" underline="R" />
+				<WSMenuItem code="FileListView_TreeTable" opaque="false" repository="false" underline="O" />
+				<WSMenuItem code="FileListView_Thumbnails" opaque="false" underline="U" />
+			</WSMenu>
+			<WSMenu code="Preview" opaque="false" underline="P">
+				<WSMenuItem code="PreviewResource" opaque="false" repository="false" underline="R" shortcut="ctrl V" />
+				<WSMenuItem code="HexEditor" opaque="false" repository="false" underline="H" />
+				<WSMenuItem code="ImageInvestigator" opaque="false" repository="false" underline="I" />
+			</WSMenu>
+			<WSMenu code="Tools" opaque="false" underline="T">
+				<WSMenuItem code="Options" opaque="false" repository="false" underline="O" shortcut="F11" />
+				<WSPopupMenuSeparator />
+				<WSMenuItem code="Search" opaque="false" repository="false" underline="E" shortcut="ctrl F" />
+				<WSPopupMenuSeparator />
+				<WSMenuItem code="PluginList" opaque="false" repository="false" underline="L" />
+				<WSMenuItem code="Information" opaque="false" repository="false" underline="I" />
+				<WSPopupMenuSeparator />
+				<WSMenuItem code="ScriptBuilder" opaque="false" />
+				<WSMenuItem code="FileListExporter" opaque="false" repository="false" underline="E" />
+			</WSMenu>
+			<WSMenu code="Help" opaque="false" repository="false" underline="H">
+				<WSMenuItem code="Help" opaque="false" repository="false" underline="E" shortcut="F1" />
+				<WSMenuItem code="About" opaque="false" repository="false" underline="A" shortcut="ctrl A" />
+			</WSMenu>
+		</WSMenuBar>
+		<WSPanel code="ToolbarFrame" position="CENTER" layout="BorderLayout">
+			<WSSplitPane code="MainSplit" position="CENTER" divider-size="5">
+				<WSFileListPanelHolder code="FileListPanelHolder" position="WEST" border-width="4" />
+				<WSSidePanelHolder code="SidePanelHolder" position="EAST" border-width="4" />
+			</WSSplitPane>
+			<WSToolBar code="MainToolBar" position="NORTH">
+				<WSButton code="NewArchive" opaque="false" showText="false" />
+				<WSComboButton code="ReadArchive_Normal" opaque="false">
+					<WSButton code="ReadArchive_Normal" opaque="false" showText="false" />
+					<WSPopupMenu visible="false">
+						<WSMenuItem code="ReadArchive_Normal" opaque="false" />
+						<WSMenuItem code="ReadArchive_OpenWith" opaque="false" />
+						<WSMenuItem code="ReadArchive_Script" opaque="false" />
+						<WSMenuItem code="ReadArchive_Scanner" opaque="false" />
+					</WSPopupMenu>
+				</WSComboButton>
+				<WSComboButton code="WriteArchive" opaque="false">
+					<WSButton code="WriteArchive" opaque="false" showText="false" />
+					<WSPopupMenu visible="false">
+						<WSMenuItem code="WriteArchive" opaque="false" />
+						<WSMenuItem code="ConvertArchive" opaque="false" />
+					</WSPopupMenu>
+				</WSComboButton>
+				<WSToolBarSeparator orientation="vertical" />
+				<WSButton code="AddResources" opaque="false" showText="false" />
+				<WSButton code="RemoveResources" opaque="false" showText="false" />
+				<WSButton code="RenameResources" opaque="false" showText="false" />
+				<WSButton code="ReplaceResources" opaque="false" showText="false" />
+				<WSToolBarSeparator orientation="vertical" />
+				<WSComboButton code="ExtractSelectedResources" opaque="false">
+					<WSButton code="ExtractSelectedResources" opaque="false" showText="false" />
+					<WSPopupMenu visible="false">
+						<WSMenuItem code="ExtractSelectedResources" opaque="false" />
+						<WSMenuItem code="ExtractAllResources" opaque="false" />
+					</WSPopupMenu>
+				</WSComboButton>
+				<WSToolBarSeparator orientation="vertical" />
+				<WSComboButton code="FileListView" opaque="false">
+					<WSButton code="FileListView" opaque="false" showText="false" />
+					<WSPopupMenu visible="false">
+						<WSMenuItem code="FileListView_Table" opaque="false" repository="false" />
+						<WSMenuItem code="FileListView_Tree" opaque="false" repository="false" />
+						<WSMenuItem code="FileListView_TreeTable" opaque="false" repository="false" />
+						<WSMenuItem code="FileListView_Thumbnails" opaque="false" />
+					</WSPopupMenu>
+				</WSComboButton>
+				<WSToolBarSeparator orientation="vertical" />
+				<WSButton code="FileListView_Thumbnails" opaque="false" showText="false" />
+				<WSButton code="FileListView_TreeTable" opaque="false" repository="false" showText="false" />
+				<WSToolBarSeparator orientation="vertical" />
+				<WSButton code="Options" opaque="false" repository="false" showText="false" />
+				<WSButton code="PreviewResource" opaque="false" repository="false" showText="false" />
+				<WSButton code="HexEditor" opaque="false" repository="false" showText="false" />
+				<WSButton code="ImageInvestigator" opaque="false" repository="false" showText="false" />
+				<WSButton code="Information" opaque="false" repository="false" showText="false" />
+				<WSToolBarSeparator orientation="vertical" />
+				<WSRedoTaskComboButton code="RedoTaskComboButton" opaque="false" repository="false" manager="TaskManager" />
+				<WSUndoTaskComboButton code="UndoTaskComboButton" opaque="false" repository="false" manager="TaskManager" />
+				<WSToolBarSeparator orientation="vertical" />
+				<WSButton code="ScriptBuilder" opaque="false" showText="false" />
+			</WSToolBar>
+		</WSPanel>
+		<WSStatusBar code="StatusBar" opaque="false" position="SOUTH" />
+	</WSPanel>
+</WSPanel>
+

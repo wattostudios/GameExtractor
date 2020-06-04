@@ -1,0 +1,12 @@
+<WSPanel code="SidePanel_DirectoryList_WritePanel_Main" showLabel="true" showBorder="true" layout="BorderLayout">
+	
+	<WSTextField code="SidePanel_DirectoryList_WriteFilenameField" showLabel="true" position="NORTH" opaque="false" />
+	<WSPanel code="SidePanel_DirectoryList_WriteButtonsPanel" opaque="false" layout="BorderLayout" position="CENTER" >
+		<WSComboBox code="SidePanel_DirectoryList_WritePluginList" position="CENTER" opaque="false" />
+		<WSPanel layout="GridLayout" position="EAST" rows="1" columns="2" opaque="false">
+			<WSButton code="SidePanel_DirectoryList_ConvertArchiveButton" showText="false" />
+			<WSButton code="SidePanel_DirectoryList_WriteArchiveButton" showText="false" />
+		</WSPanel>
+	</WSPanel>
+	
+</WSPanel>

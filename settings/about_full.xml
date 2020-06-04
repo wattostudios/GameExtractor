@@ -1,0 +1,120 @@
+<body>
+
+<center>
+
+<img src="images/WSCreditsPanel/aboutLogo.gif" /><br />
+
+<font color="green">Game Extractor - Extensible Game Archive Editor</font><br />
+<font color="orange">Created and Developed by wattostudios (c) 2002-2019<br />
+<u>http://www.watto.org/extract</u></font><br />
+
+<br /><br />
+
+<font color="white">Game Extractor is a program that opens and manipulates game archives. See the Readme file for further information and contact details, or visit the website.</font>
+
+<br /><br />
+
+<span color="red" border-width="2">
+<font color="red">Game Extractor (Full Version) is a purchasable product!<br />
+Distribution of Game Extractor (Full Version) violates the terms of the legal agreement, and holds you liable for prosecution through law!</font>
+</span>
+
+<br /><br />
+
+<font color="blue">Game Extractor makes use of the following software packages and source code...</font>
+
+<br />
+
+</center>
+
+<ul>
+<li>Java</li>
+<li>Apache Commons Compress</li>
+<li>Crunch</li>
+<li>dsdecmp</li>
+<li>FFMPEG</li>
+<li>fsbext</li>
+<li>hyperspy</li>
+<li>java-compress (MiniLZO)</li>
+<li>java-dds</li>
+<li>Java Image Management Interface</li>
+<li>Java Imaging Utilities</li>
+<li>Java-LZO</li>
+<li>Java Media Framework</li>
+<li>JLayer</li>
+<li>JOrbis</li>
+<li>jsquish</li>
+<li>junrar</li>
+<li>LZSS Compression Routines for Java</li>
+<li>puyotools</li>
+<li>python-fsb5</li>
+<li>QuickBMS</li>
+<li>Rainbow</li>
+<li>sflcomp.c Compression Functions</li>
+<li>tinf</li>
+<li>UnRAR</li>
+<li>vgmstream</li>
+<li>XZ for Java</li>
+</ul>
+
+<center>
+
+<br />
+
+<font color="orange">WATTO Studios wishes to thank the following...</font><br /><br />
+
+<font color="blue">PLUGIN DEVELOPMENT:</font>
+
+</center>
+
+<ul>
+<li>Mike Zuurman (http://www.xentax.com)</li>
+<li>http://www.dragonunpacker.com</li>
+<li>http://www.extractor.ru</li>
+<li>http://simtech.sf.net</li>
+<li>Aluigi (http://aluigi.altervista.org and https://www.zenhax.com)</li>
+<li>http://www.wotsit.org</li>
+<li>Dmitri Shlykov for sending heaps of XBox archives</li>
+<li>KorNet on the Xentax Forums</li>
+<li>All the people who have sent archives to me</li>
+</ul>
+
+<br />
+
+<center>
+
+<font color="blue">IMPORTANT PEOPLE:</font>
+
+</center>
+
+<ul>
+<li>The Game Developers - for making games great enough that people want to play them, modify them, and extract them.</li>
+<li>All the people who purchased this product - I hope you like it, and that you get lots of benefit from it!</li>
+<li>Sarah, Belle, and Charlie - the special people in my life who make the memories I cherish so dearly.</li>
+<li>Mike Zuurman - for putting up with my use of Game Extractor on his website despite him having a rival program :) , and for helping out with archive formats in general.</li>
+<li>SourceForge - for hosting the Basic Version and source code downloads, reducing the traffic on my website</li>
+<li>Google App Engine - for hosting my website and domain names</li>
+</ul>
+
+<br />
+
+<center>
+<img src="images/WSCreditsPanel/sourceforge.gif" /><br />
+<font color="white">Game Extractor (Basic Version) is hosted on SourceForge.</font><br />
+<u>http://sourceforge.net/projects/gameextractor</u>
+</center>
+
+<br /><br /><br />
+
+<center>
+
+<font color="blue">LICENSE INFORMATION:</font>
+
+</center>
+<br />
+
+<center>
+<font color="white">Refer to the NOTICE.txt file for all license information for the software contained in this product</font><br />
+</center>
+
+</body>

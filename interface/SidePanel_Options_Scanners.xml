@@ -1,0 +1,10 @@
+<WSPanel code="SidePanel_Options_Scanners_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_Scanners_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel layout="GridLayout" code="SidePanel_Options_Scanners_CheckBoxHolder" position="NORTH" rows="1" columns="1">
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

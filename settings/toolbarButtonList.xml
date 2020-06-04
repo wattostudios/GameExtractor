@@ -1,0 +1,80 @@
+<WSList>
+	<WSToolBarSeparator orientation="vertical" />
+	
+	<WSButton code="NewArchive" opaque="false" showText="false" />
+	
+	<WSComboButton code="ReadArchive_Normal" opaque="false" showText="false" repository="false">
+		<WSButton code="ReadArchive_Normal" showText="false" />
+		<WSPopupMenu>
+			<WSMenuItem code="ReadArchive_Normal" opaque="false" />
+			<WSMenuItem code="ReadArchive_OpenWith" opaque="false" />
+			<WSMenuItem code="ReadArchive_Script" opaque="false" />
+			<WSMenuItem code="ReadArchive_Scanner" opaque="false" />
+		</WSPopupMenu>
+	</WSComboButton>
+	
+	<WSButton code="CutArchive" opaque="false" showText="false" />
+	
+	<WSComboButton code="WriteArchive" opaque="false" showText="false" repository="false">
+		<WSButton code="WriteArchive" showText="false" />
+		<WSPopupMenu>
+			<WSMenuItem code="WriteArchive" opaque="false" />
+			<WSMenuItem code="ConvertArchive" opaque="false" />
+		</WSPopupMenu>
+	</WSComboButton>
+	
+	<WSButton code="AddResources" opaque="false" showText="false" />
+	<WSButton code="RemoveResources" opaque="false" showText="false" />
+	<WSButton code="RenameResources" opaque="false" showText="false" />
+	<WSButton code="ReplaceResources" opaque="false" showText="false" />
+	<WSButton code="Search" opaque="false" showText="false" />
+	
+	<WSComboButton code="SelectResources_All" opaque="false" repository="false">
+		<WSButton code="SelectResources_All" showText="false" />
+		<WSPopupMenu>
+			<WSMenuItem code="SelectResources_All" opaque="false" />
+			<WSMenuItem code="SelectResources_None" opaque="false" />
+			<WSMenuItem code="SelectResources_Inverse" opaque="false" />
+		</WSPopupMenu>
+	</WSComboButton>
+	
+	<WSComboButton code="FileListView" opaque="false" showText="false" repository="false">
+		<WSButton code="FileListView" showText="false" />
+		<WSPopupMenu>
+			<WSMenuItem code="FileListView_Table" opaque="false" />
+			<WSMenuItem code="FileListView_Tree" opaque="false" />
+			<WSMenuItem code="FileListView_TreeTable" opaque="false" />
+			<WSMenuItem code="FileListView_Thumbnails" opaque="false" />
+		</WSPopupMenu>
+	</WSComboButton>
+	
+	<WSButton code="FileListView_Table" opaque="false" showText="false" />
+	<WSButton code="FileListView_Tree" opaque="false" showText="false" />
+	<WSButton code="FileListView_TreeTable" opaque="false" showText="false" />
+	<WSButton code="FileListView_Thumbnails" opaque="false" showText="false" />
+	
+			<WSComboButton code="ExtractSelectedResources" opaque="false" repository="false">
+				<WSButton code="ExtractSelectedResources" opaque="false" showText="false" />
+				<WSPopupMenu visible="false">
+					<WSMenuItem code="ExtractSelectedResources" opaque="false" />
+					<WSMenuItem code="ExtractAllResources" opaque="false" />
+				</WSPopupMenu>
+			</WSComboButton>
+	
+	<WSButton code="PreviewResource" opaque="false" showText="false" />
+	<WSButton code="HexEditor" opaque="false" showText="false" />
+	<WSButton code="ImageInvestigator" opaque="false" showText="false" />
+	<WSButton code="Options" opaque="false" showText="false" />
+	<WSButton code="PluginList" opaque="false" showText="false" />
+	<WSButton code="Information" opaque="false" showText="false" />
+	<WSButton code="FileListExporter" opaque="false" showText="false" />
+	<WSButton code="Help" opaque="false" showText="false" />
+	<WSButton code="About" opaque="false" showText="false" />
+	<WSButton code="CloseProgram" opaque="false" showText="false" />
+	
+	<WSButton code="ScriptBuilder" opaque="false" showText="false" />
+	
+	<WSUndoTaskComboButton code="UndoTaskComboButton" opaque="false" />
+	<WSRedoTaskComboButton code="RedoTaskComboButton" opaque="false" />
+	
+</WSList>

@@ -1,0 +1,92 @@
+<html>
+<link rel="stylesheet" type="text/css" href="style.css">
+<body>
+
+<center>
+
+<img src="images\game_extractor_front.png"><img src="images\game_extractor_back.png">
+
+<br/><br/>
+
+<div class="borderout width98"><div class="borderin"><div class="heading1 center">
+Running via the Command Line
+</div></div></div>
+<br />
+<a href="index.html" class="underline">Back to Index</a>
+<br /><br />
+
+<div class="width95 justify">
+Game Extractor can be run from the Command Line, if you want to perform some of the basic functions without using a GUI interface. These are the options you have:
+
+<br><br>
+
+<center>
+<div class="borderout width95"><div class="borderin"><div class="heading2 center">
+Extracting files from an archive
+</div></div></div>
+</center>
+
+
+<pre>java -jar GameExtractor.jar -extract</pre>
+Parameters:
+<br>
+<table width="100%" cellpadding="2" cellspacing="2" class="noborder">
+<tr>
+<td><code> -input &lt;file&gt; </code></td>
+<td>The archive file to extract</td>
+</tr>
+<tr>
+<td><code> -output &lt;directory&gt; </code></td>
+<td>The directory to store the extracted files</td>
+</tr>
+<tr>
+<td><code> [-convert &lt;format&gt;] </code></td>
+<td>If images are found, convert them to this format. <br><i>(BMP, DXT1, DXT3, DXT5, GIF, JPG, PCX, PNG, TGA)</i></td>
+</tr>
+<tr>
+<td><code> [-filter &lt;regex&gt;] </code></td>
+<td>Only files that match the regex expression will be exported</td>
+</tr>
+</table>
+
+<br><br>
+
+<center>
+<div class="borderout width95"><div class="borderin"><div class="heading2 center">
+List the contents of an archive without extracting them
+</div></div></div>
+</center>
+
+
+<pre>java -jar GameExtractor.jar -list</pre>
+Parameters:
+<br>
+<table width="100%" cellpadding="2" cellspacing="2" class="noborder">
+<tr>
+<td><code> -input &lt;file&gt; </code></td>
+<td>The archive file to examine</td>
+</tr>
+<tr>
+<td><code> -output &lt;file&gt; </code></td>
+<td>A filename to save the list to</td>
+</tr>
+<tr>
+<td><code> [-format &lt;format&gt;] </code></td>
+<td>The format of the list data. <br><i>(CSV, EXCEL, HTML, JSON, TABBED, XML)</i></td>
+</tr>
+<tr>
+<td><nobr><code> [-fields &lt;f1,f2,*&gt;] </code></nobr></td>
+<td>The fields to include in the list. <br><i>(All, Compressed, CompressedKB, CompressionType, Decompressed, DecompressedKB, Description, Directory, Extension, FilePath, Filename, Offset, SourceFile)</i></td>
+</tr>
+<tr>
+<td><code> [-filter &lt;regex&gt;] </code></td>
+<td>Only files that match the regex expression will be listed</td>
+</tr>
+</table>
+
+</div>
+
+</center>
+
+</body>
+</html>

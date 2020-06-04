@@ -1,0 +1,29 @@
+<WSPanel code="SidePanel_Options_Appearance_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_Appearance_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel position="NORTH" vertical-gap="6">
+				<WSPanel layout="GridLayout" position="NORTH" rows="2" columns="1" vertical-gap="6">
+					<WSPanel layout="BorderLayout" code="Option_Appearance_CurrentLanguage_Label" showLabel="true" showBorder="true">
+						<WSOptionComboBox_Language opaque="false" code="Option_Appearance_CurrentLanguage" setting="CurrentLanguage" />
+					</WSPanel>
+					<WSPanel layout="BorderLayout" code="Option_Appearance_PluginListDisplayType_Label" showLabel="true" showBorder="true">
+						<WSOptionComboBox_PluginListDisplay opaque="false" code="Option_Appearance_PluginListDisplayType" setting="PluginListDisplayType" />
+					</WSPanel>
+				</WSPanel>
+				<WSPanel layout="GridLayout" position="CENTER" rows="2" columns="1" vertical-gap="6">
+					<WSOptionButton_Font code="Option_Appearance_CurrentFont" setting="CurrentFont" />
+					<WSOptionColorChooser code="Option_Appearance_InterfaceColors" setting="InterfaceColors" />
+				</WSPanel>
+				<WSPanel layout="GridLayout" position="SOUTH" rows="5" columns="1">
+					<WSOptionCheckBox code="Option_Appearance_ShowCustomColumns" setting="ShowCustomColumns" />
+					<WSOptionCheckBox code="Option_Appearance_ShowSystemSpecificIcons" setting="ShowSystemSpecificIcons" />
+					<WSOptionCheckBox code="Option_Appearance_ColorScriptSyntax" setting="ColorScriptSyntax" />
+					<WSOptionCheckBox code="Option_Appearance_LargeButtonIcons" setting="LargeButtonIcons" />
+					<WSOptionCheckBox code="Option_Appearance_ShowSplashScreen" setting="ShowSplashScreen" />
+				</WSPanel>
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

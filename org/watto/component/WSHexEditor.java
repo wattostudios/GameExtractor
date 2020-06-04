@@ -16,10 +16,12 @@ package org.watto.component;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.FontMetrics;
 import java.awt.Point;
 import java.io.File;
 import java.util.Calendar;
 import javax.swing.JComponent;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -38,6 +40,8 @@ import org.watto.io.converter.FloatConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.LongConverter;
 import org.watto.io.converter.ShortConverter;
+import org.watto.plaf.ButterflyHexEditorTableCellRenderer;
+import org.watto.plaf.LookAndFeelManager;
 import org.watto.xml.XMLNode;
 import org.watto.xml.XMLReader;
 
@@ -110,7 +114,13 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         currentByte = 256 + currentByte;
       }
 
-      tableData[row][cell] = "" + currentByte;
+      if (currentByte == 0) {
+        tableData[row][cell] = "<null>0";
+      }
+      else {
+        tableData[row][cell] = "" + currentByte;
+      }
+
       cell++;
 
       if (cell >= 9) {
@@ -162,7 +172,13 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         currentByte = 256 + currentByte;
       }
 
-      tableData[row][cell] = "" + (char) currentByte;
+      if (currentByte == 0) {
+        tableData[row][cell] = "<null>";
+      }
+      else {
+        tableData[row][cell] = "" + (char) currentByte;
+      }
+
       cell++;
 
       if (cell >= 9) {
@@ -189,11 +205,17 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         currentByte = 256 + currentByte;
       }
 
-      String cellVal = Integer.toHexString(currentByte).toUpperCase();
-      if (cellVal.length() < 2) {
-        cellVal = "0" + cellVal;
+      if (currentByte == 0) {
+        tableData[row][cell] = "<null>00";
       }
-      tableData[row][cell] = cellVal;
+      else {
+        String cellVal = Integer.toHexString(currentByte).toUpperCase();
+        if (cellVal.length() < 2) {
+          cellVal = "0" + cellVal;
+        }
+        tableData[row][cell] = cellVal;
+      }
+
       cell++;
 
       if (cell >= 9) {
@@ -236,6 +258,15 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
     if (showSelectedValues) {
       Component selectedValuesPanel = WSHelper.toComponent(XMLReader.read(new File("interface" + File.separator + "SidePanel_HexEditor_SelectedValues.xml")));
       add(selectedValuesPanel, BorderLayout.SOUTH);
+
+      String[] tableHeadings = new String[] { " ", Language.get("HexEditor_LittleEndian"), Language.get("HexEditor_BigEndian") };
+
+      WSTable valuesTable = (WSTable) ComponentRepository.get("SidePanel_HexEditor_SelectedValues");
+      valuesTable.setModel(new UneditableTableModel(new String[0][3], tableHeadings));
+      valuesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+
+      WSPanel tablePanel = (WSPanel) ComponentRepository.get("SidePanel_HexEditor_SelectedValues_Main");
+      tablePanel.add(valuesTable.getTableHeader(), BorderLayout.NORTH);
     }
 
     preview = new WSTable(XMLReader.read("<WSTable code=\"SidePanel_HexEditor_Table\" />"));
@@ -244,6 +275,9 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
     preview.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     preview.removeEditor();
     preview.getTableHeader().setReorderingAllowed(false);
+
+    // Special renderer for this table, so we can do things like coloring null values specially
+    preview.setDefaultRenderer(Object.class, new ButterflyHexEditorTableCellRenderer());
 
     scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane showInnerBorder=\"true\" />"));
     scrollPane.setViewportView(preview);
@@ -453,7 +487,10 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
     int col = preview.getSelectedColumn();
 
     if (col == 0) {
-      return;
+      //return;
+
+      // we actually set column to -1, so that reloadSelectedValue(row,col) will render an empty table
+      col = -1;
     }
 
     reloadSelectedValue(row, col);
@@ -528,7 +565,7 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
     }
     ;
 
-    String[][] tableData = new String[numRows][2];
+    String[][] tableData = new String[numRows][3];
 
     // populate the headings
     int curRow = 0;
@@ -589,14 +626,37 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       curRow++;
     }
 
+    String[] tableHeadings = new String[] { " ", Language.get("HexEditor_LittleEndian"), Language.get("HexEditor_BigEndian") };
+
     // display an empty table with the headings in it, if no file is loaded or no value is selected
     if (row == -1 || col == -1) {
       if (Settings.getBoolean("AlwaysShowHexEditorSelectedTable")) {
-        ((WSTable) ComponentRepository.get("SidePanel_HexEditor_SelectedValues")).setModel(new UneditableTableModel(tableData, new String[] { "", "" }));
       }
       else {
-        ((WSTable) ComponentRepository.get("SidePanel_HexEditor_SelectedValues")).setModel(new UneditableTableModel(new String[0][0], new String[] { "", "" }));
+        tableData = new String[0][0];
       }
+
+      WSTable valuesTable = (WSTable) ComponentRepository.get("SidePanel_HexEditor_SelectedValues");
+      valuesTable.setModel(new UneditableTableModel(tableData, tableHeadings));
+      valuesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+
+      // Work out the size of column 1 (the headings) and set it, so that column 2 (the value) is maximized as much as possible
+      FontMetrics metrics = valuesTable.getFontMetrics(LookAndFeelManager.getFont());
+      int width = -1;
+
+      for (int i = 0; i < numRows; i++) {
+        int textWidth = metrics.stringWidth(((Object) tableData[i][0]).toString());
+        if (textWidth > width) {
+          width = textWidth;
+        }
+      }
+      width += 10;
+
+      TableColumn column0 = valuesTable.getColumnModel().getColumn(0);
+      column0.setMinWidth(width);
+      column0.setMaxWidth(width);
+      column0.setPreferredWidth(width);
+
       return;
     }
 
@@ -643,6 +703,7 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
           binaryL += value;
         }
         tableData[curRow][1] = binaryL;
+        tableData[curRow][2] = binaryL; // big and little are the same
         curRow++;
       }
 
@@ -650,6 +711,7 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showByte) {
         String byteL = "" + data[0];
         tableData[curRow][1] = byteL;
+        tableData[curRow][2] = byteL; // big and little are the same
         curRow++;
       }
 
@@ -657,6 +719,8 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showShort) {
         String shortL = "" + ShortConverter.convertLittle(byteArray2);
         tableData[curRow][1] = shortL;
+        String shortB = "" + ShortConverter.convertBig(byteArray2);
+        tableData[curRow][2] = shortB;
         curRow++;
       }
 
@@ -664,6 +728,8 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showInt) {
         String intL = "" + IntConverter.convertLittle(byteArray4);
         tableData[curRow][1] = intL;
+        String intB = "" + IntConverter.convertBig(byteArray4);
+        tableData[curRow][2] = intB;
         curRow++;
       }
 
@@ -671,6 +737,8 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showLong) {
         String longL = "" + LongConverter.convertLittle(byteArray8);
         tableData[curRow][1] = longL;
+        String longB = "" + LongConverter.convertBig(byteArray8);
+        tableData[curRow][2] = longB;
         curRow++;
       }
 
@@ -678,6 +746,8 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showFloat) {
         String floatL = "" + FloatConverter.convertLittle(byteArray4);
         tableData[curRow][1] = floatL;
+        String floatB = "" + FloatConverter.convertBig(byteArray4);
+        tableData[curRow][2] = floatB;
         curRow++;
       }
 
@@ -685,6 +755,8 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showDouble) {
         String doubleL = "" + DoubleConverter.convertLittle(byteArray8);
         tableData[curRow][1] = doubleL;
+        String doubleB = "" + DoubleConverter.convertBig(byteArray8);
+        tableData[curRow][2] = doubleB;
         curRow++;
       }
 
@@ -695,6 +767,7 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
           hexL = "0" + hexL;
         }
         tableData[curRow][1] = hexL;
+        tableData[curRow][2] = hexL; // big and little are the same
         curRow++;
       }
 
@@ -702,6 +775,7 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showChar) {
         String charL = "" + (char) data[0];
         tableData[curRow][1] = charL;
+        tableData[curRow][2] = charL; // big and little are the same
         curRow++;
       }
 
@@ -709,6 +783,8 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       if (showUnicode) {
         String unicodeL = "" + CharConverter.convertLittle(byteArray2);
         tableData[curRow][1] = unicodeL;
+        String unicodeB = "" + CharConverter.convertBig(byteArray2);
+        tableData[curRow][2] = unicodeB;
         curRow++;
       }
 
@@ -718,10 +794,32 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         cal.setTimeInMillis(LongConverter.convertLittle(byteArray8));
         String timestampL = "" + cal.getTime().toString();
         tableData[curRow][1] = timestampL;
+        cal.setTimeInMillis(LongConverter.convertBig(byteArray8));
+        String timestampB = "" + cal.getTime().toString();
+        tableData[curRow][2] = timestampB;
         curRow++;
       }
 
-      ((WSTable) ComponentRepository.get("SidePanel_HexEditor_SelectedValues")).setModel(new UneditableTableModel(tableData, new String[] { "", "" }));
+      WSTable valuesTable = (WSTable) ComponentRepository.get("SidePanel_HexEditor_SelectedValues");
+      valuesTable.setModel(new UneditableTableModel(tableData, tableHeadings));
+      valuesTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+
+      // Work out the size of column 1 (the headings) and set it, so that column 2 (the value) is maximized as much as possible
+      FontMetrics metrics = valuesTable.getFontMetrics(LookAndFeelManager.getFont());
+      int width = -1;
+
+      for (int i = 0; i < numRows; i++) {
+        int textWidth = metrics.stringWidth(((Object) tableData[i][0]).toString());
+        if (textWidth > width) {
+          width = textWidth;
+        }
+      }
+      width += 10;
+
+      TableColumn column0 = valuesTable.getColumnModel().getColumn(0);
+      column0.setMinWidth(width);
+      column0.setMaxWidth(width);
+      column0.setPreferredWidth(width);
 
     }
     catch (Throwable t) {

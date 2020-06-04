@@ -1,0 +1,15 @@
+<WSPanel code="SidePanel_Options_Directories_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_Directories_Label" position="CENTER" repository="true" horizontal-scrollbar="false">
+		<WSPanel>
+			<WSPanel layout="GridLayout" position="NORTH" rows="5" columns="1" vertical-gap="6">
+				<WSOptionFileChooser code="Option_Directories_FileListExporterDirectory" setting="FileListExporterDirectory" />
+				<WSOptionFileChooser code="Option_General_LanguageDirectory" setting="LanguageDirectory" />
+				<WSOptionFileChooser code="Option_General_SavedPreviewDirectory" setting="SavedPreviewDirectory" />
+				<WSOptionFileChooser code="Option_General_ScriptsDirectory" setting="ScriptsDirectory" />
+				<WSOptionFileChooser code="Option_General_TempDirectory" setting="TempDirectory" />
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

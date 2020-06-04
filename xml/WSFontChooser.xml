@@ -1,0 +1,104 @@
+<WSFontChooser opaque="false" layout="BorderLayout">
+<WSPanel layout="BorderLayout" border-width="4">
+
+    <WSPanel layout="BorderLayout" vertical-gap="4">
+  
+<!-- TOP BAR - START -->
+      <WSPanel showBorder="true" layout="BorderLayout" position="center" horizontal-gap="4">
+
+        <WSPanel layout="BorderLayout" position="center" opaque="false">
+          <WSPanel layout="BorderLayout" position="north" opaque="false">
+            <WSLabel code="FontNameLabel" position="north" opaque="false" />
+            <WSTextField code="FontName" position="center" />
+          </WSPanel>
+          <WSPanel showBorder="true" opaque="false">
+            <WSScrollPane showBorder="false" width="400" height="200" opaque="false">
+              <WSList code="FontNameChooser" position="center" opaque="false" />
+            </WSScrollPane>
+          </WSPanel>
+        </WSPanel>
+  
+        <WSPanel layout="BorderLayout" position="east" horizontal-gap="4" opaque="false">
+        
+            <WSPanel layout="BorderLayout" position="center" opaque="false">
+            <WSPanel layout="BorderLayout" position="north" opaque="false">
+              <WSLabel code="FontStyleLabel" position="north" width="100" opaque="false" />
+               <WSTextField code="FontStyle" position="center" />
+            </WSPanel>
+            <WSPanel showBorder="true" opaque="false">
+              <WSScrollPane showBorder="false" opaque="false">
+                <WSList code="FontStyleChooser" position="center" opaque="false" />
+              </WSScrollPane>
+            </WSPanel>
+          </WSPanel>
+  
+          <WSPanel layout="BorderLayout" position="east" opaque="false">
+            <WSPanel layout="BorderLayout" position="north" opaque="false">
+              <WSLabel code="FontSizeLabel" position="north" width="50" opaque="false" />
+              <WSTextField code="FontSize" position="center" />
+            </WSPanel>
+            <WSPanel showBorder="true" opaque="false">
+              <WSScrollPane showBorder="false" opaque="false">
+                <WSList code="FontSizeChooser" position="center" opaque="false" />
+              </WSScrollPane>
+            </WSPanel>
+          </WSPanel>
+        
+        </WSPanel>
+      
+      </WSPanel>
+<!-- TOP BAR - END -->
+
+      <WSPanel layout="BorderLayout" position="south" vertical-gap="4">
+        <WSPanel layout="BorderLayout" position="north" vertical-gap="4">
+
+<!-- STYLE BAR - START -->
+          <WSPanel showBorder="true" layout="GridLayout" rows="1" columns="3" position="north">
+            <WSPanel layout="BorderLayout" opaque="false">
+              <WSLabel code="FontColorLabel" position="north" opaque="false" />
+              <WSSmallColorChooser code="SmallColorChooser" position="center" opaque="false" />
+            </WSPanel>
+    
+            <WSPanel layout="BorderLayout" opaque="false">
+              <WSLabel code="FontUnderlineStyleLabel" position="north" opaque="false" />
+              <WSComboBox code="FontUnderlineStyle" position="center" opaque="false" />
+            </WSPanel>
+      
+            <WSPanel layout="BorderLayout" opaque="false">
+              <WSLabel code="FontUnderlineColorLabel" position="north" opaque="false" />
+              <WSComboBox code="FontUnderlineColor" position="center" opaque="false" />
+            </WSPanel>
+          </WSPanel>
+<!-- STYLE BAR - END -->
+  
+<!-- CHECKBOXES - START -->
+          <WSPanel showBorder="true" layout="GridLayout" rows="4" columns="3" position="center" opaque="false">
+            <WSCheckBox code="FontStrikethrough" opaque="false" />
+            <WSCheckBox code="FontDoubleStrikethrough" opaque="false" />
+            <WSCheckBox code="FontSuperscript" opaque="false" />
+            <WSCheckBox code="FontSubscript" opaque="false" />
+            <WSCheckBox code="FontShadow" opaque="false" />
+            <WSCheckBox code="FontOutline" opaque="false" />
+            <WSCheckBox code="FontEmboss" opaque="false" />
+            <WSCheckBox code="FontEngrave" opaque="false" />
+            <WSCheckBox code="FontSmallCaps" opaque="false" />
+            <WSCheckBox code="FontAllCaps" opaque="false" />
+            <WSCheckBox code="FontHidden" opaque="false" />
+            <WSPanel opaque="false" />
+          </WSPanel>
+<!-- CHECKBOXES - END -->
+
+        </WSPanel>
+
+<!-- PREVIEW - START -->
+        <WSPanel showBorder="true">
+          <WSLabel code="FontPreview" position="center" vertical-alignment="center" horizontal-alignment="center" height="100" opaque="false" />
+        </WSPanel>
+<!-- PREVIEW - END -->
+
+      </WSPanel>
+
+    </WSPanel>
+
+</WSPanel>
+</WSFontChooser>

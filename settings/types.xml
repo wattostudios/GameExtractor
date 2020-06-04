@@ -1,0 +1,91 @@
+<fileTypes>
+	<program>Game Extractor</program>
+	<types>
+		<type extension="ace"   function="Archive"  description="ACE Archive" />
+		<type extension="aif"   function="Audio"    description="AIFF Audio" />
+		<type extension="aiff"  function="Audio"    description="AIFF Audio" />
+		<type extension="ani"   function="Image"    description="Animated Cursor" />
+		<type extension="asf"   function="Video"    description="Windows Media Video" />
+		<type extension="au"    function="Audio"    description="AU Audio" />
+		<type extension="avi"   function="Video"    description="AVI Movie" />
+		<type extension="bat"   function="Program"  description="Windows Application" />
+		<type extension="bik"   function="Video"    description="Bink Video" />
+		<type extension="bmp"   function="Image"    description="Bitmap Image" />
+		<type extension="c"     function="Program"  description="C++ Programming Script" />
+		<type extension="cab"   function="Archive"  description="CAB Archive" />
+		<type extension="cda"   function="Audio"    description="CD Audio" />
+		<type extension="cfg"   function="Document" description="Configuration Settings" />
+		<type extension="chm"   function="Document" description="Help Document" />
+		<type extension="class" function="Program"  description="Java Program" />
+		<type extension="com"   function="Program"  description="Windows Application" />
+		<type extension="cpp"   function="Program"  description="C++ Programming Script" />
+		<type extension="cs"    function="Program"  description="C# Programming Script" />
+		<type extension="cur"   function="Image"    description="Cursor Image" />
+		<type extension="dds"   function="Image"    description="Direct X Image" />
+		<type extension="dll"   function="Program"  description="C++ Library" />
+		<type extension="doc"   function="Document" description="Word Document" />
+		<type extension="docx"  function="Document" description="Word Document" />
+		<type extension="exe"   function="Program"  description="Windows Application" />
+		<type extension="fon"   function="Image"    description="System Font" />
+		<type extension="gif"   function="Image"    description="GIF Image" />
+		<type extension="gz"    function="Archive"  description="GZip Archive" />
+		<type extension="h"     function="Program"  description="C++ Programming Header" />
+		<type extension="hlp"   function="Document" description="Help Document" />
+		<type extension="htm"   function="Document" description="HTML Webpage" />
+		<type extension="html"  function="Document" description="HTML Webpage" />
+		<type extension="hqx"   function="Archive"  description="HQX Archive" />
+		<type extension="ico"   function="Image"    description="Icon Image" />
+		<type extension="ini"   function="Document" description="Configuration Settings" />
+		<type extension="iso"   function="Other"    description="CD Image" />
+		<type extension="java"  function="Program"  description="Java Programming Script" />
+		<type extension="jfif"  function="Image"    description="JPEG Image" />
+		<type extension="jpe"   function="Image"    description="JPEG Image" />
+		<type extension="jpeg"  function="Image"    description="JPEG Image" />
+		<type extension="jpg"   function="Image"    description="JPEG Image" />
+		<type extension="kar"   function="Audio"    description="MIDI Audio" />
+		<type extension="log"   function="Document" description="Log Document" />
+		<type extension="mid"   function="Audio"    description="MIDI Audio" />
+		<type extension="mov"   function="Video"    description="Quicktime Movie" />
+		<type extension="mp3"   function="Audio"    description="MP3 Audio" />
+		<type extension="mp4"   function="Video"    description="MPEG Movie" />
+		<type extension="mpeg"  function="Video"    description="MPEG Movie" />
+		<type extension="mpg"   function="Video"    description="MPEG Movie" />
+		<type extension="nfo"   function="Document" description="Information Document" />
+		<type extension="ogg"   function="Audio"    description="OGG Vorbis Audio" />
+		<type extension="pcx"   function="Image"    description="PCX Image" />
+		<type extension="pdf"   function="Document" description="PDF Document" />
+		<type extension="png"   function="Image"    description="PNG Image" />
+		<type extension="ppt"   function="Document" description="Powerpoint Presentation" />
+		<type extension="pptx"  function="Document" description="Powerpoint Presentation" />
+		<type extension="psd"   function="Image"    description="PSD Image" />
+		<type extension="qt"    function="Video"    description="Quicktime Movie" />
+		<type extension="ra"    function="Audio"    description="RealOne Audio" />
+		<type extension="ram"   function="Video"    description="RealOne Movie" />
+		<type extension="rar"   function="Archive"  description="RAR Archive" />
+		<type extension="raw"   function="Image"    description="Raw Image" />
+		<type extension="rm"    function="Video"    description="RealOne Movie" />
+		<type extension="rt"    function="Program"  description="Programming Script" />
+		<type extension="rtf"   function="Document" description="Rich Text Document" />
+		<type extension="swf"   function="Image"    description="Flash Animation" />
+		<type extension="sys"   function="Program"  description="System Settings" />
+		<type extension="tar"   function="Archive"  description="TAR Archive" />
+		<type extension="tga"   function="Image"    description="Targa Image" />
+		<type extension="tif"   function="Image"    description="TIFF Image" />
+		<type extension="tiff"  function="Image"    description="TIFF Image" />
+		<type extension="tmp"   function="Other"    description="Temporary File" />
+		<type extension="ttf"   function="Image"    description="True Type Font" />
+		<type extension="txt"   function="Document" description="Text Document" />
+		<type extension="wav"   function="Audio"    description="Wave Audio" />
+		<type extension="wm"    function="Audio"    description="Windows Media (Audio/Video)" />
+		<type extension="wma"   function="Audio"    description="Windows Media Audio" />
+		<type extension="wmv"   function="Video"    description="Windows Media Video" />
+		<type extension="wri"   function="Document" description="Wordpad Document" />
+		<type extension="xls"   function="Document" description="Excel Spreadsheet" />
+		<type extension="xlsx"  function="Document" description="Excel Spreadsheet" />
+		<type extension="xml"   function="Document" description="XML Document" />
+		<type extension="xsl"   function="Document" description="XSLT Webpage" />
+		<type extension="xslt"  function="Document" description="XSLT Webpage" />
+		<type extension="xwma"  function="Audio"    description="XAudio2 Audio" />
+		<type extension="zip"   function="Archive"  description="ZIP Archive" />
+	</types>
+</fileTypes>

@@ -1,0 +1,6 @@
+<WSPanel code="SidePanel_DirectoryList_ScriptPanel_Main" showLabel="true" showBorder="true" layout="BorderLayout">
+	
+	<WSComboBox code="SidePanel_DirectoryList_ScriptPluginList" position="CENTER" opaque="false" />
+	<WSButton code="SidePanel_DirectoryList_ReadScriptArchiveButton" showText="false" position="EAST" />
+	
+</WSPanel>

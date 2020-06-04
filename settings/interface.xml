@@ -1,0 +1,52 @@
+<!-- MAIN INTERFACE -->
+
+<WSPanel layout="BorderLayout">
+  
+  <WSMenuBar code="MainMenu" position="NORTH">
+    <WSMenu code="File" underline="F">
+      <WSMenuItem code="Open" shortcut="ctrl o" underline="O" />
+      <WSMenuItem code="Save" shortcut="ctrl s" underline="S" />
+      <WSSeparator code="Separator" orientation="horizontal" />
+      <WSMenuItem code="Close" shortcut="ctrl c" underline="C" />
+    </WSMenu>
+    <WSMenu code="Help" underline="H">
+      <WSMenu code="General" underline="G">
+        <WSMenuItem code="HelpDocs" />
+        <WSMenuItem code="OnlineFAQ" shortcut="F1" underline="O" />
+      </WSMenu>
+      <WSMenuItem code="About" underline="A" />
+    </WSMenu>
+  </WSMenuBar>
+
+  <WSToolBar code="MainToolbar" position="WEST">
+    <WSButton code="Open" shortcut="ctrl-o" />
+    <WSButton code="Save" shortcut="ctrl-s" />
+    <WSButton code="Close" shortcut="ctrl-c" />
+    <WSSeparator code="Separator" orientation="vertical" />
+    <WSButton code="HelpDocs" />
+    <WSButton code="OnlineFAQ" shortcut="F1" />
+    <WSButton code="About" />
+  </WSToolBar>
+  
+  <WSPanel layout="GridLayout" rows="2" columns="1">
+  
+    <WSLabel code="ProgramLogo" />
+    <WSScrollPane>
+      <WSTextArea>Some default text</WSTextArea>
+    </WSScrollPane>
+    
+  </WSPanel>
+
+</WSPanel>
+
+
+<!-- POPUP MENUS, and other individual components that dont go inside anything -->
+
+<WSPopupMenu code="MainPopupMenu">
+  <WSMenu code="General" underline="G">
+    <WSMenuItem code="HelpDocs" />
+    <WSSeparator code="Separator" orientation="horizontal" />
+    <WSMenuItem code="OnlineFAQ" shortcut="F1" underline="O" />
+  </WSMenu>
+  <WSMenuItem code="About" underline="A" />
+</WSPopupMenu>

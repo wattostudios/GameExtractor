@@ -1,0 +1,30 @@
+<WSPanel code="SidePanel_Options_OpeningArchives_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_OpeningArchives_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel position="NORTH">
+				<WSPanel layout="GridLayout" position="NORTH" rows="4" columns="1" vertical-gap="6">
+					<WSOptionTextField code="Option_OpeningArchives_MaxFilenameLength" setting="MaxFilenameLength" />
+					<WSOptionTextField code="Option_OpeningArchives_MaxNumberOfFiles2" setting="MaxNumberOfFiles2" />
+					<WSOptionTextField code="Option_OpeningArchives_MaxNumberOfFiles4" setting="MaxNumberOfFiles4" />
+					<WSOptionTextField code="Option_OpeningArchives_MaxAllowedScriptErrors" setting="MaxAllowedScriptErrors" />
+				</WSPanel>
+				<WSPanel layout="GridLayout" position="CENTER" rows="9" columns="1">
+					<WSOptionCheckBox code="Option_OpeningArchives_OpenArchiveOnDoubleClick" setting="OpenArchiveOnDoubleClick" />
+					<WSOptionCheckBox code="Option_OpeningArchives_ScanFileIfOpenFailed" setting="ScanFileIfOpenFailed" />
+					<WSOptionCheckBox code="Option_OpeningArchives_LoadScriptsAtStartup" setting="LoadScriptsAtStartup" />
+					<WSOptionCheckBox code="Option_OpeningArchives_LoadAllThumbnailsWhenOpeningArchive" setting="LoadAllThumbnailsWhenOpeningArchive" />
+					<WSOptionCheckBox code="Option_OpeningArchives_HighQualityThumbnails" setting="HighQualityThumbnails" />
+					<WSOptionCheckBox code="Option_OpeningArchives_UpscaleSmallThumbnails" setting="UpscaleSmallThumbnails" />
+					<WSOptionCheckBox code="Option_OpeningArchives_IdentifyUnknownFileTypes" setting="IdentifyUnknownFileTypes" />
+					<WSOptionCheckBox code="Option_OpeningArchives_CheckScriptResourceValues" setting="CheckScriptResourceValues" />
+					<WSOptionCheckBox code="Option_OpeningArchives_OnlyShowStandardConverters" setting="OnlyShowStandardConverters" />
+				</WSPanel>
+			</WSPanel>
+			<WSPanel position="CENTER">
+				<WSOptionFileChooser code="Option_OpeningArchives_QuickBMSLocation" setting="QuickBMS_Path" position="NORTH" />
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

@@ -1,0 +1,15 @@
+<WSPanel code="SidePanel_DirectoryList_CutPanel_Main" showLabel="true" showBorder="true" layout="BorderLayout" >
+	
+	<WSPanel layout="BorderLayout" opaque="false" position="NORTH">
+		<WSPanel layout="GridLayout" opaque="false" rows="2" columns="1" position="CENTER">
+			<WSTextField code="SidePanel_DirectoryList_CutInputFilenameField" opaque="false" showLabel="true" />
+			<WSTextField code="SidePanel_DirectoryList_CutOutputFilenameField" opaque="false" showLabel="true" />
+		</WSPanel>
+	</WSPanel>
+	
+	<WSPanel layout="BorderLayout" opaque="false" position="CENTER">
+		<WSComboBox code="SidePanel_DirectoryList_CutLengthPresets" position="CENTER" />
+		<WSButton code="SidePanel_DirectoryList_CutArchiveButton" showText="false" position="EAST" />
+	</WSPanel>
+
+</WSPanel>

@@ -1,0 +1,5 @@
+<WSToolBar>
+	<WSButton code="NewFile" showText="false" />
+	<WSSeparator orientation="vertical" />
+	<WSButton code="OpenFile" showText="false" />
+</WSToolBar>

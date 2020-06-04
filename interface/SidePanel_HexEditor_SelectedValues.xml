@@ -1,0 +1,5 @@
+<WSPanel code="SidePanel_HexEditor_SelectedValues_Main" showBorder="true">
+	
+	<WSTable code="SidePanel_HexEditor_SelectedValues" position="CENTER" >
+	
+</WSPanel>

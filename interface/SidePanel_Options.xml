@@ -1,0 +1,17 @@
+<WSPanel code="SidePanel_Options" layout="BorderLayout" vertical-gap="6">
+
+	<WSPanel position="CENTER" vertical-gap="6">
+		<WSComboBox code="SidePanel_Options_OptionGroups" position="NORTH" />
+	
+		
+		<WSOptionGroupHolder code="SidePanel_Options_OptionGroupHolder" position="CENTER" />
+		
+	
+		<WSScrollPane visible="false" showLabel="true" code="SidePanel_Options_DescriptionField_Label" position="SOUTH">
+			<WSTextArea code="SidePanel_Options_DescriptionField" height="40" wrap="true" />
+		</WSScrollPane>
+	</WSPanel>
+	
+	<WSButton code="SidePanel_Options_SaveOptionsButton" position="SOUTH" />
+	
+</WSPanel>

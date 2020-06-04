@@ -1,0 +1,4 @@
+<WSCollapsePanel state="collapsed">
+	<WSPanel position="expanded" />
+	<WSPanel position="collapsed" />
+</WSCollapsePanel>

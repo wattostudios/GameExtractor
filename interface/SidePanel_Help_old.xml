@@ -1,0 +1,5 @@
+<WSPanel code="SidePanel_Help" layout="BorderLayout">
+	<WSScrollPane code="SidePanel_Help_ScrollPane">
+		<WSEditorPane code="SidePanel_Help_Display" position="CENTER">
+	</WSScrollPane>
+</WSPanel>

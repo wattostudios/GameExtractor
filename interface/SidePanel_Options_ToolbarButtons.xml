@@ -1,0 +1,28 @@
+<WSPanel code="SidePanel_Options_ToolbarButtons_Main" layout="ReverseBorderLayout">
+	
+	<WSScrollPane position="NORTH" code="Option_ToolbarButtons_ChoicesLabel" showLabel="true" showBorder="true" showInnerBorder="true" opaque="false" viewport-border-width="3">
+		<WSList code="Option_ToolbarButtons_ChoicesList" />
+	</WSScrollPane>
+	
+	<WSPanel layout="BorderLayout" position="CENTER">
+	
+		<WSPanel layout="GridLayout" position="CENTER" rows="1" columns="2">
+			<WSButton code="Option_ToolbarButtons_AddButton" repository="false" />
+			<WSButton code="Option_ToolbarButtons_RemoveButton" repository="false" />
+		</WSPanel>
+	
+		<WSPanel height="4" position="SOUTH" />
+	</WSPanel>
+	
+	<WSPanel position="SOUTH">
+		<WSScrollPane position="CENTER" code="Option_ToolbarButtons_CurrentLabel" showLabel="true" showBorder="true" showInnerBorder="true" opaque="false" viewport-border-width="3">
+			<WSList code="Option_ToolbarButtons_CurrentList" />
+		</WSScrollPane>
+		
+		<WSPanel layout="GridLayout" position="SOUTH" rows="1" columns="2">
+			<WSButton code="Option_ToolbarButtons_MoveUp" />
+			<WSButton code="Option_ToolbarButtons_MoveDown" />
+		</WSPanel>
+	</WSPanel>
+	
+</WSPanel>

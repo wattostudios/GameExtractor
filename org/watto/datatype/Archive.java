@@ -24,7 +24,6 @@ import org.watto.component.ComponentRepository;
 import org.watto.component.SidePanel_DirectoryList;
 import org.watto.component.WSTableColumn;
 import org.watto.ge.GameExtractor;
-import org.watto.ge.helper.FullVersionVerifier;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.DirectoryBuilder;
@@ -47,19 +46,28 @@ public class Archive {
 
   /** The file that was read into this archive **/
   static File basePath = null;
+
   /** The columns to be shown in the current FileListPanel **/
   static WSTableColumn[] columns = new WSTableColumn[0];
+
   /** The plugin used to read the <i>basePath</i> archive **/
   static ArchivePlugin readPlugin = new AllFilesPlugin();
+
   /** The resources stored in this archive **/
   static Resource[] resources = new Resource[0];
 
   static Icon fileIcon;
+
   static Icon renamedIcon;
+
   static Icon unrenamedIcon;
+
   static Icon replacedIcon;
+
   static Icon unreplacedIcon;
+
   static Icon addedIcon;
+
   static Icon unaddedIcon;
 
   /**
@@ -172,7 +180,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Icon getAddedIcon(boolean added) {
@@ -269,7 +277,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Icon getIcon(String name) {
@@ -358,7 +366,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Icon getRenamedIcon(boolean renamed) {
@@ -372,7 +380,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Icon getReplacedIcon(boolean replaced) {
@@ -607,8 +615,7 @@ public class Archive {
   public static void setBasePath(File basePathNew) {
     basePath = basePathNew;
 
-    try {
-      new FullVersionVerifier();
+    if (GameExtractor.isFullVersion()) {
       if (basePath == null) {
         GameExtractor.getInstance().setTitle(Language.get("ProgramName") + " " + Settings.get("Version") + " - http://www.watto.org");
       }
@@ -616,7 +623,7 @@ public class Archive {
         GameExtractor.getInstance().setTitle(Language.get("ProgramName") + " " + Settings.get("Version") + " [" + basePath.getName() + "]");
       }
     }
-    catch (Throwable t) {
+    else {
       if (basePath == null) {
         GameExtractor.getInstance().setTitle(Language.get("ProgramName_Free") + " " + Settings.get("Version") + " - http://www.watto.org");
       }

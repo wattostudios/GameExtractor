@@ -1,0 +1,20 @@
+<plugins>
+	<prefixes>
+		<prefix type="DirectoryList">DirectoryList_</prefix>
+		<prefix type="SidePanel">SidePanel_</prefix>
+		<prefix type="FileList">FileListPanel_</prefix>
+		<prefix type="Archive">Plugin_</prefix>
+		<prefix type="Scanner">Scanner_</prefix>
+		<prefix type="Renamer">Renamer_</prefix>
+		<prefix type="Viewer">Viewer_</prefix>
+		<prefix type="Options">Options_</prefix>
+		<prefix type="FileListExporter">FileListExporter_</prefix>
+	</prefixes>
+	<locations>
+		<location type="zip">GameExtractor.jar</location>
+		<location type="directory"></location>
+		<location type="directory">plugins</location>
+		<location type="directory" traverse="true" package="org.watto.ge.plugin" pathIsPackage="true">bin\org\watto\ge\plugin</location>
+		<location type="directory" package="org.watto.component">bin\org\watto\component</location>
+	</locations>
+</plugins>

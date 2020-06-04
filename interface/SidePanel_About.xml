@@ -1,0 +1,3 @@
+<WSPanel code="SidePanel_About" layout="BorderLayout" showBorder="true">
+	<WSCreditsPanel code="SidePanel_About_Credits" position="CENTER">
+</WSPanel>

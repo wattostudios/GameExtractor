@@ -1,0 +1,12 @@
+<WSPanel code="SidePanel_ImageInvestigator" layout="BorderLayout" vertical-gap="6">
+
+	<WSPreviewPanelHolder code="SidePanel_ImageInvestigator_PreviewPanelHolder" position="CENTER" />
+	
+	<WSPanel code="SidePanel_ImageInvestigator_WritePreviewHolder" layout="BorderLayout" position="SOUTH" showLabel="true" showBorder="true">
+
+		<WSComboBox code="SidePanel_ImageInvestigator_WritePreviewPlugins" position="CENTER" />
+		<WSButton code="SidePanel_ImageInvestigator_WritePreviewButton" showText="false" position="EAST" />
+
+	</WSPanel>
+	
+</WSPanel>

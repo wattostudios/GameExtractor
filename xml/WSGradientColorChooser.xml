@@ -1,0 +1,30 @@
+<WSGradientColorChooser opaque="false" layout="BorderLayout">
+<WSPanel layout="BorderLayout" border-width="4" horizontal-gap="4">
+
+	<WSPanel position="CENTER">
+		<WSPanel showBorder="true" position="CENTER">
+			<WSGradientColorPanel code="GradientColorPanel" position="CENTER" />
+		</WSPanel>
+	
+		<WSPanel position="EAST">
+			<WSPanel showBorder="true" position="CENTER">
+				<WSGradientColorSlider code="GradientColorSlider" position="CENTER" />
+			</WSPanel>
+			<WSSlider code="GradientColorSliderBar" position="EAST" orientation="vertical" />
+		</WSPanel>
+	</WSPanel>
+	
+	<WSPanel position="SOUTH">
+		<WSPanel position="CENTER" layout="GridLayout" rows="1" columns="4">
+			<WSTextField showLabel="true" code="GradientColorChooserRedValue" editable="false" />
+			<WSTextField showLabel="true" code="GradientColorChooserGreenValue" editable="false" />
+			<WSTextField showLabel="true" code="GradientColorChooserBlueValue" editable="false" />
+			<WSTextField showLabel="true" code="GradientColorChooserHexValue" editable="false" />
+		</WSPanel>
+		<WSPanel position="EAST">
+			<WSColorPanel code="GradientColorChooserSelectedColor" width="30" height="30" visible="true" />
+		</WSPanel>
+	</WSPanel>
+
+</WSPanel>
+</WSGradientColorChooser>

@@ -1,0 +1,60 @@
+<WSSmallColorChooser opaque="false" layout="BorderLayout">
+<WSPanel layout="BorderLayout" border-width="4">
+
+  <WSPanel showBorder="true" position="north">
+    <WSColorInfoPanel code="ColorCurrentColor" />
+  </WSPanel>
+
+<!-- COLOR BOXES - START -->
+  <WSPanel showBorder="true" caller="SmallColorChooser" code="ColorGrid" layout="GridLayout" rows="5" columns="8" horizontal-gap="2" vertical-gap="2" position="center">
+    <WSColorPanel caller="SmallColorChooser" code="ColorRedDarkest" red="0" green="0" blue="0" width="15" height="15" /> <!-- BLACK -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorOrangeDarkest" red="153" green="51" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorYellowDarkest" red="51" green="51" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGreenDarkest" red="0" green="51" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorCyanDarkest" red="0" green="51" blue="102" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorBlueDarkest" red="0" green="0" blue="128" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorPurpleDarkest" red="51" green="51" blue="153" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGrayDarkest" red="51" green="51" blue="51" />
+    
+    <WSColorPanel caller="SmallColorChooser" code="ColorRedDark" red="128" green="0" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorOrangeDark" red="255" green="102" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorYellowDark" red="128" green="128" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGreenDark" red="0" green="128" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorCyanDark" red="0" green="128" blue="128" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorBlueDark" red="0" green="0" blue="255" /> <!-- BLUE -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorPurpleDark" red="102" green="102" blue="153" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGrayDark" red="128" green="128" blue="128" />
+  
+    <WSColorPanel caller="SmallColorChooser" code="ColorRedMid" red="255" green="0" blue="0" /> <!-- RED -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorOrangeMid" red="255" green="153" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorYellowMid" red="153" green="204" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGreenMid" red="51" green="153" blue="102" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorCyanMid" red="51" green="204" blue="204" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorBlueMid" red="51" green="102" blue="255" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorPurpleMid" red="128" green="0" blue="128" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGrayMid" red="153" green="153" blue="153" />
+    
+    <WSColorPanel caller="SmallColorChooser" code="ColorRedLight" red="255" green="0" blue="255" /> <!-- MAGENTA -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorOrangeLight" red="255" green="204" blue="0" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorYellowLight" red="255" green="255" blue="0" /> <!-- YELLOW -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorGreenLight" red="0" green="255" blue="0" /> <!-- GREEN -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorCyanLight" red="0" green="255" blue="255" /> <!-- CYAN -->
+    <WSColorPanel caller="SmallColorChooser" code="ColorBlueLight" red="0" green="204" blue="255" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorPurpleLight" red="153" green="51" blue="102" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGrayLight" red="192" green="192" blue="192" />
+    
+    <WSColorPanel caller="SmallColorChooser" code="ColorRedLightest" red="255" green="153" blue="204" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorOrangeLightest" red="255" green="204" blue="153" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorYellowLightest" red="255" green="255" blue="153" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGreenLightest" red="204" green="255" blue="204" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorCyanLightest" red="204" green="255" blue="255" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorBlueLightest" red="153" green="204" blue="255" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorPurpleLightest" red="204" green="153" blue="255" />
+    <WSColorPanel caller="SmallColorChooser" code="ColorGrayLightest" red="255" green="255" blue="255" /> <!-- WHITE -->
+  </WSPanel>
+<!-- COLOR BOXES - END -->
+
+  <WSButton caller="SmallColorChooser" code="ColorMoreColors" position="south" />
+ 
+</WSPanel>
+</WSSmallColorChooser>

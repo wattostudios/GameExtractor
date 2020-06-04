@@ -1,0 +1,15 @@
+<WSPanel code="SidePanel_DirectoryList_ExportPanel_Main" showLabel="true" showBorder="true" layout="BorderLayout"vertical-gap="6">
+	
+	<WSPanel position="CENTER" opaque="false">
+		<WSTextField code="SidePanel_DirectoryList_ExportFilenameField" showLabel="true" opaque="false" position="CENTER" />
+		<WSPanel layout="GridLayout" position="EAST" rows="1" columns="2" opaque="false">
+			<WSButton code="SidePanel_DirectoryList_ExportSelectedButton" showText="false" />
+			<WSButton code="SidePanel_DirectoryList_ExportAllButton" showText="false" />
+		</WSPanel>
+	</WSPanel>
+	
+	<WSPanel code="SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder" layout="GridLayout" rows="1" columns="1" position="SOUTH" showLabel="true" showBorder="true" opaque="false">
+		<WSComboBox code="SidePanel_DirectoryList_ExportPanel_ImageConverters" />
+	</WSPanel>
+		
+</WSPanel>

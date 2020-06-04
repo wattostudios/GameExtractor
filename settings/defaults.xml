@@ -1,0 +1,67 @@
+<settingsStore>
+	<program>Game Extractor</program>
+	
+	<settings>
+		<!-- REQUIRED -->
+		<setting code="" value="" />
+		
+		<!-- program -->
+		<setting code="Version" value="1.0" />
+		
+		<!-- language -->
+		<setting code="LanguageDirectory" value="language" />
+		<setting code="CurrentLanguage" value="English" />
+		
+		<!-- settings and interfaces -->
+		<setting code="InterfaceFile" value="settings/interface.xml" />1
+		
+		<setting code="ToolbarButtonListFile" value="settings/toolbarButtons.xml" />
+		
+		<setting code="DefaultSettingsFile" value="settings/defaults.xml" />
+		<setting code="SettingsFile" value="settings/settings.xml" />
+		
+		<setting code="PluginPreferencesFile" value="settings/pluginPreferences.xml" />
+		
+		<!-- WSComponent interfaces -->
+		<setting code="WSFontChooserXML" value="xml/WSFontChooser.xml" />
+		<setting code="WSSmallColorChooserXML" value="xml/WSSmallColorChooser.xml" />
+		<setting code="WSMonthCalendarXML" value="xml/WSMonthCalendar.xml" />
+		<setting code="WSGradientColorChooserXML" value="xml/WSGradientColorChooser.xml" />
+		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
+		
+		<setting code="WSColorChooser_ColorRed_Selected" value="256" />
+		<setting code="WSColorChooser_ColorGreen_Selected" value="0" />
+		<setting code="WSColorChooser_ColorBlue_Selected" value="0" />
+		
+		<setting code="WSFontChooser_FontName_Selected" value="Arial" />
+		<setting code="WSFontChooser_FontSize_Selected" value="12" />
+		<setting code="WSFontChooser_FontStyle_Selected" value="Plain" />
+		
+		<!-- general interface -->
+		<setting code="InterfaceLookAndFeel" value="ButterflyLookAndFeel" />
+		<setting code="Theme_ButterflyLookAndFeel_BackgroundColor" value="-1" />
+		<setting code="Theme_ButterflyLookAndFeel_DarkColor" value="-12814286" />
+		<setting code="Theme_ButterflyLookAndFeel_MidColor" value="-10251429" />
+		<setting code="Theme_ButterflyLookAndFeel_LightColor" value="-5125715" />
+		<setting code="Theme_ButterflyLookAndFeel_TextColor" value="-16777216" />
+		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
+		
+		<setting code="ShowSplashScreen" value="true" />
+		<setting code="WSProgramClosesSplashScreen" value="true" /> <!-- true = WSProgram will close the splash screen, false = you'll close it yourself -->
+		
+		<setting code="ToolbarLocation" value="ToolbarLocation_Top" />
+		
+		<setting code="LargeButtonIcons" value="false" />
+		
+		<!-- other -->
+		<setting code="DebugMode" value="true" /> <!-- write errors to screen -->
+		<setting code="RecentFileCount" value="4" />
+		<setting code="NumberOfTasks" value="4" />
+		<setting code="CurrentDirectory" value="" />
+		
+		
+		<!-- CUSTOM -->
+		
+		
+	</settings>
+</settingsStore>

@@ -1,0 +1,21 @@
+<WSPanel code="SidePanel_Options_HexEditorFields_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_HexEditorFields_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel layout="GridLayout" position="NORTH" rows="11" columns="1" code="SidePanel_Options_HexEditorFields_Checkboxes">
+				<WSOptionCheckBox code="Option_HexEditorFields_Binary" setting="ShowBinaryHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Byte" setting="ShowByteHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Short" setting="ShowShortHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Int" setting="ShowIntHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Long" setting="ShowLongHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Float" setting="ShowFloatHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Double" setting="ShowDoubleHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Hex" setting="ShowHexHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Char" setting="ShowCharHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Unicode" setting="ShowUnicodeHexEditorField" />
+				<WSOptionCheckBox code="Option_HexEditorFields_Timestamp" setting="ShowTimestampHexEditorField" />
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

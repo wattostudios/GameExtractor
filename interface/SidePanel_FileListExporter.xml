@@ -1,0 +1,17 @@
+<WSPanel code="SidePanel_FileListExporter" layout="BorderLayout" vertical-gap="6">
+	
+	<WSPanel layout="BorderLayout" position="NORTH" vertical-gap="6">
+	
+		<WSPanel layout="BorderLayout" code="SidePanel_FileListExporter_ExporterPlugins_Label" position="NORTH" showLabel="true" showBorder="true">
+			<WSComboBox code="SidePanel_FileListExporter_ExporterPlugins" position="NORTH" />
+		</WSPanel>
+				
+		<WSPanel code="SidePanel_FileListExporter_ColumnsHolder_Label" showLabel="true" showBorder="true" border-width="3" position="CENTER">
+			<WSPanel code="SidePanel_FileListExporter_ColumnsHolder" showBorder="true" position="CENTER" opaque="false" />
+		</WSPanel>
+	
+		<WSButton code="SidePanel_FileListExporter_ExportButton" showText="true" position="SOUTH" />
+		
+	</WSPanel>
+	
+</WSPanel>

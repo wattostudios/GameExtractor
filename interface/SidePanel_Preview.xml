@@ -1,0 +1,12 @@
+<WSPanel code="SidePanel_Preview" layout="BorderLayout" vertical-gap="6">
+
+	<WSPreviewPanelHolder code="SidePanel_Preview_PreviewPanelHolder" position="CENTER" />
+	
+	<WSPanel code="SidePanel_Preview_WritePreviewHolder" layout="BorderLayout" position="SOUTH" showLabel="true" showBorder="true">
+
+		<WSComboBox code="SidePanel_Preview_WritePreviewPlugins" position="CENTER" />
+		<WSButton code="SidePanel_Preview_WritePreviewButton" showText="false" position="EAST" />
+
+	</WSPanel>
+	
+</WSPanel>

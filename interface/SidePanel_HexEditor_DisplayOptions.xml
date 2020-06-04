@@ -1,0 +1,7 @@
+<WSPanel code="SidePanel_HexEditor_DisplayOptions_Main" showBorder="true" layout="GridLayout" rows="1" columns="3">
+	
+	<WSRadioButton code="SidePanel_HexEditor_ShowHex" group="HexEditorDisplayOptions" opaque="false" />
+	<WSRadioButton code="SidePanel_HexEditor_ShowChar" group="HexEditorDisplayOptions" opaque="false" />
+	<WSRadioButton code="SidePanel_HexEditor_ShowByte" group="HexEditorDisplayOptions" opaque="false" />
+	
+</WSPanel>

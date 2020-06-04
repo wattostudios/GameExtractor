@@ -360,17 +360,11 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public static boolean isFullVersion() {
-    try {
-      new FullVersionVerifier();
-      return true;
-    }
-    catch (Throwable t) {
-      return false;
-    }
+    return false;
   }
 
   /**
@@ -497,7 +491,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       if (redoMenu != null) {
         taskManager.addMonitor(redoMenu);
       }
-    
+
       WSUndoTaskComboButton undoButton = ((WSUndoTaskComboButton) ComponentRepository.get("UndoTaskComboButton"));
       if (undoButton != null) {
         taskManager.addMonitor(undoButton);
@@ -517,33 +511,33 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
     if (commandLineOnly) {
       return; // stop here - don't want to display the interface
     }
-    
+
     pack();
     setExtendedState(JFrame.MAXIMIZED_BOTH);
-    
+
     fileListPanelHolder.setMinimumSize(new Dimension(0, 0));
     sidePanelHolder.setMinimumSize(new Dimension(0, 0));
-    
+
     WSSplitPane mainSplit = (WSSplitPane) ComponentRepository.get("MainSplit");
     mainSplit.setDividerSize(5);
-    
+
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    
+
     //double splitPos = Settings.getDouble("DividerLocation");
     //if (splitPos < 0 || splitPos > 1){
     //  splitPos = 0.7;
     //  }
-    
+
     //mainSplit.setDividerLocation(splitPos);
     //mainSplit.setResizeWeight(1);
     setVisible(true);
     //pack();
-    
+
     //int location = (int)(mainSplit.getWidth() * splitPos);
     //System.out.println(location);
     //mainSplit.resetToPreferredSizes();
     //mainSplit.setDividerLocation(splitPos);
-    
+
      */
 
     // writes out the list of ArchivePlugins and ViewerPlugins, for the excel spreadsheet
@@ -583,7 +577,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void makeNewArchive() {
@@ -592,7 +586,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void makeNewArchive(boolean runInNewThread) {
@@ -948,7 +942,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -958,7 +952,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void openSidePanelOnStartup() {
@@ -970,7 +964,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void outputPluginExcelList() {
@@ -1064,7 +1058,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean promptToSave() {
@@ -1132,7 +1126,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setFileListPanel(String name) {
@@ -1142,7 +1136,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setSidePanel(String name) {

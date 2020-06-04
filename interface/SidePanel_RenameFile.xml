@@ -1,0 +1,24 @@
+<WSPanel code="SidePanel_RenameFile" layout="BorderLayout">
+	
+	<WSPanel layout="BorderLayout" position="NORTH" vertical-gap="6">
+
+		<WSPanel layout="BorderLayout" position="NORTH" vertical-gap="6">
+		
+			<WSPanel layout="BorderLayout" position="NORTH" vertical-gap="6">
+				<WSPanel layout="BorderLayout" position="NORTH" repository="false" code="SidePanel_RenameFile_RenamerPluginsLabel" showLabel="true" showBorder="true">
+					<WSComboBox code="SidePanel_RenameFile_RenamerPlugins" />
+				</WSPanel>
+				<WSTextField code="SidePanel_RenameFile_SearchValue" showLabel="true" position="CENTER" />
+			</WSPanel>
+			
+			<WSTextField code="SidePanel_RenameFile_ReplaceValue" showLabel="true" position="CENTER" />
+		</WSPanel>
+		
+		<WSPanel layout="GridLayout" rows="1" columns="2" position="CENTER">
+			<WSButton code="SidePanel_RenameFile_RenameSelectedButton" showText="true" />
+			<WSButton code="SidePanel_RenameFile_RenameAllButton" showText="true" />
+		</WSPanel>
+
+	</WSPanel>
+	
+</WSPanel>

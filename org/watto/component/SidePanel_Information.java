@@ -25,6 +25,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import org.watto.Language;
 import org.watto.component.model.UneditableTableModel;
 import org.watto.datatype.Archive;
@@ -104,9 +105,10 @@ public class SidePanel_Information extends WSPanelPlugin implements WSMotionable
     }
     width += 10;
 
-    table.getColumnModel().getColumn(0).setMinWidth(width);
-    table.getColumnModel().getColumn(0).setMaxWidth(width);
-    table.getColumnModel().getColumn(0).setPreferredWidth(width);
+    TableColumn column0 = table.getColumnModel().getColumn(0);
+    column0.setMinWidth(width);
+    column0.setMaxWidth(width);
+    column0.setPreferredWidth(width);
 
     /*
      * TableColumnModel columnModel = table.getColumnModel(); if (columnModel.getColumnCount() >

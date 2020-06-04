@@ -1,0 +1,17 @@
+<WSPanel code="SidePanel_PluginList" layout="BorderLayout" vertical-gap="6">
+	
+	<WSComboBox code="SidePanel_PluginList_PluginTypes" position="NORTH" />
+	
+	<WSPanel layout="GridLayout" position="CENTER" rows="2" columns="1" vertical-gap="6">
+
+		<WSScrollPane code="SidePanel_PluginList_Plugins_Label" showLabel="true" showBorder="true" showInnerBorder="true" opaque="false" viewport-border-width="3" >
+			<WSList code="SidePanel_PluginList_Plugins" />
+		</WSScrollPane>
+		
+		<WSScrollPane code="SidePanel_PluginList_PluginDescription_Label" showLabel="true" showBorder="true" showInnerBorder="true" opaque="false" viewport-border-width="3" >
+			<WSTextArea code="SidePanel_PluginList_PluginDescription" editable="false" wrap="true" />
+		</WSScrollPane>
+
+	</WSPanel>
+	
+</WSPanel>

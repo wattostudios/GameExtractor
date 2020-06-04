@@ -1,0 +1,28 @@
+<WSPanel code="SidePanel_ScriptBuilder" layout="BorderLayout" vertical-gap="6">
+	
+	<WSScrollPane position="CENTER" showLabel="true" showBorder="true" code="SidePanel_ScriptBuilder_ScriptLabel" showInnerBorder="true" opaque="false">
+		<WSEditorPane code="SidePanel_ScriptBuilder_Script" />
+	</WSScrollPane>
+	
+	<WSPanel position="SOUTH" vertical-gap="6">
+		<WSPanel position="NORTH" showLabel="true" showBorder="true" code="SidePanel_ScriptBuilder_ExistingScript">
+			<WSComboBox code="SidePanel_ScriptBuilder_ScriptsList" position="CENTER" />
+			<WSButton code="SidePanel_ScriptBuilder_OpenScript" showText="false" position="EAST" />
+		</WSPanel>
+		
+		<WSPanel position="CENTER" showLabel="true" showBorder="true" code="SidePanel_ScriptBuilder_NewScript">
+			<WSTextField showLabel="true" code="SidePanel_ScriptBuilder_ScriptName" position="CENTER" opaque="false" />
+			
+			<WSPanel layout="GridLayout" rows="1" columns="3" position="EAST" opaque="false">
+				<WSButton code="SidePanel_ScriptBuilder_CheckScript" showText="false" />
+				<WSButton code="SidePanel_ScriptBuilder_TestScript" showText="false" />
+				<WSButton code="SidePanel_ScriptBuilder_SaveScript" showText="false" />
+			</WSPanel>
+		</WSPanel>
+		
+		<WSScrollPane position="SOUTH" height="100" showBorder="true" showInnerBorder="true" showLabel="true" code="SidePanel_ScriptBuilder_CommandsLabel" opaque="false">
+			<WSList code="SidePanel_ScriptBuilder_CommandsList" />
+		</WSScrollPane>
+	</WSPanel>
+	
+</WSPanel>

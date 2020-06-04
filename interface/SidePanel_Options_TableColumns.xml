@@ -1,0 +1,27 @@
+<WSPanel code="SidePanel_Options_TableColumns_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_TableColumns_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel layout="GridLayout" position="NORTH" rows="17" columns="1" code="SidePanel_Options_TableColumns_Checkboxes">
+				<WSOptionCheckBox code="Option_TableColumn_Compressed" setting="ShowTableColumn_Compressed" />
+				<WSOptionCheckBox code="Option_TableColumn_CompressedLength" setting="ShowTableColumn_CompressedLength" />
+				<WSOptionCheckBox code="Option_TableColumn_CompressedLengthKB" setting="ShowTableColumn_CompressedLengthKB" />
+				<WSOptionCheckBox code="Option_TableColumn_Compression" setting="ShowTableColumn_Compression" />
+				<WSOptionCheckBox code="Option_TableColumn_DecompressedLength" setting="ShowTableColumn_DecompressedLength" />
+				<WSOptionCheckBox code="Option_TableColumn_DecompressedLengthKB" setting="ShowTableColumn_DecompressedLengthKB" />
+				<WSOptionCheckBox code="Option_TableColumn_Description" setting="ShowTableColumn_Description" />
+				<WSOptionCheckBox code="Option_TableColumn_Directory" setting="ShowTableColumn_Directory" />
+				<WSOptionCheckBox code="Option_TableColumn_Extension" setting="ShowTableColumn_Extension" />
+				<WSOptionCheckBox code="Option_TableColumn_FilePath" setting="ShowTableColumn_FilePath" />
+				<WSOptionCheckBox code="Option_TableColumn_Filename" setting="ShowTableColumn_Filename" />
+				<WSOptionCheckBox code="Option_TableColumn_Icon" setting="ShowTableColumn_Icon" />
+				<WSOptionCheckBox code="Option_TableColumn_Offset" setting="ShowTableColumn_Offset" />
+				<WSOptionCheckBox code="Option_TableColumn_AddedIcon" setting="ShowTableColumn_AddedIcon" />
+				<WSOptionCheckBox code="Option_TableColumn_RenamedIcon" setting="ShowTableColumn_RenamedIcon" />
+				<WSOptionCheckBox code="Option_TableColumn_ReplacedIcon" setting="ShowTableColumn_ReplacedIcon" />
+				<WSOptionCheckBox code="Option_TableColumn_Source" setting="ShowTableColumn_Source" />
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

@@ -1,0 +1,28 @@
+<WSPanel code="SidePanel_Options_PreviewingFiles_Main" layout="BorderLayout">
+	
+	<WSScrollPane showLabel="false" code="SidePanel_Options_PreviewingFiles_Label" position="CENTER" repository="false">
+		<WSPanel>
+			<WSPanel position="NORTH" vertical-gap="6">
+			
+				<WSPanel layout="GridLayout" position="NORTH" rows="2" columns="1" vertical-gap="6">
+				<WSPanel position="NORTH">
+					<WSOptionFileChooser code="Option_PreviewingFiles_FFMPEGLocation" setting="FFMPEG_Path" position="NORTH" />
+				</WSPanel>
+					<WSPanel layout="BorderLayout" code="Option_PreviewingFiles_PreviewType_Label" showLabel="true" showBorder="true">
+						<WSOptionComboBox_PreviewType opaque="false" code="Option_PreviewingFiles_PreviewType" setting="PreviewType" />
+					</WSPanel>
+				</WSPanel>
+				
+				<WSPanel layout="GridLayout" rows="4" columns="1">
+					<WSOptionCheckBox code="Option_PreviewingFiles_PreviewOnDoubleClick" setting="PreviewOnDoubleClick" />
+					<WSOptionCheckBox code="Option_PreviewingFiles_PlayAudioOnLoad" setting="PlayAudioOnLoad" />
+					<WSOptionCheckBox code="Option_PreviewingFiles_ShowHexIfPreviewFailed" setting="ShowHexIfPreviewFailed" />
+					<WSOptionCheckBox code="Option_PreviewingFiles_AlwaysShowHexEditorSelectedTable" setting="AlwaysShowHexEditorSelectedTable" />
+				</WSPanel>
+			
+
+			</WSPanel>
+		</WSPanel>
+	</WSScrollPane>
+	
+</WSPanel>

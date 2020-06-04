@@ -1,0 +1,8 @@
+<WSPanel code="SidePanel_DirectoryList_ModifyPanel_Main" showLabel="true" showBorder="true" layout="GridLayout" rows="1" columns="4" position="CENTER" >
+
+	<WSButton code="SidePanel_DirectoryList_AddFileButton" showText="false" />
+	<WSButton code="SidePanel_DirectoryList_RemoveFileButton" showText="false" />
+	<WSButton code="SidePanel_DirectoryList_ReplaceFileSelectedButton" showText="false" />
+	<WSButton code="SidePanel_DirectoryList_ReplaceFileMatchingButton" showText="false" />
+	
+</WSPanel>

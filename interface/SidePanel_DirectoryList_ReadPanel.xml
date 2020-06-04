@@ -1,0 +1,10 @@
+<WSPanel code="SidePanel_DirectoryList_ReadPanel_Main" showLabel="true" showBorder="true" layout="BorderLayout">
+	
+	<WSComboBox code="SidePanel_DirectoryList_ReadPluginList" position="CENTER" opaque="false" />
+	
+	<WSPanel code="SidePanel_DirectoryList_ReadButtonsPanel" opaque="false" layout="GridLayout" rows="1" columns="2" position="EAST" >
+		<WSButton code="SidePanel_DirectoryList_ReadArchiveButton" showText="false" />
+		<WSButton code="SidePanel_DirectoryList_ScanArchiveButton" showText="false" />
+	</WSPanel>
+	
+</WSPanel>

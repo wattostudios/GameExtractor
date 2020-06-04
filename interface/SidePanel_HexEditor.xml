@@ -1,0 +1,5 @@
+<WSPanel code="SidePanel_HexEditor" layout="BorderLayout">
+	
+	<WSHexEditor code="SidePanel_HexEditor_Editor" layout="BorderLayout" position="CENTER" showDisplayOptions="true" showSelectedValues="true" />
+	
+</WSPanel>

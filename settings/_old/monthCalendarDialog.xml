@@ -1,0 +1,78 @@
+<WSPanel layout="BorderLayout" border-width="4">
+
+  <WSPanel showBorder="true" position="NORTH">
+  
+    <WSButton code="PreviousMonth" position="WEST" opaque="false" />
+    
+    <WSPanel position="CENTER" opaque="false">
+      <WSButton code="PreviousYear" position="WEST" opaque="false" />
+      <WSLabel wrap="true" code="CurrentMonth" position="CENTER" opaque="false" height="30" />
+      <WSButton code="NextYear" position="EAST" opaque="false" />
+    </WSPanel>
+    
+    <WSButton code="NextMonth" position="EAST" opaque="false" />
+    
+  </WSPanel>
+
+<!-- DATE BOXES - START -->
+  <WSPanel showBorder="true" opaque="false" layout="GridLayout" rows="7" columns="7" position="CENTER">
+    <WSLabel showBorder="true" border-width="2" code="SundayHeaderSmall" />
+    <WSLabel showBorder="true" border-width="2" code="MondayHeaderSmall" />
+    <WSLabel showBorder="true" border-width="2" code="TuesdayHeaderSmall" />
+    <WSLabel showBorder="true" border-width="2" code="WednesdayHeaderSmall" />
+    <WSLabel showBorder="true" border-width="2" code="ThursdayHeaderSmall" />
+    <WSLabel showBorder="true" border-width="2" code="FridayHeaderSmall" />
+    <WSLabel showBorder="true" border-width="2" code="SaturdayHeaderSmall" />
+    
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C1" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C2" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C3" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C4" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C5" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C6" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR1C7" />
+    
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C1" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C2" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C3" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C4" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C5" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C6" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR2C7" />
+    
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C1" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C2" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C3" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C4" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C5" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C6" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR3C7" />
+    
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C1" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C2" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C3" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C4" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C5" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C6" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR4C7" />
+    
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C1" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C2" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C3" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C4" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C5" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C6" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR5C7" />
+    
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C1" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C2" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C3" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C4" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C5" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C6" />
+    <WSLabel showBorder="true" border-width="2" code="MonthCalendarDayR6C7" />
+  </WSPanel>
+<!-- DATE BOXES - END -->
+
+ 
+</WSPanel>
