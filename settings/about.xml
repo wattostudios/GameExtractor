@@ -5,7 +5,7 @@
 <img src="images/WSCreditsPanel/aboutLogo.gif" /><br />
 
 <font color="green">Game Extractor - Extensible Game Archive Editor</font><br />
-<font color="orange">Created and Developed by wattostudios (c) 2002-2019<br />
+<font color="orange">Created and Developed by wattostudios (c) 2002-2020<br />
 <u>http://www.watto.org/extract</u></font><br />
 
 <br /><br />
@@ -15,11 +15,15 @@
 <br /><br />
 
 <span color="red" border-width="2">
-<font color="red">This is the Basic Version of Game Extractor, which can read archives, but can't do advanced things such as saving archives and previewing files.<br />
-Please visit the Game Extractor website for more information on the Full Version and its features.</font>
+<font color="red">This is the Basic Version of Game Extractor, which can read archives, but can't do advanced things such as saving archives and previewing files.</font>
+<br /><br />
+<font color="red">Please visit the Game Extractor website for more information on the Full Version and its features.</font>
+<br />
 </span>
 
+
 <br /><br />
+
 
 <font color="blue">Game Extractor makes use of the following software packages and source code...</font>
 

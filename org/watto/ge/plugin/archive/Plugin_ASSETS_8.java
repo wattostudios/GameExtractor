@@ -48,6 +48,7 @@ public class Plugin_ASSETS_8 extends ArchivePlugin {
 
     setGames("English Country Tune",
         "Rapscallion",
+        "Sea Legends: Phantasmal Light",
         "Sonic Fan Remix",
         "Tech Ships: Waves of Victory",
         "Thomas Was Alone");

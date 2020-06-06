@@ -40,8 +40,18 @@ public class Plugin_DAT_FORM extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Knight Club",
-        "Monster Slayers");
+    setGames("10 Second Ninja X",
+        "Dead Ground",
+        "Gloom",
+        "HackyZack",
+        "HellCat",
+        "Knight Club",
+        "Laggerjack",
+        "Monster Slayers",
+        "Rising Lords",
+        "Spectrubes Infinity",
+        "Starship Annihilator",
+        "The Rare Nine");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

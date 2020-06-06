@@ -47,6 +47,7 @@ public class Plugin_BNK_BKHD extends ArchivePlugin {
         "F1 2015",
         "Tom Clancy's Ghost Recon Wildlands",
         "Resident Evil 2",
+        "Sure Footing",
         "Warhammer 40,000 Space Marine",
         "Warhammer: End Times: Vermintide");
     setExtensions("bnk"); // MUST BE LOWER CASE

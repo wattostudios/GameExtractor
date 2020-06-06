@@ -109,6 +109,8 @@ Version 3.10
     [I] Included vgmstream for converting many audio formats to WAV files
     [I] Exporters and previewers for FSB5 Audio, used in Unity games
     [I] An Image Investigator, for previewing unknown files as images in a variety of formats
+    [I] Interface improvements and additional functions for many of the Side Panels
+    [I] Source code and complimentary files are now pushed to GitHub
 [+] Image Previews can now show images with multiple frames stored in the same file
 [+] Added support for opening, previewing, and extracting files using QuickBMS. This allows for
     the use of complex functions like non-Java compression algorithms and in-line code execution.
@@ -134,6 +136,7 @@ Version 3.10
     didn't exist, such as when manually entered.
 [B] The Group Table view no longer removes the filter when replacing single files
 [B] Fixed a bug where files would not be extracted when using the right-click Extract options
+[B] Bug fixes for some overlapping and miscolored text in the About SidePanel
 
 Version 3.09
 [I] Support for more games, with a focus on adding previews (image and audio) and thumbnails

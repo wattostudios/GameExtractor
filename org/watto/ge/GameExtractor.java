@@ -32,6 +32,7 @@ import javax.swing.JFrame;
 - Post an update on Facebook and Twitter
 - Inform SoftPedia of the new Release and the Changes
 - Update the Plugins Spreadsheet
+- Update GitHub
 
 // TO DO EVERY TIME...
  - New EXPORTERS need to be added in to SidePanel_PluginList.loadExporters()
@@ -84,7 +85,6 @@ import javax.swing.JFrame;
 - The KeyListeners on the FileListPanels and DirPanel (for selecting next filename with given letter) should allow input of text strings
   - ie pressing 2 characters should look for files starting with these 2 characters.
   - Resets the search string after 1 second.
-- Build a package for the Microsoft Store, and other similar websites
 - Popup when loading for the first time, offering wizards and help
   - WSOverlayPopup with the ability to load in a custom Layout XML file
 - Integrate with Windows Explorer, like ZIP files.
@@ -281,7 +281,6 @@ import org.watto.event.WSWindowFocusableInterface;
 import org.watto.event.listener.WSWindowFocusableListener;
 import org.watto.ge.helper.CommandLineProcessor;
 import org.watto.ge.helper.FileTypeDetector;
-import org.watto.ge.helper.FullVersionVerifier;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.script.ScriptManager;

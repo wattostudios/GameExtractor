@@ -40,7 +40,14 @@ public class Plugin_PAK_48 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Wild Terra Online");
+    setGames("Wild Terra Online",
+        "Future Proof",
+        "Survive in Angaria TWO",
+        "Achievement Collector: Cat",
+        "Baikonur Space",
+        "Hello Pollution",
+        "Indecision",
+        "Kitty Run");
     setExtensions("pak"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

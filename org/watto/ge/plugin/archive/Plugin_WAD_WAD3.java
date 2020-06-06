@@ -3,7 +3,6 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -25,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,7 +35,7 @@ public class Plugin_WAD_WAD3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_WAD_WAD3() {
@@ -48,7 +48,15 @@ public class Plugin_WAD_WAD3 extends ArchivePlugin {
     setExtensions("wad");
     setGames("Quake",
         "Quake 2",
-        "Half-Life");
+        "Half-Life",
+        "Counter-Strike",
+        "Counter-Strike: Condition Zero",
+        "Day of Defeat",
+        "Half-Life: Blue Shift",
+        "Half-Life: Deathmatch Classic",
+        "Half-Life: Opposing Force",
+        "Ricochet",
+        "Team Fortress Classic");
     setPlatforms("PC");
 
     setFileTypes("unk", "Unknown File",
@@ -59,7 +67,7 @@ public class Plugin_WAD_WAD3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -99,7 +107,7 @@ public class Plugin_WAD_WAD3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -184,7 +192,7 @@ public class Plugin_WAD_WAD3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

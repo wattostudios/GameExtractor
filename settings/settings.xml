@@ -39,12 +39,12 @@
 		<setting code="AllowInlineFileListEditing" value="false" />
 		<setting code="LanguageDirectory" value="language" />
 		<setting code="SearchColumn_Filename" value="false" />
-		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\Prisioner of War\mission1.wga" />
-		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\City of Heroes\texture_gui.pigg" />
+		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\City of Heroes\texture_gui.pigg" />
+		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\Driv3r\SOUND.GSD" />
 		<setting code="WSFontChooser_FontSize_Selected" value="12" />
-		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\Driv3r\SOUND.GSD" />
+		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfhcSavvy-014.wll" />
 		<setting code="WSTableColumn_Icon_Width" value="18" />
-		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfhcSavvy-014.wll" />
+		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfchCountryWilderness-01.wll" />
 		<setting code="Popup_Search_MatchFound_Show" value="false" />
 		<setting code="MaximumDirectoryFileLength" value="524800" />
 		<setting code="FileListExporterDirectory" value="lists" />
@@ -62,7 +62,7 @@
 		<setting code="Scanner_wav" value="true" />
 		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims" />
 		<setting code="ExportFileListColumn_Offset" value="true" />
-		<setting code="CurrentSidePanel" value="SidePanel_DirectoryList" />
+		<setting code="CurrentSidePanel" value="SidePanel_About" />
 		<setting code="PluginListDisplayType" value="Game" />
 		<setting code="ShowCustomColumns" value="true" />
 		<setting code="WSMonthCalendarXML" value="xml/WSMonthCalendar.xml" />
@@ -128,7 +128,7 @@
 		<setting code="SortPluginLists" value="true" />
 		<setting code="NumberOfUndoTasks" value="4" />
 		<setting code="Popup_ScriptBuilder_NoNameSpecified_Show" value="true" />
-		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfhcSavvy-014.wll" />
+		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfchCountryWilderness-01.wll" />
 		<setting code="MaxAllowedScriptErrors" value="10" />
 		<setting code="ShowTimestampHexEditorField" value="false" />
 		<setting code="TypesFile" value="settings/types.xml" />

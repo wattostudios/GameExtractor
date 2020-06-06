@@ -50,7 +50,11 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
 
     setExtensions("fsb");
     setGames("SOMA",
-        "The Sims FreePlay");
+        "The Sims FreePlay",
+        "A Roll-Back Story",
+        "Object Cleaning",
+        "Splash Blast Panic",
+        "Sure Footing");
     setPlatforms("PC");
 
     //setFileTypes("spr", "Object Sprite");
