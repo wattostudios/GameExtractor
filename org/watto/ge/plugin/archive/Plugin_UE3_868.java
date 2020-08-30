@@ -39,17 +39,22 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
   **********************************************************************************************
   **/
   public Plugin_UE3_868() {
-    super("UE3_868", "Unreal Engine 3 versions 648, 678, 706, 740, 787, 849, 854, 860, 864, 865, 867, and 868");
+    super("UE3_868", "Unreal Engine 3 [648,678,706,740-2,787,849,854,860,864-8]");
 
     setExtensions("upk", "udk");
-    setGames("Chivalry: Medieval Warfare", "Deadlight",
+    setGames("Alien Rage",
+        "Angels Fall First: Planetstorm",
+        "Chivalry: Medieval Warfare",
+        "Deadlight",
         "Dirty Bomb",
         "Duty Calls",
         "Hazard: Journey Of Life",
         "Killer Is Dead",
         "Mortal Royale",
+        "NaissanceE",
         "Nether",
         "Rise of the Triad (2013)",
+        "Sherlock Holmes: Crimes And Punishments",
         "Spec Ops: The Line",
         "The Ball",
         "The Bureau: XCOM Declassified",
@@ -67,7 +72,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706);
+    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706, 742);
   }
 
   /**

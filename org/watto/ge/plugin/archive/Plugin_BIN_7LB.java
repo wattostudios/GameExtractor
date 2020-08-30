@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -25,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -48,7 +48,6 @@ public class Plugin_BIN_7LB extends ArchivePlugin {
     allowImplicitReplacing = true;
 
     setGames("Battle Beast",
-        "Take Your Best Shot",
         "Arcade America",
         "Monty Python's Complete Waste Of Time",
         "Monty Python And The Quest For The Holy Grail",

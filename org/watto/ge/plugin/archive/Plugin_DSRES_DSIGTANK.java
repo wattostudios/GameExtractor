@@ -1,29 +1,29 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -33,7 +33,9 @@ import org.watto.io.FileManipulator;
 public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
 
   long dirOffset;
+
   long filesDirOffset;
+
   int realNumFiles;
 
   /**
@@ -48,13 +50,16 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Copperhead Retaliation");
+    setGames("Copperhead Retaliation",
+        "Dungeon Siege: Legends of Aranna");
     setExtensions("dsres");
     setPlatforms("PC");
 
     //setFileTypes("","",
     //             "",""
     //             );
+
+    setTextPreviewExtensions("gas", "gpg", "nnk", "skrit"); // LOWER CASE
 
   }
 
@@ -150,15 +155,17 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       // 4 - Files Directory Offset?
-      filesDirOffset = fm.readInt();
+      filesDirOffset = fm.readInt() - 4; // -4 so that we account for some padding at the end of the archive
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       // 4 - Length of all Directories (ie ArchiveSize - FoldersDirectoryOffset)
       fm.skip(4);
 
       // 4 - Number Of Files?
-      int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      fm.skip(4);
+      int numFiles = Archive.getMaxFiles();
+      //int numFiles = fm.readInt();
+      //FieldValidator.checkNumFiles(numFiles);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
@@ -179,8 +186,18 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
       }
 
       // read the folders
+      /*
       for (int i = 0; i < numFolders; i++) {
-        readDirectory(resources, fm, path, "");
+        fm.seek(offsets[i]);
+        if (fm.getOffset() < arcSize - 4) {
+          readDirectory(resources, fm, path, "");
+        }
+      }
+      */
+      readDirectory(resources, fm, path, "");
+
+      if (realNumFiles < numFiles) {
+        resources = resizeResources(resources, realNumFiles);
       }
 
       /*
@@ -226,6 +243,7 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
   public void readDirectory(Resource[] resources, FileManipulator fm, File path, String parentDirName) throws Exception {
 
     long arcSize = (int) fm.getLength();
+    ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
     // 4 - Parent Directory Offset (relative to the folders directory offset)
     fm.skip(4);
@@ -239,10 +257,16 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
 
     // 2 - Folder Name Length
     short folderNameLength = fm.readShort();
-    FieldValidator.checkFilenameLength(folderNameLength);
+    try {
+      FieldValidator.checkFilenameLength(folderNameLength + 1); // +1 to allow null (root)
+    }
+    catch (Throwable t) {
+      return;
+    }
 
     // X - Folder Name
     String folderName = fm.readString(folderNameLength);
+    //System.out.println(fm.getOffset() + "\t" + folderName);
 
     // 0-3 - null Padding to a multiple of 4 bytes (including the folder name length)
     int paddingSize = 4 - ((folderNameLength + 2) % 4);
@@ -255,6 +279,9 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
     for (int j = 0; j < numFilesInFolder; j++) {
       // 4 - File Entry Offset (relative to the folders directory offset)
       int innerOffset = (int) (fm.readInt() + dirOffset);
+      if (innerOffset == dirOffset) {
+        innerOffset = (int) (fm.readInt() + dirOffset); // sometimes there's 4 nulls for the first entry after a folderName - this'll fix it
+      }
       FieldValidator.checkOffset(innerOffset, arcSize);
       innerOffsets[j] = innerOffset;
     }
@@ -266,7 +293,12 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
 
       if (innerOffset < filesDirOffset) {
         // directory
-        readDirectory(resources, fm, path, parentDirName + folderName + "\\");
+        if (folderName.equals("")) {
+          readDirectory(resources, fm, path, parentDirName + folderName);
+        }
+        else {
+          readDirectory(resources, fm, path, parentDirName + folderName + "\\");
+        }
       }
       else {
         // file
@@ -274,19 +306,19 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
         // 4 - Parent Directory Offset (relative to the folders directory offset)
         fm.skip(4);
 
-        // 4 - File Length?
+        // 4 - Decompressed File Length
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - File Offset?
-        long offset = fm.readInt();
+        long offset = fm.readInt() + 804;
         FieldValidator.checkOffset(offset, arcSize);
 
         // 12 - Hash
         fm.skip(12);
 
-        // 4 - File Type? (0/1)
-        int fileType = fm.readInt();
+        // 4 - Compression Flag? (0=Uncompressed, 1=ZLib Compression)
+        int compressionFlag = fm.readInt();
 
         // 2 - Filename Length
         short filenameLength = fm.readShort();
@@ -294,6 +326,7 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
 
         // X - Filename
         String filename = parentDirName + folderName + "\\" + fm.readString(filenameLength);
+        //System.out.println(fm.getOffset() + "\t" + filename);
 
         // 0-3 - null Padding to a multiple of 4 bytes (including the filename length)
         int filenamePaddingSize = 4 - ((filenameLength + 2) % 4);
@@ -301,17 +334,60 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
           fm.skip(filenamePaddingSize);
         }
 
-        if (fileType == 1) {
-          // 4 - Unknown
-          // 4 - Unknown (16384)
-          // 4 - Unknown
-          // 4 - Unknown
-          // 8 - null
-          fm.skip(24);
-        }
+        if (compressionFlag == 1) {
+          long decompLength = length;
 
-        //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
+          // 4 - Compressed Length
+          length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - Block Size (16384)
+          fm.skip(4);
+
+          int numBlocks = (int) (decompLength / 16384);
+          if (decompLength % 16384 != 0) {
+            numBlocks++;
+          }
+
+          long[] blockOffsets = new long[numBlocks];
+          long[] blockLengths = new long[numBlocks];
+          long[] blockDecompLengths = new long[numBlocks];
+
+          for (int b = 0; b < numBlocks; b++) {
+            // 4 - Decompressed Block Length
+            int blockDecompLength = fm.readInt();
+            FieldValidator.checkLength(blockDecompLength);
+            blockDecompLengths[b] = blockDecompLength;
+
+            // 4 - Compressed Block Length
+            int blockLength = fm.readInt();
+            FieldValidator.checkLength(blockLength, arcSize);
+            blockLengths[b] = blockLength;
+
+            // 4 - More Blocks Flag? (16 = more blocks, 0 = last block)
+            fm.skip(4);
+
+            // 4 - Decompressed Block Offset
+            long blockOffset = fm.readInt() + offset;
+            FieldValidator.checkLength(blockOffset, arcSize);
+            blockOffsets[b] = blockOffset;
+          }
+
+          if (numBlocks == 1) {
+            //path,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+          else {
+            BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+
+            //path,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, blockExporter);
+          }
+        }
+        else {
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
+        }
 
         TaskProgressManager.setValue(realNumFiles);
         realNumFiles++;

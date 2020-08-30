@@ -399,6 +399,19 @@ public final class MiniLZO implements LZOConstants {
 
   public final static int lzo1x_decompress(final byte[] in, final int in_len, final byte[] out, MInt out_len) {
     int op = 0;
+    return lzo1x_decompress(in, in_len, out, op, out_len);
+  }
+
+  /** Decompress the data. Error codes would be returned (@see LZOConstants). 
+   * Decompressed length is returned via out_len. 
+   *
+   * @param in Input byte array to be decompressed
+   * @param in_len Input length 
+   * @param out  decompressed output byte array. Ensure that out array has sufficient length
+   * @param op OUT POSITION IN THE ARRAY 
+   * @param out_len decompressed data length
+   */
+  public final static int lzo1x_decompress(final byte[] in, final int in_len, final byte[] out, int op, MInt out_len) {
     int ip = 0;
     int t;
     int state = c_top_loop;

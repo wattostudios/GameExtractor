@@ -198,7 +198,9 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
         //"DXT3_BigEndian16",
         //"DXT5_BigEndian16",
         //"DXT5Swizzled",
+        "BC4",
         "BC5",
+        "BC7",
         "ETC2_RGBA8",
         "ARGB",
         "ABGR",
@@ -461,8 +463,14 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       //else if (format.equals("DXT5Swizzled")) {
       //  imageResource = ImageFormatReader.readDXT5Swizzled(fm, imageWidth, imageHeight);
       //}
+      else if (format.equals("BC4")) {
+        imageResource = ImageFormatReader.readBC4(fm, imageWidth, imageHeight);
+      }
       else if (format.equals("BC5")) {
         imageResource = ImageFormatReader.readBC5(fm, imageWidth, imageHeight);
+      }
+      else if (format.equals("BC7")) {
+        imageResource = ImageFormatReader.readBC7(fm, imageWidth, imageHeight);
       }
       else if (format.equals("ETC2_RGBA8")) {
         imageResource = ImageFormatReader.readETC2_RGBA8(fm, imageWidth, imageHeight);

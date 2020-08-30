@@ -30,12 +30,14 @@ import org.watto.task.Task_RenameFiles;
 public class FileListModel_Table implements FileListModel, TableModel {
 
   Resource[] resources;
+
   WSTableColumn[] columns;
+
   ArchivePlugin readPlugin;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public FileListModel_Table() {
@@ -44,7 +46,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -53,7 +55,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -67,7 +69,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -77,7 +79,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -87,7 +89,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource getResource(int row) {
@@ -101,7 +103,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -111,17 +113,22 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public Object getValueAt(int row, int column) {
-    return readPlugin.getColumnValue(resources[row], columns[column].getCharCode());
+    try {
+      return readPlugin.getColumnValue(resources[row], columns[column].getCharCode());
+    }
+    catch (Throwable t) {
+      return "";
+    }
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -153,7 +160,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void reload() {
@@ -164,7 +171,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void reload(Resource[] resources) {
@@ -175,7 +182,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -184,7 +191,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -221,7 +228,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void sortResources(int column) {
@@ -230,7 +237,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void sortResources(int column, boolean useCurrentResources) {

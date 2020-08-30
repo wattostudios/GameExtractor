@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -24,6 +23,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,7 +44,8 @@ public class Plugin_ADB extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Nibiru: Age Of Secrets");
+    setGames("Nibiru: Age Of Secrets",
+        "Tale Of A Hero");
     setExtensions("adb");
     setPlatforms("PC");
 
@@ -65,13 +66,13 @@ public class Plugin_ADB extends ArchivePlugin {
         rating += 25;
       }
 
+      // Unknown (666)
+      if (fm.readInt() == 666) {
+        rating += 5;
+      }
+
       fm.skip(4);
 
-      // Version
-      if (fm.readInt() == 1) {
-        rating += 5;
-      }
-
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readInt())) {
         rating += 5;
@@ -79,6 +80,11 @@ public class Plugin_ADB extends ArchivePlugin {
 
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readInt())) {
+        rating += 5;
+      }
+
+      // Unknown (31)
+      if (fm.readInt() == 31) {
         rating += 5;
       }
 
@@ -110,12 +116,12 @@ public class Plugin_ADB extends ArchivePlugin {
 
       long arcSize = (int) fm.getLength();
 
-      // 4 - Maximum Number Of Files ?
-      // 4 - Version (1)
+      // 4 - Unknown (666)
+      // 4 - Unknown (0/1)
       fm.skip(8);
 
       // 4 - Number Of Files (including padding entries at the end of the directory)
-      int firstFileOffset = fm.readInt() * 40;
+      int firstFileOffset = (fm.readInt() * 40) + 20;
       FieldValidator.checkOffset(firstFileOffset, arcSize);
 
       // 4 - Number Of Files (NOT including the padding entries at the end of the directory)
@@ -131,7 +137,7 @@ public class Plugin_ADB extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-        // 4 - File Offset? (relative to the start of the file data)
+        // 4 - File Offset (relative to the start of the file data)
         long offset = fm.readInt() + firstFileOffset;
         FieldValidator.checkOffset(offset, arcSize);
 
@@ -139,7 +145,7 @@ public class Plugin_ADB extends ArchivePlugin {
         String filename = fm.readNullString(32);
         FieldValidator.checkFilename(filename);
 
-        // 4 - File Size?
+        // 4 - File Length
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 

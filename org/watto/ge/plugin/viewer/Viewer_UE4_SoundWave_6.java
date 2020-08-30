@@ -326,7 +326,7 @@ public class Viewer_UE4_SoundWave_6 extends ViewerPlugin {
       long typeID = fm.readLong();
       String type = UE4Helper.getName(typeID);
 
-      if (type.equals("OGG")) {
+      if (type == null || type.equals("OGG") || type.startsWith("OGG")) { // some files have OGG, others have OGG10025600-1-1-1-1-1
         // 4 - Unknown (72)
         fm.skip(4);
 
@@ -508,14 +508,23 @@ public class Viewer_UE4_SoundWave_6 extends ViewerPlugin {
       // 8 - Type ID (points to "OGG" for a Sound File)
       long typeID = fm.readLong();
       String type = UE4Helper_Short.getName(typeID);
-
-      // 4 - Unknown
-      // 8 - Unknown
-      fm.skip(12);
+      if (type == null) {
+        // just in case there was another 4-byte field in there somewhere, let's try to correct that
+        typeID >>= 32;
+        type = UE4Helper_Short.getName(typeID);
+        if (type != null) {
+          fm.skip(4); // to get it back to the correct spot
+        }
+      }
 
       if (type.equals("OGG")) {
+        // X - fields until the next one
         // 4 - Unknown (72)
-        fm.skip(4);
+        for (int f = 0; f < 10; f++) {
+          if (fm.readInt() == 72) {
+            break;
+          }
+        }
 
         // 4 - File Data Length
         int length = fm.readInt();

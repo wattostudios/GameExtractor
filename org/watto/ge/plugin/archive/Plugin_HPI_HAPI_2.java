@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -25,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -34,11 +34,12 @@ import org.watto.io.FileManipulator;
 public class Plugin_HPI_HAPI_2 extends ArchivePlugin {
 
   int realNumFiles = 0;
+
   int filenameDirOffset = 0;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_HPI_HAPI_2() {
@@ -56,7 +57,7 @@ public class Plugin_HPI_HAPI_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -101,7 +102,7 @@ public class Plugin_HPI_HAPI_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -183,6 +184,11 @@ public class Plugin_HPI_HAPI_2 extends ArchivePlugin {
     }
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public void readDirectory(FileManipulator fm, File path, Resource[] resources, long dirOffset) throws Exception {
 
     long arcSize = fm.getLength();

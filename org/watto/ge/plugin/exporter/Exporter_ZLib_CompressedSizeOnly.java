@@ -22,12 +22,14 @@ import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.stream.ManipulatorInputStream;
 import org.watto.io.stream.ManipulatorOutputStream;
+import org.watto.io.stream.ManipulatorUnclosableInputStream;
 
 public class Exporter_ZLib_CompressedSizeOnly extends ExporterPlugin {
 
   static Exporter_ZLib_CompressedSizeOnly instance = new Exporter_ZLib_CompressedSizeOnly();
 
   static InflaterInputStream readSource;
+
   static long readLength = 0;
 
   /**
@@ -63,7 +65,7 @@ public class Exporter_ZLib_CompressedSizeOnly extends ExporterPlugin {
       // If not, the nextByte was the null at the end of the stream
       // so we want to return false, as the null should not be exported.
       if (readSource.available() <= 0) {
-        readSource.close();
+        //readSource.close();
         return false;
       }
       return true;
@@ -98,6 +100,20 @@ public class Exporter_ZLib_CompressedSizeOnly extends ExporterPlugin {
   public void open(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
     try {
       readSource = new InflaterInputStream(new ManipulatorInputStream(fmIn));
+      readLength = decompLengthIn;
+    }
+    catch (Throwable t) {
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void openUnclosable(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
+    try {
+      readSource = new InflaterInputStream(new ManipulatorUnclosableInputStream(fmIn));
       readLength = decompLengthIn;
     }
     catch (Throwable t) {

@@ -54,8 +54,11 @@ public class Plugin_PAK_38 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("2000 to 1: A Space Felony",
+    setGames("3 Out Of 10: Episode 1: Welcome To Shovelworks",
+        "3 Out Of 10: Episode 2: Foundation 101",
+        "2000 to 1: A Space Felony",
         "A Way Out",
+        "ABZU",
         "Action Rush",
         "AIDEN",
         "Animal Super Squad",
@@ -63,6 +66,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
         "Baiko",
         "BARBAR_BAR",
         "Basketball",
+        "Battle Breakers",
         "Beast Mode: Night Of The Werewolf",
         "BitMaster",
         "Blade & Bones",
@@ -70,11 +74,15 @@ public class Plugin_PAK_38 extends ArchivePlugin {
         "Boons Farm",
         "Breach",
         "BRIGHTEST",
+        "Builders of Egypt: Prologue",
         "CAT Interstellar",
+        "City Of Brass",
         "Clicker bAdventure",
+        "Close To The Sun",
         "Crescent Bay",
         "Cyborg Invasion Shooter",
         "Dark Deception",
+        "Dauntless",
         "Dead by Daylight",
         "Dispatcher",
         "Evolvation",
@@ -86,6 +94,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
         "FreeFly Burning",
         "Glow",
         "Go Kart Survival",
+        "Hello Neighbor",
         "HIVE",
         "Horny Fighter",
         "Infernales",
@@ -101,21 +110,26 @@ public class Plugin_PAK_38 extends ArchivePlugin {
         "Lifeblood",
         "Lock Parsing 2",
         "Milky Way Map",
+        "Mutant Year Zero: Road To Eden",
         "Nash Racing 2: Muscle Cars",
         "Nash Racing",
         "NeoSticks",
         "No70: Eye Of Basir",
         "Nuclear 2050",
+        "Observer",
         "Outpost Zero",
         "Overkill's The Walking Dead",
         "Perfect Heist",
         "Phobia",
+        "QUBE 2",
         "RAMS",
+        "Remnant: From The Ashes",
         "Remothered: Tormented Fathers",
         "Rest House",
         "RiME",
         "ROGALIK",
         "RollingBall: Unlimited World",
+        "RUINER",
         "Running Man 3D: Part 2",
         "Sky Noon",
         "Slayer Of Traitors",
@@ -600,6 +614,29 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       long dirOffset = fm.readLong();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
+      boolean shortCompressionFlags = false;
+      if (dirOffset == 0) {
+        // maybe there's some kind of padding at the end - go back a bit more (eg Game: Rainy Season)
+        fm.seek(arcSize - 128 - 36);
+
+        // 8 - Directory Offset
+        try {
+          dirOffset = fm.readLong();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+
+          shortCompressionFlags = true;
+        }
+        catch (Throwable t) {
+          // go back another 32 bytes
+          fm.seek(arcSize - 128 - 36 - 32);
+
+          dirOffset = fm.readLong();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+          shortCompressionFlags = false;
+        }
+
+      }
+
       fm.seek(dirOffset);
 
       // 4 - Relative Directory Name Length (including null terminator) (10)
@@ -611,7 +648,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      FieldValidator.checkNumFiles(numFiles / 4);
 
       Resource_PAK_38[] resources = new Resource_PAK_38[numFiles];
       TaskProgressManager.setMaximum(numFiles);
@@ -655,8 +692,15 @@ public class Plugin_PAK_38 extends ArchivePlugin {
         long decompLength = fm.readLong();
         FieldValidator.checkLength(decompLength);
 
-        // 4 - Compression Type (0=uncompressed, 1=ZLib, 2=GZip, 4=Snappy)
-        int compressionType = fm.readInt();
+        int compressionType;
+        if (shortCompressionFlags) {
+          // 1 - Compression Type (0=uncompressed, 1=ZLib, 2=GZip, 4=Snappy)
+          compressionType = fm.readByte();
+        }
+        else {
+          // 4 - Compression Type (0=uncompressed, 1=ZLib, 2=GZip, 4=Snappy, others=Oodle?)
+          compressionType = fm.readInt();
+        }
         FieldValidator.checkRange(compressionType, 0, 4);
 
         // 20 - Unknown
@@ -669,6 +713,10 @@ public class Plugin_PAK_38 extends ArchivePlugin {
           // skip all the header fields for this file
           offset += 53;
 
+          if (shortCompressionFlags) {
+            offset -= 3;
+          }
+
           //path,name,offset,length,decompLength,exporter
           resources[i] = new Resource_PAK_38(path, filename, offset, length);
         }
@@ -679,6 +727,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
 
           long[] blockOffsets = new long[numBlocks];
           long[] blockLengths = new long[numBlocks];
+          boolean addOffset = true;
           for (int b = 0; b < numBlocks; b++) {
             // 8 - Offset to the start of the compressed data block (relative to the start of the archive)
             long blockStartOffset = fm.readLong();
@@ -690,6 +739,23 @@ public class Plugin_PAK_38 extends ArchivePlugin {
 
             long blockLength = blockEndOffset - blockStartOffset;
             FieldValidator.checkLength(blockLength);
+
+            if (compressionType == 1) {
+              if (b == 0) {
+                // IN SOME ONLY, ZLib compression uses an offset relative to the start of the Data for *this* File
+                long difference = blockStartOffset - offset - (numBlocks * 16);
+                if (difference >= 0 && difference < 250) {
+                  addOffset = false;
+                }
+                else {
+                  addOffset = true;
+                }
+              }
+
+              if (addOffset) {
+                blockStartOffset += offset;
+              }
+            }
 
             blockOffsets[b] = blockStartOffset;
             blockLengths[b] = blockLength;
@@ -766,7 +832,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
           asset = resource;
           assetName = resource.getName();
 
-          culledResources[numCulledFiles] = resource; // we want to kep this file - it's a main uasset file
+          culledResources[numCulledFiles] = resource; // we want to keep this file - it's a main uasset file
           numCulledFiles++;
 
           int dotPos = assetName.lastIndexOf(".uasset");
@@ -903,9 +969,15 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       FieldValidator.checkOffset(nameDirOffset, arcSize);
 
       // 8 - null
+      fm.skip(8);
+
       // 4 - Number Of Exports
+      int exportCount = fm.readInt();
+      FieldValidator.checkNumFiles(exportCount);
+
       // 4 - Exports Directory Offset
-      fm.skip(16);
+      long exportDirOffset = IntConverter.unsign(fm.readInt());
+      FieldValidator.checkOffset(exportDirOffset, arcSize);
 
       // 4 - Number Of Imports
       int importCount = fm.readInt();
@@ -918,7 +990,15 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       // 16 - null
       // 4 - [optional] null
       // 16 - GUID Hash
-      fm.skip(32);
+      if (importDirOffset == 0) {
+        // that skipped 8 "null" bytes probably wasn't in this archive, so correct the import details
+        importCount = exportCount;
+        importDirOffset = exportDirOffset;
+        fm.skip(32 - 8);
+      }
+      else {
+        fm.skip(32);
+      }
 
       // 4 - Unknown (1)
       if (fm.readInt() != 1) { // this is to skip the OPTIONAL 4 bytes in MOST circumstances

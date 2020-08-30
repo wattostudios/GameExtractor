@@ -15,12 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
@@ -44,15 +46,16 @@ public class Plugin_P_DFPF extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Brutal Legend");
+    setGames("Brutal Legend",
+        "Costume Quest");
     setExtensions("~p"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
-    setEnabled(false); // Too complex to be worried about it
+    //setEnabled(false); // Too complex to be worried about it
 
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("texture", "Texture Image", FileType.TYPE_IMAGE));
+
+    setTextPreviewExtensions("prototyperesource"); // LOWER CASE
 
   }
 
@@ -108,13 +111,17 @@ public class Plugin_P_DFPF extends ArchivePlugin {
       long dirSize = fm.getLength();
 
       // 4 - Header (dfpf)
-      // 4 - Version? (5) (LITTLE ENDIAN)
-      // 4 - null
-      fm.skip(12);
+      fm.skip(4);
 
-      // 4 - Folder Names Directory Offset (2048)
-      int folderNamesDirOffset = IntConverter.changeFormat(fm.readInt());
-      FieldValidator.checkOffset(folderNamesDirOffset, dirSize);
+      // 4 - Version? (5) (LITTLE ENDIAN)
+      int version = fm.readByte();
+
+      // 4 - null
+      fm.skip(7);
+
+      // 4 - Type Names Directory Offset (2048)
+      int typeNamesDirOffset = IntConverter.changeFormat(fm.readInt());
+      FieldValidator.checkOffset(typeNamesDirOffset, dirSize);
 
       // 4 - null
       fm.skip(4);
@@ -123,16 +130,16 @@ public class Plugin_P_DFPF extends ArchivePlugin {
       int filenameDirOffset = IntConverter.changeFormat(fm.readInt());
       FieldValidator.checkOffset(filenameDirOffset, dirSize);
 
-      // 4 - Number of Folders
-      int numFolders = fm.readInt();
-      FieldValidator.checkNumFiles(numFolders);
+      // 4 - Number of Types
+      int numTypes = IntConverter.changeFormat(fm.readInt());
+      FieldValidator.checkNumFiles(numTypes);
 
       // 4 - Filename Directory Length
       int filenameDirLength = IntConverter.changeFormat(fm.readInt());
       FieldValidator.checkLength(filenameDirLength, dirSize);
 
       // 4 - Number of Files
-      int numFiles = fm.readInt();
+      int numFiles = IntConverter.changeFormat(fm.readInt());
       FieldValidator.checkNumFiles(numFiles);
 
       // 4 - Unknown
@@ -152,17 +159,43 @@ public class Plugin_P_DFPF extends ArchivePlugin {
       // 4 - Unknown (1)
       // 4 - Unknown
       // 0-2047 - null Padding to a multiple of 2048 bytes
+      fm.seek(typeNamesDirOffset);
+
+      String[] types = new String[numTypes];
+      for (int i = 0; i < numTypes; i++) {
+        // 4 - Type Name Length (including null terminator)
+        int typeNameLength = IntConverter.changeFormat(fm.readInt());
+
+        // X - Type Name
+        // 1 - null Type Name Terminator
+        String type = fm.readNullString(typeNameLength);
+        types[i] = type;
+
+        // 4 - Unknown
+        // 4 - Hash?
+        // 4 - null
+        fm.skip(12);
+      }
+
       fm.seek(filenameDirOffset);
 
-      String[] filenames = new String[numFiles];
       // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
+      /*
+       * String[] filenames = new String[numFiles];
+      while (dirPos < filenameDirLength) {
         // X - Filename (null)
         String filename = fm.readNullString();
         FieldValidator.checkFilename(filename);
-
-        filenames[i] = filename;
+      
+        dirPos += filename.length() + 1;
+      
+        filenames[numNames] = filename;
+        numNames++;
       }
+      */
+
+      byte[] nameDirBytes = fm.readBytes(filenameDirLength);
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameDirBytes));
 
       fm.seek(detailsDirOffset);
 
@@ -170,57 +203,136 @@ public class Plugin_P_DFPF extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        // 3 - Compressed File Length
-        byte[] lengthBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
-        int length = IntConverter.convertBig(lengthBytes);
+      if (version == 2) {
+        // VERSION 2
 
-        // 2 - Flags
-        short flags = ShortConverter.changeFormat(fm.readShort());
+        for (int i = 0; i < numFiles; i++) {
+          // 3 - Decompressed File Length
+          byte[] decompLengthBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int decompLength = IntConverter.convertBig(decompLengthBytes) + 36;
 
-        // 3 - Decompressed File Length ???
-        fm.skip(3);
+          // 3 - Unknown
+          byte[] next3bytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
 
-        // 3 - File Offset
-        byte[] offsetBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
-        int offset = IntConverter.convertBig(offsetBytes);
+          // 2 - Compressed File Length (Version 2)
+          byte[] lengthBytes = new byte[] { 0, (byte) (next3bytes[3] & 7), fm.readByte(), fm.readByte() };
+          int length = IntConverter.convertBig(lengthBytes) >> 1;
 
-        // 1 - VALUEX
-        int valueX = fm.readByte();
+          // 3 - File Offset
+          byte[] offsetBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int offset = IntConverter.convertBig(offsetBytes) << 5;
 
-        // 3 - NAMEX
-        byte[] nameXBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
-        int nameX = IntConverter.convertBig(nameXBytes);
+          // 1 - null
+          fm.skip(1);
 
-        // 1 - Compression Type
-        fm.skip(1);
+          // 3 - Filename Offset
+          // 1 - File Type and Compression Type
+          byte[] last4bytes = fm.readBytes(4);
 
-        int decompLength = (((valueX & 7) << 24) | nameX);
+          byte[] nameOffsetBytes = new byte[] { 0, last4bytes[0], last4bytes[1], last4bytes[2] };
+          int nameOffset = IntConverter.convertBig(nameOffsetBytes) >> 3;
 
-        if ((flags & 0x8000) == 0x8000) {
-          length <<= 3;
-          offset <<= 2;
+          int fileType = ShortConverter.convertBig(new byte[] { (byte) (last4bytes[2] & 7), last4bytes[3] }) >> 4;
+
+          int compressionType = last4bytes[3] & 15;
+
+          // Do the checks
+          FieldValidator.checkOffset(offset, arcSize);
+          FieldValidator.checkLength(length, arcSize);
+          FieldValidator.checkLength(decompLength);
+
+          //String filename = filenames[i];
+          nameFM.seek(nameOffset);
+          String filename = nameFM.readNullString();
+          //String filename = Resource.generateFilename(i);
+
+          filename += "." + types[fileType];
+
+          if (compressionType == 4) {
+            // ZLib
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+          else {
+            // No compression?
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
+
+          TaskProgressManager.setValue(i);
         }
-        else {
-          decompLength >>= 4;
+      }
+      else {
+        // VERSION 5
+
+        for (int i = 0; i < numFiles; i++) {
+          // 3 - Decompressed File Length
+          byte[] decompLengthBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int decompLength = IntConverter.convertBig(decompLengthBytes) + 36;
+
+          // 3 - Filename Offset
+          byte[] nameOffsetBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int nameOffset = IntConverter.convertBig(nameOffsetBytes) >> 3;
+
+          // 2 - Flags (Version 5)
+          fm.skip(2);
+
+          // 3 - File Offset
+          byte[] offsetBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int offset = IntConverter.convertBig(offsetBytes) << 5;
+
+          // 1 - null
+          fm.skip(1);
+
+          // 3 - Compressed File Length (Version 5) (version 2 = Unknown)
+          // 1 - File Type and Compression Type
+          byte[] last4bytes = fm.readBytes(4);
+
+          byte[] lengthBytes = new byte[] { 0, last4bytes[0], last4bytes[1], (byte) (last4bytes[2] & 240) };
+          int length = IntConverter.convertBig(lengthBytes) >> 4;
+
+          int fileType = ShortConverter.convertBig(new byte[] { (byte) (last4bytes[2] & 7), last4bytes[3] }) >> 5;
+
+          int compressionType = last4bytes[3] & 15;
+
+          // Do the checks
+          FieldValidator.checkOffset(offset, arcSize);
+          FieldValidator.checkLength(length, arcSize);
+          FieldValidator.checkLength(decompLength);
+
+          //String filename = filenames[i];
+          nameFM.seek(nameOffset);
+          String filename = nameFM.readNullString();
+          //String filename = Resource.generateFilename(i);
+
+          filename += "." + types[fileType];
+
+          if (compressionType == 8) {
+            // ZLib
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+          else if (compressionType == 4) {
+            // ???
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
+          else {
+            // No compression?
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
+
+          TaskProgressManager.setValue(i);
         }
-
-        offset <<= 5;
-        valueX >>= 3;
-        offset |= valueX;
-
-        FieldValidator.checkOffset(offset, arcSize);
-        FieldValidator.checkLength(length, arcSize);
-        FieldValidator.checkLength(decompLength);
-
-        String filename = filenames[i];
-
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
-
-        TaskProgressManager.setValue(i);
       }
 
+      nameFM.close();
       fm.close();
 
       return resources;

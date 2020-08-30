@@ -257,11 +257,22 @@ public class Viewer_U_Texture_Generic extends ViewerPlugin {
   **/
   @Override
   public ImageResource readThumbnail(FileManipulator fm) {
+
     try {
 
-      // 1 - Number Of Mipmaps (9)
-      int numMipmaps = ByteConverter.unsign(fm.readByte());
-      FieldValidator.checkLength(numMipmaps, 50);
+      int numMipmaps = 1;
+      try {
+        // 1 - Number Of Mipmaps (9)
+        numMipmaps = ByteConverter.unsign(fm.readByte());
+        FieldValidator.checkLength(numMipmaps, 20);
+      }
+      catch (Throwable t) {
+        // skip another 3 bytes and try again
+        fm.skip(3);
+
+        numMipmaps = ByteConverter.unsign(fm.readByte());
+        FieldValidator.checkLength(numMipmaps, 20);
+      }
 
       // for each mipmap
       for (int i = 0; i < numMipmaps; i++) {

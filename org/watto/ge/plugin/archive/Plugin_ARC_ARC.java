@@ -1,29 +1,30 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -48,9 +49,9 @@ public class Plugin_ARC_ARC extends ArchivePlugin {
     setExtensions("arc");
     setPlatforms("PC");
 
-    //setFileTypes("","",
-    //             "",""
-    //             );
+    setFileTypes(new FileType("tex", "Texture Image", FileType.TYPE_IMAGE));
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
   }
 
@@ -70,7 +71,7 @@ public class Plugin_ARC_ARC extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(4).equals("ARC" + null)) {
+      if (fm.readString(4).equals("ARC" + (char) 0)) {
         rating += 50;
       }
 
@@ -125,7 +126,7 @@ public class Plugin_ARC_ARC extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -137,35 +138,64 @@ public class Plugin_ARC_ARC extends ArchivePlugin {
       // 4 - Version (1)
       fm.skip(8);
 
-      // 4 - Number Of Files in Directory 2
+      // 4 - Number Of Files
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
+      if (numFiles < 3) {
+        return null; // so it errors-out some other files that pick this up
+      }
 
-      // 4 - Number Of Files in Directory 1
-      int numFilesDir1 = fm.readInt();
-      FieldValidator.checkNumFiles(numFilesDir1);
+      // 4 - Number Of Compressed Blocks
+      int numBlocks = fm.readInt();
+      FieldValidator.checkNumFiles(numBlocks);
+      if (numBlocks < 3) {
+        return null; // so it errors-out some other files that pick this up
+      }
 
-      // 4 - Unknown Length?
-      fm.skip(4);
+      // 4 - Compression Directory Length
+      int compressionDirLength = fm.readInt();
+      FieldValidator.checkLength(compressionDirLength, arcSize);
 
       // 4 - Filename Directory Length
-      long dirLength = fm.readInt();
-      FieldValidator.checkLength(dirLength, arcSize);
+      int filenameDirLength = fm.readInt();
+      FieldValidator.checkLength(filenameDirLength, arcSize);
 
-      // 4 - Directory 1 Offset
-      long dirOffset = fm.readInt() + (numFiles * 12);
-      FieldValidator.checkOffset(dirOffset, arcSize);
-      long filenameDirOffset = dirOffset;
-      dirOffset += dirLength;
-      FieldValidator.checkOffset(dirOffset, arcSize);
+      // 4 - Compression Directory Offset
+      int compressionDirOffset = fm.readInt();
+      FieldValidator.checkOffset(compressionDirOffset, arcSize);
 
-      fm.seek(dirOffset);
+      fm.seek(compressionDirOffset);
+
+      int[] blockOffsets = new int[numBlocks];
+      int[] blockLengths = new int[numBlocks];
+      int[] blockDecompLengths = new int[numBlocks];
+
+      for (int i = 0; i < numBlocks; i++) {
+        // 4 - Compressed Block Offset
+        int blockOffset = fm.readInt();
+        FieldValidator.checkOffset(blockOffset, arcSize);
+        blockOffsets[i] = blockOffset;
+
+        // 4 - Compressed Block Length
+        int blockLength = fm.readInt();
+        FieldValidator.checkLength(blockLength, arcSize);
+        blockLengths[i] = blockLength;
+
+        // 4 - Decompressed Block Length
+        int blockDecompLength = fm.readInt();
+        FieldValidator.checkLength(blockDecompLength);
+        blockDecompLengths[i] = blockDecompLength;
+      }
+
+      fm.seek(compressionDirOffset + compressionDirLength); // just in case
+
+      byte[] nameDirBytes = fm.readBytes(filenameDirLength);
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameDirBytes));
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      long[] nameOffsets = new long[numFiles];
       for (int i = 0; i < numFiles; i++) {
         // 4 - Unknown (3)
         fm.skip(4);
@@ -184,32 +214,62 @@ public class Plugin_ARC_ARC extends ArchivePlugin {
 
         // 8 - CRC?
         // 4 - Unknown
-        // 4 - Unknown ID
-        // 4 - File ID
+        fm.skip(12);
+
+        // 4 - Number of Compressed Blocks
+        int numBlocksForFile = fm.readInt();
+        FieldValidator.checkRange(numBlocksForFile, 0, numBlocks);
+
+        // 4 - ID of First Compressed Block
+        int firstBlockForFile = fm.readInt();
+        FieldValidator.checkRange(firstBlockForFile, 0, numBlocks);
+
         // 4 - Filename Length
-        fm.skip(24);
+        int filenameLength = fm.readInt();
+        FieldValidator.checkFilenameLength(filenameLength);
 
         // 4 - Filename Offset (relative to the start of the filename directory)
-        long filenameOffset = fm.readInt() + filenameDirOffset;
-        FieldValidator.checkOffset(filenameOffset, arcSize);
-        nameOffsets[i] = filenameOffset;
+        long filenameOffset = fm.readInt();
+        FieldValidator.checkOffset(filenameOffset, filenameDirLength);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, "", offset, length);
+        nameFM.seek(filenameOffset);
+        String filename = nameFM.readNullString(filenameLength);
+
+        if (length == decompLength) {
+          // uncompressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else if (numBlocksForFile == 1) {
+          // single compressed block
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+        }
+        else {
+          // multiple compressed blocks
+          long[] offsets = new long[numBlocksForFile];
+          long[] lengths = new long[numBlocksForFile];
+          long[] decompLengths = new long[numBlocksForFile];
+
+          for (int b = 0; b < numBlocksForFile; b++) {
+            int blockNum = firstBlockForFile + b;
+            offsets[b] = blockOffsets[blockNum];
+            lengths[b] = blockLengths[blockNum];
+            decompLengths[b] = blockDecompLengths[blockNum];
+          }
+
+          BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, offsets, lengths, decompLengths);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength, blockExporter);
+        }
 
         TaskProgressManager.setValue(i);
       }
 
-      // get the filenames
-      for (int i = 0; i < numFiles; i++) {
-        fm.seek(nameOffsets[i]);
-
-        // X - Filename
-        // 1 - null Filename Terminator
-        String filename = fm.readNullString();
-        FieldValidator.checkFilename(filename);
-        resources[i].setName(filename);
-      }
+      nameFM.close();
 
       fm.close();
 

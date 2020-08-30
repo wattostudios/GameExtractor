@@ -43,6 +43,7 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("One Finger Death Punch",
+        "Towerfall Ascension",
         "Two Worlds");
     setExtensions("xwb");
     setPlatforms("XBox");
@@ -207,7 +208,10 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
 
         //path,id,name,offset,length,decompLength,exporter
         //resources[i] = new Resource(path, filename, offset, length);
-        resources[i] = new Resource(path, filename, offset, length, length, exporter);
+        //Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length, length, exporter);
+        //resource.setAudioProperties(11025, (short) 8, (short) 1, true);
+        Resource resource = new Resource(path, filename, offset, length, length, exporter);
+        resources[i] = resource;
 
         TaskProgressManager.setValue(i);
       }

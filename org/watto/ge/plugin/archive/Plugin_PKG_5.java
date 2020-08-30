@@ -32,7 +32,7 @@ public class Plugin_PKG_5 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PKG_5() {
@@ -51,11 +51,13 @@ public class Plugin_PKG_5 extends ArchivePlugin {
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
 
+    setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -171,6 +173,30 @@ public class Plugin_PKG_5 extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 577) {
+      return "model";
+    }
+    else if (headerInt1 == 1685679970) {
+      return "pos";
+    }
+    else if (headerInt1 == 20) {
+      return "script";
+    }
+
+    return null;
   }
 
 }

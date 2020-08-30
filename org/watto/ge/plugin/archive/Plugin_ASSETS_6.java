@@ -45,7 +45,8 @@ public class Plugin_ASSETS_6 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Fract",
-        "Max And The Magic Marker");
+        "Max And The Magic Marker",
+        "StuntMANIA");
     setExtensions("assets"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -390,18 +391,47 @@ public class Plugin_ASSETS_6 extends ArchivePlugin {
             fm.skip(16);
 
             // X - File Data
+            boolean found = false;
+
             String audioHeader = fm.readString(4);
             if (audioHeader.equals("RIFF")) {
               resource.setExtension("wav");
               resource.setOriginalName(resource.getName());
+              found = true;
             }
             else if (audioHeader.equals("OggS")) {
               resource.setExtension("ogg");
               resource.setOriginalName(resource.getName());
+              found = true;
             }
 
             realOffset += 16;
             realSize -= 16;
+
+            if (!found) {
+              // 4 - Sound Data Length
+              fm.skip(4);
+
+              // X - File Data
+              audioHeader = fm.readString(4);
+
+              if (audioHeader.equals("RIFF")) {
+                resource.setExtension("wav");
+                resource.setOriginalName(resource.getName());
+                found = true;
+              }
+              else if (audioHeader.equals("OggS")) {
+                resource.setExtension("ogg");
+                resource.setOriginalName(resource.getName());
+                found = true;
+              }
+
+              if (found) {
+                realOffset += 8;
+                realSize -= 8;
+              }
+
+            }
 
           }
           catch (Throwable t) {

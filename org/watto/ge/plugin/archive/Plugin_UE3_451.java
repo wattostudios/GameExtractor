@@ -35,11 +35,11 @@ public class Plugin_UE3_451 extends PluginGroup_UE3 {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_UE3_451() {
-    super("UE3_451", "Unreal Engine 3 version 451");
+    super("UE3_451", "Unreal Engine 3 [451]");
 
     setExtensions("upk", "ut3");
     setGames("Alliance of Valiant Arms (AVA)");
@@ -49,7 +49,7 @@ public class Plugin_UE3_451 extends PluginGroup_UE3 {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -59,7 +59,7 @@ public class Plugin_UE3_451 extends PluginGroup_UE3 {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -159,17 +159,17 @@ public class Plugin_UE3_451 extends PluginGroup_UE3 {
         // 4 - Unknown ID (XOR with 255)
         // 4 - null
         fm.skip(8);
-
+        
         // 4 - Type ID
         int typeID = fm.readInt();
         FieldValidator.checkRange(typeID, 0, numTypes);
         String type = imports[typeID].getName();
-
+        
         // 4 - File Name ID
         int fileNameID = fm.readInt();
         FieldValidator.checkRange(fileNameID, 0, numNames);
         String filename = names[fileNameID] + "." + type;
-
+        
         // 4 - Unknown ID
         // 8 - null
         // 4 - Flags

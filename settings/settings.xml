@@ -11,8 +11,8 @@
 		<setting code="Popup_RemoveFiles_FilesAdded_Show" value="true" />
 		<setting code="ShowTableColumn_Directory" value="false" />
 		<setting code="ShowCharHexEditorField" value="false" />
-		<setting code="WSTableColumn_Description_Width" value="99" />
-		<setting code="PreviewPanel_ImageInvestigator_Format" value="DXT5" />
+		<setting code="WSTableColumn_Description_Width" value="69" />
+		<setting code="PreviewPanel_ImageInvestigator_Format" value="ARGB" />
 		<setting code="DirectoryListView" value="List" />
 		<setting code="ShowBinaryHexEditorField" value="false" />
 		<setting code="ScanFileIfOpenFailed" value="true" />
@@ -27,7 +27,7 @@
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
 		<setting code="IdentifyUnknownFileTypes" value="true" />
 		<setting code="SelectedFileListExporter" value="0" />
-		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="Unreal Engine Paletted Texture Image" />
+		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="JPEG Image" />
 		<setting code="ShowTableColumn_Value" value="true" />
 		<setting code="Popup_ConvertArchive_FilenameMissing_Show" value="true" />
 		<setting code="Scanner_tim" value="true" />
@@ -39,18 +39,20 @@
 		<setting code="AllowInlineFileListEditing" value="false" />
 		<setting code="LanguageDirectory" value="language" />
 		<setting code="SearchColumn_Filename" value="false" />
-		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\City of Heroes\texture_gui.pigg" />
-		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\Driv3r\SOUND.GSD" />
+		<setting code="RecentFile4" value="D:\_Games_to_Analyze\_TO_ANALYSE\Psychonauts\WorkResource\Sounds\aslbvoice.isb" />
+		<setting code="RecentFile3" value="D:\_Games_to_Analyze\_TO_ANALYSE\Psychonauts\WorkResource\Sounds\aslbfx.isb" />
 		<setting code="WSFontChooser_FontSize_Selected" value="12" />
-		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfhcSavvy-014.wll" />
+		<setting code="RecentFile2" value="D:\_Games_to_Analyze\_TO_ANALYSE\Psychonauts\WorkResource\Sounds\calivoice.isb" />
 		<setting code="WSTableColumn_Icon_Width" value="18" />
-		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfchCountryWilderness-01.wll" />
+		<setting code="RecentFile1" value="D:\_Games_to_Analyze\_TO_ANALYSE\Psychonauts\Psychonautsdata2.pkg" />
 		<setting code="Popup_Search_MatchFound_Show" value="false" />
 		<setting code="MaximumDirectoryFileLength" value="524800" />
 		<setting code="FileListExporterDirectory" value="lists" />
-		<setting code="WSTableColumn_CRC_Width" value="65" />
+		<setting code="WSTableColumn_CRC_Width" value="28" />
 		<setting code="WSTableColumn_AddedIcon_Width" value="18" />
 		<setting code="WSTableColumn_R_Width" value="18" />
+		<setting code="PreviewPanel_ImageInvestigator_SwizzleCheckboxSelected" value="false" />
+		<setting code="Popup_ExportFiles_DirectoryNotWritable_Show" value="true" />
 		<setting code="ShowHexHexEditorField" value="false" />
 		<setting code="SelectedScript" value="SND_Daggerfall" />
 		<setting code="WSTableColumn_T_Width" value="62" />
@@ -60,9 +62,9 @@
 		<setting code="Popup_TaskManager_UndoComplete_Show" value="true" />
 		<setting code="HexEditorFileSizeLimit" value="10000" />
 		<setting code="Scanner_wav" value="true" />
-		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims" />
+		<setting code="CurrentDirectory" value="D:\_Games_to_Analyze\_TO_ANALYSE\Psychonauts" />
 		<setting code="ExportFileListColumn_Offset" value="true" />
-		<setting code="CurrentSidePanel" value="SidePanel_About" />
+		<setting code="CurrentSidePanel" value="SidePanel_DirectoryList" />
 		<setting code="PluginListDisplayType" value="Game" />
 		<setting code="ShowCustomColumns" value="true" />
 		<setting code="WSMonthCalendarXML" value="xml/WSMonthCalendar.xml" />
@@ -73,7 +75,7 @@
 		<setting code="InterfaceFile" value="interface/interface.xml" />
 		<setting code="PreviewType" value="Hex" />
 		<setting code="Popup_ExportFileList_ListExported_Show" value="true" />
-		<setting code="WSTableColumn_FilePath_Width" value="495" />
+		<setting code="WSTableColumn_FilePath_Width" value="737" />
 		<setting code="Theme_ButterflyLookAndFeel_InterfaceColors" value="-9725853" />
 		<setting code="ShowTableColumn_DecompressedLengthKB" value="false" />
 		<setting code="CheckScriptResourceValues" value="true" />
@@ -99,7 +101,7 @@
 		<setting code="ShowLanguagePackOutdatedError" value="false" />
 		<setting code="Noesis_Path" value="external_bins\noesis" />
 		<setting code="Popup_ReadArchive_FileNotAnArchive_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Width" value="32" />
+		<setting code="PreviewPanel_ImageInvestigator_Width" value="128" />
 		<setting code="SearchColumn_Extension" value="true" />
 		<setting code="ShowTableColumn_FilePath" value="true" />
 		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
@@ -109,14 +111,13 @@
 		<setting code="ExportPreviewType_class PreviewPanel_Image" value="PNG Image" />
 		<setting code="Popup_ExportFiles_NoFilesSelected_Show" value="true" />
 		<setting code="WSTableColumn_I_Width" value="203" />
-		<setting code="WSTableColumn_CompressedLength_Width" value="130" />
+		<setting code="WSTableColumn_CompressedLength_Width" value="69" />
 		<setting code="WSProgramClosesSplashScreen" value="true" />
 		<setting code="Popup_Search_NoColumnsSelected_Show" value="true" />
 		<setting code="PlayAudioOnLoad" value="true" />
-		<setting code="ww2ogg_Path" value="external_bins\ww2ogg" />
-		<setting code="SelectedOptionGroup" value="3" />
+		<setting code="SelectedOptionGroup" value="4" />
 		<setting code="PreviewOnFileListEnter" value="true" />
-		<setting code="DividerLocation" value="0.7" />
+		<setting code="DividerLocation" value="0.7276041666666667" />
 		<setting code="PreviewPanel_ImageInvestigator_LittleEndianRadioButtonSelected" value="true" />
 		<setting code="Popup_ReadArchive_MakeNewArchive_Show" value="false" />
 		<setting code="WSFontChooser_FontStyle_Selected" value="Plain" />
@@ -128,12 +129,13 @@
 		<setting code="SortPluginLists" value="true" />
 		<setting code="NumberOfUndoTasks" value="4" />
 		<setting code="Popup_ScriptBuilder_NoNameSpecified_Show" value="true" />
-		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_DONE\The Sims\sfchCountryWilderness-01.wll" />
+		<setting code="CurrentArchive" value="D:\_Games_to_Analyze\_TO_ANALYSE\Psychonauts\Psychonautsdata2.pkg" />
 		<setting code="MaxAllowedScriptErrors" value="10" />
 		<setting code="ShowTimestampHexEditorField" value="false" />
 		<setting code="TypesFile" value="settings/types.xml" />
 		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
-		<setting code="PreviewPanel_Image_CurrentFrame" value="2" />
+		<setting code="PreviewPanel_Image_CurrentFrame" value="358" />
+		<setting code="Popup_ExportFiles_SomeFilesExported_Show" value="true" />
 		<setting code="ExtractDirectory" value="extract" />
 		<setting code="WSTableColumn_E_Width" value="87" />
 		<setting code="Popup_ImageInvestigator_PreviewSaved_Show" value="true" />
@@ -176,7 +178,7 @@
 		<setting code="vgmstream_Path" value="external_bins\vgmstream" />
 		<setting code="CurrentLanguage" value="English" />
 		<setting code="SearchColumn_Source" value="false" />
-		<setting code="WSTableColumn_DecompressedLength_Width" value="147" />
+		<setting code="WSTableColumn_DecompressedLength_Width" value="70" />
 		<setting code="WSTableColumn_i_Width" value="18" />
 		<setting code="SelectedRenamer" value="4" />
 		<setting code="ShowShortHexEditorField" value="true" />
@@ -207,31 +209,33 @@
 		<setting code="WSTableColumn_d_Width" value="107" />
 		<setting code="LoadingHex" value="false" />
 		<setting code="Scanner_html" value="true" />
-		<setting code="WSTableColumn_Offset_Width" value="100" />
+		<setting code="WSTableColumn_Offset_Width" value="69" />
 		<setting code="PreviewOnDoubleClick" value="true" />
 		<setting code="DefaultInterfaceColors" value="-12814286" />
 		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
 		<setting code="ColorScriptSyntax" value="true" />
 		<setting code="Scanner_ogg" value="true" />
 		<setting code="SelectedTreeTableType" value="2" />
+		<setting code="PreviewPanel_ImageInvestigator_VerticalFlipCheckboxSelected" value="false" />
 		<setting code="WSTableColumn_a_Width" value="18" />
 		<setting code="ShowTableColumn_Extension" value="false" />
-		<setting code="WSTableColumn_Time_Width" value="65" />
+		<setting code="WSTableColumn_Time_Width" value="28" />
 		<setting code="ShowTableColumn_ReplacedIcon" value="true" />
 		<setting code="ShowTableColumn_CompressedLengthKB" value="false" />
 		<setting code="ShowSplashScreen" value="true" />
 		<setting code="HighQualityThumbnails" value="true" />
+		<setting code="Popup_ExportFiles_NoFilesExported_Show" value="true" />
 		<setting code="ToolbarLocation" value="ToolbarLocation_Top" />
 		<setting code="QuickBMS_Path" value="external_bins\quickbms" />
 		<setting code="ShowTableColumn_Description" value="true" />
 		<setting code="ShowIntHexEditorField" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Height" value="32" />
+		<setting code="PreviewPanel_ImageInvestigator_Height" value="128" />
 		<setting code="WSTableColumn_RenamedIcon_Width" value="18" />
 		<setting code="WSGradientColorChooser_Color_Selected" value="-9725853" />
 		<setting code="ExportFileListColumn_Directory" value="true" />
 		<setting code="LoadingPreviewFromHex" value="false" />
 		<setting code="Popup_WriteArchive_ArchiveSaved_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Offset" value="0" />
+		<setting code="PreviewPanel_ImageInvestigator_Offset" value="124" />
 		<setting code="LoadScriptsAtStartup" value="false" />
 		<setting code="ShowTableColumn_RenamedIcon" value="true" />
 		<setting code="Theme_ButterflyLookAndFeel_BackgroundColor" value="9999999999" />
@@ -248,6 +252,8 @@
 		<setting code="LargeButtonIcons" value="false" />
 		<setting code="AutoResizeTableColumns" value="true" />
 		<setting code="WSSmallColorChooserXML" value="xml/WSSmallColorChooser.xml" />
+		<setting code="PreviewPanel_ImageInvestigator_BigEndianRadioButtonSelected" value="false" />
+		<setting code="ExportFileListColumn_CompressedLength" value="true" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

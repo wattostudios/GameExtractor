@@ -4,7 +4,6 @@ package org.watto.ge.plugin.archive;
 import java.io.File;
 import org.watto.Language;
 import org.watto.Settings;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -26,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -49,7 +49,8 @@ public class Plugin_BSA extends ArchivePlugin {
     setExtensions("bsa");
     setGames("Terminator: Future Shock",
         "Battlespire",
-        "Elder Scrolls: Arena");
+        "Elder Scrolls: Arena",
+        "Elder Scrolls 2: Daggerfall");
     setPlatforms("PC");
 
   }

@@ -2,10 +2,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
+import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundNodeWave_Generic;
 import org.watto.ge.plugin.exporter.Exporter_Custom_U_Palette_Generic;
+import org.watto.ge.plugin.exporter.Exporter_Custom_U_Sound_Generic;
 import org.watto.ge.plugin.exporter.Exporter_Custom_U_Texture_Generic;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
@@ -34,9 +37,11 @@ public class Plugin_U_Generic extends PluginGroup_U {
         "Clive Barker's Undying",
         "Deus Ex",
         "Harry Potter And The Chamber Of Secrets",
+        "Jazz Jackrabbit 3D",
         "Land Of The Dead: Road To Fiddlers Green",
         "Lemony Snicket's A Series of Unfortunate Events",
         "Medal Of Honor: Airborne",
+        "Men of Valor: Vietnam",
         "Mobile Forces",
         "Nerf ArenaBlast",
         "Postal 2",
@@ -52,6 +57,7 @@ public class Plugin_U_Generic extends PluginGroup_U {
         "Star Trek: The Next Generation: Klingon Honor Guard",
         "Star Wars: Republic Commando",
         "SWAT 4",
+        "Tactical Ops: Assault On Terror",
         "Thief 3: Deadly Shadows",
         "Tribes Vengeance",
         "Unreal",
@@ -65,6 +71,11 @@ public class Plugin_U_Generic extends PluginGroup_U {
         "X-Com Enforcer",
         "XIII");
     setPlatforms("PC", "XBox");
+
+    setFileTypes(new FileType("package", "Package", FileType.TYPE_OTHER),
+        new FileType("palette", "Color Palette", FileType.TYPE_OTHER),
+        new FileType("sound", "Sound File", FileType.TYPE_AUDIO),
+        new FileType("texture", "Texture Image", FileType.TYPE_IMAGE));
 
   }
 
@@ -264,6 +275,9 @@ public class Plugin_U_Generic extends PluginGroup_U {
         if (type.equals("Texture")) {
           resources[i].setExporter(Exporter_Custom_U_Texture_Generic.getInstance());
         }
+        else if (type.equals("Sound")) {
+          resources[i].setExporter(Exporter_Custom_U_Sound_Generic.getInstance());
+        }
         else if (type.equals("Palette")) {
           resources[i].setExporter(Exporter_Custom_U_Palette_Generic.getInstance());
         }
@@ -342,7 +356,17 @@ public class Plugin_U_Generic extends PluginGroup_U {
 
       // 4 - Generation Count
       int numGenerations = fm.readInt();
-      FieldValidator.checkNumFiles(numGenerations);
+      try {
+        FieldValidator.checkNumFiles(numGenerations);
+      }
+      catch (Throwable t) {
+        // 12 - rest of the next GUID
+        fm.skip(12); // already skipped 4 from above
+
+        // 4 - Generation Count
+        numGenerations = fm.readInt();
+        FieldValidator.checkNumFiles(numGenerations);
+      }
 
       // for each generation
       // 4 - Number Of Files
@@ -483,12 +507,15 @@ public class Plugin_U_Generic extends PluginGroup_U {
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource_Unreal(path, filename, offset, length);
 
-        //if (type.equals("Texture")){
-        //  resources[i].setExporter(Exporter_Custom_U_Texture_Generic.getInstance());
-        //  }
-        //else if (type.equals("Palette")){
+        if (type.equals("Texture2D")) {
+          resources[i].setExporter(Exporter_Custom_U_Texture_Generic.getInstance());
+        }
+        else if (type.equals("SoundNodeWave")) {
+          resources[i].setExporter(Exporter_Custom_UE3_SoundNodeWave_Generic.getInstance());
+        }
+        //else if (type.equals("Palette")) {
         //  resources[i].setExporter(Exporter_Custom_U_Palette_Generic.getInstance());
-        //  }
+        //}
 
         TaskProgressManager.setValue(i);
       }
@@ -519,29 +546,65 @@ public class Plugin_U_Generic extends PluginGroup_U {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      for (int i = 0; i < numFiles; i++) {
+      long startPos = fm.getOffset();
+      try {
+        // 16 byte entries
+        for (int i = 0; i < numFiles; i++) {
 
-        // 4 - Unknown
-        fm.skip(4);
+          // 4 - Unknown
+          fm.skip(4);
 
-        // 4 - Decompressed Length?
-        int decompLength = fm.readInt();
-        FieldValidator.checkLength(decompLength);
+          // 4 - Decompressed Length?
+          int decompLength = fm.readInt();
+          FieldValidator.checkLength(decompLength);
 
-        // 4 - Archive Offset
-        int offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
+          // 4 - Archive Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - Compressed Length
-        int length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
+          // 4 - Compressed Length
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
 
-        String filename = Resource.generateFilename(i) + ".u";
+          String filename = Resource.generateFilename(i) + ".u";
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource_Unreal(path, filename, offset, length, decompLength);
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource_Unreal(path, filename, offset, length, decompLength);
 
-        TaskProgressManager.setValue(i);
+          TaskProgressManager.setValue(i);
+        }
+      }
+      catch (Throwable t) {
+        // Try 20-byte entries instead
+        fm.relativeSeek(startPos);
+
+        for (int i = 0; i < numFiles; i++) {
+
+          // 4 - Unknown
+          fm.skip(4);
+
+          // 4 - Decompressed Length?
+          int decompLength = fm.readInt();
+          FieldValidator.checkLength(decompLength);
+
+          // 4 - Archive Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - Compressed Length
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - Unknown (1)
+          fm.skip(4);
+
+          String filename = Resource.generateFilename(i) + ".u";
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource_Unreal(path, filename, offset, length, decompLength);
+
+          TaskProgressManager.setValue(i);
+        }
       }
 
       fm.close();
@@ -682,12 +745,12 @@ public class Plugin_U_Generic extends PluginGroup_U {
    * Overwritten - slight change
    **********************************************************************************************
    **/
-  @Override
+  /*@Override
   public UnrealProperty readProperty10(UnrealProperty property, FileManipulator fm) {
     // Structure
-
+  
     String name = names[(int) property.getNameID()];
-
+  
     if (name.equals("MipZero") || name.equals("MaxColor")) {
       property.setValue(fm.readBytes(5));
     }
@@ -696,6 +759,6 @@ public class Plugin_U_Generic extends PluginGroup_U {
       property.setValue(fm.readBytes((int) property.getLength()));
     }
     return property;
-  }
+  }*/
 
 }

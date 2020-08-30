@@ -35,6 +35,7 @@ import org.watto.event.WSMotionableInterface;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.PluginFinder;
 import org.watto.ge.plugin.RatedPlugin;
+import org.watto.ge.plugin.resource.Resource_Property;
 import org.watto.plaf.LookAndFeelManager;
 import org.watto.task.Task;
 import org.watto.task.Task_ReadArchiveWithPlugin;
@@ -267,8 +268,18 @@ public class SidePanel_Information extends WSPanelPlugin implements WSMotionable
 
     ArchivePlugin readPlugin = Archive.getReadPlugin();
     WSTableColumn[] columns = Archive.getColumns();
-    Object[][] tableData = new Object[columns.length][2];
 
+    // also list any resource-specific properties stored on it (eg image width/height/format/etc)
+    Resource_Property[] properties = resource.getProperties();
+
+    int rowCount = columns.length;
+    if (properties != null) {
+      rowCount += properties.length;
+    }
+
+    Object[][] tableData = new Object[rowCount][2];
+
+    // Fill with the standard resource information
     for (int i = 0; i < columns.length; i++) {
       tableData[i][0] = columns[i].getName();
       Object value = readPlugin.getColumnValue(resource, columns[i].getCharCode());
@@ -277,6 +288,16 @@ public class SidePanel_Information extends WSPanelPlugin implements WSMotionable
       }
       else {
         tableData[i][1] = value;
+      }
+    }
+
+    // Fill with the properties
+    if (properties != null) {
+      for (int i = 0, j = columns.length; i < properties.length; i++, j++) {
+        Resource_Property property = properties[i];
+
+        tableData[j][0] = Language.get("ResourceProperty_" + property.getCode());
+        tableData[j][1] = property.getValue();
       }
     }
 
@@ -425,38 +446,43 @@ public class SidePanel_Information extends WSPanelPlugin implements WSMotionable
    **/
   @Override
   public boolean onMotion(JComponent c, java.awt.event.MouseEvent e) {
-    // Shows the value of the cell in the statusbar
-    if (c instanceof WSTable) {
-      WSTable table = (WSTable) c;
-      String code = table.getCode();
+    try {
+      // Shows the value of the cell in the statusbar
+      if (c instanceof WSTable) {
+        WSTable table = (WSTable) c;
+        String code = table.getCode();
 
-      if (code.equals("SidePanel_Information_ResourceTable") || code.equals("SidePanel_Information_ArchiveTable") || code.equals("SidePanel_Information_PluginTable")) {
-        Point point = e.getPoint();
+        if (code.equals("SidePanel_Information_ResourceTable") || code.equals("SidePanel_Information_ArchiveTable") || code.equals("SidePanel_Information_PluginTable")) {
+          Point point = e.getPoint();
 
-        int row = table.rowAtPoint(point);
-        if (row < 0) {
+          int row = table.rowAtPoint(point);
+          if (row < 0) {
+            return true;
+          }
+
+          String selectedObject = table.getValueAt(row, 1).toString();
+          String columnHeading = table.getValueAt(row, 0).toString();
+
+          if (columnHeading == null || (lastMotionObject != null && lastMotionObject.equals(columnHeading))) {
+            return true; // still over the same object on the list
+          }
+          lastMotionObject = columnHeading;
+
+          // If the selectedObject is an icon (eg for the table columns Icon, Renamed, Replaced, ...)
+          // then change it to a text-value reflecting the proper value of the field
+          if (selectedObject.startsWith("images/WSTable/")) {
+            selectedObject = Language.get("FileListPanel_" + selectedObject.substring(15) + "_Tooltip");
+          }
+
+          ((WSStatusBar) ComponentRepository.get("StatusBar")).setText(columnHeading + ": " + selectedObject);
           return true;
         }
-
-        String selectedObject = table.getValueAt(row, 1).toString();
-        String columnHeading = table.getValueAt(row, 0).toString();
-
-        if (columnHeading == null || (lastMotionObject != null && lastMotionObject.equals(columnHeading))) {
-          return true; // still over the same object on the list
-        }
-        lastMotionObject = columnHeading;
-
-        // If the selectedObject is an icon (eg for the table columns Icon, Renamed, Replaced, ...)
-        // then change it to a text-value reflecting the proper value of the field
-        if (selectedObject.startsWith("images/WSTable/")) {
-          selectedObject = Language.get("FileListPanel_" + selectedObject.substring(15) + "_Tooltip");
-        }
-
-        ((WSStatusBar) ComponentRepository.get("StatusBar")).setText(columnHeading + ": " + selectedObject);
-        return true;
       }
+      return false;
     }
-    return false;
+    catch (Throwable t) {
+      return false;
+    }
   }
 
   /**

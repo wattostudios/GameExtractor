@@ -38,10 +38,11 @@ public class Plugin_UE3_807 extends PluginGroup_UE3 {
   **********************************************************************************************
   **/
   public Plugin_UE3_807() {
-    super("UE3_807", "Unreal Engine 3 versions 807");
+    super("UE3_807", "Unreal Engine 3 [807,863]");
 
     setExtensions("upk", "udk");
-    setGames("Batman: Arkham Origins");
+    setGames("Batman: Arkham Origins",
+        "Batman: Arkham Knight");
     setPlatforms("PC");
 
   }
@@ -53,7 +54,7 @@ public class Plugin_UE3_807 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 807);
+    return super.getMatchRating(fm, 807, 863);
   }
 
   /**

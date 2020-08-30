@@ -41,7 +41,11 @@ public class Plugin_PCK_AKPK_4 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Tom Clancy's Ghost Recon Wildlands");
+    setGames(
+        "Assassins Creed: Syndicate",
+        "Borderlands: The Pre-Sequel",
+        "Steep",
+        "Tom Clancy's Ghost Recon Wildlands");
     setExtensions("pck"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

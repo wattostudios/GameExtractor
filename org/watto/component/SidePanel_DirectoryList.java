@@ -32,6 +32,7 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.event.WSEnterableInterface;
 import org.watto.event.WSSelectableInterface;
+import org.watto.ge.helper.FullVersionVerifier;
 import org.watto.ge.helper.ShellFolderFile;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -260,7 +261,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   **********************************************************************************************
   **/
   public boolean checkFullVersion() {
-    return checkFullVersion(true);
+    return false;
   }
 
   /**
@@ -269,6 +270,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   **********************************************************************************************
   **/
   public boolean checkFullVersion(boolean showPopup) {
+    // basic version
     if (showPopup) {
       WSPopup.showErrorInNewThread("FullVersionOnly", true);
     }

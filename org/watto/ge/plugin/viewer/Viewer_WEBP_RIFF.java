@@ -23,6 +23,7 @@ import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ExporterByteBuffer;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -205,7 +206,30 @@ public class Viewer_WEBP_RIFF extends ViewerPlugin {
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
-      File convertedFile = convertImage(fm.getFile());
+      File sourceFile = fm.getFile();
+      if (fm.getBuffer() instanceof ExporterByteBuffer) {
+        // need to dump the data to disk, so we can then read it into the converter
+
+        // dump to disk
+        String outputFilePath = Settings.getString("TempDirectory") + File.separatorChar + sourceFile.getName();
+        File outputFile = new File(outputFilePath);
+        if (outputFile.exists()) {
+          // already dumped to disk
+          sourceFile = outputFile;
+        }
+        else {
+          FileManipulator outFM = new FileManipulator(outputFile, true);
+          long length = fm.getLength();
+          while (length > 0) {
+            outFM.writeByte(fm.readByte());
+            length--;
+          }
+          outFM.close();
+          sourceFile = outputFile;
+        }
+      }
+
+      File convertedFile = convertImage(sourceFile);
       if (convertedFile == null || !convertedFile.exists()) {
         return null;
       }

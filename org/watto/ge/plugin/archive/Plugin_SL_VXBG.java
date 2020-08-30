@@ -34,7 +34,7 @@ public class Plugin_SL_VXBG extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_SL_VXBG() {
@@ -48,7 +48,8 @@ public class Plugin_SL_VXBG extends ArchivePlugin {
         "Art of Murder: Hunt for the Puppeteer",
         "Chronicles of Mystery: The Scorpio Ritual",
         "Chronicles of Mystery: The Tree of Life",
-        "Still Life");
+        "Still Life",
+        "Syberia 2");
     setExtensions("sl");
     setPlatforms("PC");
 
@@ -56,7 +57,7 @@ public class Plugin_SL_VXBG extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -105,7 +106,7 @@ public class Plugin_SL_VXBG extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -166,7 +167,7 @@ public class Plugin_SL_VXBG extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

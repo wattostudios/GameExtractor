@@ -42,6 +42,15 @@ public class ReplaceDetails implements Comparable<ReplaceDetails> {
 
   /**
   **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public Object clone() {
+    return new ReplaceDetails(name, offset, length, value, endian);
+  }
+
+  /**
+  **********************************************************************************************
   @param offset the offset to the field that stores the value
   @param length the length of the field that stores the value
   @param value the decompressed length

@@ -41,6 +41,7 @@ public class Plugin_DAT_FORM extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("10 Second Ninja X",
+        "Crashlands",
         "Dead Ground",
         "Gloom",
         "HackyZack",
@@ -51,7 +52,9 @@ public class Plugin_DAT_FORM extends ArchivePlugin {
         "Rising Lords",
         "Spectrubes Infinity",
         "Starship Annihilator",
-        "The Rare Nine");
+        "The Rare Nine",
+        "vApe Escape",
+        "Woten");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

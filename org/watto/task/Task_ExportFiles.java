@@ -56,6 +56,17 @@ public class Task_ExportFiles extends AbstractTask {
   // so we can stop "file being exported" progress popup from appearing when doing a preview
   boolean showProgressPopups = true;
 
+  /** the status of the extraction (some/all/none) **/
+  int status = 0;
+
+  public static int EXTRACTED_UNKNOWN = 0;
+
+  public static int EXTRACTED_ALL = 1;
+
+  public static int EXTRACTED_SOME = 2;
+
+  public static int EXTRACTED_NONE = 3;
+
   /**
   **********************************************************************************************
   
@@ -97,16 +108,6 @@ public class Task_ExportFiles extends AbstractTask {
       return;
     }
 
-    // Progress dialog
-
-    if (showProgressPopups) {
-      TaskProgressManager.show(2, 0, Language.get("Progress_ExportingFiles")); // 2 progress bars
-      TaskProgressManager.setIndeterminate(true, 0); // first 1 is indeterminate
-      TaskProgressManager.setMaximum(resources.length, 1); // second one shows how many files are done
-
-      TaskProgressManager.startTask();
-    }
-
     // check the directory exists
     if (directory.exists()) {
       if (directory.isFile()) {
@@ -123,6 +124,28 @@ public class Task_ExportFiles extends AbstractTask {
     }
 
     DirectoryBuilder.buildDirectory(directory, true);
+
+    if (showPopups) {
+      if (isShowPopups()) {
+        // do a test extract into this directory, ensure that it's writable.
+        boolean writable = directory.canWrite();
+        if (!writable) {
+          WSPopup.showMessage("ExportFiles_DirectoryNotWritable", true);
+          TaskProgressManager.stopTask();
+          return;
+        }
+      }
+    }
+
+    // Progress dialog
+
+    if (showProgressPopups) {
+      TaskProgressManager.show(2, 0, Language.get("Progress_ExportingFiles")); // 2 progress bars
+      TaskProgressManager.setIndeterminate(true, 0); // first 1 is indeterminate
+      TaskProgressManager.setMaximum(resources.length, 1); // second one shows how many files are done
+
+      TaskProgressManager.startTask();
+    }
 
     // SEE BELOW THIS CODE BLOCK FOR THE CHANGE...
     /*
@@ -179,6 +202,21 @@ public class Task_ExportFiles extends AbstractTask {
 
       Task_QuickBMSBulkExport task = new Task_QuickBMSBulkExport(bulkResources, directory);
       task.redo(); // run it within this Thread, not as a new one
+
+      int numRequested = task.getNumResources();
+      int numExtracted = task.getNumExtracted();
+
+      if (numExtracted == 0) {
+        // didn't extract anything
+        status = EXTRACTED_NONE;
+      }
+      else if (numRequested != numExtracted) {
+        // some files weren't extracted properly, tell the user.
+        status = EXTRACTED_SOME;
+      }
+      else {
+        status = EXTRACTED_ALL;
+      }
     }
 
     // Now that we have exported all the files, see whether they chose to do conversions (eg convert images --> *.PNG).
@@ -247,7 +285,15 @@ public class Task_ExportFiles extends AbstractTask {
 
     if (showPopups) {
       if (isShowPopups()) {
-        WSPopup.showMessage("ExportFiles_FilesExported", true);
+        if (status == EXTRACTED_NONE) {
+          WSPopup.showMessage("ExportFiles_NoFilesExported", true);
+        }
+        else if (status == EXTRACTED_SOME) {
+          WSPopup.showMessage("ExportFiles_SomeFilesExported", true);
+        }
+        else {
+          WSPopup.showMessage("ExportFiles_FilesExported", true);
+        }
       }
     }
 

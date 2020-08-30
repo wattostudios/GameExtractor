@@ -1,3 +1,16 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
@@ -6,23 +19,6 @@ import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -45,7 +41,9 @@ public class Plugin_DAT_26 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, true, true, false);
 
-    setGames("The Lost Vikings");
+    setGames("Into The Breach",
+        "The Lost Vikings",
+        "WarWind");
     setExtensions("dat");
     setPlatforms("PC");
 
@@ -112,14 +110,24 @@ public class Plugin_DAT_26 extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(path, false);
 
       // 4 - Number Of Files
-      int numFiles = fm.readInt() / 4;
+      int numFiles = fm.readInt();
+
+      // 4 - First File Offset
+      int firstFileOffset = fm.readInt();
+      if (numFiles == ((firstFileOffset / 4) - 1)) {
+        // first field really is the number of files
+        fm.seek(4);
+      }
+      else {
+        // first field is actually the first offset
+        numFiles /= 4;
+        fm.seek(0);
+      }
       FieldValidator.checkNumFiles(numFiles);
 
       if (numFiles <= 1) {
         return null; // unlikely to be the correct plugin if only 1 file is found
       }
-
-      fm.seek(0);
 
       long arcSize = fm.getLength();
 
@@ -140,9 +148,43 @@ public class Plugin_DAT_26 extends ArchivePlugin {
         TaskProgressManager.setValue(i);
       }
 
-      fm.close();
-
       calculateFileSizes(resources, arcSize);
+      fm.getBuffer().setBufferSize(64);
+      fm.seek(0);
+
+      // Loop through directory
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        if (resource.getLength() < 8) {
+          continue;
+        }
+
+        long startOffset = resource.getOffset();
+        fm.seek(startOffset);
+
+        // 4 - File Data Length
+        int length = fm.readInt();
+
+        // 4 - Filename Length
+        int filenameLength = fm.readInt();
+
+        if (resource.getLength() == (length + filenameLength + 8)) {
+          // X - Filename
+          String filename = fm.readString(filenameLength);
+
+          // X - File Data
+          long offset = fm.getOffset();
+
+          resource.setOffset(offset);
+          resource.setLength(length);
+          resource.setDecompressedLength(length);
+          resource.setName(filename);
+          resource.setOriginalName(filename);
+        }
+        TaskProgressManager.setValue(i);
+      }
+
+      fm.close();
 
       return resources;
 

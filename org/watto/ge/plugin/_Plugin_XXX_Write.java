@@ -237,7 +237,7 @@ public class _Plugin_XXX_Write extends ArchivePlugin {
       TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
       write(resources, fm);
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      //ExporterPlugin exporter = new Exporter_ZLib();
       //long[] compressedLengths = write(exporter,resources,fm);
 
       fm.close();

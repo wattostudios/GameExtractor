@@ -14,46 +14,35 @@
 
 package org.watto.ge.plugin.exporter;
 
+import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.archive.datatype.LZWXDictionaryEntry;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
 
 public class Exporter_LZWX extends ExporterPlugin {
 
   static Exporter_LZWX instance = new Exporter_LZWX();
 
   static FileManipulator readSource;
-  static byte[] readBuffer = new byte[0];
-  static int readBufferPos = 0;
+
+  static byte[] decompBuffer = new byte[0];
+
+  static int decompBufferPos = 0;
+
+  static long decompBufferLength = 0;
+
   static long readLength = 0;
-  static int readBufferLevel = 0;
-
-  static int outlen,                 // current output length
-      outsize,                // output buffer size
-      dictsize,               // offset of the last element in the dictionary
-      dictoff,                // offset of the new entry to add to the dictionary
-      dictalloc;              // used only for dynamic dictionary allocation
-
-  static int dictlen;                // offset length (like dict_t.len)
-
-  static int bits;                   // init bits (usually max 16)
 
   /**
   **********************************************************************************************
-  DO NOT USE - DOESN'T WORK!!!
+  Based off QuickBMS unlzwx.c with modifications for repeating bytes
   **********************************************************************************************
   **/
   public static Exporter_LZWX getInstance() {
     return instance;
   }
-
-  int UNLZW_BITS = 9;
-
-  int UNLZW_END = 256;
-
-  byte[][] dict_data = new byte[0][0];
-
-  int[] dict_len = new int[0];
 
   /**
   **********************************************************************************************
@@ -75,10 +64,6 @@ public class Exporter_LZWX extends ExporterPlugin {
       if (readLength <= 0) {
         return false;
       }
-
-      if (readBufferPos >= readBufferLevel) {
-        unlzwx(readBuffer.length, readSource, (int) readLength);
-      }
       return true;
 
     }
@@ -97,7 +82,9 @@ public class Exporter_LZWX extends ExporterPlugin {
     try {
       readSource.close();
       readSource = null;
-      readBuffer = null;
+      decompBuffer = null;
+      decompBufferPos = 0;
+      decompBufferLength = 0;
     }
     catch (Throwable t) {
       readSource = null;
@@ -123,20 +110,16 @@ public class Exporter_LZWX extends ExporterPlugin {
     try {
       readSource = fmIn;
 
-      readBufferPos = 0;
-      readBufferLevel = 0;
+      decompBufferPos = 0;
+      decompBufferLength = decompLengthIn;
+      decompBuffer = new byte[(int) decompBufferLength];
 
-      readLength = decompLengthIn;
+      byte[] compBuffer = readSource.readBytes(compLengthIn);
 
-      int readBufferSize = 200000;
-      if (readLength < readBufferSize) {
-        readBufferSize = (int) readLength;
-      }
-
-      readBuffer = new byte[readBufferSize];
-
+      readLength = unlzwx(compBuffer, compLengthIn, decompLengthIn);
     }
     catch (Throwable t) {
+      ErrorLogger.log(t);
     }
   }
 
@@ -151,17 +134,7 @@ public class Exporter_LZWX extends ExporterPlugin {
       readSource = new FileManipulator(source.getSource(), false);
       readSource.seek(source.getOffset());
 
-      readBufferPos = 0;
-      readBufferLevel = 0;
-      readLength = source.getDecompressedLength();
-
-      int readBufferSize = 200000;
-      if (readLength < readBufferSize) {
-        readBufferSize = (int) readLength;
-      }
-
-      readBuffer = new byte[readBufferSize];
-
+      open(readSource, (int) source.getLength(), (int) source.getDecompressedLength());
     }
     catch (Throwable t) {
     }
@@ -169,27 +142,11 @@ public class Exporter_LZWX extends ExporterPlugin {
 
   /**
    **********************************************************************************************
-   * // TEST - NOT DONE
+   NOT DONE
    **********************************************************************************************
    **/
   @Override
   public void pack(Resource source, FileManipulator destination) {
-    try {
-      //long decompLength = source.getDecompressedLength();
-
-      ExporterPlugin exporter = source.getExporter();
-      exporter.open(source);
-
-      while (exporter.available()) {
-        destination.writeByte(exporter.read());
-      }
-
-      exporter.close();
-
-    }
-    catch (Throwable t) {
-      logError(t);
-    }
   }
 
   /**
@@ -200,8 +157,8 @@ public class Exporter_LZWX extends ExporterPlugin {
   @Override
   public int read() {
     try {
-      int readByte = readBuffer[readBufferPos];
-      readBufferPos++;
+      int readByte = decompBuffer[decompBufferPos];
+      decompBufferPos++;
       readLength--;
       return readByte;
     }
@@ -210,14 +167,39 @@ public class Exporter_LZWX extends ExporterPlugin {
     }
   }
 
-  int unlzwx(int maxsize, FileManipulator fm, int insize) {
-    int code,                   // current element
-        inlen,                  // current input length
-        cl,
-        dl,
-        totbits;
-    int n,                      // bytes written in the output
-        i;
+  int UNLZW_BITS = 9;
+
+  int UNLZW_END = 256;
+
+  LZWXDictionaryEntry[] dict = new LZWXDictionaryEntry[0];
+
+  int outlen = 0;                 // current output length
+
+  int outsize = 0;                // output buffer size
+
+  int dictsize = 0;               // offset of the last element in the dictionary
+
+  int dictoff = 0;                // offset of the new entry to add to the dictionary
+
+  int dictalloc = 0;              // used only for dynamic dictionary allocation
+
+  int dictlen = 0;                // offset length (like dict_t.len)
+
+  int bits = 0;                   // init bits (usually max 16)
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  int unlzwx(byte[] in, int insize, int maxsize) {
+    int code = 0;                   // current element
+    int inlen = 0;                  // current input length
+    int cl = 0;
+    int dl = 0;
+    int totbits = 0;
+    int n = 0;                      // bytes written in the output
+    int i = 0;
 
     code = -1;                       // useless
     inlen = 0;                        // current input length
@@ -225,18 +207,15 @@ public class Exporter_LZWX extends ExporterPlugin {
     outsize = maxsize;                  // needed only for the global var
     totbits = 0;
 
-    dict_data = new byte[0][0];                     // global var initialization
-    dict_len = new int[0];                     // global var initialization
-    unlzwx_init();
+    dict = null;                     // global var initialization
+    if (unlzwx_init() < 0) {
+      return (0);
+    }
 
     insize -= 2;
     while (inlen < insize) {
-      int byte1 = fm.readByte();
-      int byte2 = fm.readByte();
-      int byte3 = fm.readByte();
-
-      cl = (byte2 << 8) | byte1;
-      dl = byte3;
+      cl = (ByteConverter.unsign(in[inlen + 1]) << 8) | ByteConverter.unsign(in[inlen]);
+      dl = ByteConverter.unsign(in[inlen + 2]);
       for (i = 0; i < (totbits & 7); i++) {
         cl = (cl >> 1) | ((dl & 1) << 15);
         dl >>= 1;
@@ -249,17 +228,18 @@ public class Exporter_LZWX extends ExporterPlugin {
       if (code == 257) {
         break;
       }
+
       if (code == UNLZW_END) {         // means that we need to reset everything
-        unlzwx_init();
+        if (unlzwx_init() < 0) {
+          break;
+        }
         continue;                   // and restart the unpacking
       }
 
       if (code == dictsize) {          // I think this is used for repeated chars
-        if (unlzwx_dictionary()      // fill the dictionary
-        < 0) {
+        if (unlzwx_dictionary_repeating() < 0) {      // fill the dictionary
           break;
         }
-
         n = unlzwx_expand(code);    // unpack
 
       }
@@ -279,35 +259,62 @@ public class Exporter_LZWX extends ExporterPlugin {
       outlen += n;
     }
 
+    dict = null;
     return (outlen);                     // return the output length
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   void unlzwx_cpy(int outpos, byte[] in, int len) {
     for (int i = 0; i < len; i++) {
-      readBuffer[outpos + i] = in[i];
+      decompBuffer[outpos + i] = in[i];
     }
   }
 
-  int unlzwx_dictionary() {     // fill the dictionary
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  int unlzwx_dictionary_repeating() {     // fill the dictionary
     //int tmp;
 
-    if (dictlen++ > 0) {
+    if ((dictlen++) != 0) {
+      //if (dictlen != 0) {
+      //  dictlen++;
+
       if ((dictoff + dictlen) > outsize) {
         dictlen = outsize - dictoff;
       }
 
-      //dict_data[dictsize] = new byte[] { readBuffer[dictoff] };
-      //dict_len[dictsize] = dictlen;
+      /*
+      byte[] currentDictData = new byte[dictoff];
+      for (int i = 0; i < dictoff; i++) {
+        currentDictData[i] = decompBuffer[(int) (decompBufferPos + i)];
+      }
+      */
+      byte[] currentDictData = new byte[dictlen];
+      for (int i = 0; i < dictlen; i++) {
+        if ((decompBufferPos + dictoff + i) >= outlen) {
+          currentDictData[i] = decompBuffer[(int) (decompBufferPos + dictoff + i - 1)];
+        }
+        else {
+          currentDictData[i] = decompBuffer[(int) (decompBufferPos + dictoff + i)];
+        }
+      }
 
-      dict_data[dictsize] = new byte[dictlen];
-      System.arraycopy(readBuffer, dictoff, dict_data[dictsize], 0, dictlen);
-      dict_len[dictsize] = dictlen;
-
+      //dict[dictsize].setData(currentDictData);
+      //dict[dictsize].setLength(dictlen);
+      LZWXDictionaryEntry dictEntry = new LZWXDictionaryEntry(currentDictData, dictlen);
+      dict[dictsize] = dictEntry;
       dictsize++;
-      if (((dictsize >> bits) > 0) && (bits != 12)) {
+      if (((dictsize >> bits) != 0) && (bits != 12)) {
         bits++;
-        // dynamic dictionary
         /*
+                                    // dynamic dictionary
         tmp = sizeof(dict_t) * (1 << bits);
         if(tmp > dictalloc) {
             dict = realloc(dict, tmp);
@@ -321,35 +328,107 @@ public class Exporter_LZWX extends ExporterPlugin {
     return (0);
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  int unlzwx_dictionary() {
+    //int tmp;
+
+    if ((dictlen++) != 0) {
+      //if (dictlen != 0) {
+      //  dictlen++;
+
+      if ((dictoff + dictlen) > outsize) {
+        dictlen = outsize - dictoff;
+      }
+
+      /*
+      byte[] currentDictData = new byte[dictoff];
+      for (int i = 0; i < dictoff; i++) {
+        currentDictData[i] = decompBuffer[(int) (decompBufferPos + i)];
+      }
+      */
+      byte[] currentDictData = new byte[dictlen];
+      for (int i = 0; i < dictlen; i++) {
+        currentDictData[i] = decompBuffer[(int) (decompBufferPos + dictoff + i)];
+      }
+
+      //dict[dictsize].setData(currentDictData);
+      //dict[dictsize].setLength(dictlen);
+      LZWXDictionaryEntry dictEntry = new LZWXDictionaryEntry(currentDictData, dictlen);
+      dict[dictsize] = dictEntry;
+      dictsize++;
+      if (((dictsize >> bits) != 0) && (bits != 12)) {
+        bits++;
+        /*
+                                    // dynamic dictionary
+        tmp = sizeof(dict_t) * (1 << bits);
+        if(tmp > dictalloc) {
+            dict = realloc(dict, tmp);
+            if(!dict) return(-1);
+            memset((void *)dict + dictalloc, 0, tmp - dictalloc);
+            dictalloc = tmp;
+        }
+        */
+      }
+    }
+    return (0);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   int unlzwx_expand(int code) {
     if (code >= dictsize) {
       return (0);     // invalid so return 0
     }
 
-    if (code >= UNLZW_END) {             // put the data in the dictionary
-      if ((outlen + dict_len[code]) > outsize) {
+    if (code >= UNLZW_END) { // get the data from the dictionary
+      if ((outlen + dict[code].getLength()) > outsize) {
         return (-1);
       }
-      unlzwx_cpy(outlen, dict_data[code], dict_len[code]);
-      return (dict_len[code]);
+      //System.out.println("[LZWX]: Copying data from dict[" + code + "] to " + (decompBufferPos + outlen));
+      //System.out.println("  " + new String(dict[code].getData()));
+      unlzwx_cpy(decompBufferPos + outlen, dict[code].getData(), dict[code].getLength());
+      return (dict[code].getLength());
     }
-    // put the byte
+    // Get the data from the byte[] array
     if ((outlen + 1) > outsize) {
       return (-1);
     }
-    readBuffer[outlen] = (byte) code;
+    //System.out.println("[LZWX]: Writing data from byte[] array: " + ((char) code));
+
+    decompBuffer[outlen] = (byte) code;
     return (1);
   }
 
-  void unlzwx_init() {
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  int unlzwx_init() {
     bits = UNLZW_BITS;
     dictsize = UNLZW_END + 2;
     dictoff = 0;
     dictlen = 0;
 
-    int dictinitsize = (1 << (UNLZW_BITS + 3));
-    dict_data = new byte[dictinitsize][0];
-    dict_len = new int[dictinitsize];
+    dictalloc = 1 * (1 << (UNLZW_BITS + 3));
+    dict = new LZWXDictionaryEntry[dictalloc];
+    /*
+    if(!dict) {                         // allocate memory for a dictionary of UNLZW_BITS bits
+        dictalloc = sizeof(dict_t) * (1 << (UNLZW_BITS + 3));
+        dict = malloc(dictalloc);       // + 3 is used for avoiding too much realloc() calls
+        if(!dict) return(-1);
+    }                                   // if dict still exists we use it
+    memset((void *)dict, 0, dictalloc); // all lengths set to zero to avoid malicious crashes
+    */
+
+    return (0);
   }
 
 }

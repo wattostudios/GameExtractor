@@ -15,11 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -40,13 +41,16 @@ public class Plugin_000_5 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Ice Age 2: The Meltdown");
+    setGames("Ice Age 2: The Meltdown",
+        "Pirates Of The Caribbean: At Worlds End");
     setExtensions("000");
     setPlatforms("PC");
 
     //setFileTypes("","",
     //             "",""
     //             );
+
+    setTextPreviewExtensions("h"); // LOWER CASE
 
   }
 
@@ -140,6 +144,64 @@ public class Plugin_000_5 extends ArchivePlugin {
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
+      }
+
+      // read the filename offset directory
+
+      int[] nameOffsets = new int[numFiles];
+      for (int i = 0; i < numFiles; i++) {
+        // 4 - Filename Offset (relative to the start of this field)
+        int nameOffset = (int) (fm.readInt() + fm.getOffset() - 4);
+        FieldValidator.checkOffset(nameOffset, arcSize);
+        nameOffsets[i] = nameOffset;
+      }
+
+      // reach and decrypt the filenames
+      boolean encrypted = false;
+      for (int i = 0; i < numFiles; i++) {
+        int offset = nameOffsets[i];
+        fm.seek(offset);
+
+        String filename = "";
+
+        if (i == 0) {
+          int check = fm.readByte();
+          if (check != 0 && check != 120) {
+            encrypted = true;
+          }
+          else {
+            encrypted = false;
+          }
+          fm.seek(offset);
+        }
+
+        int j = 0;
+        int character = -1;
+        do {
+          character = ByteConverter.unsign(fm.readByte());
+
+          if (encrypted) {
+            int CL = 0x16 - i - j; // 22
+            character += CL;
+            character &= 0xff;
+          }
+
+          if (character != 0) {
+            filename += (char) (byte) character;
+          }
+
+          j++;
+        }
+        while (character != 0);
+
+        int slashPos = filename.indexOf(":\\");
+        if (slashPos > 0) {
+          filename = filename.substring(slashPos + 2);
+        }
+
+        Resource resource = resources[i];
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       fm.close();

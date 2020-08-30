@@ -234,7 +234,11 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
 
     WSPanel leftPanel = new WSPanel();
     leftPanel.setLayout(new BorderLayout(2, 2));
-    leftPanel.add(new JScrollPane(tree), BorderLayout.CENTER);
+
+    JScrollPane treeScrollPane = new JScrollPane(tree);
+    treeScrollPane.setWheelScrollingEnabled(true);
+    leftPanel.add(treeScrollPane, BorderLayout.CENTER);
+
     leftPanel.add(groupTypesWrapper, BorderLayout.NORTH);
 
     JScrollPane scrollPane = new JScrollPane(table);
@@ -1260,7 +1264,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         WSSidePanelHolder holder = ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder"));
         WSPanel panel = holder.getCurrentPanel();
         //if (panel == null || (!panel.getCode().equals("SidePanel_HexEditor") && !panel.getCode().equals("SidePanel_Preview"))){
-        if (panel == null || (!panel.getCode().equals("SidePanel_HexEditor") && !panel.getCode().equals("SidePanel_Preview"))) {
+        if (panel == null || (!panel.getCode().equals("SidePanel_HexEditor") && !panel.getCode().equals("SidePanel_Preview") && !panel.getCode().equals("SidePanel_ImageInvestigator"))) {
           holder.loadPanel("SidePanel_Preview", false);
           return true;
         }

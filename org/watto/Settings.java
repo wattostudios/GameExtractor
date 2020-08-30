@@ -359,8 +359,10 @@ public class Settings {
 
       File path = new File(getString("SettingsFile"));
 
-      if (path.exists()) {
-        path.delete();
+      // Write to a temporary file first
+      File tempPath = new File(path.getAbsolutePath() + ".tmp");
+      if (tempPath.exists()) {
+        tempPath.delete();
       }
 
       // build an XML tree of the settings
@@ -385,7 +387,17 @@ public class Settings {
         settingsTree.addChild(setting);
       }
 
-      XMLWriter.write(path, settingsStore);
+      boolean success = XMLWriter.writeWithValidation(tempPath, settingsStore);
+      if (!success) {
+        return; // something went wrong when writing the settings, so don't replace the real file with the corrupt one
+      }
+
+      // if all is OK, remove the Proper file and then rename the temp one to it.
+      // This helps to avoid the occasional issue where the settings file becomes corrupt during write, due to stream being closed.
+      if (path.exists()) {
+        path.delete();
+      }
+      tempPath.renameTo(path);
 
     }
     catch (Throwable t) {

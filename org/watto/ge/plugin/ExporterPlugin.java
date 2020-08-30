@@ -41,7 +41,7 @@ public abstract class ExporterPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void extract(Resource source, File destination) {
@@ -50,7 +50,7 @@ public abstract class ExporterPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void extract(Resource source, FileManipulator destination) {
@@ -90,7 +90,7 @@ public abstract class ExporterPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -118,16 +118,7 @@ public abstract class ExporterPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
-  **********************************************************************************************
-  **/
-  public void pack(Resource source, File destination) {
-    pack(source, new FileManipulator(destination, true));
-  }
-
-  /**
-  **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public abstract void pack(Resource source, FileManipulator destination);

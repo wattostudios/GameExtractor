@@ -48,7 +48,7 @@ public class Exporter_Deflate_CompressedSizeOnly extends ExporterPlugin {
   **********************************************************************************************
   **/
   public Exporter_Deflate_CompressedSizeOnly() {
-    setName("ZLib Compression (Compressed Size Only)");
+    setName("Deflate Compression (Compressed Size Only)");
   }
 
   /**

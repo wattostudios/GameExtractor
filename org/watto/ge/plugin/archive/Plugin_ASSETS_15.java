@@ -105,6 +105,7 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
         "Illusoria",
         "Infection: Humanity's Last Gasp",
         "Infinity Wings: Scout & Grunt",
+        "Inside",
         "Iron Defense",
         "Janken Cards",
         "Karma. Incarnation 1",
@@ -120,6 +121,7 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
         "Mobius Final Fantasy",
         "Mordheim: City of the Damned",
         "Mysterium",
+        "Mysterium: A Psychic Clue Game",
         "Neon Hardcore",
         "NORTH",
         "Nuked Knight",
@@ -143,6 +145,7 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
         "Savage Lands",
         "Save Jesus",
         "SEGA Mega Drive and Genesis Classics",
+        "Shadow Tactics",
         "Shift",
         "ShipLord",
         "Shoppe Keep",
@@ -237,6 +240,7 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
     */
     setFileTypes(Unity3DHelper.getFileTypes());
 
+    setTextPreviewExtensions("textasset"); // LOWER CASE
   }
 
   /**
@@ -1039,7 +1043,10 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
       int relativeDataOffset = 0;
       String header5 = fm.readString(5);
       String header2 = fm.readString(2);
-      if (header5.equals("Unity")) {
+      if (header5.substring(0, 4).equals("FSB5")) {
+        return new Plugin_FSB_FSB5().read(path);
+      }
+      else if (header5.equals("Unity")) {
         if (header2.equals("FS")) {
           // a UnityFS file - skip over the header stuff, to reach the real file data
           unityFS = true;
@@ -1209,8 +1216,8 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
-      if (arcSize > 200000000) { // Large archives, in Dungeons 2
-        FieldValidator.checkNumFiles(numFiles / 3);
+      if (arcSize > 200000000) { // Large archives, in Dungeons 2, Tokyo 42
+        FieldValidator.checkNumFiles(numFiles / 5);
       }
       else {
         FieldValidator.checkNumFiles(numFiles);

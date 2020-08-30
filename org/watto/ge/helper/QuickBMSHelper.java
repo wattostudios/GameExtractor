@@ -169,6 +169,8 @@ public class QuickBMSHelper {
     script += "      comtype RFPK\n";
     script += "    elif INCOMTYPE = RNC\n";
     script += "      comtype RNC\n";
+    //script += "    elif INCOMTYPE = LZ77EA_970\n";
+    //script += "      comtype LZ77EA_970\n";
     script += "    endif\n";
     script += "    \n";
     script += "  elif PROPERTY = clog\n";

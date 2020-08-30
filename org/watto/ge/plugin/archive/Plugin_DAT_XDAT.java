@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -25,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -46,7 +46,8 @@ public class Plugin_DAT_XDAT extends ArchivePlugin {
     setProperties(true, false, false, false);
     setCanImplicitReplace(true);
 
-    setGames("Domination: Massive Assault");
+    setGames("Domination: Massive Assault",
+        "Massive Assault Network 2");
     setExtensions("dat");
     setPlatforms("PC");
 

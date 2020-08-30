@@ -41,8 +41,10 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Warhammer 40k: Dawn Of War");
-    setExtensions("rsh", "wtp"); // MUST BE LOWER CASE
+    setGames("Company of Heroes",
+        "Company of Heroes 2",
+        "Warhammer 40k: Dawn Of War");
+    setExtensions("rgt", "rsh", "wtp"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
@@ -99,6 +101,8 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
 
   int imageFormat = 0;
 
+  int archiveVersion = 1;
+
   /**
    **********************************************************************************************
    * Reads an [archive] File into the Resources
@@ -129,9 +133,18 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
 
       // 14 - Header ("Relic Chunky" + (bytes)13,10)
       // 2 - Unknown (26)
+      fm.skip(16);
+
       // 4 - Unknown (1)
+      archiveVersion = fm.readInt();
+      if (archiveVersion == 3) {
+        // 4 - Unknown
+        // 4 - Unknown
+        // 4 - Unknown
+        fm.skip(12);
+      }
       // 4 - Unknown (1)
-      fm.skip(24);
+      fm.skip(4);
 
       while (fm.getOffset() < arcSize) {
         readChunk(path, fm, resources, "");
@@ -150,6 +163,12 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
     }
   }
 
+  int dxtcOffset = 0;
+
+  int dxtcLength = 0;
+
+  int dxtcDecompLength = 0;
+
   /**
    **********************************************************************************************
   
@@ -157,8 +176,6 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
    **/
   public void readChunk(File path, FileManipulator fm, Resource[] resources, String parentID) {
     try {
-
-      addFileTypes();
 
       //ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
@@ -180,6 +197,12 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
 
       // 4 - Chunk Name Length (can be null)
       int nameLength = fm.readInt();
+
+      if (archiveVersion == 3) {
+        // 4 - Unknown
+        // 4 - Unknown
+        fm.skip(8);
+      }
 
       // X - Chunk Name (optional) (padded with nulls to a multiple of 4 bytes)
       String filename = null;
@@ -223,8 +246,10 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
           imageHeight = fm.readInt();
           FieldValidator.checkHeight(imageHeight);
 
-          // 4 - Mipmap Count
-          fm.skip(4);
+          if (archiveVersion != 3) {
+            // 4 - Mipmap Count
+            fm.skip(4);
+          }
         }
         else if (chunkID.equals("DATA") && parentID.equals("IMAG")) {
           // this is an image - store the image height and width
@@ -264,6 +289,91 @@ public class Plugin_RSH_RELICCHUNKY extends ArchivePlugin {
           resource.addProperty("Height", imageHeight);
 
           fm.skip(length);
+        }
+        else if (chunkID.equals("TMAN") && parentID.equals("DXTC")) {
+          // 4 - Number of Chunks
+          fm.skip(4);
+
+          // skip to the biggest chunk
+          int numChunks = (length - 4) / 8;
+          int largestOffset = 0;
+          for (int c = 0; c < numChunks - 1; c++) {
+            // 4 - Chunk Decompressed Length
+            fm.skip(4);
+
+            // 4 - Chunk Compressed Length
+            int chunkLength = fm.readInt();
+            FieldValidator.checkLength(chunkLength);
+            largestOffset += chunkLength;
+          }
+
+          // now we're at the details for the largest chunk
+
+          // 4 - Chunk Decompressed Length
+          int largestDecompLength = fm.readInt();
+          FieldValidator.checkLength(largestDecompLength);
+
+          // 4 - Chunk Compressed Length
+          int largestLength = fm.readInt();
+          FieldValidator.checkLength(largestLength);
+
+          dxtcOffset = largestOffset;
+          dxtcLength = largestLength;
+          dxtcDecompLength = largestDecompLength;
+        }
+        else if (chunkID.equals("TDAT") && parentID.equals("DXTC")) {
+          // this is an image - store the image height and width
+
+          resource.addProperty("Offset", dxtcOffset);
+          resource.addProperty("Length", dxtcLength);
+          resource.addProperty("DecompressedLength", dxtcDecompLength);
+          resource.addProperty("Width", 1); // dummy so that the Viewer doesn't quit
+          resource.addProperty("Height", 1); // dummy so that the Viewer doesn't quit
+
+          fm.skip(length);
+        }
+        else if (chunkID.equals("DXTC") && parentID.equals("TXTR")) {
+          // this is an image - store the image height and width
+
+          // 4 - Image Width
+          imageWidth = fm.readInt();
+          FieldValidator.checkWidth(imageWidth);
+
+          // 4 - Image Height
+          imageHeight = fm.readInt();
+          FieldValidator.checkHeight(imageHeight);
+
+          resource.addProperty("Width", imageWidth);
+          resource.addProperty("Height", imageHeight);
+
+          // 4 - Unknown (1)
+          // 4 - Unknown (2)
+          fm.skip(8);
+
+          // 4 - Image Format (13=DXT1, 15=DXT5)
+          int imageFormat = fm.readInt();
+
+          // the largest mipmap is last in the file. So, set the offset at the appropriate place
+          int mipmapSize = imageWidth * imageHeight;
+          if (imageFormat == 13) {
+            mipmapSize /= 2; // DXT1
+          }
+          offset += (length - mipmapSize);
+          resource.setOffset(offset);
+          resource.setLength(mipmapSize);
+          resource.setDecompressedLength(mipmapSize);
+
+          if (imageFormat == 13) {
+            resource.addProperty("ImageFormat", "DXT1");
+          }
+          else if (imageFormat == 15) {
+            resource.addProperty("ImageFormat", "DXT5");
+          }
+          else {
+            resource.addProperty("ImageFormat", "" + imageFormat);
+          }
+
+          fm.skip(length - 20); // we already read 20 bytes at the start
         }
         else {
           fm.skip(length);

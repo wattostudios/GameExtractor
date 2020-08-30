@@ -31,7 +31,7 @@ public class Plugin_ASR_ASURA_RSCF extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_ASR_ASURA_RSCF() {
@@ -42,6 +42,7 @@ public class Plugin_ASR_ASURA_RSCF extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Alien vs Predator (2010)",
+        "Prism: Guard Shield",
         "Sniper Elite");
     setExtensions("asr");
     setPlatforms("PC");
@@ -50,7 +51,7 @@ public class Plugin_ASR_ASURA_RSCF extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

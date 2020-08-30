@@ -2,10 +2,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio_Compressed;
+import org.watto.ge.plugin.exporter.Exporter_LZSS;
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            //
 //                                       GAME EXTRACTOR                                       //
@@ -24,7 +27,10 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.ShortConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -45,7 +51,8 @@ public class Plugin_DAT_SLHALL extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Wizball");
+    setGames("Temporal",
+        "Wizball");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -102,7 +109,9 @@ public class Plugin_DAT_SLHALL extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      ExporterPlugin exporter = Exporter_LZSS.getInstance();
+      Exporter_Custom_WAV_RawAudio_Compressed exporterWave = new Exporter_Custom_WAV_RawAudio_Compressed(exporter);
+      exporterWave.setSkipAmount(6);
 
       // RESETTING GLOBAL VARIABLES
 
@@ -122,58 +131,97 @@ public class Plugin_DAT_SLHALL extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
+        //System.out.println(fm.getOffset());
+        String filename = Resource.generateFilename(i);
 
-        // 8 - Date Property (propDATE)
-        fm.skip(8);
+        // 4 - Field Type
+        String fieldType = fm.readString(4);
+        while (fieldType.equals("prop")) {
+          // process a property
 
-        // 4 - Date Data Length
-        int dataLength = IntConverter.changeFormat(fm.readInt());
-        FieldValidator.checkLength(dataLength);
+          // 4 - Property Type
+          String propertyType = fm.readString(4);
 
-        // X - Date String
-        fm.skip(dataLength);
+          // 4 - Property Length
+          int propertyLength = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkLength(propertyLength, arcSize);
 
-        // 8 - Filename Property (propNAME)
-        fm.skip(8);
+          if (propertyType.equals("NAME")) {
+            // X - Filename (no extension)
+            filename = fm.readString(propertyLength);
+          }
+          else {
+            // something else - skip the property data
+            fm.skip(propertyLength);
+          }
 
-        // 4 - Filename Length
-        int filenameLength = IntConverter.changeFormat(fm.readInt());
-        FieldValidator.checkFilenameLength(filenameLength);
+          // read the next property
+          fieldType = fm.readString(4);
+        }
 
-        // X - Filename
-        String filename = fm.readString(filenameLength);
+        // if we've read something other than "prop", then it's the actual file data
+        filename = filename.replaceAll("_", ".");
 
-        // 8 - File Path Property (propORIG)
-        fm.skip(8);
-
-        // 4 - File Path Length
-        dataLength = IntConverter.changeFormat(fm.readInt());
-        FieldValidator.checkLength(dataLength);
-
-        // X - File Path
-        fm.skip(dataLength);
-
-        // 4 - Data Type (DATA/BMP )
-        fm.skip(4);
-
-        // 4 - File Length
+        // 4 - Compressed File Length
         int length = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - File Length
-        int length2 = IntConverter.changeFormat(fm.readInt());
-        FieldValidator.checkLength(length2, arcSize);
-
-        if (length != length2) {
-          System.out.println("Different lengths: " + length + " - " + length2);
+        // 4 - Decompressed File Length
+        byte[] decompBytes = fm.readBytes(4);
+        if (ByteConverter.unsign(decompBytes[0]) == 255) {
+          decompBytes[0] ^= 255;
+          decompBytes[1] ^= 255;
+          decompBytes[2] ^= 255;
+          decompBytes[3] ^= 255;
         }
+        int decompLength = IntConverter.convertBig(decompBytes);
+        FieldValidator.checkLength(decompLength);
 
-        // X - File Data
-        long offset = fm.getOffset();
-        fm.skip(length);
+        if (fieldType.equals("SAMP")) {
+          // Audio File (WAV)
+          long offset = fm.getOffset();
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+          // 1 - Compression Flag (255)
+          fm.skip(1);
+
+          // 2 - Bitrate
+          short bitrate = ShortConverter.changeFormat(fm.readShort());
+
+          // 2 - Frequency
+          short frequency = ShortConverter.changeFormat(fm.readShort());
+
+          fm.skip(length - 5);
+
+          if (length == decompLength) {
+            //path,name,offset,length,decompLength,exporter
+            Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+            resource.setAudioProperties(frequency, bitrate, (short) 1, false);
+            resources[i] = resource;
+          }
+          else {
+            //path,name,offset,length,decompLength,exporter
+            Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length, decompLength);
+            resource.setAudioProperties(frequency, bitrate, (short) 1, false);
+            resource.setExporter(exporterWave);
+            resources[i] = resource;
+          }
+
+        }
+        else {
+
+          // X - File Data
+          long offset = fm.getOffset();
+          fm.skip(length);
+
+          if (length == decompLength) {
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length);
+          }
+          else {
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+        }
 
         TaskProgressManager.setValue(i);
       }

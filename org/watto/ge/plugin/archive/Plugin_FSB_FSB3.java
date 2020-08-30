@@ -109,7 +109,6 @@ public class Plugin_FSB_FSB3 extends ArchivePlugin {
   **********************************************************************************************
   **/
   @Override
-  @SuppressWarnings("unused")
   public Resource[] read(File path) {
     try {
 

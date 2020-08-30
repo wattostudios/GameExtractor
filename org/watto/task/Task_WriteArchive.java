@@ -37,11 +37,12 @@ public class Task_WriteArchive extends AbstractTask {
   int direction = 1;
 
   File path;
+
   ArchivePlugin plugin;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Task_WriteArchive(File path, ArchivePlugin plugin) {
@@ -51,7 +52,7 @@ public class Task_WriteArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -59,13 +60,6 @@ public class Task_WriteArchive extends AbstractTask {
     if (!TaskProgressManager.canDoTask()) {
       return;
     }
-
-    // Progress dialog
-    TaskProgressManager.show(2, 0, Language.get("Progress_WritingArchive")); // 2 progress bars
-    TaskProgressManager.setIndeterminate(true, 0); // first 1 is indeterminate
-    TaskProgressManager.setMaximum(Archive.getNumFiles(), 1); // second one shows how many files are done
-
-    TaskProgressManager.startTask();
 
     boolean replacingCurrentArchive = false;
     if (Archive.getBasePath().equals(path)) {
@@ -81,11 +75,17 @@ public class Task_WriteArchive extends AbstractTask {
       }
       else {
         // don't do anything - the user needs to enter a new filename
-        TaskProgressManager.stopTask();
         return;
       }
 
     }
+
+    // Progress dialog
+    TaskProgressManager.show(2, 0, Language.get("Progress_WritingArchive")); // 2 progress bars
+    TaskProgressManager.setIndeterminate(true, 0); // first 1 is indeterminate
+    TaskProgressManager.setMaximum(Archive.getNumFiles(), 1); // second one shows how many files are done
+
+    TaskProgressManager.startTask();
 
     File desiredFile = path;
     String temporaryFilePath = path.getAbsolutePath() + ".temp";
@@ -156,7 +156,7 @@ public class Task_WriteArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -175,7 +175,7 @@ public class Task_WriteArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

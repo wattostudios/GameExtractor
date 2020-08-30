@@ -70,6 +70,15 @@ public class Scanner_WAV_RIFF extends ScannerPlugin {
       else if (type2.equals("MIDS") && fm.readString(4).equals("fmt ")) {
         ext = ".mid";
       }
+      else if (type2.equals("FEV ")) {
+        ext = ".bank"; // FMOD FSB5 BANK
+      }
+      else if (type2.equals("WEBP")) {
+        ext = ".webp"; // WebP Image
+      }
+      else if (type2.equals("PAL ")) {
+        ext = ".pal"; // Color Palette
+      }
 
       fm.seek(offset + length);
 

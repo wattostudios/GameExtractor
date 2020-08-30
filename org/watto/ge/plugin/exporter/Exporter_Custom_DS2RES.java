@@ -26,19 +26,24 @@ public class Exporter_Custom_DS2RES extends ExporterPlugin {
   static Exporter_Custom_DS2RES instance = new Exporter_Custom_DS2RES();
 
   static FileManipulator fm;
+
   static InflaterInputStream readSource;
 
   static long[] readLengths;
+
   static long[] decompSpacers;
+
   static long[] readOffsets;
+
   static int readChunk = 0;
 
   static byte[] betweenChunkBuffer = new byte[0];
+
   static int betweenChunkBufferPos = 16;
 
   /**
   **********************************************************************************************
-  
+  NOT USED - REPLACED BY A BlockVariableExportWraper IN PLUGIN DS2REG_DSG2TANK
   **********************************************************************************************
   **/
   public static Exporter_Custom_DS2RES getInstance() {

@@ -28,6 +28,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.PluginGroup_UE3;
+import org.watto.ge.plugin.archive.Plugin_UE3_727;
 import org.watto.ge.plugin.archive.Plugin_UE3_807;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
 import org.watto.ge.plugin.exporter.Exporter_LZO_SingleBlock;
@@ -80,7 +81,7 @@ public class Viewer_UE3_Texture2D_807 extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin readPlugin = Archive.getReadPlugin();
-      if (readPlugin instanceof Plugin_UE3_807) {
+      if (readPlugin instanceof Plugin_UE3_807 || readPlugin instanceof Plugin_UE3_727) {
         rating += 50;
       }
 
@@ -166,7 +167,15 @@ public class Viewer_UE3_Texture2D_807 extends ViewerPlugin {
         UnrealProperty property = properties[p];
         String name = property.getName();
         if (name.equals("Format")) {
-          String formatName = (String) property.getValue();
+          Object formatObject = property.getValue();
+          String formatName = "";
+          if (formatObject instanceof String) {
+            formatName = (String) formatObject;
+          }
+          else if (formatObject instanceof Long) {
+            formatName = ue3Plugin.getName((Long) formatObject);
+          }
+
           if (formatName != null) {
             if (formatName.equals("PF_DXT5")) {
               imageFormat = "DXT5";
@@ -176,6 +185,9 @@ public class Viewer_UE3_Texture2D_807 extends ViewerPlugin {
             }
             else if (formatName.equals("PF_DXT3")) {
               imageFormat = "DXT3";
+            }
+            else if (formatName.equals("PF_BC5")) {
+              imageFormat = "BC5";
             }
             else if (formatName.equals("PF_G8")) {
               imageFormat = "G8";
@@ -207,9 +219,9 @@ public class Viewer_UE3_Texture2D_807 extends ViewerPlugin {
       // 8 - null
       // 4 - null
       // 4 - Unknown
-      fm.skip(16);
+      //fm.skip(16);
 
-      // 4 - Number of Mipmaps (10)
+      // 4 - Number of Mipmaps (12)
       int numMipmaps = fm.readInt();
       FieldValidator.checkRange(numMipmaps, 0, 50);
 
@@ -299,7 +311,7 @@ public class Viewer_UE3_Texture2D_807 extends ViewerPlugin {
         short compressionType = fm.readShort();
         if (compressionType != 1 && compressionType != 2) {
           // unsupported compression
-          ErrorLogger.log("[Viewer_UE3_Texture2D_507] Unsupported compression: " + compressionType);
+          ErrorLogger.log("[Viewer_UE3_Texture2D_807] Unsupported compression: " + compressionType);
           return null;
         }
 
@@ -383,6 +395,9 @@ public class Viewer_UE3_Texture2D_807 extends ViewerPlugin {
       }
       else if (imageFormat.equals("ARGB")) {
         imageResource = ImageFormatReader.readARGB(fm, imageWidth, imageHeight);
+      }
+      else if (imageFormat.equals("BC5")) {
+        imageResource = ImageFormatReader.readBC5(fm, imageWidth, imageHeight);
       }
       else {
         return null;// should not get here

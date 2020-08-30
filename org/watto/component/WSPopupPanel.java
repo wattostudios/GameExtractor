@@ -37,8 +37,9 @@ public class WSPopupPanel extends JComponent implements WSClickableInterface, WS
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** so only 1 popup will ever be displayed to the user at a time! **/
-  static WSPopupPanelDialog instance = null;
+  static WSPopupPanelDialogInterface instance = null;
 
   /** The value of the button that was pressed **/
   static String pressedEvent = null;
@@ -47,7 +48,7 @@ public class WSPopupPanel extends JComponent implements WSClickableInterface, WS
   Gets the singleton <code>instance</code> of the <code>WSPopupPanelDialog</code>
   @return the <code>instance</code> <code>WSPopupPanelDialog</code>
   ***********************************************************************************************/
-  public static WSPopupPanelDialog getInstance() {
+  public static WSPopupPanelDialogInterface getInstance() {
     return instance;
   }
 
@@ -87,7 +88,19 @@ public class WSPopupPanel extends JComponent implements WSClickableInterface, WS
   ***********************************************************************************************/
   public WSPopupPanel() {
     super();
+
+    /*
     if (instance == null) {
+      instance = new WSPopupPanelDialog(this);
+    }
+    */
+
+    if (ComponentRepository.has("PopupOverlay")) {
+      // use the OverlayPopupDialog
+      instance = new WSOverlayPopupPanelDialog(this);
+    }
+    else {
+      // use the Popup PopupDialog
       instance = new WSPopupPanelDialog(this);
     }
   }

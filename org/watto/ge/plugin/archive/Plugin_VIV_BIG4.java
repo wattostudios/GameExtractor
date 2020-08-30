@@ -3,7 +3,6 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -26,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -51,6 +51,7 @@ public class Plugin_VIV_BIG4 extends ArchivePlugin {
         "Medal Of Honor: European Assault");
     setPlatforms("PC", "XBox");
     setExtensions("viv", "big");
+    setEnabled(false); // DISABLED, BECAUSE WANT TO USE THE BIG_BIGF ONE INSTEAD, WHICH IS THE SAME BUT MORE UPDATED
 
   }
 

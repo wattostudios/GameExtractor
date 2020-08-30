@@ -97,6 +97,7 @@ public class Plugin_ASSETS_9 extends ArchivePlugin {
         "Kentucky Route Zero",
         "Kingdom of Aurelia: Mystery of the Poisoned Dagger",
         "Kingdom Rush",
+        "Lifeless Planet",
         "Lovely Planet",
         "Magma Tsunami",
         "Max: The Curse of Brotherhood",
@@ -599,15 +600,11 @@ public class Plugin_ASSETS_9 extends ArchivePlugin {
       int numFiles = fm.readInt();
       if (arcSize > 1000000000) {
         // need to allow more files than usual in these large games (eg Dungeonland)
-        FieldValidator.checkNumFiles(numFiles / 6);
-      }
-      else if (arcSize > 500000000) {
-        // need to allow more files than usual in these large games (eg Cognition)
-        FieldValidator.checkNumFiles(numFiles / 2);
+        FieldValidator.checkNumFiles(numFiles / 15);
       }
       else if (arcSize > 300000000) {
         // need to allow more files than usual in these large games (eg Caravan)
-        FieldValidator.checkNumFiles(numFiles / 4);
+        FieldValidator.checkNumFiles(numFiles / 10);
       }
       else {
         FieldValidator.checkNumFiles(numFiles);
@@ -707,20 +704,19 @@ public class Plugin_ASSETS_9 extends ArchivePlugin {
           realOffset = fm.getOffset();
         }
         else if (fileType.equals(".AudioClip")) {
-          try {
-            // 4 - Unknown (2)
-            // 4 - Unknown (20)
-            // 4 - Unknown (0/1)
-            // 4 - Unknown (2=external, 1=internal)
-            fm.skip(16);
+          // 4 - Unknown (2)
+          // 4 - Unknown (20)
+          // 4 - Unknown (0/1)
+          // 4 - Unknown (2=external, 1=internal)
+          fm.skip(16);
 
-            // 4 - File Length
-            int extSize = fm.readInt();
+          // 4 - File Length
+          int extSize = fm.readInt();
 
-            long remainingLength = fm.getOffset() - offset - 4;
-            if (remainingLength < 8 || (extSize - remainingLength > 100000)) {
-              // external file
-
+          long remainingLength = fm.getOffset() - offset - 4;
+          if (remainingLength < 8 || (extSize - remainingLength > 100000)) {
+            // external file (probably)
+            try {
               // 4 - File Offset in External *.resS File
               int extOffset = fm.readInt();
 
@@ -763,19 +759,19 @@ public class Plugin_ASSETS_9 extends ArchivePlugin {
                 realSize = extSize;
               }
             }
-            else {
-              // internal file
-
-              // set the externalArchive on the Resource (the other fields set down further)
-              realOffset = fm.getOffset();
+            catch (Throwable t) {
+              realOffset += 20;
               realSize = extSize;
             }
+          }
+          else {
+            // internal file
 
+            // set the externalArchive on the Resource (the other fields set down further)
+            realOffset = fm.getOffset();
+            realSize = extSize;
           }
-          catch (Throwable t) {
-            // not in an external archive, or some other error
-            ErrorLogger.log(t);
-          }
+
         }
         else if (fileType.equals(".Texture2D")) {
           try {

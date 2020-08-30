@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -25,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -72,7 +72,7 @@ public class Plugin_PAK_16 extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // First File Length
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+      if (FieldValidator.checkLength(fm.readInt() - 1, arcSize)) { // -1 will fail it if the length is 0
         rating += 5;
       }
 

@@ -156,7 +156,6 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
         "pnb",
         "psh",
         "psw",
-        "raw",
         "rkv",
         "rnd",
         "rrds",

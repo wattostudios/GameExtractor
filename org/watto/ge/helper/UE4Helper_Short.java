@@ -239,6 +239,7 @@ public class UE4Helper_Short {
       FieldValidator.checkNumFiles(entryCount); // sanity check, in case the number is HUGE
 
       boolean isStruct = false;
+      long innerLength = 0;
       if (type.equals("StructProperty")) {
         isStruct = true;
 
@@ -251,7 +252,7 @@ public class UE4Helper_Short {
         String innerType = names[(int) innerTypeID];
 
         // 8 - Length Property
-        long innerLength = fm.readLong();
+        innerLength = fm.readLong();
 
         // 8 - Class ID
         // HERE WE OVERWRITE THE ONES DEFINED IN THE ARRAY WITH THE TYPE DEFINED IN THE STRUCTPROPERTY
@@ -261,11 +262,15 @@ public class UE4Helper_Short {
         // 8 - null
         // 8 - null
         fm.skip(16);
+
+        // 1 - null
+        fm.skip(1);
       }
 
       UnrealProperty[] innerProperties = new UnrealProperty[entryCount];
       for (int i = 0; i < entryCount; i++) {
-        UnrealProperty innerProperty = new UnrealProperty("", 0, type, typeID, 0);
+        //UnrealProperty innerProperty = new UnrealProperty("", 0, type, typeID, 0);
+        UnrealProperty innerProperty = new UnrealProperty("", 0, type, typeID, innerLength);
 
         innerProperty = handlePropertyType(fm, innerProperty);
 

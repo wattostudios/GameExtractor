@@ -14,7 +14,9 @@
 
 package org.watto.task;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -42,7 +44,27 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
 
   Resource[] resources;
 
+  public int getNumResources() {
+    return numResources;
+  }
+
+  public void setNumResources(int numResources) {
+    this.numResources = numResources;
+  }
+
+  public int getNumExtracted() {
+    return numExtracted;
+  }
+
+  public void setNumExtracted(int numExtracted) {
+    this.numExtracted = numExtracted;
+  }
+
+  /** the number of files that we're trying to extract **/
   int numResources = 0;
+
+  /** the number of files that were successfully extracted **/
+  int numExtracted = 0;
 
   File outputDirectory = null;
 
@@ -99,6 +121,7 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
   Uses QuickBMS to decompress the files
   **********************************************************************************************
   **/
+  @SuppressWarnings("unused")
   public File extractFiles(String nameList, File sourceFile, String scriptPath, File tempDirectory) {
     try {
 
@@ -119,14 +142,14 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
       if (nameList == null) {
         // Exporter_QuickBMS_Decompression
         // The script was custom-built with only the files needed in it
-        pb = new ProcessBuilder(quickbmsPath, "-o", "-Q", scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
-        //pb = new ProcessBuilder(quickbmsPath, "-o", scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
+        //pb = new ProcessBuilder(quickbmsPath, "-o", "-Q", scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
+        pb = new ProcessBuilder(quickbmsPath, "-o", "-q", scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
       }
       else {
         // Exporter_QuickBMSWrapper
         // Using an existing script, so need to feed in the filename filter to only extract certain files
-        pb = new ProcessBuilder(quickbmsPath, "-o", "-Q", "-f", nameList, scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
-        //pb = new ProcessBuilder(quickbmsPath, "-o", "-f", nameList, scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
+        //pb = new ProcessBuilder(quickbmsPath, "-o", "-Q", "-f", nameList, scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
+        pb = new ProcessBuilder(quickbmsPath, "-o", "-q", "-f", nameList, scriptPath, sourceFile.getAbsolutePath(), tempDirectory.getAbsolutePath());
       }
 
       // Progress dialog
@@ -139,38 +162,50 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
       Process convertProcess = pb.start();
       int returnCode = convertProcess.waitFor(); // wait for QuickBMS to finish
 
-      /*
-      int returnCode = 0;
+      //int returnCode = 0;
       BufferedReader outputReader = new BufferedReader(new InputStreamReader(convertProcess.getInputStream()));
       BufferedReader errorReader = new BufferedReader(new InputStreamReader(convertProcess.getErrorStream()));
-      
+
       String errorLine = errorReader.readLine();
-      while (errorLine != null) {
-        System.out.println(errorLine);
-        errorLine = errorReader.readLine();
+      if (errorLine != null) {
+        ErrorLogger.log("[Task_QuickBMSBulkExport] Possible errors when running QuickBMS:");
+        while (errorLine != null) {
+          ErrorLogger.log(errorLine);
+          errorLine = errorReader.readLine();
+        }
+        returnCode = -1;
       }
-      
+
       String outputLine = outputReader.readLine();
-      while (outputLine != null) {
-        System.out.println(outputLine);
-        outputLine = outputReader.readLine();
+      if (outputLine != null) {
+        ErrorLogger.log("[Task_QuickBMSBulkExport] Normal output when running QuickBMS:");
+        while (outputLine != null) {
+          ErrorLogger.log(outputLine);
+          outputLine = outputReader.readLine();
+        }
+        returnCode = -1;
       }
-      */
 
       // Stop the task
       TaskProgressManager.stopTask();
 
+      /*
       if (returnCode == 0) {
         // successful decompression
         //if (destFile.exists()) {
         return tempDirectory;
         //}
       }
-
+      
       return null;
+      */
+      // Want to return in all cases, because it's possible some files didn't export properly, but we want to continue anyway for all the other files that DID.
+      return tempDirectory;
 
     }
     catch (Throwable t) {
+      ErrorLogger.log("[Task_QuickBMSBulkExport] Fatal error when running QuickBMS:");
+      ErrorLogger.log(t);
       return null;
     }
   }
@@ -292,24 +327,66 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
     else if (exporter instanceof Exporter_QuickBMS_Decompression) {
       // QuickBMS for decompression only - need to create a temporary BMS script
 
-      // 
-      // 2. Compile a script with all the files listed in it
-      //
-      File scriptFile = new File(new File(new File(Settings.get("TempDirectory")).getAbsolutePath()) + File.separator + "ge_quickbms_extract_" + System.currentTimeMillis() + ".bms");
-      scriptFile = FilenameChecker.correctFilename(scriptFile); // removes funny characters etc.
-      FileManipulator fm = new FileManipulator(scriptFile, true);
+      // if there are too many files, it'll trip QuickBMS up (more than 1024 variables), so we trick it, like when using the BlockQuickBMS wrapper
 
-      String compressionType = ((Exporter_QuickBMS_Decompression) exporter).getCompressionType();
-      fm.writeString("comtype " + compressionType + "\n");
+      if (numResources > 100) {
+        // Create a temporary file for the "real" BMS script
+        String tempDirectory = new File(Settings.get("TempDirectory")).getAbsolutePath();
+        //File scriptFile = new File(tempDirectory + File.separator + "ge_quickbms_extract_" + System.currentTimeMillis() + ".bms");
+        File scriptFile = new File(tempDirectory + File.separator + "ge_quickbms_extract_" + System.currentTimeMillis() + ".txt");
+        scriptFile = FilenameChecker.correctFilename(scriptFile); // removes funny characters etc.
+        FileManipulator fm = new FileManipulator(scriptFile, true);
 
-      for (int i = 0; i < numResources; i++) {
-        Resource resource = resources[i];
-        //System.out.println("Bulk for " + resource.getName());
-        fm.writeString("clog \"" + resource.getName() + "\" " + resource.getOffset() + " " + resource.getLength() + " " + resource.getDecompressedLength() + "\n");
+        for (int i = 0; i < numResources; i++) {
+          Resource resource = resources[i];
+          String script = ((Exporter_QuickBMS_Decompression) resource.getExporter()).buildScript(resource);
+          if (script != null) {
+            //System.out.println("Bulk for " + resource.getName());
+            fm.writeString(script);
+          }
+        }
+        fm.close();
+
+        // Now create a temporary file for the "processing" BMS script
+
+        String processingFilePath = tempDirectory + File.separator + "ge_quickbms_extract_processing_" + System.currentTimeMillis() + ".bms";
+        File processingFile = new File(processingFilePath);
+        processingFile = FilenameChecker.correctFilename(processingFile); // removes funny characters etc.
+
+        // write the script
+        FileManipulator tempFM = new FileManipulator(processingFile, true);
+
+        String processingScript = QuickBMSHelper.buildProcessingScript(scriptFile);
+        tempFM.writeString(processingScript);
+
+        tempFM.close();
+
+        // return the processing file --> it will be the one that calls the Real script
+        //scriptPath = scriptFile.getAbsolutePath();
+        scriptPath = processingFile.getAbsolutePath();
       }
-      fm.close();
+      else {
+        // there are only a few files - give it to QuickBMS directly
 
-      scriptPath = scriptFile.getAbsolutePath();
+        // 
+        // 2. Compile a script with all the files listed in it
+        //
+        File scriptFile = new File(new File(new File(Settings.get("TempDirectory")).getAbsolutePath()) + File.separator + "ge_quickbms_extract_" + System.currentTimeMillis() + ".bms");
+        scriptFile = FilenameChecker.correctFilename(scriptFile); // removes funny characters etc.
+        FileManipulator fm = new FileManipulator(scriptFile, true);
+
+        String compressionType = ((Exporter_QuickBMS_Decompression) exporter).getCompressionType();
+        fm.writeString("comtype " + compressionType + "\n");
+
+        for (int i = 0; i < numResources; i++) {
+          Resource resource = resources[i];
+          //System.out.println("Bulk for " + resource.getName());
+          fm.writeString("clog \"" + resource.getName() + "\" " + resource.getOffset() + " " + resource.getLength() + " " + resource.getDecompressedLength() + "\n");
+        }
+        fm.close();
+
+        scriptPath = scriptFile.getAbsolutePath();
+      }
     }
     else if (exporter instanceof BlockQuickBMSExporterWrapper) {
       // QuickBMS for decompression only - need to create a temporary BMS script
@@ -431,6 +508,7 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
     //
     // 5. Update all the resources so that they know they've been extracted
     //
+    numExtracted = 0;
     String absoluteTempPath = tempPath.getAbsolutePath();
     for (int i = 0; i < numResources; i++) {
       Resource resource = resources[i];
@@ -439,6 +517,10 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
       if (outputFile.exists()) {
         // found the exported file, update the resource accordingly
         resource.setExportedPath(outputFile);
+        numExtracted++;
+      }
+      else {
+        ErrorLogger.log("[Task_QuickBMSBulkExport] File wasn't extracted: " + resource.getName());
       }
 
     }
@@ -449,7 +531,6 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
     // 6. Clean up
     //
     resources = null;
-    numResources = 0;
     outputDirectory = null;
 
     return;

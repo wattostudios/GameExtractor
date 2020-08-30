@@ -36,16 +36,21 @@ public class WSOverlayProgressDialog extends JPanel implements WSProgressDialogI
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** the singleton instance of the dialog **/
   static WSOverlayProgressDialog instance = null;
 
   /** the progress bars **/
   static JProgressBar[] bars = new JProgressBar[1];
+
   /** the number of progress bars **/
   static int barCount = 1;
 
   /** the status message label **/
   static JLabel message = new JLabel();
+
+  /** If the maximum is too large, the maximum and actual values need to be scaled down **/
+  static int scalingFactor = 0;
 
   /***********************************************************************************************
   Gets the singleton <code>instance</code> of this <code>WSProgressDialog</code>
@@ -160,14 +165,32 @@ public class WSOverlayProgressDialog extends JPanel implements WSProgressDialogI
         // if the barNumber is indeterminate, looks for the next determinate bar and changes that instead
         for (; barNumber < barCount; barNumber++) {
           if (!bars[barNumber].isIndeterminate()) {
+            bars[barNumber].setMinimum(0);
             bars[barNumber].setValue(0);
+
+            scalingFactor = 0;
+            while (newMaximum > Integer.MAX_VALUE) {
+              // need to apply a scaling factor
+              newMaximum >>= 1;
+              scalingFactor++;
+            }
+
             bars[barNumber].setMaximum((int) newMaximum);
             return;
           }
         }
       }
       else {
+        bars[barNumber].setMinimum(0);
         bars[barNumber].setValue(0);
+
+        scalingFactor = 0;
+        while (newMaximum > Integer.MAX_VALUE) {
+          // need to apply a scaling factor
+          newMaximum >>= 1;
+          scalingFactor++;
+        }
+
         bars[barNumber].setMaximum((int) newMaximum);
       }
     }
@@ -215,6 +238,9 @@ public class WSOverlayProgressDialog extends JPanel implements WSProgressDialogI
         // if the barNumber is indeterminate, looks for the next determinate bar and changes that instead
         for (; barNumber < barCount; barNumber++) {
           if (!bars[barNumber].isIndeterminate()) {
+            if (scalingFactor != 0) {
+              newValue >>= scalingFactor;
+            }
             bars[barNumber].setValue((int) newValue);
             return;
           }
@@ -222,6 +248,9 @@ public class WSOverlayProgressDialog extends JPanel implements WSProgressDialogI
       }
       else {
         if (barNumber < bars.length) {
+          if (scalingFactor != 0) {
+            newValue >>= scalingFactor;
+          }
           bars[barNumber].setValue((int) newValue);
         }
       }

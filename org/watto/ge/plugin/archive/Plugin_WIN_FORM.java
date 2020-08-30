@@ -58,6 +58,7 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
         "Clickdraw Clicker",
         "Colonumbers",
         "Crab Dub",
+        "Crashlands",
         "Daddy's Gone A-Hunting",
         "Daily Run",
         "Dead Dust",
@@ -65,6 +66,7 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
         "Detective Case and the Clown Bot: Murder In the Hotel Lisbon",
         "Digital Resistance",
         "Drill Arena",
+        "Dungeon Souls",
         "Endorlight",
         "Epic PVP Castles",
         "Fran Bow",
@@ -85,7 +87,9 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
         "Laserium",
         "Learn to Drive on Moto Wars",
         "Love",
+        "Mable and The Wood",
         "Memoranda",
+        "Minit",
         "Monster Slayers",
         "Ninja from Hell vs. Reptiloids",
         "No Turning Back: The Pixel Art Action-Adventure Roguelike",
@@ -93,6 +97,7 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
         "Othello 2018",
         "Outer Space",
         "Outrunner 2",
+        "Overture",
         "PHAT STACKS",
         "Pixel Gladiator",
         "PlatONIR",
@@ -121,9 +126,11 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
         "The President",
         "The Rare Nine",
         "The Story Goes On",
+        "Tormentor X Punisher",
         "Torture Chamber",
         "Trolley Gold",
         "unBorn",
+        "vApe Escape",
         "Vicky Saves the Big Dumb World",
         "Violent Vectors",
         "Void Source",
@@ -209,6 +216,10 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
       TaskProgressManager.setMaximum(arcSize);
 
       // Loop through directory
+      String[] types = new String[100];
+      int[] typeCounter = new int[100];
+      int numTypes = 0;
+
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
         // 4 - Header/File Type
@@ -222,7 +233,28 @@ public class Plugin_WIN_FORM extends ArchivePlugin {
         long offset = fm.getOffset();
         fm.skip(length);
 
-        String filename = Resource.generateFilename(realNumFiles) + "." + fileType;
+        int typePos = -1;
+        for (int t = 0; t < numTypes; t++) {
+          if (types[t].contentEquals(fileType)) {
+            typePos = t;
+            break;
+          }
+        }
+
+        int typeID = 0;
+        if (typePos == -1) {
+          // a new type - add it
+          types[numTypes] = fileType;
+          typeCounter[numTypes] = 1;
+          numTypes++;
+        }
+        else {
+          // an existing type - increment the counter
+          typeID = typeCounter[typeID];
+          typeCounter[typeID]++;
+        }
+
+        String filename = Resource.generateFilename(typeID) + "." + fileType;
 
         //path,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);

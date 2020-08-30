@@ -32,7 +32,7 @@ import javax.swing.JFrame;
 - Post an update on Facebook and Twitter
 - Inform SoftPedia of the new Release and the Changes
 - Update the Plugins Spreadsheet
-- Update GitHub
+- Update GitHub (and remove the Full Version code from it)
 
 // TO DO EVERY TIME...
  - New EXPORTERS need to be added in to SidePanel_PluginList.loadExporters()
@@ -51,10 +51,11 @@ import javax.swing.JFrame;
 - Archive where the directory needs to be decompressed first, then analysed - Plugin_PAK_PAK_3
 - Archive with nested directories that we need to read - Plugin_FMF_FMF
 - Archive where multiple files are stored in a single ZLib block, so you need to decompress the ZLib, then find the file within it - Plugin_RSB_1BSR
+- Archive where the user is asked to choose an option (from a ComboBox) in a popup when saving - Plugin_PAK_EYEDENTITY (see start of replace() method)
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a separate Palette file is extracted from the archive, and then used to create the image - IFF_SPR
 - Image Viewer where the image data is a big image, but it's read as blocks of 32x32 - Viewer_RSB_1BSR_PTX (see reorderPixelBlocks() method)
-- Image Viewer where the image width and height are stored on the Resource by the Plugin, so need to be retrieved before processing the image in the Viewer
+- Image Viewer where the image width and height are stored on the Resource by the Plugin, so need to be retrieved before processing the image in the Viewer (DAT_66_BITMAP)
 - Scanning unknown files to determine their file type (by adding some custom types to the list of standard ones) - Plugin_PAK_44
 - Scanning unknown files to determine their file type (custom, rather than using the automatic scanner) - Plugin_000_9 (see end of read() method)
 
@@ -71,16 +72,46 @@ import javax.swing.JFrame;
 - Height
 - XOffset
 - YOffset
+- Offset
+- Length
+- DecompressedLength
 
-// COMMON ARCHIVE PLUGINS...
-- Unreal Engine 4 = Plugin_PAK_38
-- Unreal Engine 3 with support for decompressing the whole archive first, if needed = Plugin_UE3_868 or Plugin_UE3_576
-- Valve Source Engine = Plugin_VPK
-- Unity3D Engine (version 15) = Plugin_ASSETS_15
-- Unity3D Engine (version 17) = Plugin_ASSETS_17
-- NW_PAK = Plugin_PAK_44 or Plugin_PAK_48
+// COMMON ARCHIVE PLUGINS (Supported Game Engines, for example)...
+- Unreal Engine 4                 = Plugin_PAK_38
+- Unreal Engine 3                 = Plugin_UE3_868 or Plugin_UE3_576 (with support for decompressing the whole archive first, if needed)
+                                  = Plugin_UE3_*
+- Unreal Engine 2                 = Plugin_U*
+- Unreal Engine 1                 = Plugin_U*
+- Valve Source Engine (version 1) = Plugin_VPK
+- Valve Source Engine (version 2) = Plugin_VPK_2
+- Unity3D Engine (version 5)      = Plugin_ASSETS_5
+- Unity3D Engine (version 6)      = Plugin_ASSETS_6
+- Unity3D Engine (version 8)      = Plugin_ASSETS_8
+- Unity3D Engine (version 9)      = Plugin_ASSETS_9
+- Unity3D Engine (version 14)     = Plugin_ASSETS_14
+- Unity3D Engine (version 15)     = Plugin_ASSETS_15
+- Unity3D Engine (version 17)     = Plugin_ASSETS_17
+- Unity3D Engine (version 20)     = Plugin_ASSETS_20
+- Unity3D Engine (version 22)     = Plugin_ASSETS_22
+- Node-Webkit (NW_PAK)            = Plugin_PAK_44
+                                  = Plugin_PAK_48
+- Electron (ASAR)                 = Plugin_ASAR
+- PopCap!                         = Plugin_PAK_41
+- Microsoft XNA Game Studio       = Plugin_XNB_XNB
+- Game Maker (WIN_FORM)           = Plugin_WIN_FORM
+                                  = Plugin_DAT_FORM
+- Monolith                        = Plugin_REZ_REZMGR
+- RPG Maker VX                    = Plugin_RGSSAD_RGSSAD
+- RPG Maker VX Ace                = Plugin_RGSS3A_RGSSAD
+- FMOD (version 3)                = Plugin_FSB_FSB3
+- FMOD (version 4)                = Plugin_FSB_FSB4
+- FMOD (version 5)                = Plugin_FSB_FSB5
+- FMOD (bank)                     = Plugin_BANK_RIFF
 
 // NEW IDEAS...
+- YouTube videos showing how to do common tasks
+- Make an FFMPEG Helper class, for all the viewer plugins, for commonality, similar to the QuickBMS class.
+  - Will also tell people if trying to use FFMPEG and it isn't installed. Maybe only tell them once each time they open GE?
 - Add legal info to GE similarly to the website - eg no refunds, no guarantees, no support for non-windows, etc.
 - The KeyListeners on the FileListPanels and DirPanel (for selecting next filename with given letter) should allow input of text strings
   - ie pressing 2 characters should look for files starting with these 2 characters.
@@ -90,7 +121,6 @@ import javax.swing.JFrame;
 - Integrate with Windows Explorer, like ZIP files.
   - Can then add right-click items to Windows Explorer, eg "Extract all to new folder", which calls the command-line interface of GE
     - https://superuser.com/questions/392212/how-can-i-add-a-program-to-the-context-menu-of-all-files?rq=1
-- YouTube videos showing how to do common tasks
 - Add filters to the thumbnail view, just like TreeTable
   - Include a Filename Filter above the "Groups" for simple matching like *Texture* for all files with Texture in the name
 - Add a SidePanel for "Search in contents of selected files" and "search in all file contents"
@@ -104,13 +134,10 @@ import javax.swing.JFrame;
   - Rename file/folder
   - Delete file
 - Option to auto-shrink the SidePanel when on mouseout, and unshrink when on mouseover
+- LUA Decompiler (for converting LUA bytecode into LUA script - eg. Homeworld 2)
 
 // PLUGIN THINGS...
 - Write an FFMPEG converter, to add it to the bottom of Audio Previews, so you can convert WAV to OGG, for example
-- BC7 Renderer (for "A Way Out" game, and "Park the Car" etc.) --> C:\_WATTOz\____Development_Stuff\lwjgl-release-3.1.6-custom\EXAMPLE_CODE.java
-  --> See if we can implement this --> https://github.com/hglm/detex/blob/master/decompress-bptc.c
-  --> Also BC6/7 as per game Blind Mind and First Telegram War
-  --> https://github.com/Microsoft/DirectXTex/wiki/Texconv
 - ETC1 and ETC2 Decompression from here --> C:\_WATTOz\____Development_Stuff\detex-master\detex-master
 - PVRTC Decoder --> https://www.javatips.net/api/NearInfinity-master/src/org/infinity/resource/graphics/PvrDecoder.java
 - Password-protected ZIP files --> https://github.com/srikanth-lingala/zip4j
@@ -129,7 +156,6 @@ import javax.swing.JFrame;
 - Integrate with ZModeller or Noesis or something, for generating 3D models
 
 // GAME THINGS...
-- Examine the Medal Of Honor *.xxx UE3 compressed archives - format of the compression
 - Some Iron Defense TEX images don't show properly
 - Unreal Engine...
   - Plugins for more Unreal Engine 4 games
@@ -281,6 +307,7 @@ import org.watto.event.WSWindowFocusableInterface;
 import org.watto.event.listener.WSWindowFocusableListener;
 import org.watto.ge.helper.CommandLineProcessor;
 import org.watto.ge.helper.FileTypeDetector;
+import org.watto.ge.helper.FullVersionVerifier;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.script.ScriptManager;

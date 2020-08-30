@@ -24,6 +24,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import org.watto.Settings;
+import org.watto.SingletonManager;
+import org.watto.TemporarySettings;
 import org.watto.component.task.Task_ShowPopupInNewThread;
 import org.watto.event.WSClickableInterface;
 import org.watto.event.WSKeyableInterface;
@@ -38,6 +40,7 @@ public class WSPopup extends JComponent implements WSClickableInterface, WSKeyab
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** The code for the language and settings **/
   static String code = null;
 
@@ -46,20 +49,28 @@ public class WSPopup extends JComponent implements WSClickableInterface, WSKeyab
 
   /** A message popup **/
   public static String TYPE_MESSAGE = "Message";
+
   /** An error popup **/
   public static String TYPE_ERROR = "Error";
+
   /** A confirmation popup **/
   public static String TYPE_CONFIRM = "Confirm";
 
+  /** A popup asking the user to choose a value from a list of options (a ComboBox) **/
+  public static String TYPE_OPTION = "Option";
+
   /** The OK Button **/
   public static String BUTTON_OK = "OK";
+
   /** The Yes Button **/
   public static String BUTTON_YES = "Yes";
+
   /** The No Button **/
   public static String BUTTON_NO = "No";
 
   /** Whether the panel can be disabled from appearing **/
   static boolean hidable = false;
+
   /** The type of the popup **/
   static String type = TYPE_MESSAGE;
 
@@ -68,6 +79,7 @@ public class WSPopup extends JComponent implements WSClickableInterface, WSKeyab
 
   /** The button with focus **/
   static WSButton buttonWithFocus = null;
+
   /** The checkbox that asks to hide the popup **/
   static JCheckBox hidableCheckbox = null;
 
@@ -136,6 +148,67 @@ public class WSPopup extends JComponent implements WSClickableInterface, WSKeyab
 
     return pressedEvent;
 
+  }
+
+  /***********************************************************************************************
+  Sets the options and selected value that will appear in an Options ComboBox popup
+  @param codeIn the text code of the popup
+  @param options the options to display in the ComboBox
+  @param selectedValue the default selected value of the ComboBox (or null)
+  ***********************************************************************************************/
+  public static void setOptionsList(String codeIn, String[] options, String selectedValue) {
+    SingletonManager.set("Options_" + codeIn, options);
+    TemporarySettings.set("SelectedOption_" + codeIn, selectedValue);
+  }
+
+  /***********************************************************************************************
+  Shows a non-hidable <code>WSPopupDialog</code> popup where the user chooses a value from a ComboBox
+  @param codeIn the text code of the popup
+  @param options the options to display in the ComboBox
+  @param selectedValue the default selected value of the ComboBox (or null)
+  @return the value that was chosen from the ComboBox
+  ***********************************************************************************************/
+  public static String showOption(String codeIn, String[] options, String selectedValue) {
+    setOptionsList(codeIn, options, selectedValue);
+    return show(TYPE_OPTION, codeIn, false);
+  }
+
+  /***********************************************************************************************
+  Shows a <code>WSPopupDialog</code> popup where the user chooses a value from a ComboBox
+  @param codeIn the text code of the popup
+  @param hidableIn whether the popup can be disabled from appearing or not
+  @param options the options to display in the ComboBox
+  @param selectedValue the default selected value of the ComboBox (or null)
+  @return the value that was chosen from the ComboBox
+  ***********************************************************************************************/
+  public static String showOption(String codeIn, boolean hidableIn, String[] options, String selectedValue) {
+    setOptionsList(codeIn, options, selectedValue);
+    return show(TYPE_OPTION, codeIn, hidableIn);
+  }
+
+  /***********************************************************************************************
+  Shows a non-hidable <code>WSPopupDialog</code> popup where the user chooses a value from a ComboBox
+  @param codeIn the text code of the popup
+  @param options the options to display in the ComboBox
+  @param selectedValue the default selected value of the ComboBox (or null)
+  @return the value that was chosen from the ComboBox
+  ***********************************************************************************************/
+  public static void showOptionInNewThread(String codeIn, String[] options, String selectedValue) {
+    setOptionsList(codeIn, options, selectedValue);
+    generateNewThread(TYPE_OPTION, codeIn, false);
+  }
+
+  /***********************************************************************************************
+  Shows a <code>WSPopupDialog</code> popup where the user chooses a value from a ComboBox
+  @param codeIn the text code of the popup
+  @param hidableIn whether the popup can be disabled from appearing or not
+  @param options the options to display in the ComboBox
+  @param selectedValue the default selected value of the ComboBox (or null)
+  @return the value that was chosen from the ComboBox
+  ***********************************************************************************************/
+  public static void showOptionInNewThread(String codeIn, boolean hidableIn, String[] options, String selectedValue) {
+    setOptionsList(codeIn, options, selectedValue);
+    generateNewThread(TYPE_OPTION, codeIn, hidableIn);
   }
 
   /***********************************************************************************************
@@ -281,6 +354,21 @@ public class WSPopup extends JComponent implements WSClickableInterface, WSKeyab
   public boolean onClick(JComponent component, MouseEvent event) {
     if (component instanceof JButton) {
       pressedEvent = ((WSComponent) component).getCode();
+
+      if (type.equals(TYPE_OPTION)) {
+        // We want to return the selected value, not the button that was clicked.
+        try {
+          WSComponent comboComponent = ComponentRepository.get("WSPopup_OptionsCombo");
+          if (comboComponent != null && comboComponent instanceof WSComboBox) {
+            WSComboBox comboBox = (WSComboBox) comboComponent;
+            String selectedValue = (String) comboBox.getSelectedItem();
+            pressedEvent = selectedValue;
+          }
+        }
+        catch (Throwable t) {
+        }
+      }
+
       instance.dispose();
     }
     return true;

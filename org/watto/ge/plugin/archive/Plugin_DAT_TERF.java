@@ -1,30 +1,29 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.ErrorLogger;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -48,7 +47,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
     setProperties(true, true, true, false);
 
     setGames("Madden 2004",
-        "Madden 2005");
+        "Madden 2005",
+        "NFL Head Coach");
     setExtensions("dat");
     setPlatforms("PC");
 
@@ -76,7 +76,7 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       // Header Size
       int headerSize = fm.readInt();
-      if (headerSize == 64 || headerSize == 16 || headerSize == 2048) {
+      if (headerSize == 64 || headerSize == 16 || headerSize == 2048 || headerSize == 128) {
         rating += 5;
       }
 
@@ -87,17 +87,12 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       // Padding Size
       int paddingSize = fm.readShort();
-      if (paddingSize == 64 || paddingSize == 4 || paddingSize == 2048) {
+      if (paddingSize == 64 || paddingSize == 4 || paddingSize == 2048 || paddingSize == 128) {
         rating += 5;
       }
 
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readShort())) {
-        rating += 5;
-      }
-
-      // null (if headersize == 64)
-      if (headerSize == 64 && fm.readInt() == 0) {
         rating += 5;
       }
 
@@ -163,6 +158,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       compressedArchive = true;
 
+      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+
       long arcSize = fm.getLength();
 
       // 4 - Unknown (83886594)
@@ -174,14 +171,34 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
       FieldValidator.checkNumFiles(numFiles);
 
       // 112 - null
-      // 4 - Directory Header (DIR1)
-      fm.skip(116);
+      fm.skip(112);
 
-      // 4 - Directory Length (including these 2 fields) // *2 to include the compressed directory
-      int relOffset = (fm.readInt() * 2) + 128;
+      long dirOffset = fm.getOffset();
+
+      // 4 - Directory Header (DIR1)
+      String header = fm.readString(4);
+      if (header.equals("HSH1")) {
+
+        // 4 - Directory Length (including these 2 fields)
+        int dirLength = fm.readInt() - 8;
+        FieldValidator.checkLength(dirLength, arcSize);
+
+        fm.skip(dirLength);
+
+        dirOffset = fm.getOffset();
+
+        // 4 - Directory Header (DIR1)
+        fm.skip(4);
+      }
+
+      // 4 - Directory Length (including these 2 fields)
+      int dirLength = fm.readInt();
+      FieldValidator.checkLength(dirLength, arcSize);
+
+      long relOffset = (dirLength * 2) + dirOffset; // *2 to include the compressed directory
 
       Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles * 2);
+      TaskProgressManager.setMaximum(numFiles);
 
       // Files Directory
       for (int i = 0; i < numFiles; i++) {
@@ -205,6 +222,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
         TaskProgressManager.setValue(i);
       }
 
+      fm.seek(dirOffset + dirLength);
+
       // 4 - Compression Header (COMP)
       // 4 - Compression Length (including these 2 fields)
       fm.skip(8);
@@ -222,19 +241,21 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
           compressed = true;
         }
         else {
-          System.out.println("BAD COMPRESSION VALUE");
+          ErrorLogger.log("[DAT_TERF] Unknown compression type: " + compTag);
           return null;
         }
 
         // 4 - Decompressed Size (0=uncompressed)
         if (compressed) {
-          resources[i].setDecompressedLength(fm.readInt());
+          Resource resource = resources[i];
+          resource.setDecompressedLength(fm.readInt());
+          resource.setExporter(exporter);
         }
         else {
           fm.skip(4);
         }
 
-        TaskProgressManager.setValue(numFiles + i);
+        TaskProgressManager.setValue(i);
       }
 
       fm.close();
@@ -257,6 +278,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
     try {
 
       compressedArchive = true;
+
+      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
 
       long arcSize = fm.getLength();
 
@@ -316,13 +339,15 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
           compressed = true;
         }
         else {
-          System.out.println("BAD COMPRESSION VALUE");
+          ErrorLogger.log("[DAT_TERF] Unknown compression type: " + compTag);
           return null;
         }
 
         // 4 - Decompressed Size (0=uncompressed)
         if (compressed) {
-          resources[i].setDecompressedLength(fm.readInt());
+          Resource resource = resources[i];
+          resource.setDecompressedLength(fm.readInt());
+          resource.setExporter(exporter);
         }
         else {
           fm.skip(4);
@@ -344,13 +369,15 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
   /**
    **********************************************************************************************
-   * AN ARCHIVE WITH SOME COMPRESSED FILES
+   * SOMETIMES COMPRESSED ARCHIVE, AN ARCHIVE WITH SOME COMPRESSED FILES
    **********************************************************************************************
    **/
   public Resource[] read2048(FileManipulator fm, File path) {
     try {
 
       compressedArchive = true;
+
+      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
 
       long arcSize = fm.getLength();
 
@@ -362,15 +389,39 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
       int numFiles = fm.readShort();
       FieldValidator.checkNumFiles(numFiles);
 
-      // 112 - null
-      // 4 - Directory Header (DIR1)
-      fm.seek(2048 + 4);
+      // 2032 - null
+      fm.skip(2032);
 
-      // 4 - Directory Length (including these 2 fields) // *2 to include the compressed directory
-      int relOffset = (fm.readInt() * 2) + 2048;
+      long dirOffset = fm.getOffset();
+
+      // 4 - Directory Header (DIR1)
+      fm.skip(4);
+
+      // 4 - Directory Length (including these 2 fields)
+      int dirLength = fm.readInt();
+      FieldValidator.checkLength(dirLength, arcSize);
+
+      // Lets check whether there is a Compressed directory
+      fm.seek(dirOffset + dirLength);
+      if (fm.readString(4).equals("COMP")) {
+        compressedArchive = true;
+      }
+      else {
+        compressedArchive = false;
+      }
+
+      fm.seek(dirOffset + 8);
+
+      long relOffset = 0;
+      if (compressedArchive) {
+        relOffset = (dirLength * 2) + dirOffset; // *2 to include the compressed directory
+      }
+      else {
+        relOffset = dirLength + dirOffset;
+      }
 
       Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles * 2);
+      TaskProgressManager.setMaximum(numFiles);
 
       // Files Directory
       for (int i = 0; i < numFiles; i++) {
@@ -394,36 +445,42 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
         TaskProgressManager.setValue(i);
       }
 
-      // 4 - Compression Header (COMP)
-      // 4 - Compression Length (including these 2 fields)
-      fm.skip(8);
+      if (compressedArchive) {
+        fm.seek(dirOffset + dirLength);
 
-      // Compression Directory
-      for (int i = 0; i < numFiles; i++) {
+        // 4 - Compression Header (COMP)
+        // 4 - Compression Length (including these 2 fields)
+        fm.skip(8);
 
-        boolean compressed = false;
+        // Compression Directory
+        for (int i = 0; i < numFiles; i++) {
 
-        // 4 - Compression Tag (0=uncompressed, 5=compressed)
-        int compTag = fm.readInt();
-        if (compTag == 0) {
-        }
-        else if (compTag == 5) {
-          compressed = true;
-        }
-        else {
-          System.out.println("BAD COMPRESSION VALUE");
-          return null;
-        }
+          boolean compressed = false;
 
-        // 4 - Decompressed Size (0=uncompressed)
-        if (compressed) {
-          resources[i].setDecompressedLength(fm.readInt());
-        }
-        else {
-          fm.skip(4);
-        }
+          // 4 - Compression Tag (0=uncompressed, 5=compressed)
+          int compTag = fm.readInt();
+          if (compTag == 0) {
+          }
+          else if (compTag == 5) {
+            compressed = true;
+          }
+          else {
+            ErrorLogger.log("[DAT_TERF] Unknown compression type: " + compTag);
+            return null;
+          }
 
-        TaskProgressManager.setValue(numFiles + i);
+          // 4 - Decompressed Size (0=uncompressed)
+          if (compressed) {
+            Resource resource = resources[i];
+            resource.setDecompressedLength(fm.readInt());
+            resource.setExporter(exporter);
+          }
+          else {
+            fm.skip(4);
+          }
+
+          TaskProgressManager.setValue(i);
+        }
       }
 
       fm.close();
@@ -510,6 +567,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       compressedArchive = true;
 
+      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+
       long arcSize = fm.getLength();
 
       // 4 - Unknown (83886594)
@@ -577,13 +636,15 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
           compressed = true;
         }
         else {
-          System.out.println("BAD COMPRESSION VALUE");
+          ErrorLogger.log("[DAT_TERF] Unknown compression type: " + compTag);
           return null;
         }
 
         // 4 - Decompressed Size (0=uncompressed)
         if (compressed) {
-          resources[i].setDecompressedLength(fm.readInt());
+          Resource resource = resources[i];
+          resource.setDecompressedLength(fm.readInt());
+          resource.setExporter(exporter);
         }
         else {
           fm.skip(4);

@@ -30,7 +30,7 @@ public class Plugin_OSA_AUFS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_OSA_AUFS() {
@@ -40,7 +40,9 @@ public class Plugin_OSA_AUFS extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Broken Sword 5");
+    setGames("Broken Sword: Shadow of the Templars",
+        "Broken Sword 2: The Smoking Mirror",
+        "Broken Sword 5: The Serpent's Curse");
     setExtensions("osa"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -49,11 +51,13 @@ public class Plugin_OSA_AUFS extends ArchivePlugin {
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
 
+    setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

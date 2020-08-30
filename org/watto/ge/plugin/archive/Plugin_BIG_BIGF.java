@@ -53,6 +53,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
     setGames("Ajax Club Football 2005",
         "Battlefield 2 (PS2)",
         "Command And Conquer: Generals",
+        "Command And Conquer 3",
         "Create",
         "Def Jam - Fight For NY",
         "EA Cricket 2005",
@@ -76,7 +77,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
         "FIFA Manager 11",
         "FIFA World Cup 2006",
         "Harry Potter And The Goblet Of Fire",
-        "Harry Potter And The Goblet Of Fire (PS2)",
+        "Harry Potter And The Half-Blood Prince",
         "Harry Potter And The Order Of The Phoenix",
         "NBA 2003",
         "NBA 2004",
@@ -90,6 +91,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
         "Need For Speed 3: Hot Pursuit",
         "Need For Speed: Hot Pursuit 2",
         "Need For Speed: Porsche Unleashed",
+        "Red Alert 3",
         "Starlancer",
         "UEFA Champions League 2004",
         "UEFA Champions League 2005",
@@ -184,7 +186,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -237,12 +239,15 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
     if (extension.equalsIgnoreCase("shd") || extension.equalsIgnoreCase("loc") || extension.equalsIgnoreCase("skn") || extension.equalsIgnoreCase("irr")) {
       return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "TXT");
     }
+    else if (extension.equalsIgnoreCase("cdata")) { // Red Alert 3 Audio Files
+      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "FFMPEG_Audio_EA_SCHl");
+    }
     return null;
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -346,7 +351,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

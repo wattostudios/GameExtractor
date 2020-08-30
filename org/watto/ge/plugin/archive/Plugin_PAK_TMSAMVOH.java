@@ -32,7 +32,7 @@ public class Plugin_PAK_TMSAMVOH extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PAK_TMSAMVOH() {
@@ -46,7 +46,10 @@ public class Plugin_PAK_TMSAMVOH extends ArchivePlugin {
         "Airport Tycoon 3",
         "Blowout",
         "Crusades: Quest For Power",
+        "Daemonica",
         "Mob Enforcer",
+        "Mystery Case Files: Prime Suspects",
+        "Mystery Case Files: Ravenhearst",
         "Sprint Cars: Road To Knoxville");
     setExtensions("pak");
     setPlatforms("PC");
@@ -55,11 +58,13 @@ public class Plugin_PAK_TMSAMVOH extends ArchivePlugin {
     //             "",""
     //             );
 
+    //setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

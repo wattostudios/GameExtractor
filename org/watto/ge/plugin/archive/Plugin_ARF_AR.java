@@ -1,34 +1,30 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Custom_ARF_AR;
-import org.watto.ge.plugin.resource.ReplacableResource_FileID;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_XOR;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
-import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -39,7 +35,7 @@ public class Plugin_ARF_AR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_ARF_AR() {
@@ -50,7 +46,8 @@ public class Plugin_ARF_AR extends ArchivePlugin {
     setProperties(true, false, false, false);
     setCanImplicitReplace(true);
 
-    setGames("Snowy: Fish Frenzy");
+    setGames("Snowy: Fish Frenzy",
+        "The Apprentice: Los Angeles");
     setExtensions("arf");
     setPlatforms("PC");
 
@@ -58,7 +55,7 @@ public class Plugin_ARF_AR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -116,7 +113,7 @@ public class Plugin_ARF_AR extends ArchivePlugin {
       //      - Uncompressed files MUST know their LENGTH
 
       addFileTypes();
-      ExporterPlugin exporter = Exporter_Custom_ARF_AR.getInstance();
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
 
       // RESETTING THE GLOBAL VARIABLES
 
@@ -174,28 +171,29 @@ public class Plugin_ARF_AR extends ArchivePlugin {
         fm.skip(4);
 
         // 4 - File Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
-
         long offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
-        long lengthPointerLocation = fm.getOffset();
-        long lengthPointerLength = 4;
-
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Hash
-        int fileID = IntConverter.changeFormat(fm.readInt());
-        //fm.skip(4);
+        // 1 - File Data XOR Value
+        // 3 - Unknown
+        //int fileID = IntConverter.changeFormat(fm.readInt());
+        int xorValue = ByteConverter.unsign(fm.readByte());
+        fm.skip(3);
 
         String filename = names[i];
 
+        long[] blockOffsets = new long[] { offset, offset + 20 };
+        long[] blockLengths = new long[] { 20, length - 20 };
+        long[] blockDecompLengths = new long[] { 20, length - 20 };
+        ExporterPlugin[] exporters = new ExporterPlugin[] { new Exporter_XOR(xorValue), exporterDefault };
+        BlockVariableExporterWrapper blockExporter = new BlockVariableExporterWrapper(exporters, blockOffsets, blockLengths, blockDecompLengths);
+
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new ReplacableResource_FileID(path, fileID, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength, length, 0, 0, exporter);
-        //resources[i] = new ReplacableResource(path,filename,offset,offsetPointerLocation,offsetPointerLength,length,lengthPointerLocation,lengthPointerLength);
+        resources[i] = new Resource(path, filename, offset, length, length, blockExporter);
 
         TaskProgressManager.setValue(i);
       }

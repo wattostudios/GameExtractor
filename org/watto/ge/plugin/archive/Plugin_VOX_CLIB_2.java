@@ -42,9 +42,12 @@ public class Plugin_VOX_CLIB_2 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Kathy Rain",
+    setGames("Gemini Rue",
+        "Kathy Rain",
         "Kings Quest 1: Quest for the Crown",
         "Kings Quest 2: Romancing the Stones",
+        "Life Of D. Duck 2",
+        "Loftus",
         "Quest For Glory 2",
         "Reality Falls",
         "Symploke");

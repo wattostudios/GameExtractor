@@ -25,6 +25,7 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /** the exporters that will do all the actual work **/
   ExporterPlugin[] exporters = null;
+
   ExporterPlugin currentExporter = null;
 
   /** the offset to each compressed block **/
@@ -40,7 +41,7 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public BlockVariableExporterWrapper() {
@@ -49,19 +50,23 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public BlockVariableExporterWrapper(ExporterPlugin[] exporters, long[] blockOffsets, long[] blockLengths, long[] decompLengths) {
+    setName("Block Variable Exporter Wrapper");
     this.exporters = exporters;
     this.blockOffsets = blockOffsets;
     this.blockLengths = blockLengths;
     this.decompLengths = decompLengths;
+
+    setName("Block Variable Exporter Wrapper");
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -93,7 +98,7 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -115,7 +120,7 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -137,7 +142,7 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -163,7 +168,7 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

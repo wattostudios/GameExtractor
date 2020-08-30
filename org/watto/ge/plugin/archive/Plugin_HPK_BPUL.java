@@ -15,11 +15,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_LZ4;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
@@ -32,10 +34,15 @@ import org.watto.task.TaskProgressManager;
 public class Plugin_HPK_BPUL extends ArchivePlugin {
 
   int realNumFiles = 0;
+
   int numFiles = 0;
+
   int[] offsets;
+
   int[] lengths;
+
   String[] names;
+
   boolean[] hasName;
 
   /**
@@ -51,6 +58,8 @@ public class Plugin_HPK_BPUL extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Grand Ages: Rome",
+        "Imperium Romanum",
+        "Surviving Mars",
         "Tropico 3",
         "Tropico 4",
         "Tropico 5");
@@ -58,9 +67,9 @@ public class Plugin_HPK_BPUL extends ArchivePlugin {
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("opus", "Text Document", FileType.TYPE_AUDIO));
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
   }
 
@@ -125,7 +134,8 @@ public class Plugin_HPK_BPUL extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
+      ExporterPlugin exporterLZ4 = Exporter_LZ4.getInstance();
 
       // RESETTING GLOBAL VARIABLES
       numFiles = 0;
@@ -237,7 +247,8 @@ public class Plugin_HPK_BPUL extends ArchivePlugin {
         fm.seek(relativeOffset);
 
         // 4 - Compression Header
-        if (fm.readString(4).equals("ZLIB")) {
+        String compressionHeader = fm.readString(4);
+        if (compressionHeader.equals("ZLIB") || compressionHeader.equals("LZ4 ")) {
           // compressed
 
           // 4 - Decompressed Length
@@ -278,7 +289,13 @@ public class Plugin_HPK_BPUL extends ArchivePlugin {
 
           // Set the properties on the resource
           resource.setDecompressedLength(decompLength);
-          resource.setExporter(new BlockExporterWrapper(exporter, offsets, lengths, decompLengths));
+
+          if (compressionHeader.equals("ZLIB")) {
+            resource.setExporter(new BlockExporterWrapper(exporterZLib, offsets, lengths, decompLengths));
+          }
+          else if (compressionHeader.equals("LZ4 ")) {
+            resource.setExporter(new BlockExporterWrapper(exporterLZ4, offsets, lengths, decompLengths));
+          }
 
         }
       }
@@ -296,7 +313,7 @@ public class Plugin_HPK_BPUL extends ArchivePlugin {
 
   /**
    **********************************************************************************************
-
+  
    **********************************************************************************************
    **/
 

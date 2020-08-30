@@ -2,12 +2,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -18,7 +18,7 @@ public class Plugin_PAK_37 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PAK_37() {
@@ -40,7 +40,7 @@ public class Plugin_PAK_37 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -151,8 +151,18 @@ public class Plugin_PAK_37 extends ArchivePlugin {
         // 4 - null
         fm.skip(4);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, "", offset, length);
+        if (decompLength != length) {
+          // compressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, "", offset, length, decompLength);
+        }
+        else {
+          // uncompressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, "", offset, length);
+        }
 
         TaskProgressManager.setValue(i);
       }
@@ -164,7 +174,10 @@ public class Plugin_PAK_37 extends ArchivePlugin {
       for (int i = 0; i < numFiles; i++) {
         // X - Filename
         String filename = fm.readString(filenameLengths[i]);
-        resources[i].setName(filename);
+
+        Resource resource = resources[i];
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       fm.close();

@@ -43,6 +43,10 @@ public class Plugin_PCK_AKPK extends ArchivePlugin {
     setProperties(true, false, true, false);
 
     setGames("APB Reloaded",
+        "Bioshock Infinite",
+        "Borderlands: The Pre-Sequel",
+        "Borderlands 2",
+        "Darksiders 2",
         "Middle Earth: Shadow Of Mordor",
         "Resident Evil 2");
     setExtensions("pck"); // MUST BE LOWER CASE

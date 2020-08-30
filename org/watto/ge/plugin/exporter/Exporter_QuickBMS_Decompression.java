@@ -285,4 +285,28 @@ public class Exporter_QuickBMS_Decompression extends Exporter_Default {
     }
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public String buildScript(Resource sourceFile) {
+    try {
+
+      String script = "";
+
+      String sourceName = sourceFile.getName();
+
+      script += "set NAME " + sourceName + " \n";
+      script += "comtype " + compressionType + " \n";
+      script += "clog NAME " + sourceFile.getOffset() + " " + sourceFile.getLength() + " " + sourceFile.getDecompressedLength() + " \n";
+
+      return script;
+
+    }
+    catch (Throwable t) {
+      return null;
+    }
+  }
+
 }

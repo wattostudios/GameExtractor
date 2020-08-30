@@ -1,6 +1,6 @@
 <languagePack>
 	<name>Portuguese</name>
-	<version>3.10</version>
+	<version>3.11</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -1227,7 +1227,7 @@
 	
 <!-- New with 3.08 -->
 		<lang code="IdentifyUnknownFileTypes" value="Identifying File Types" />
-		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Text" value="Idenitify Unknown File Types (slower)" />
+		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Text" value="Identify Unknown File Types (slower)" />
 		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Tooltip" value="If filenames aren't stored in an archive, attempt to automatically identify the types of files (ticked)" />
 		
 <!-- New with 3.09 -->
@@ -1321,6 +1321,40 @@
 		
 		<lang code="HexEditor_LittleEndian" value="Little Endian" />
 		<lang code="HexEditor_BigEndian" value="Big Endian" />
+		
+<!-- New with 3.11 -->
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesExported_Show_Text" value="No Files Extracted" />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesExported_Show_Tooltip" value="Show a popup message when there was a problem, and no files could be extracted." />
+		<lang code="WSLabel_ExportFiles_NoFilesExported_Text" value="There was a problem trying to extract the files." />
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_SomeFilesExported_Show_Text" value="Some Files Extracted" />
+		<lang code="WSCheckBox_Popup_ExportFiles_SomeFilesExported_Show_Tooltip" value="Show a popup message when some of the files could be extracted, but not all of them." />
+		<lang code="WSLabel_ExportFiles_SomeFilesExported_Text" value="Some files were successfully extracted, but not all of them." />
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_DirectoryNotWritable_Show_Text" value="Extract Directory Not Writable" />
+		<lang code="WSCheckBox_Popup_ExportFiles_DirectoryNotWritable_Show_Tooltip" value="Show a popup message when trying to extract files to a directory that isn't writable, such as a read-only directory (a CD/DVD) or without write permissions." />
+		<lang code="WSLabel_ExportFiles_DirectoryNotWritable_Text" value="\nUnable to extract files to the directory. Please check that it's not read-only (eg not a CD/DVD),\nthat you have permissions to write to the directory, or try choosing a different directory to extract to.\n\n " />
+
+		<lang code="WSLabel_ChooseCompressionType_Text" value="Please choose the type of compression you want to use." />
+		
+		<lang code="Progress_DecryptingArchive" value="Decrypting Archive" />
+		
+		<lang code="ResourceProperty_ColorCount" value="Number of Colors" />
+		<lang code="ResourceProperty_DecompressedLength" value="Decompressed Length" />
+		<lang code="ResourceProperty_FileID" value="File ID" />
+		<lang code="ResourceProperty_Filename" value="Filename" />
+		<lang code="ResourceProperty_FrameCount" value="Number of Frames" />
+		<lang code="ResourceProperty_Hash" value="Hash Value" />
+		<lang code="ResourceProperty_Height" value="Image Height" />
+		<lang code="ResourceProperty_ImageFormat" value="Image Pixel Format" />
+		<lang code="ResourceProperty_Length" value="Length" />
+		<lang code="ResourceProperty_MipmapCount" value="Number of Mipmaps" />
+		<lang code="ResourceProperty_Offset" value="Offset" />
+		<lang code="ResourceProperty_Version" value="Version" />
+		<lang code="ResourceProperty_Width" value="Image Width" />
+		<lang code="ResourceProperty_XOffset" value="Image X Offset" />
+		<lang code="ResourceProperty_YOffset" value="Image Y Offset" />
 		
 		<lang code="" value="" />
 		

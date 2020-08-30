@@ -24,6 +24,7 @@ public class ReplacableResource extends Resource {
    * when this file is replaced, these fields remember the original offset and length of the file
    **/
   protected long origLength = -1;
+
   protected long origOffset = -1;
 
   protected ReplaceDetails[] replaceDetails = new ReplaceDetails[0];
@@ -84,7 +85,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, ExporterPlugin exporter, ReplaceDetails... replaceDetails) {
@@ -94,7 +95,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset) {
@@ -103,7 +104,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset, long length) {
@@ -112,7 +113,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset, long offsetPointerLocation, long offsetPointerLength) {
@@ -124,7 +125,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset, long length, long decompLength, ExporterPlugin exporter) {
@@ -147,7 +148,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset, long offsetPointerLocation, long offsetPointerLength, long length, long lengthPointerLocation, long lengthPointerLength) {
@@ -159,7 +160,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset, long offsetPointerLocation, long offsetPointerLength, long length, long lengthPointerLocation, long lengthPointerLength, long decompLength, long decompPointerLocation, long decompPointerLength) {
@@ -171,7 +172,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, long offset, long offsetPointerLocation, long offsetPointerLength, long length, long lengthPointerLocation, long lengthPointerLength, long decompLength, long decompPointerLocation, long decompPointerLength, ExporterPlugin exporter) {
@@ -183,7 +184,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplacableResource(File sourcePath, String name, ReplaceDetails... replaceDetails) {
@@ -216,7 +217,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void addReplaceDetails(ReplaceDetails... details) {
@@ -237,12 +238,20 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public Object clone() {
-    ReplacableResource newRes = new ReplacableResource(sourcePath, origName, exporter, replaceDetails);
+
+    // clone the ReplaceDetails
+    int numDetails = replaceDetails.length;
+    ReplaceDetails[] clonedDetails = new ReplaceDetails[numDetails];
+    for (int i = 0; i < numDetails; i++) {
+      clonedDetails[i] = (ReplaceDetails) replaceDetails[i].clone();
+    }
+
+    ReplacableResource newRes = new ReplacableResource(sourcePath, origName, exporter, clonedDetails);
 
     // Important - sets the new and orig name!
     newRes.setName(name);
@@ -284,7 +293,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getDecompPointerLength() {
@@ -293,7 +302,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getDecompPointerLocation() {
@@ -302,7 +311,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -316,7 +325,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getImplicitReplaceDecompressed() {
@@ -329,7 +338,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getImplicitReplacedOffset() {
@@ -343,7 +352,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getImplicitReplacedOffset_clone() {
@@ -352,7 +361,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails[] getImplicitReplaceFields() {
@@ -365,7 +374,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getImplicitReplaceFile() {
@@ -379,7 +388,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getImplicitReplaceLength() {
@@ -392,7 +401,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getImplicitReplaceOffset() {
@@ -405,7 +414,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -415,7 +424,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getLengthPointerLength() {
@@ -424,7 +433,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getLengthPointerLocation() {
@@ -433,7 +442,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -443,7 +452,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getOffsetPointerLength() {
@@ -452,7 +461,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getOffsetPointerLocation() {
@@ -461,7 +470,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getOriginalLength() {
@@ -470,7 +479,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getOriginalOffset() {
@@ -479,7 +488,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getReplaceDecomp() {
@@ -488,7 +497,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails[] getReplaceDetails() {
@@ -497,7 +506,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getReplaceDetails(String name) {
@@ -511,7 +520,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getReplaceDetailsLength(String name) {
@@ -524,7 +533,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getReplaceDetailsOffset(String name) {
@@ -537,7 +546,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getReplaceDetailsValue(String name) {
@@ -550,7 +559,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getReplaceLength() {
@@ -559,7 +568,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ReplaceDetails getReplaceOffset() {
@@ -578,7 +587,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -607,7 +616,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -617,7 +626,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setDecompressedLength(ReplaceDetails replaceDecomp) {
@@ -626,7 +635,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setImplicitReplacedOffset(long implicitReplacedOffset) {
@@ -636,7 +645,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -646,7 +655,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setLength(ReplaceDetails replaceLength) {
@@ -655,7 +664,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -665,7 +674,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setOffset(ReplaceDetails replaceOffset) {
@@ -674,7 +683,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setReplaceDetails(ReplaceDetails details) {
@@ -683,7 +692,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setReplaceDetails(ReplaceDetails[] details) {
@@ -692,7 +701,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setReplaceDetails(String name, ReplaceDetails details) {
@@ -707,7 +716,7 @@ public class ReplacableResource extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setReplaceDetailsValue(String name, long value) {

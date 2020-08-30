@@ -388,8 +388,6 @@ public class UE4Helper_4 {
    **/
   public static UnrealProperty readFloatProperty(FileManipulator fm, UnrealProperty property) {
     try {
-      // 1 - null
-      fm.skip(1);
 
       // 4 - Float Value
       float floatValue = fm.readFloat();
@@ -877,6 +875,9 @@ public class UE4Helper_4 {
       // 8 - Class ID
       long typeID = fm.readLong();
       String type = names[(int) typeID];
+
+      // 16 - null
+      fm.skip(16);
 
       // innerProperty inherits the length of the StructProperty
       UnrealProperty innerProperty = new UnrealProperty("", 0, type, typeID, property.getLength());

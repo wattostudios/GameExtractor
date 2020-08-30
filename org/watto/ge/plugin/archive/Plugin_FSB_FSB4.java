@@ -46,6 +46,7 @@ public class Plugin_FSB_FSB4 extends ArchivePlugin {
 
     setExtensions("fsb");
     setGames("A Vampyre Story",
+        "Costume Quest",
         "Cryostasis",
         "Demigod",
         "Dragon Age: Origins",

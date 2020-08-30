@@ -190,7 +190,8 @@ public class Exporter_Custom_FSB5_OGG extends ExporterPlugin {
       exporter.close();
       //System.out.println("Opening block at " + blockOffsets[currentBlock] + " with compressed length " + blockLengths[currentBlock]);
       exporter.open(new Resource(sourceFile, "", blockOffsets[currentBlock], blockLengths[currentBlock]));
-      return exporter.available();
+      boolean result = exporter.available();
+      return result;
     }
     else {
       // finished reading the last block

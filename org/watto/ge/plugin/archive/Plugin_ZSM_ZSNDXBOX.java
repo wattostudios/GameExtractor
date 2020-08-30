@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -27,6 +26,7 @@ import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Custom_ZSM_ZSNDXBOX;
 import org.watto.ge.plugin.resource.Resource_FileID;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -37,7 +37,7 @@ public class Plugin_ZSM_ZSNDXBOX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_ZSM_ZSNDXBOX() {
@@ -48,7 +48,8 @@ public class Plugin_ZSM_ZSNDXBOX extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("X-Men: Legends",
-        "X-Men Legends 2: Rise Of Apocalypse");
+        "X-Men Legends 2: Rise Of Apocalypse",
+        "X-Men: The Official Game");
     setExtensions("zsm", "zss");
     setPlatforms("PC", "XBox");
 
@@ -56,7 +57,7 @@ public class Plugin_ZSM_ZSNDXBOX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -88,7 +89,7 @@ public class Plugin_ZSM_ZSNDXBOX extends ArchivePlugin {
       }
 
       // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
+      if (FieldValidator.checkNumFiles(fm.readInt() + 1)) {
         rating += 5;
       }
 
@@ -184,10 +185,7 @@ public class Plugin_ZSM_ZSNDXBOX extends ArchivePlugin {
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - Unknown (1/3/106)
-        if (fm.readInt() != 106) {
-          // 8 - null
-          fm.skip(8);
-        }
+        fm.skip(4);
 
         if (length == 0 && offset == 0) {
           // not all the files are used - ie blank entries for the rest of the directory
@@ -196,8 +194,14 @@ public class Plugin_ZSM_ZSNDXBOX extends ArchivePlugin {
           i = numFiles;
         }
         else {
+          // optional null padding
+          byte testByte = fm.readByte();
+          while (testByte == 0) {
+            testByte = fm.readByte();
+          }
+
           // 64 - Filename (null terminated)
-          String filename = fm.readNullString(64);
+          String filename = ((char) testByte) + fm.readNullString(63);
           FieldValidator.checkFilename(filename);
 
           int fileID = audioDataOffset;

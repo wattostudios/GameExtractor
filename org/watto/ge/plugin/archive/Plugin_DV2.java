@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.component.WSPluginManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -34,7 +35,7 @@ public class Plugin_DV2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_DV2() {
@@ -44,20 +45,19 @@ public class Plugin_DV2 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Divinity 2");
+    setGames("Divinity 2",
+        "Divinity 2: Ego Draconis");
     setExtensions("dv2"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("nif", "NIF Image", FileType.TYPE_IMAGE));
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -71,18 +71,21 @@ public class Plugin_DV2 extends ArchivePlugin {
       }
 
       // 4 - Unknown (5)
-      if (fm.readInt() == 5) {
+      int version = fm.readInt();
+      if (version == 4 || version == 5) {
         rating += 5;
       }
 
-      // 4 - Unknown (1)
-      if (fm.readInt() == 1) {
-        rating += 5;
-      }
+      if (version == 5) {
+        // 4 - Unknown (1)
+        if (fm.readInt() == 1) {
+          rating += 5;
+        }
 
-      // 4 - Unknown (4)
-      if (fm.readInt() == 4) {
-        rating += 5;
+        // 4 - Unknown (4)
+        if (fm.readInt() == 4) {
+          rating += 5;
+        }
       }
 
       // 2 - Unknown (256)
@@ -144,11 +147,17 @@ public class Plugin_DV2 extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // 4 - Unknown (5)
-      // 4 - Unknown (1)
-      // 4 - Unknown (4)
+      // 4 - Version (4/5)
+      int version = fm.readInt();
+
+      if (version == 5) {
+        // 4 - Unknown (1)
+        // 4 - Unknown (4)
+        fm.skip(8);
+      }
+
       // 2 - Unknown (256)
-      fm.skip(14);
+      fm.skip(2);
 
       // 4 - First File Offset
       int firstFileOffset = fm.readInt();
@@ -165,7 +174,12 @@ public class Plugin_DV2 extends ArchivePlugin {
       FieldValidator.checkNumFiles(numFiles);
 
       // go back and read the filenames
-      fm.seek(22);
+      if (version == 5) {
+        fm.seek(22);
+      }
+      else {
+        fm.seek(14);
+      }
 
       String[] filenames = new String[numFiles];
       for (int i = 0; i < numFiles; i++) {
@@ -177,7 +191,12 @@ public class Plugin_DV2 extends ArchivePlugin {
         filenames[i] = filename;
       }
 
-      fm.seek(22 + filenameDirLength + 4);
+      if (version == 5) {
+        fm.seek(22 + filenameDirLength + 4);
+      }
+      else {
+        fm.seek(14 + filenameDirLength + 4);
+      }
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);

@@ -22,6 +22,7 @@ import org.watto.Language;
 import org.watto.Settings;
 import org.watto.component.WSPluginException;
 import org.watto.component.WSPopup;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -42,11 +43,12 @@ import org.watto.task.TaskProgressManager;
 public abstract class PluginGroup_U extends ArchivePlugin {
 
   protected static long version = -1;
+
   protected static String[] names;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static long getVersion() {
@@ -457,7 +459,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public PluginGroup_U(String code, String name) {
@@ -472,11 +474,19 @@ public abstract class PluginGroup_U extends ArchivePlugin {
     setGames("");
     setPlatforms("PC", "XBox");
 
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("package", "Package", FileType.TYPE_OTHER),
+        new FileType("palette", "Color Palette", FileType.TYPE_OTHER),
+        new FileType("sound", "Sound File", FileType.TYPE_AUDIO),
+        new FileType("soundnodewave", "Sound File", FileType.TYPE_AUDIO),
+        new FileType("texture", "Texture Image", FileType.TYPE_IMAGE),
+        new FileType("texture2d", "Texture Image", FileType.TYPE_IMAGE));
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public FileManipulator checkCompression(FileManipulator fm) throws WSPluginException {
@@ -598,7 +608,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void decompressFile(FileManipulator fm, FileManipulator out) {
@@ -684,7 +694,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public int getMatchRating(FileManipulator fm, int version) {
@@ -706,7 +716,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
 
       // 2 - Version
       if (fm.readShort() == version) {
-        rating += 5;
+        rating += 30;
       }
       else if (version == -1) {
         // just leave the rating at 50
@@ -725,7 +735,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public int getMatchRating(FileManipulator fm, int[] versions) {
@@ -749,7 +759,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
       int version = fm.readShort();
       for (int i = 0; i < versions.length; i++) {
         if (version == versions[i]) {
-          rating += 5;
+          rating += 30;
           break;
         }
       }
@@ -764,12 +774,14 @@ public abstract class PluginGroup_U extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public Resource[] read(File path) {
     try {
+
+      addFileTypes();
 
       FileManipulator fm = new FileManipulator(path, false);
 
@@ -1038,9 +1050,21 @@ public abstract class PluginGroup_U extends ArchivePlugin {
    **/
   public UnrealProperty readProperty10(UnrealProperty property, FileManipulator fm) {
     // Structure
+    try {
+      // 1-5 - Type ID of the Inner Object
+      long typeID = readIndex(fm);
+      property.setTypeID(typeID);
 
-    property.setValue(fm.readBytes((int) property.getLength()));
-    return property;
+      String type = names[(int) typeID];
+      property.setType(type);
+
+      // X - Object Data
+      property.setValue(fm.readBytes((int) property.getLength()));
+      return property;
+    }
+    catch (Throwable t) {
+      return null;
+    }
   }
 
   /**

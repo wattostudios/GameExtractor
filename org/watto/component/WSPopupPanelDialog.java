@@ -36,10 +36,11 @@ The actual popup dialog that is shown to the user. Users should create popups us
 @see org.watto.component.WSPopupPanel
 ***********************************************************************************************/
 
-public class WSPopupPanelDialog extends JDialog implements WSClickableInterface, WSKeyableInterface {
+public class WSPopupPanelDialog extends JDialog implements WSPopupPanelDialogInterface, WSClickableInterface, WSKeyableInterface {
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** the popup that this dialog belongs to **/
   WSPopupPanel popup;
 
@@ -118,6 +119,14 @@ public class WSPopupPanelDialog extends JDialog implements WSClickableInterface,
   public boolean onKeyPress(JComponent component, KeyEvent event) {
     popup.onKeyPress(component, event);
     return true;
+  }
+
+  /***********************************************************************************************
+   * Waits for the user to click something before continuing with the Thread
+   ***********************************************************************************************/
+  @Override
+  public void waitForClick() {
+    // don't need to do anything - it's a modal dialog already!
   }
 
 }

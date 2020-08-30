@@ -34,7 +34,7 @@ public class Plugin_OPPC_OBPK extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_OPPC_OBPK() {
@@ -123,7 +123,7 @@ public class Plugin_OPPC_OBPK extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -155,14 +155,17 @@ public class Plugin_OPPC_OBPK extends ArchivePlugin {
         rating += 5;
       }
 
+      /*
+      
       fm.skip(4);
-
+      
       long arcSize = fm.getLength();
-
+      
       // Directory Offset
       if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
         rating += 5;
       }
+      */
 
       return rating;
 

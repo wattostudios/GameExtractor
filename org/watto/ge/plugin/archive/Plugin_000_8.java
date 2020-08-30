@@ -15,10 +15,16 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_LZO_MiniLZO;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -45,9 +51,7 @@ public class Plugin_000_8 extends ArchivePlugin {
     setExtensions("000"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("tsd", "TSD Image", FileType.TYPE_IMAGE));
 
   }
 
@@ -103,7 +107,9 @@ public class Plugin_000_8 extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      //Exporter_LZO_MiniLZO exporterLZO = Exporter_LZO_MiniLZO.getInstance();
+      //exporterLZO.setForceDecompress(true);
+      Exporter_Default exporterDefault = Exporter_Default.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -153,7 +159,7 @@ public class Plugin_000_8 extends ArchivePlugin {
         }
         else {
           // file entry
-          offset += 12; // to skip the 13-byte file header
+          //offset += 13; // to skip the 13-byte file header
 
           // 4 - Decompressed Length
           long decompLength = fm.readInt();
@@ -188,6 +194,69 @@ public class Plugin_000_8 extends ArchivePlugin {
       }
 
       resources = resizeResources(resources, realNumFiles);
+
+      // now open the original archive, go to each offset, and work out the compressed blocks
+      fm.close();
+      fm = new FileManipulator(path, false, 13); // only reading the block headers
+
+      for (int i = 0; i < realNumFiles; i++) {
+        Resource resource = resources[i];
+
+        fm.seek(resource.getOffset());
+
+        long decompLength = resource.getDecompressedLength();
+        int numBlocks = (int) (decompLength / 8192);
+        if (decompLength % 8192 != 0) {
+          numBlocks++;
+        }
+
+        ExporterPlugin[] exporters = new ExporterPlugin[numBlocks];
+        long[] offsets = new long[numBlocks];
+        long[] lengths = new long[numBlocks];
+        long[] decompLengths = new long[numBlocks];
+
+        // we need to create a NEW exporter here, so that each file will reset the buffer at the start, but keep the buffer for each block
+        Exporter_LZO_MiniLZO exporterLZO = new Exporter_LZO_MiniLZO();
+        exporterLZO.setForceDecompress(true);
+        exporterLZO.setResetBuffer(false);
+
+        for (int b = 0; b < numBlocks; b++) {
+          // 4 - Decompressed Length
+          int blockDecompLength = fm.readInt();
+          FieldValidator.checkLength(blockDecompLength);
+
+          // 4 - Compressed Length
+          int blockLength = fm.readInt();
+          FieldValidator.checkLength(blockLength, arcSize);
+
+          // 4 - Unknown (190,186,173,222)
+          fm.skip(4);
+
+          // 1 - Unknown (3)
+          int compressionType = fm.readByte();
+
+          long blockOffset = fm.getOffset();
+          fm.skip(blockLength);
+
+          offsets[b] = blockOffset;
+          lengths[b] = blockLength;
+          decompLengths[b] = blockDecompLength;
+
+          if (compressionType == 3) {
+            exporters[b] = exporterLZO;
+          }
+          else if (compressionType == 2) {
+            exporters[b] = exporterDefault;
+          }
+          else {
+            ErrorLogger.log("[000_8] Unknown compression type: " + compressionType);
+            exporters[b] = exporterLZO;
+          }
+        }
+
+        BlockVariableExporterWrapper blockExporter = new BlockVariableExporterWrapper(exporters, offsets, lengths, decompLengths);
+        resource.setExporter(blockExporter);
+      }
 
       fm.close();
 

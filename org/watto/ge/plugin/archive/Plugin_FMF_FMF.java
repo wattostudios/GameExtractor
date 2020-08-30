@@ -19,6 +19,8 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
@@ -46,8 +48,10 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Football Manager 2011");
-    setExtensions("fmf"); // MUST BE LOWER CASE
+    setGames("Football Manager 2009",
+        "Football Manager 2010",
+        "Football Manager 2011");
+    setExtensions("fmf", "qfm"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
@@ -189,6 +193,8 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
   public void readDirectory(FileManipulator fm, Resource[] resources, File path, String parentDirName, long arcSize) {
     try {
 
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
+
       // 4 - Directory Name Length [*2 for unicode] (not including the null terminator bytes)
       int dirNameLength = fm.readInt();
 
@@ -232,16 +238,29 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
         int offset = fm.readInt() + 18; // FILE DATA starts at offset 18
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - File Length
+        // 4 - Compressed File Length
         int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - File Length
-        fm.skip(4);
+        // 4 - Decompressed File Length
+        int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
-        realNumFiles++;
+        if (decompLength != 0 && decompLength != length) {
+          // compressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+          realNumFiles++;
+
+        }
+        else {
+          // uncompressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
+          realNumFiles++;
+        }
 
         TaskProgressManager.setValue(offset);
       }

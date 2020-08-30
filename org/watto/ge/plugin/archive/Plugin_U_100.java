@@ -27,7 +27,8 @@ public class Plugin_U_100 extends PluginGroup_U {
     super("U_100", "Unreal Engine (Version 100)");
 
     setExtensions("u", "uax", "ukx", "umx", "upx", "usx", "utx", "uvx");
-    setGames("Splinter Cell: Chaos Theory");
+    setGames("Splinter Cell: Chaos Theory",
+        "Splinter Cell: Double Agent");
     setPlatforms("PC", "XBox");
 
   }

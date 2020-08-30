@@ -15,21 +15,37 @@
 package org.watto.ge.plugin.exporter;
 
 import org.watto.datatype.Resource;
+import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.ShortConverter;
 
+/**
+ **********************************************************************************************
+ Ref: https://sourceforge.net/p/stratlas/wiki/HPI/
+ **********************************************************************************************
+ **/
 public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   static Exporter_Custom_HPI_HAPI instance = new Exporter_Custom_HPI_HAPI();
 
   static FileManipulator readSource;
+
   static long readLength = 0;
+
+  byte[] decompData = new byte[0];
+
+  int decompPos = 0;
+
+  int decompLength = 0;
 
   static int key = 0;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Exporter_Custom_HPI_HAPI getInstance() {
@@ -38,21 +54,22 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_Custom_HPI_HAPI() {
-    setName("Total Annihilation HAPI Encryption");
+    setName("Total Annihilation HAPI Encryption + Compression");
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public boolean available() {
-    if (readLength > 0) {
+    //if (readLength > 0) {
+    if (decompPos < decompLength) {
       return true;
     }
     return false;
@@ -60,12 +77,17 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public void close() {
     try {
+
+      decompData = new byte[0];
+      decompPos = 0;
+      decompLength = 0;
+
       readSource.close();
       readSource = null;
     }
@@ -76,7 +98,7 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -86,7 +108,7 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  Opens and decompresses the whole file
   **********************************************************************************************
   **/
   @Override
@@ -96,8 +118,149 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
       readSource.seek(source.getOffset());
 
       readLength = source.getDecompressedLength();
+
+      decompLength = (int) readLength;
+      decompData = new byte[decompLength];
+      decompPos = 0;
+
+      // Now lets read the file header
+      int numChunks = (int) (readLength / 65536);
+      if (readLength % 65536 != 0) {
+        numChunks++;
+      }
+
+      int[] chunkLengths = new int[numChunks];
+      for (int i = 0; i < numChunks; i++) {
+        // 4 - Compressed Length (including this header stuff)
+        int chunkLength = IntConverter.convertLittle(new byte[] { readByte(), readByte(), readByte(), readByte() });
+        FieldValidator.checkLength(chunkLength, readLength);
+        chunkLengths[i] = chunkLength;
+      }
+
+      // now read and decompress each chunk
+      for (int i = 0; i < numChunks; i++) {
+        // 4 - Header (SQSH)
+        readByte();
+        readByte();
+        readByte();
+        readByte();
+
+        // 1 - Unknown (2)
+        readByte();
+
+        // 1 - Compression Type (1=LZ77, 2=ZLib)
+        int compType = readByte();
+
+        // 1 - Encryption (1=Encrypted, 0=Not Encrypted)
+        int encType = readByte();
+
+        // 4 - Compressed Chunk Length (data only)
+        int chunkLength = IntConverter.convertLittle(new byte[] { readByte(), readByte(), readByte(), readByte() });
+        FieldValidator.checkLength(chunkLength, readLength);
+
+        // 4 - Decompressed Chunk Length
+        int chunkDecompLength = IntConverter.convertLittle(new byte[] { readByte(), readByte(), readByte(), readByte() });
+        FieldValidator.checkLength(chunkDecompLength, readLength);
+
+        // 4 - Checksum
+        readByte();
+        readByte();
+        readByte();
+        readByte();
+
+        // X - Compressed Chunk Data
+
+        // get the compressed data (including decryption if needed)
+        byte[] compData = new byte[chunkLength];
+        if (encType == 1) {
+          // double-encrypted
+          for (int b = 0; b < chunkLength; b++) {
+            compData[b] = (byte) ((readByte() - b) ^ b);
+          }
+        }
+        else {
+          // single encrypted
+          for (int b = 0; b < chunkLength; b++) {
+            compData[b] = readByte();
+          }
+        }
+
+        // decompress it
+        if (compType == 1) {
+          // LZ77
+          decompressChunk(compData);
+        }
+        else if (compType == 2) {
+          // ZLib
+          Exporter_ZLib exporter = Exporter_ZLib.getInstance();
+          exporter.open(new FileManipulator(new ByteBuffer(compData)), chunkLength, chunkDecompLength);
+          for (int b = 0; b < chunkDecompLength; b++) {
+            exporter.available();
+            decompData[decompPos] = (byte) exporter.read();
+            decompPos++;
+          }
+          exporter.close();
+        }
+
+      }
+
+      // now reset the pointer back to the beginning, ready for the reads
+      decompPos = 0;
+
     }
     catch (Throwable t) {
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   Ref: https://sourceforge.net/p/stratlas/wiki/HPI/
+   **********************************************************************************************
+   **/
+  public void decompressChunk(byte[] in) {
+    int x;
+    int outbufptr = 1;
+    int mask = 1;
+    int tag;
+    int inptr = 0;
+    int count;
+    boolean done = false;
+    byte[] window = new byte[4096];
+    int inbufptr;
+
+    tag = in[inptr++];
+
+    while (!done) {
+      if ((mask & tag) == 0) {
+        decompData[decompPos++] = in[inptr]; //out[outptr++] = in[inptr];
+        window[outbufptr] = in[inptr];
+        outbufptr = (outbufptr + 1) & 0xFFF;
+        inptr++;
+      }
+      else {
+
+        count = ShortConverter.unsign(ShortConverter.convertLittle(new byte[] { in[inptr], in[inptr + 1] }));//count = ((unsigned short ) (in+inptr));
+        inptr += 2;
+        inbufptr = count >> 4;
+        if (inbufptr == 0)
+          return;
+        else {
+          count = (count & 0x0f) + 2;
+          if (count >= 0) {
+            for (x = 0; x < count; x++) {
+              decompData[decompPos++] = window[inbufptr];
+              window[outbufptr] = window[inbufptr];
+              inbufptr = (inbufptr + 1) & 0xFFF;
+              outbufptr = (outbufptr + 1) & 0xFFF;
+            }
+          }
+        }
+      }
+      mask *= 2;
+      if ((mask & 0x0100) == 0x0100) {
+        mask = 1;
+        tag = in[inptr++];
+      }
     }
   }
 
@@ -128,14 +291,15 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public int read() {
     try {
-      readLength--;
-      return readByte();
+      int currentByte = decompData[decompPos];
+      decompPos++;
+      return currentByte;
     }
     catch (Throwable t) {
       return 0;
@@ -144,7 +308,7 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public byte readByte() throws Exception {
@@ -157,7 +321,7 @@ public class Exporter_Custom_HPI_HAPI extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setKey(int key2) {

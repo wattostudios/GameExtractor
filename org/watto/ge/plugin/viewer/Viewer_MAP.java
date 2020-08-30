@@ -142,6 +142,9 @@ public class Viewer_MAP extends ViewerPlugin {
       short height = ShortConverter.changeFormat(fm.readShort());
       FieldValidator.checkHeight(height);
 
+      int requiredLength = (width * height * 4) + 4;
+      FieldValidator.checkLength(requiredLength, fm.getLength());
+
       // X - Pixels
       ImageResource imageResource = ImageFormatReader.reverseAlpha(ImageFormatReader.readARGB(fm, width, height));
 

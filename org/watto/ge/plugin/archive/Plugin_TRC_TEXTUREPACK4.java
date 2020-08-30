@@ -2,7 +2,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -24,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -45,7 +46,7 @@ public class Plugin_TRC_TEXTUREPACK4 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("X Motor Racing");
-    setExtensions("trc"); // MUST BE LOWER CASE
+    setExtensions("trc", "pnt", "shd"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     //setFileTypes("","",
@@ -70,11 +71,17 @@ public class Plugin_TRC_TEXTUREPACK4 extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(12).equals("TexturePack4")) {
+      if (fm.readString(11).equals("TexturePack")) {
         rating += 50;
       }
 
-      fm.skip(9);
+      String header2 = fm.readString(1);
+      if (header2.equals("4")) {
+        fm.skip(9);
+      }
+      else if (header2.equals("D")) {
+        fm.skip(12);
+      }
 
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readInt())) {
@@ -111,10 +118,13 @@ public class Plugin_TRC_TEXTUREPACK4 extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // 12 - Header (TexturePack4)
+      // X - Header (TexturePack4/TexturePackDDS2)
       // 1 - null Header Terminator
+      fm.skip(11);
+      String header = fm.readNullString();
+
       // 8 - null
-      fm.skip(21);
+      fm.skip(8);
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
@@ -124,32 +134,98 @@ public class Plugin_TRC_TEXTUREPACK4 extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        // 2 - Filename Length (including null terminator)
-        fm.skip(2);
+      if (header.equals("DDS2")) {
+        for (int i = 0; i < numFiles; i++) {
+          // 2 - Filename Length (including null terminator)
+          fm.skip(2);
 
-        // X - Filename
-        // 1 - null Filename Terminator
-        String filename = fm.readNullString();
-        FieldValidator.checkFilename(filename);
+          // X - Filename
+          // 1 - null Filename Terminator
+          String filename = fm.readNullString();
+          FieldValidator.checkFilename(filename);
+          filename += ".dds";
 
-        // 4 - Unknown (1)
-        // 4 - Unknown
-        // 2 - Image Height/Width
-        // 2 - Image Height/Width
-        fm.skip(12);
+          // 4 - Unknown (1)
+          // 4 - Unknown
+          // 2 - Image Height/Width
+          // 2 - Image Height/Width
+          fm.skip(12);
 
-        // 4 - File Offset
-        int offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
+          // 4 - File Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
+          // 4 - File Length
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
 
-        TaskProgressManager.setValue(i);
+          // 11 - null
+          fm.skip(11);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length);
+
+          TaskProgressManager.setValue(i);
+        }
+
       }
+      else if (header.equals("4")) {
+        for (int i = 0; i < numFiles; i++) {
+          // 2 - Filename Length (including null terminator)
+          fm.skip(2);
 
-      calculateFileSizes(resources, arcSize);
+          // X - Filename
+          // 1 - null Filename Terminator
+          String filename = fm.readNullString();
+          FieldValidator.checkFilename(filename);
+
+          // 4 - Unknown (1)
+          // 2 - Unknown
+          fm.skip(6);
+
+          // 2 - Bits Per Pixel (24=RGB/32=RGBA)
+          short bitsPerPixel = fm.readShort();
+          FieldValidator.checkRange(bitsPerPixel, 8, 32);
+
+          // 2 - Image Width
+          short width = fm.readShort();
+          FieldValidator.checkWidth(width);
+
+          // 2 - Image Height
+          short height = fm.readShort();
+          FieldValidator.checkHeight(height);
+
+          String imageFormat = "";
+          if (bitsPerPixel == 24) {
+            imageFormat = "RGB";
+          }
+          else if (bitsPerPixel == 32) {
+            imageFormat = "RGBA";
+          }
+          else if (bitsPerPixel == 8) {
+            imageFormat = "8BitPaletted";
+          }
+
+          // 4 - File Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, filename, offset);
+          resource.addProperty("ImageFormat", imageFormat);
+          resource.addProperty("Width", width);
+          resource.addProperty("Height", height);
+
+          resources[i] = resource;
+
+          TaskProgressManager.setValue(i);
+        }
+
+        calculateFileSizes(resources, arcSize);
+      }
+      else {
+        ErrorLogger.log("[TRC_TEXTUREPACK4] Unknown Directory Format: " + header);
+      }
 
       fm.close();
 

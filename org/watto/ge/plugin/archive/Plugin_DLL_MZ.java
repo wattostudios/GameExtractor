@@ -36,9 +36,11 @@ import org.watto.task.TaskProgressManager;
 public class Plugin_DLL_MZ extends ArchivePlugin {
 
   int realNumFiles = 0;
+
   int resourceOffset = 0;
 
   long furthestOffset = 0;
+
   long earliestOffset = 0;
 
   ExporterPlugin exporterBMP = Exporter_Custom_DLL_MZ_BMP.getInstance();
@@ -118,7 +120,82 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
       }
       else {
         // The first 2 bytes are the resource ID, the last 2 bytes are null
-        filename = "" + ShortConverter.convertLittle(new byte[] { resNameBytes[0], resNameBytes[1] });
+        short resourceID = ShortConverter.convertLittle(new byte[] { resNameBytes[0], resNameBytes[1] });
+
+        if (dirName.equals("")) {
+          // this directory is within the Root - want to change the ID number into a name
+          // Ref: https://docs.microsoft.com/en-us/windows/win32/menurc/resource-types
+          if (resourceID == 1) {
+            filename = "Cursor";
+          }
+          else if (resourceID == 2) {
+            filename = "Bitmap";
+          }
+          else if (resourceID == 3) {
+            filename = "Icon";
+          }
+          else if (resourceID == 4) {
+            filename = "Menu";
+          }
+          else if (resourceID == 5) {
+            filename = "Dialog";
+          }
+          else if (resourceID == 6) {
+            filename = "String Table";
+          }
+          else if (resourceID == 7) {
+            filename = "Font Directory";
+          }
+          else if (resourceID == 8) {
+            filename = "Font";
+          }
+          else if (resourceID == 9) {
+            filename = "Accelerator Table";
+          }
+          else if (resourceID == 10) {
+            filename = "Raw Data";
+          }
+          else if (resourceID == 11) {
+            filename = "Message Table";
+          }
+          else if (resourceID == 12) {
+            filename = "Cursor Group";
+          }
+          else if (resourceID == 14) {
+            filename = "Icon Group";
+          }
+          else if (resourceID == 16) {
+            filename = "Version Info";
+          }
+          else if (resourceID == 17) {
+            filename = "Dialog Include";
+          }
+          else if (resourceID == 19) {
+            filename = "Plug and Play";
+          }
+          else if (resourceID == 20) {
+            filename = "VDX";
+          }
+          else if (resourceID == 21) {
+            filename = "Animated Cursor";
+          }
+          else if (resourceID == 22) {
+            filename = "Animated Icon";
+          }
+          else if (resourceID == 23) {
+            filename = "HTML";
+          }
+          else if (resourceID == 24) {
+            filename = "Manifest";
+          }
+          else {
+            filename = "" + resourceID;
+          }
+        }
+        else {
+          filename = "" + resourceID;
+        }
+
       }
 
       filename = dirName + filename.replace('_', '.');
@@ -160,6 +237,12 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
         // 8 - null
         //fm.skip(8);
 
+        long currentOffset = fm.getOffset();
+
+        if (currentOffset > furthestOffset) { // for calculating the real offsets later on
+          furthestOffset = currentOffset + 6;
+        }
+
         fm.seek(curPos);
 
         //path,id,name,offset,length,decompLength,exporter
@@ -169,21 +252,39 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           earliestOffset = offset;
         }
 
-        if (filename.toLowerCase().indexOf(".bmp") > 0) {
+        if (filename.startsWith("Icon")) {
+          resource.setExtension("ico");
+        }
+        else if (filename.startsWith("Cursor")) {
+          resource.setExtension("cur");
+        }
+        else if (filename.startsWith("Bitmap")) {
           resource.setExporter(exporterBMP);
           resource.setExtension("bmp");
-          resource.setOriginalName(resource.getName()); // so it doesn't think the file has been renamed
+        }
+        else if (filename.startsWith("Animated")) { // animated cursor or icon
+          resource.setExtension("ani");
+        }
+        else if (filename.startsWith("HTML")) { // animated cursor or icon
+          resource.setExtension("html");
+        }
+        else if (filename.startsWith("Manifest")) { // animated cursor or icon
+          resource.setExtension("txt");
+        }
+        else if (filename.toLowerCase().indexOf(".bmp") > 0) {
+          resource.setExporter(exporterBMP);
+          resource.setExtension("bmp");
         }
         else if (filename.toLowerCase().indexOf(".ini") > 0) {
           resource.setExtension("ini");
-          resource.setOriginalName(resource.getName()); // so it doesn't think the file has been renamed
         }
         else if (filename.indexOf("CABINET") > 0) {
           // This is a Cabinet 3.0 embedded in the EXE, rather than a newer CAB which is stored at the end of the EXE
           filename = path.getName() + ".cab";
           resource.setName(filename);
-          resource.setOriginalName(filename); // so it doesn't think the file has been renamed
         }
+
+        resource.setOriginalName(resource.getName()); // so it doesn't think the file has been renamed
 
         resources[realNumFiles] = resource;
 
@@ -252,7 +353,7 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
 
       FileManipulator fm = new FileManipulator(path, false);
 
-      long arcSize = (int) fm.getLength();
+      long arcSize = fm.getLength();
 
       int numFiles = Archive.getMaxFiles();
       Resource[] resources = new Resource[numFiles];
@@ -399,30 +500,33 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
       if (resourceLength != 0) {
 
         // Reset the globals
-        earliestOffset = arcSize;
+        //earliestOffset = arcSize;
+        earliestOffset = Integer.MAX_VALUE;
         furthestOffset = 0;
 
         analyseDirectory(fm, path, resources, "", resourceOffset);
 
         fm.close();
 
-        // NOW we need to change all the resource offsets - they're too high, need to make them relative to the end of the directories
-        // The FurthestOffset is the end of the directories
-        // The EariestOffset is the offset of the first file in the EXE, as reported in the offset tables
-        // The EarliestOffset reported in the offset tables is HIGHER than the FurthestOffset as calculated by reading the directories
-        // The difference needs to be subtracted from all offsets in all resources
-        furthestOffset += 2; // there's a 2-null byte between directory and file data
-        long difference = earliestOffset - furthestOffset; // yeah i know, the naming makes it seem the wrong way around, but this is right!
+        if (furthestOffset != 0) {
+          // NOW we need to change all the resource offsets - they're too high, need to make them relative to the end of the directories
+          // The FurthestOffset is the end of the directories
+          // The EarliestOffset is the offset of the first file in the EXE, as reported in the offset tables
+          // The EarliestOffset reported in the offset tables is HIGHER than the FurthestOffset as calculated by reading the directories
+          // The difference needs to be subtracted from all offsets in all resources
+          furthestOffset += 2; // there's a 2-null byte between directory and file data
+          long difference = earliestOffset - furthestOffset; // yeah i know, the naming makes it seem the wrong way around, but this is right!
 
-        for (int i = 0; i < realNumFiles; i++) {
-          Resource resource = resources[i];
-          long offset = resource.getOffset();
-          resource.setOffset(offset - difference);
+          for (int i = 0; i < realNumFiles; i++) {
+            Resource resource = resources[i];
+            long offset = resource.getOffset();
+            resource.setOffset(offset - difference);
 
-          // Then we need to see if there's a Cabinet 3.0 embedded in the EXE - if there is, rename it appropriately, like we do in newer CAB
-          // versions (above) where the CAB is just appended to the end of the EXE rather than being embedded in it.
+            // Then we need to see if there's a Cabinet 3.0 embedded in the EXE - if there is, rename it appropriately, like we do in newer CAB
+            // versions (above) where the CAB is just appended to the end of the EXE rather than being embedded in it.
 
-          System.out.println("Old: " + offset + "\tNew: " + resource.getOffset() + "\tName: " + resource.getName());
+            System.out.println("Old: " + offset + "\tNew: " + resource.getOffset() + "\tName: " + resource.getName());
+          }
         }
 
         resources = resizeResources(resources, realNumFiles);

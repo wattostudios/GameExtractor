@@ -1,32 +1,29 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
-import org.watto.datatype.SplitChunkResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DS2RES;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -36,8 +33,11 @@ import org.watto.io.FileManipulator;
 public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
 
   long dirOffset = 0;
+
   int dir2Offset = 0;
+
   int realNumFiles = 0;
+
   int firstFileOffset = 0;
 
   /**
@@ -52,8 +52,9 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Dungeon Siege 2");
-    setExtensions("ds2res");
+    setGames("Dungeon Siege 2",
+        "Space Siege");
+    setExtensions("ds2res", "ssres", "ssmap");
     setPlatforms("PC");
 
     setFileTypes("gas", "GAS Programming Script",
@@ -74,6 +75,8 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
         "db", "Windows Thumbnail File",
         "prs", "Animation File");
 
+    setTextPreviewExtensions("gas", "gpg", "nnk", "skrit", "bat", "as", "hlsl"); // LOWER CASE
+
   }
 
   /**
@@ -92,7 +95,8 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(8).equals("DSg2Tank")) {
+      String header = fm.readString(8);
+      if (header.equals("DSg2Tank") || header.equals("SSg1Tank")) {
         rating += 50;
       }
 
@@ -167,7 +171,7 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
       dir2Offset = fm.readInt();
       FieldValidator.checkOffset(dir2Offset, arcSize);
 
-      // 4 - Length Of XXX Directory?
+      // 4 - Length Of Unknown Directory?
       fm.skip(4);
 
       // 4 - First File Offset
@@ -212,7 +216,11 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
   **/
   public void readDirectory(Resource[] resources, FileManipulator fm, File path, String parentDirName) throws Exception {
 
-    ExporterPlugin exporter = Exporter_Custom_DS2RES.getInstance();
+    //ExporterPlugin exporter = Exporter_Custom_DS2RES.getInstance();
+
+    ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
+    ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+
     long arcSize = (int) fm.getLength();
 
     // 4 - Offset To Parent Directory
@@ -287,34 +295,41 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
 
         filename = dirName + filename;
 
+        // 0-3 - null Padding to a multiple of 4 bytes (including the filename length)
+        int filenamePaddingSize = 4 - ((filenameLength + 2) % 4);
+        //if (filenamePaddingSize != 4) {
+        fm.skip(filenamePaddingSize);
+        //}
+
         if (compressed) {
+          /*
           // 1-4 - null Padding so filenameField+filenameLengthField is a multiple of 4 bytes
           fm.skip(4 - ((filenameLength + 2) % 4));
-
+          
           // 4 - Compressed Length
           length = fm.readInt();
-
+          
           // 4 - Chunk Size
           int chunkSize = fm.readInt();
           int numChunks = (decompLength / chunkSize) + 1;
           if (decompLength % chunkSize == 0) {
             numChunks++;
           }
-
+          
           long[] offsets = new long[numChunks];
           long[] lengths = new long[numChunks];
           long[] decompLengths = new long[numChunks];
-
+          
           boolean hasMore = true;
           int chunkNum = 0;
           int totalDecompLength = 0;
           while (hasMore) {
             // 4 - Decompressed Size Of Chunk
             int chunkDecompLength = fm.readInt();
-
+          
             // 4 - Compressed Size Of Chunk [+16 if moreDetailsMarker == 16]
             int chunkLength = fm.readInt();
-
+          
             // 4 - More Details Marker (0=no more comp data, 16=another comp data follows)
             int moreDetails = fm.readInt();
             if (moreDetails == 0) {
@@ -329,27 +344,125 @@ public class Plugin_DS2RES_DSG2TANK extends ArchivePlugin {
               //chunkLength += 16;
               chunkDecompLength -= 16;
             }
-
+          
             // 4 - Unknown
-            fm.skip(4);
-
-            offsets[chunkNum] = offset;
+            long blockOffset = fm.readInt() + offset;
+            FieldValidator.checkLength(blockOffset, arcSize);
+          
+            offsets[chunkNum] = blockOffset;
             lengths[chunkNum] = chunkLength;
             decompLengths[chunkNum] = chunkDecompLength;
-
+          
             chunkNum++;
-
+          
             if (moreDetails != 0) {
               chunkLength += 16;
             }
-
-            offset += chunkLength;
+          
+            //offset += chunkLength;
             totalDecompLength += chunkDecompLength + 16;
+          
+          }
+          
+          
+          //path,id,name,offset,length,decompLength,exporter
+          ExporterPlugin zlibExporter = Exporter_ZLib.getInstance();
+          BlockExporterWrapper blockExporter = new BlockExporterWrapper(zlibExporter, offsets, lengths, decompLengths);
+          //resources[realNumFiles] = new SplitChunkResource(path, filename, offsets, lengths, decompLengths, exporter);
+          resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, blockExporter);
+          */
+
+          // 4 - Compressed Length
+          int length2 = fm.readInt();
+          FieldValidator.checkLength(length2, arcSize);
+          if (length2 != 0) {
+            length = length2;
+          }
+
+          // 4 - Block Size (16384)
+          int blockSize = fm.readInt();
+          //blockSize = 16384;
+          FieldValidator.checkLength(blockSize, arcSize);
+
+          int numBlocks = (int) (decompLength / blockSize);
+          if (decompLength % blockSize != 0) {
+            numBlocks++;
+          }
+          numBlocks *= 2; // the last few blocks might be empty - that's OK
+
+          //System.out.println(fm.getOffset() + "\t" + blockSize + "\t" + decompLength);
+
+          ExporterPlugin[] exporters = new ExporterPlugin[numBlocks];
+          long[] blockOffsets = new long[numBlocks];
+          long[] blockLengths = new long[numBlocks];
+          long[] blockDecompLengths = new long[numBlocks];
+
+          for (int b = 0; b < numBlocks; b++) {
+            // fill the array with default exporters
+            exporters[b] = exporterDefault;
+          }
+
+          long totalDecomp = 0;
+          for (int b = 0; b < numBlocks; b += 2) {
+            if (totalDecomp >= decompLength) {
+              break;
+            }
+
+            // 4 - Decompressed Block Length
+            int blockDecompLength = fm.readInt();
+            FieldValidator.checkLength(blockDecompLength);
+
+            // 4 - Compressed Block Length
+            int blockLength = fm.readInt();
+            FieldValidator.checkLength(blockLength, arcSize);
+
+            // 4 - More Blocks Flag? (16 = more blocks, 0 = last block)
+            int moreBlocksFlag = fm.readInt();
+
+            // 4 - Decompressed Block Offset
+            long blockOffset = fm.readInt() + offset;
+            FieldValidator.checkLength(blockOffset, arcSize);
+
+            if (moreBlocksFlag != 0) {
+              // the last 16 bytes of uncompressed data are just stored uncompressed in the space between blocks.
+              blockDecompLength -= moreBlocksFlag;
+            }
+
+            blockDecompLengths[b] = blockDecompLength;
+            blockLengths[b] = blockLength;
+            blockOffsets[b] = blockOffset;
+
+            if (blockLength - 16 == blockDecompLength) {
+              // an uncompressed block
+              exporters[b] = exporterDefault;
+            }
+            else {
+              // compressed block
+              exporters[b] = exporterZLib;
+            }
+
+            totalDecomp += blockDecompLength;
+
+            if (moreBlocksFlag != 0) {
+              // now add the 16-byte uncompressed block
+              blockOffset += blockLength;
+              blockLength = moreBlocksFlag;
+              blockDecompLength = moreBlocksFlag;
+
+              blockDecompLengths[b + 1] = blockDecompLength;
+              blockLengths[b + 1] = blockLength;
+              blockOffsets[b + 1] = blockOffset;
+              exporters[b + 1] = exporterDefault;
+
+              totalDecomp += moreBlocksFlag;
+            }
 
           }
 
-          //path,id,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new SplitChunkResource(path, filename, offsets, lengths, decompLengths, exporter);
+          BlockVariableExporterWrapper blockExporter = new BlockVariableExporterWrapper(exporters, blockOffsets, blockLengths, blockDecompLengths);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, blockExporter);
         }
         else {
           //path,id,name,offset,length,decompLength,exporter

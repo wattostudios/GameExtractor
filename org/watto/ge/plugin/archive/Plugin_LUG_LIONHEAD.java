@@ -1,29 +1,25 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,7 +40,8 @@ public class Plugin_LUG_LIONHEAD extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Black And White 2");
+    setGames("Black And White 2",
+        "The Movies");
     setExtensions("lug");
     setPlatforms("PC");
 
@@ -80,13 +77,7 @@ public class Plugin_LUG_LIONHEAD extends ArchivePlugin {
       }
 
       // 13 - null
-      if (fm.readLong() == 0) {
-        rating += 5;
-      }
-      if (fm.readShort() == 0) {
-        rating += 5;
-      }
-      fm.skip(1);
+      fm.skip(13);
 
       long arcSize = fm.getLength();
 
@@ -138,8 +129,26 @@ public class Plugin_LUG_LIONHEAD extends ArchivePlugin {
       // 4 - Number Of Directories (3)
       // 4 - Number Of Tables after the File Data? (4)
       // 4 - Unknown (1)
-      // 16 - null
-      fm.skip(72);
+      // 12 - null
+      fm.skip(68);
+
+      // 4 - Number of Names
+      int numNames = fm.readInt();
+      FieldValidator.checkNumFiles(numNames + 1); // +1 to allow 0 names
+
+      for (int i = 0; i < numNames; i++) {
+        // 4 - Name Length
+        int nameLength = fm.readInt();
+        FieldValidator.checkFilenameLength(nameLength);
+
+        // X - Name
+        fm.skip(nameLength);
+
+        // 4 - Unknown
+        // 4 - Unknown
+        // 4 - Unknown
+        fm.skip(12);
+      }
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
@@ -159,6 +168,9 @@ public class Plugin_LUG_LIONHEAD extends ArchivePlugin {
 
         // X - Filename
         String filename = fm.readString(filenameLength);
+        if (filename.startsWith("C:\\")) {
+          filename = filename.substring(3);
+        }
 
         // 4 - File Length
         long length = fm.readInt();

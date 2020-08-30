@@ -40,7 +40,8 @@ public class Plugin_WAD_WWAD_2 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Batman: Arkham Origins");
+    setGames("Batman: Arkham Origins",
+        "Batman: Arkham City");
     setExtensions("wad"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

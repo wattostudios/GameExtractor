@@ -26,6 +26,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.plugin.PluginFinder;
 import org.watto.ge.plugin.RatedPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_FSB5_ProcessWithinArchive;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ExporterByteBuffer;
 
@@ -100,16 +101,42 @@ public class Task_LoadThumbnailLater extends AbstractTask {
       // Need to read the file from the archive
       //System.out.println("Loading Thumbnail for " + resource.getName() + " (NEEDS EXPORTING)");
 
+      if (resource.getExporter() instanceof Exporter_Custom_FSB5_ProcessWithinArchive) {
+        return; // SPECIAL CASE: this exporter is a bit intensive, and it doesn't generate thumbnails, so skip it early.
+      }
+
       // Create a buffer that reads from the exporter
+      /*
+      long length = resource.getLength();
+      long decompLength = resource.getDecompressedLength();
+      
+      int maxSize = 65536;
+      if (length > maxSize) {
+        resource.setLength(maxSize);
+      }
+      if (decompLength > maxSize) {
+        resource.setDecompressedLength(maxSize);
+      }
+      
       ExporterByteBuffer byteBuffer = new ExporterByteBuffer(resource);
+      
+      resource.setLength(length);
+      resource.setDecompressedLength(decompLength);
+      */
+      ExporterByteBuffer byteBuffer = new ExporterByteBuffer(resource);
+
       fm = new FileManipulator(byteBuffer);
       // Need to set a fake file, so that the ViewerPlugins can get the extension when running getMatchRating()
       fm.setFakeFile(new File(resource.getName()));
     }
 
+    //System.out.println("LoadThumbnailLater: Starting load for " + resource.getName());
+
     // now find a previewer for the file
     // preview the first selected file
+
     RatedPlugin[] plugins = PluginFinder.findPlugins(fm, ViewerPlugin.class); // NOTE: This closes the fm pointer!!!
+    //System.out.println("    Done");
     if (plugins == null || plugins.length == 0) {
       // no viewer plugins found that will accept this file
       // leave the BlankResource here
@@ -131,6 +158,7 @@ public class Task_LoadThumbnailLater extends AbstractTask {
 
     // try to open the preview using each plugin and previewFile(File,Plugin)
     for (int i = 0; i < plugins.length; i++) {
+
       fm.seek(0); // go back to the start of the file
       ImageResource imageResource = ((ViewerPlugin) plugins[i].getPlugin()).readThumbnail(fm);
 

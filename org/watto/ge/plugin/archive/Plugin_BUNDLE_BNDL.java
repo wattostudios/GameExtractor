@@ -1,32 +1,31 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -49,7 +48,8 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
     setCanImplicitReplace(true);
 
     setGames("Ghost Recon Advanced Warfighter",
-        "Ghost Recon Advanced Warfighter 2");
+        "Ghost Recon Advanced Warfighter 2",
+        "Wanted: Weapons Of Fate");
     setExtensions("bundle");
     setPlatforms("PC");
 
@@ -118,7 +118,7 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      ExporterPlugin exporter = Exporter_ZLib_CompressedSizeOnly.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -145,6 +145,10 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
         // 1 - Entry Type
         int entryType = ByteConverter.unsign(fm.readByte());
 
+        if (entryType == 0) {
+          // end of directory - start of file data
+          break;
+        }
         if (entryType == 1) {
           // Start of SubFolder
 
@@ -156,6 +160,9 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
           String dirName = fm.readNullString();
           FieldValidator.checkFilename(dirName);
 
+          if (numDirs < 0) {
+            numDirs = 0;
+          }
           dirNames[numDirs] = dirName;
           numDirs++;
 
@@ -201,10 +208,26 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
           // End of Current SubFolder
           numDirs--;
         }
+        else {
+          ErrorLogger.log("[BUNDLE_BNDL] Unknown entry type: " + entryType + " at " + fm.getOffset());
+        }
 
       }
 
       resources = resizeResources(resources, realNumFiles);
+
+      // now go through and see if the files are compressed
+      fm.getBuffer().setBufferSize(1);
+      fm.seek(0);
+
+      for (int i = 0; i < realNumFiles; i++) {
+        Resource resource = resources[i];
+        fm.relativeSeek(resource.getOffset());
+
+        if (fm.readString(1).equals("x")) {
+          resource.setExporter(exporter);
+        }
+      }
 
       fm.close();
 

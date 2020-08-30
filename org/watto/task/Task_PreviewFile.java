@@ -93,6 +93,7 @@ public class Task_PreviewFile extends AbstractTask {
       }
       else if (currentSidePanel.equals("SidePanel_ImageInvestigator")) {
         ((SidePanel_ImageInvestigator) ComponentRepository.get("SidePanel_ImageInvestigator")).previewFile(path);
+        //((SidePanel_ImageInvestigator) ComponentRepository.get("SidePanel_ImageInvestigator")).onOpenRequest();
       }
       else {
         ((SidePanel_Preview) ComponentRepository.get("SidePanel_Preview")).previewFile(path);

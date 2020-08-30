@@ -1,30 +1,26 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -45,7 +41,7 @@ public class Plugin_CLU extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, true, false, false);
 
-    setGames("Broken Sword 2");
+    setGames("Broken Sword 2: The Smoking Mirror");
     setExtensions("clu");
     setPlatforms("PC");
 
@@ -139,20 +135,87 @@ public class Plugin_CLU extends ArchivePlugin {
         lengths[i] = length;
       }
 
+      fm.getBuffer().setBufferSize(32);// short quick reads
+
+      int realNumFiles = 0;
       for (int i = 0; i < numFiles; i++) {
         long offset = offsets[i];
         long length = lengths[i];
 
-        fm.seek(offset + 10);
+        if (length == 0) { // ignore empty files
+          continue;
+        }
 
-        // 34 - Filename (null)
-        String filename = fm.readNullString(34);
+        fm.seek(offset);
+
+        // 1 - File Type?
+        int fileType = fm.readByte();
+
+        String filename = Resource.generateFilename(realNumFiles);
+        if (fileType == 112) {
+          // X - Filename
+          // 1 - null Filename Terminator
+          filename = fm.readNullString();
+          int filenameLength = filename.length();
+
+          offset += (filenameLength + 1);
+          length -= (filenameLength + 1);
+        }
+        else {
+          // 31 - Filename (null)
+          filename = fm.readNullString(31);
+          offset += 32;
+          length -= 32;
+        }
+
+        String extension = "." + fileType;
+        if (fileType == 101) {
+          extension = ".101"; //image??
+        }
+        else if (fileType == 102) {
+          extension = ".screen";
+        }
+        else if (fileType == 103) {
+          extension = ".script";
+        }
+        else if (fileType == 104) {
+          extension = ".grid";
+        }
+        else if (fileType == 105) {
+          extension = ".global_vars";
+        }
+        else if (fileType == 107) {
+          extension = ".run_list";
+        }
+        else if (fileType == 108) {
+          extension = ".text";
+        }
+        else if (fileType == 109) {
+          extension = ".screen_mngr";
+        }
+        else if (fileType == 110) {
+          extension = ".new";
+        }
+        else if (fileType == 111) {
+          extension = ".wav";
+        }
+        else if (fileType == 113) {
+          extension = ".palette";
+        }
+        filename += extension;
+
+        //System.out.println(filename);
         FieldValidator.checkFilename(filename);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        resources[realNumFiles] = new Resource(path, filename, offset, length);
+        realNumFiles++;
 
         TaskProgressManager.setValue(i);
+      }
+
+      if (realNumFiles != numFiles) {
+        resources = resizeResources(resources, realNumFiles);
       }
 
       fm.close();

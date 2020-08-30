@@ -45,7 +45,9 @@ public class Plugin_FORGE_SCIMITAR extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("For Honor",
+    setGames("Assassins Creed: Syndicate",
+        "For Honor",
+        "Steep",
         "Tom Clancy's Ghost Recon Wildlands");
     setExtensions("forge"); // MUST BE LOWER CASE
     setPlatforms("PC");

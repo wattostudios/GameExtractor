@@ -149,6 +149,9 @@ public class Scanner_GIF_GIF extends ScannerPlugin {
       // GIF Terminator Character ";"
 
       long length = fm.getOffset() - offset;
+      if (length <= 13) {
+        return null;
+      }
 
       //path,id,name,offset,length,compressed
       return new Resource(".gif", offset, length);

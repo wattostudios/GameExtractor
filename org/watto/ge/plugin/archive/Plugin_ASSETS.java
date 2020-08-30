@@ -15,12 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -31,7 +31,7 @@ public class Plugin_ASSETS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_ASSETS() {
@@ -45,6 +45,15 @@ public class Plugin_ASSETS extends ArchivePlugin {
     setExtensions("assets"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
+    //////////////////
+    //////////////////
+    //////////////////
+    // THIS PLUGIN IS DISABLED, REPLACED BY ASSETS_5 WHICH USES PROPER Unity3D HANDLING
+    //////////////////
+    //////////////////
+    //////////////////
+    setEnabled(false);
+
     //setFileTypes("","",
     //             "",""
     //             );
@@ -53,7 +62,7 @@ public class Plugin_ASSETS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

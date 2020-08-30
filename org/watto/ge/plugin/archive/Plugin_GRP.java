@@ -44,6 +44,7 @@ public class Plugin_GRP extends ArchivePlugin {
 
     setGames("Nibiru: Messenger Of The Gods",
         "Nibiru: Age Of Secrets",
+        "Tale Of A Hero",
         "The Black Mirror");
     setExtensions("grp");
     setPlatforms("PC");

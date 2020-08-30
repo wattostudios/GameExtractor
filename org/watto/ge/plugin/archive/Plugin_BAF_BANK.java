@@ -1,29 +1,26 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -143,6 +140,7 @@ public class Plugin_BAF_BANK extends ArchivePlugin {
         // 32 - Filename (without extension) (null terminated)
         String filename = fm.readNullString(32);
         FieldValidator.checkFilename(filename);
+        filename += ".wav";
 
         // 4 - File Offset (offset to the data of the file, not the offset to the DATA header!)
         int offset = fm.readInt();
@@ -154,14 +152,24 @@ public class Plugin_BAF_BANK extends ArchivePlugin {
 
         // 4 - Unknown (1065353216)
         // 4 - Unknown (25)
-        // 4 - Bitrate (48000)
-        // 4 - Quality (16)
+        fm.skip(8);
+
+        // 4 - Frequency (48000)
+        int frequency = fm.readInt();
+
+        // 4 - Bitrate (16)
+        short bitrate = (short) fm.readInt();
+
         // 4 - Channels (1)
+        short channels = (short) fm.readInt();
+
         // 8 - null
-        fm.skip(28);
+        fm.skip(8);
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+        resource.setAudioProperties(frequency, bitrate, channels);
+        resources[i] = resource;
 
         TaskProgressManager.setValue(i);
       }

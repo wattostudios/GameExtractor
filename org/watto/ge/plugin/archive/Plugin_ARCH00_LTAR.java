@@ -43,11 +43,13 @@ public class Plugin_ARCH00_LTAR extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("FEAR",
+    setGames("Condemned: Criminal Origins",
+        "FEAR",
         "FEAR: Extraction Point",
         "FEAR: Perseus Mandate",
         "FEAR 2: Project Origin",
-        "Middle Earth: Shadow Of Mordor");
+        "Middle Earth: Shadow Of Mordor",
+        "SAS: Secure Tomorrow");
     setExtensions("arch00", "arch01");
     setPlatforms("PC");
 

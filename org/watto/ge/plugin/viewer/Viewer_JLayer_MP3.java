@@ -96,7 +96,7 @@ public class Viewer_JLayer_MP3 extends ViewerPlugin {
     try {
       Player player = new Player(new FileInputStream(source));
       PreviewPanel_JLayerAudio preview = new PreviewPanel_JLayerAudio(player);
-
+    
       return preview;
     }
     catch (Throwable t) {

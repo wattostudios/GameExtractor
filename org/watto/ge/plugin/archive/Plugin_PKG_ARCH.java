@@ -1,31 +1,27 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -36,7 +32,7 @@ public class Plugin_PKG_ARCH extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PKG_ARCH() {
@@ -54,7 +50,7 @@ public class Plugin_PKG_ARCH extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -125,12 +121,12 @@ public class Plugin_PKG_ARCH extends ArchivePlugin {
       // 4 - Header (ARCH)
       // 2 - Version
       // 2 - Unknown
-      // 4 - Unknown, possibly archive CRC/Timestamp
-      // 4 - Unknown, possibly archive CRC/Timestamp
+      // 4 - Unknown
+      // 4 - Unknown
       // 4 - Archive Length
       fm.skip(20);
 
-      // 4 - Directory Offset (from the end of the archive)
+      // 4 - Directory Length
       long dirOffset = arcSize - fm.readInt();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
@@ -142,7 +138,6 @@ public class Plugin_PKG_ARCH extends ArchivePlugin {
       FieldValidator.checkNumFiles(numFiles);
 
       Resource[] resources = new Resource[numFiles];
-
       TaskProgressManager.setMaximum(numFiles);
 
       fm.seek(dirOffset);
@@ -150,8 +145,8 @@ public class Plugin_PKG_ARCH extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       for (int i = 0; i < numFiles; i++) {
-        // 4 - Unknown, possibly archive CRC/Timestamp
-        // 4 - Unknown, possibly archive CRC/Timestamp
+        // 4 - Unknown
+        // 4 - Unknown
         fm.skip(8);
 
         // 4 - Compressed Length
@@ -163,25 +158,32 @@ public class Plugin_PKG_ARCH extends ArchivePlugin {
 
         // 4 - File Offset (directories have offset all 255's and lengths=0)
         long offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
 
         // 2 - Filename Length [*2 for unicode text]
-        int filenameLength = fm.readShort() * 2;
+        int filenameLength = fm.readShort();
         FieldValidator.checkFilenameLength(filenameLength);
 
         // 2 - Unknown
         fm.skip(2);
 
         // X - Filename (unicode text)
-        String filename = new String(fm.readBytes(filenameLength), "UTF-16LE");
+        String filename = fm.readUnicodeString(filenameLength);
         FieldValidator.checkFilename(filename);
 
-        if (length > 0) {
-          //path,id,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength);
+        if (length != 0) {
+          FieldValidator.checkOffset(offset, arcSize);
 
-          if (length != decompLength) {
-            resources[realNumFiles].setExporter(exporter);
+          if (length == decompLength) {
+            // no compression
+
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength);
+          }
+          else {
+            // compression
+
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
           }
 
           TaskProgressManager.setValue(i);

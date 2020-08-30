@@ -37,7 +37,7 @@ public class Plugin_REZ_REZMGR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_REZ_REZMGR() {
@@ -52,6 +52,7 @@ public class Plugin_REZ_REZMGR extends ArchivePlugin {
         "Blood 2",
         "Contract JACK",
         "Die Hard Nakatomi Plaza",
+        "Global Operations",
         "I, The Gangster",
         "KISS Psycho Circus: The Nightmare Child",
         "Marine Sharpshooter",
@@ -62,6 +63,7 @@ public class Plugin_REZ_REZMGR extends ArchivePlugin {
         "Sanity Aiken's Artifact",
         "Sentinel",
         "Shogo: Mobile Armor Division",
+        "TerraWars: New York Invasion",
         "Tron 2.0",
         "World War 2 Normandy",
         "World War 2 Sniper - Call To Victory");
@@ -141,7 +143,7 @@ public class Plugin_REZ_REZMGR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -202,7 +204,7 @@ public class Plugin_REZ_REZMGR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

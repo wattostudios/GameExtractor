@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -24,6 +23,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,7 +44,8 @@ public class Plugin_BM extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Blood Magic");
+    setGames("Blood Magic",
+        "Dawn Of Magic");
     setExtensions("bm");
     setPlatforms("PC");
 
@@ -114,14 +115,15 @@ public class Plugin_BM extends ArchivePlugin {
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
+      // 4 - Unknown
+      fm.skip(4);
+
       Resource[] resources = new Resource[numFiles];
 
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-        // 4 - Unknown (0/5)
-        fm.skip(4);
 
         // 64 - Filename (null-terminated) (filled with junk)
         String filename = fm.readNullString(64);
@@ -141,6 +143,9 @@ public class Plugin_BM extends ArchivePlugin {
 
         // 8 - Hash?
         fm.skip(8);
+
+        // 4 - Unknown (0/5)
+        fm.skip(4);
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length, decompLength);

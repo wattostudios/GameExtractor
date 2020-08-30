@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.component.WSPluginManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -35,7 +36,7 @@ public class Plugin_SGA_ARCHIVE_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_SGA_ARCHIVE_2() {
@@ -49,11 +50,13 @@ public class Plugin_SGA_ARCHIVE_2 extends ArchivePlugin {
     setExtensions("sga");
     setPlatforms("PC");
 
+    setFileTypes(new FileType("rgt", "Relic Image", FileType.TYPE_IMAGE));
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -100,7 +103,7 @@ public class Plugin_SGA_ARCHIVE_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

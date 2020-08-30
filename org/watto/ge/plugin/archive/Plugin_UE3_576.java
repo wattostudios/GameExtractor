@@ -19,6 +19,8 @@ import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
+import org.watto.ge.plugin.archive.datatype.UnrealProperty;
+import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_RFMODSound_576;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -37,7 +39,7 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
   **********************************************************************************************
   **/
   public Plugin_UE3_576() {
-    super("UE3_576", "Unreal Engine 3 version 576");
+    super("UE3_576", "Unreal Engine 3 [576]");
 
     setExtensions("upk", "umap");
     setGames("Batman: Arkham Asylum",
@@ -59,7 +61,7 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -159,7 +161,7 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
       // TEST FOR FULL ARCHIVE COMPRESSION
       //
       long currentOffset = fm.getOffset();
-
+      
       // 4 - Compressed Data Offset (Offset to Unreal Header for the Compressed Block)
       int compressedBlockOffset = fm.readInt();
       if (compressedBlockOffset < currentOffset || compressedBlockOffset > arcSize) {
@@ -168,12 +170,12 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
       }
       else {
         fm.seek(compressedBlockOffset);
-
+      
         // 4 - Unreal Header (193,131,42,158)
         if (fm.readByte() == -63 && fm.readByte() == -125 && fm.readByte() == 42 && fm.readByte() == -98) {
           // The whole archive is compressed
           fm.seek(currentOffset);
-
+      
           FileManipulator decompFM = decompressArchive(fm);
           if (decompFM != null) {
             fm.close(); // close the original archive
@@ -194,21 +196,21 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
 
       /*
       // TEMPORARY FOR DECOMPRESSION TESTING ONLY!!!
-
+      
       // read the names directory
       fm.seek(nameOffset);
       readNamesDirectory(fm, numNames);
       for (int i = 0; i < numNames; i++) {
         System.out.println("Name " + i + "\t" + names[i]);
       }
-
+      
       // read the types directory
       fm.seek(typesOffset);
       UnrealImportEntry[] imports = readImportDirectory(fm, numTypes);
       for (int i = 0; i < numTypes; i++) {
         System.out.println("Type " + i + "\t" + imports[i].getName());
       }
-
+      
       fm.close();
       Resource[] resources = null;
       */
@@ -241,8 +243,14 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
         if (typeID < 0) {
           typeID = (0 - typeID) - 1;
         }
-        FieldValidator.checkRange(typeID, 0, numTypes);
-        String type = imports[typeID].getName();
+
+        String type = "Unknown";
+        try {
+          FieldValidator.checkRange(typeID, 0, numTypes);
+          type = imports[typeID].getName();
+        }
+        catch (Throwable t) {
+        }
 
         // 4 - null
         fm.skip(4);
@@ -315,6 +323,13 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource_Unreal(path, filename, offset, length);
 
+        //if (type.equals("SoundNodeWave")) {
+        //  resources[i].setExporter(Exporter_Custom_UE3_SoundNodeWave_Generic.getInstance());
+        //}
+        if (type.equals("RFMODSound")) {
+          resources[i].setExporter(Exporter_Custom_UE3_RFMODSound_576.getInstance());
+        }
+
         TaskProgressManager.setValue(i);
       }
 
@@ -373,6 +388,26 @@ public class Plugin_UE3_576 extends PluginGroup_UE3 {
     }
     catch (Throwable t) {
       logError(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   ArrayProperty
+   **********************************************************************************************
+   **/
+
+  public UnrealProperty readArrayProperty(FileManipulator fm, UnrealProperty property) {
+    try {
+
+      // JUST SKIP OVER THE ARRAY CONTENT, WE DON'T NEED IT IN THIS CASE (RFMODSound Files)
+      property.setValue(fm.readBytes((int) property.getLength()));
+
+      return property;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
       return null;
     }
   }

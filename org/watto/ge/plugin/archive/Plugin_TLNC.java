@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -26,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -130,7 +130,7 @@ public class Plugin_TLNC extends ArchivePlugin {
       FileManipulator fm;
 
       String pathName = path.getName();
-      if (pathName.indexOf(".hlnc") > 0 || pathName.indexOf(".ulnc") > 0) {
+      if (pathName.indexOf(".tlnc") > 0 || pathName.indexOf(".ulnc") > 0) {
         sourcePath = getDirectoryFile(path, "hlnc");
         fm = new FileManipulator(sourcePath, false);
       }
@@ -147,29 +147,26 @@ public class Plugin_TLNC extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
 
-      long prevOffset = 0;
-      int skipCounter = 0;
-
       while (fm.getOffset() < fm.getLength()) {
         // 4 - Unknown
         // 1 - Unknown (75)
         fm.skip(5);
 
         // 512 - Filename (unicode) (null terminated)
-        String filename = fm.readUnicodeString(256);
+        String utxFilename = fm.readUnicodeString(256);
         for (int j = 0; j < 256; j++) {
           // remove the null characters at the end of the filename
-          if (filename.charAt(j) == (char) 0) {
-            filename = filename.substring(0, j);
+          if (utxFilename.charAt(j) == (char) 0) {
+            utxFilename = utxFilename.substring(0, j);
             j = 256;
           }
         }
-        FieldValidator.checkFilename(filename);
+        FieldValidator.checkFilename(utxFilename);
 
-        if (filename.length() > 2) {
+        if (utxFilename.length() > 2) {
           // remove the ../ at the beginning
-          if (filename.charAt(0) == '.' && filename.charAt(1) == '.') {
-            filename = filename.substring(3);
+          if (utxFilename.charAt(0) == '.' && utxFilename.charAt(1) == '.') {
+            utxFilename = utxFilename.substring(3);
           }
         }
 
@@ -180,52 +177,30 @@ public class Plugin_TLNC extends ArchivePlugin {
         // 1 - Unknown (75)
         fm.skip(11);
 
-        // 4 - Entry Type
-        int entryType = fm.readInt();
+        // 4 - Number of Images in this UTX File
+        int numImages = fm.readInt();
 
-        if (entryType != 0) {
-          // valid file
+        for (int j = 0; j < numImages; j++) {
 
-          // 4 - null
+          // 4 - Unknown
           // 1 - Unknown (75)
-          // 4 - File Data Length (up to the end of the names table)
+          // 4 - Unknown
           // 1 - Unknown (75)
           fm.skip(10);
 
-          // 4 - File Offset
+          // 4 - Image Offset
           long offset = fm.readInt();
           FieldValidator.checkOffset(offset, arcSize);
 
-          //System.out.println("File " + filename + " at " + offset);
+          // 1 - Unknown (75)
+          fm.skip(1);
 
-          for (int j = 1; j < entryType; j++) { // note, starting at 1
-            // 1 - Unknown (75)
-            // 10 - Unknown
-            // 4 - Unknown Length/Offset
-            fm.skip(15);
-          }
+          String filename = utxFilename + "(" + (j + 1) + ").Texture";
 
           //path,name,offset,length,decompLength,exporter
           //resources[realNumFiles] = new Resource(path,filename,offset,length);
           resources[realNumFiles] = new Resource(path, filename, offset);
           realNumFiles++;
-
-          if (prevOffset != 0) {
-            // determine the length of the previous file
-            long length = offset - prevOffset - ((skipCounter + 1) * 533) - 10;
-
-            resources[realNumFiles - 2].setLength(length);
-          }
-
-          prevOffset = offset;
-          skipCounter = 0;
-
-          // 1 - Unknown (75)
-          fm.skip(1);
-        }
-        else {
-          //System.out.println("Skipping Empty File " + filename);
-          skipCounter++;
         }
 
         // 1 - Unknown (75)
@@ -234,19 +209,17 @@ public class Plugin_TLNC extends ArchivePlugin {
         TaskProgressManager.setValue(fm.getOffset());
       }
 
-      // determine the length of the last file
-      long length = arcSize - prevOffset - (skipCounter * 533);
-      resources[realNumFiles - 1].setLength(length);
-
       resources = resizeResources(resources, realNumFiles);
-      //calculateFileSizes(resources,arcSize);
+      calculateFileSizes(resources, arcSize);
 
       fm.close();
 
       return resources;
 
     }
-    catch (Throwable t) {
+    catch (
+
+    Throwable t) {
       logError(t);
       return null;
     }

@@ -43,7 +43,9 @@ public class Plugin_UE4_6 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("BARBAR_BAR");
+    setGames("BARBAR_BAR",
+        "Conarium",
+        "Hello Neighbor");
     setExtensions("uasset"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

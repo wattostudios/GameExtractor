@@ -19,6 +19,7 @@ import java.io.File;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.FileType;
+import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
@@ -43,6 +44,54 @@ public abstract class PluginGroup_UE3 extends ArchivePlugin {
   protected static long version = -1;
 
   protected static String[] names;
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
+  public Resource[] read(File path) {
+    try {
+
+      addFileTypes();
+
+      FileManipulator fm = new FileManipulator(path, false);
+
+      //long arcSize = fm.getLength();
+
+      // 4 - Header
+      fm.skip(4);
+
+      // 2 - Version
+      version = fm.readShort();
+      System.out.println("This archive uses the Unreal Engine: Version " + version);
+
+      if (version >= 300) {
+        // Try reading as an Unreal Engine 3 archive.
+        // If failed, will open as normal Unreal Engine 1/2 archive.
+        Resource[] resources = readGenericUE3(path, fm);
+        if (resources != null && resources.length > 0) {
+          return resources;
+        }
+      }
+      return null;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Basic Format
+   **********************************************************************************************
+   **/
+  public Resource[] readGenericUE3(File path, FileManipulator fm) {
+    return null;
+  }
 
   /**
    **********************************************************************************************
@@ -262,6 +311,16 @@ public abstract class PluginGroup_UE3 extends ArchivePlugin {
         for (int i = 0; i < realNumBlocks; i++) {
           TaskProgressManager.setValue(fm.getOffset()); // progress bar
 
+          long currentPos = fm.getOffset();
+
+          if (compType == 2) {
+            // check for actually being ZLib
+            if (fm.readString(1).equals("x")) {
+              compType = 1;
+            }
+            fm.relativeSeek(currentPos);
+          }
+
           if (compType == 1) {
             exporterZLib.open(fm, blockCompLengths[i], blockDecompLengths[i]);
             exporter = exporterZLib;
@@ -274,6 +333,8 @@ public abstract class PluginGroup_UE3 extends ArchivePlugin {
           while (exporter.available()) {
             decompFM.writeByte(exporter.read());
           }
+
+          fm.relativeSeek(currentPos + blockCompLengths[i]); // make sure we're at the right place for the next decompression
         }
 
       }
@@ -445,8 +506,15 @@ public abstract class PluginGroup_UE3 extends ArchivePlugin {
       int version = fm.readShort();
       for (int i = 0; i < versions.length; i++) {
         if (version == versions[i]) {
-          rating += 5;
+          rating += 30;
           break;
+        }
+
+      }
+      if (version >= 300) {
+        rating += 10;
+        if (versions.length == 1 && versions[0] == -1) {
+          rating += 1; // to prioritise the generic plugins slightly above any of the version-specific plugins where the version doesn't match
         }
       }
 
@@ -706,20 +774,48 @@ public abstract class PluginGroup_UE3 extends ArchivePlugin {
     // Now read each block
     long[] offsets = new long[numBlocks];
     long[] compLengths = new long[numBlocks];
-    for (int i = 0; i < numBlocks; i++) {
-      // 4 - Offset in the Decompressed File for where this data belongs
-      // 4 - Decompressed Data Length
-      fm.skip(8);
 
-      // 4 - Compressed Data Offset (Offset to Unreal Header for the Compressed Block)
-      long offset = IntConverter.unsign(fm.readInt());
-      FieldValidator.checkOffset(offset, arcSize);
-      offsets[i] = offset;
+    long startPos = fm.getOffset();
 
-      // 4 - Compressed Data Length
-      long compLength = IntConverter.unsign(fm.readInt());
-      FieldValidator.checkLength(compLength, arcSize);
-      compLengths[i] = compLength;
+    try {
+      // Try 16-byte entries
+      for (int i = 0; i < numBlocks; i++) {
+        // 4 - Offset in the Decompressed File for where this data belongs
+        // 4 - Decompressed Data Length
+        fm.skip(8);
+
+        // 4 - Compressed Data Offset (Offset to Unreal Header for the Compressed Block)
+        long offset = IntConverter.unsign(fm.readInt());
+        FieldValidator.checkOffset(offset, arcSize);
+        offsets[i] = offset;
+
+        // 4 - Compressed Data Length
+        long compLength = IntConverter.unsign(fm.readInt());
+        FieldValidator.checkLength(compLength, arcSize);
+        compLengths[i] = compLength;
+      }
+    }
+    catch (Throwable t) {
+      // try 20-byte entries
+      fm.seek(startPos);
+      for (int i = 0; i < numBlocks; i++) {
+        // 4 - Offset in the Decompressed File for where this data belongs
+        // 4 - Decompressed Data Length
+        fm.skip(8);
+
+        // 4 - Compressed Data Offset (Offset to Unreal Header for the Compressed Block)
+        long offset = IntConverter.unsign(fm.readInt());
+        FieldValidator.checkOffset(offset, arcSize);
+        offsets[i] = offset;
+
+        // 4 - Compressed Data Length
+        long compLength = IntConverter.unsign(fm.readInt());
+        FieldValidator.checkLength(compLength, arcSize);
+        compLengths[i] = compLength;
+
+        // 4 - Compression Flag? (1)
+        fm.skip(4);
+      }
     }
 
     return new BlockExporterWrapper(null, offsets, compLengths, compLengths);

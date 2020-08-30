@@ -76,7 +76,9 @@ public class Plugin_PAK_55 extends ArchivePlugin {
 
       // 4 - Decompressed Length
       // 4 - Compressed Length (including the next 2 fields)
-      if (fm.readInt() == fm.readInt()) {
+      int decompLength = fm.readInt();
+      int compLength = fm.readInt();
+      if (decompLength == compLength && decompLength != 0) {
         // raw file
         rating += 25;
       }

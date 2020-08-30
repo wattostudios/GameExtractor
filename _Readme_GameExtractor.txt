@@ -61,11 +61,11 @@ More detailed instructions can be found below, or on the Game Extractor website.
                                  Other Operating Systems
 1. Install Java Runtime Environment 8.0 (or 1.8), or later, from http://www.java.com
 2. Download GameExtractor.zip from http://www.watto.org/extract
-3. Using any zip program, unzip GameExtractor.zip to c:\extract
+3. Using any zip program, unzip GameExtractor.zip to /usr/local/bin/extract
 4. Open a Command Prompt window
-5. Change to the Game Extractor directory by typing "cd c:\extract"
+5. Change to the Game Extractor directory by typing "cd /usr/local/bin/extract"
 6a. Run Game Extractor by typing "java -jar GameExtractor.jar"
-6b. If that doesn't work, try typing "c:\java\bin\java -jar GameExtractor.jar"
+6b. If that doesn't work, try typing "/usr/java/bin/java -jar GameExtractor.jar"
 
 * Please note: While Java can theoretically run on many different operating systems, this
   doesn't necessarily mean that Game Extractor works correctly on those operating systems. 
@@ -101,6 +101,20 @@ website as well.
 //                                      Version History                                       //
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+Version 3.11
+[I] Support for more games, with a focus on adding previews (image and audio) and thumbnails
+[+] Better support for more Unreal Engine 1/2/3/4 games, including Sound and Texture previews
+[+] The Information SidePanel now shows any resource-specific properties like Image Width/Height
+[+] BC7 images can now be shown as previews or thumbnails
+[B] Fixed a bug where some Unreal Engine 4 archives would always show a progress bar of 99.9%
+[B] Fixed a bug where some thumbnails would display corrupted, particularly Unreal Engine images
+[B] Fixed a bug where the Settings and Interface files would occasionally get corrupted on exit
+[B] Fixed a bug where the ImageInvestigator would show a blank panel on double-click of a file
+[B] Fixed a bug which prevented some Unreal Engine 1 and 2 Textures from being displayed
+[B] Fixed several bugs with reading Unreal Engine 4 archives and processing uasset files in them
+[B] Fixed a bug where files using QuickBMS compression wouldn't be extracted if there were more
+    than ~100 files selected, or if you chose the Extract All button.
 
 Version 3.10
 [I] Heaps of new features and improvements...

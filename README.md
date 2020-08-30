@@ -51,6 +51,20 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.11
+  * [I] Support for more games, with a focus on adding previews (image and audio) and thumbnails
+  * [+] Better support for more Unreal Engine 1/2/3/4 games, including Sound and Texture previews
+  * [+] The Information SidePanel now shows any resource-specific properties like Image Width/Height
+  * [+] BC7 images can now be shown as previews or thumbnails
+  * [B] Fixed a bug where some Unreal Engine 4 archives would always show a progress bar of 99.9%
+  * [B] Fixed a bug where some thumbnails would display corrupted, particularly Unreal Engine images
+  * [B] Fixed a bug where the Settings and Interface files would occasionally get corrupted on exit
+  * [B] Fixed a bug where the ImageInvestigator would show a blank panel on double-click of a file
+  * [B] Fixed a bug which prevented some Unreal Engine 1 and 2 Textures from being displayed
+  * [B] Fixed several bugs with reading Unreal Engine 4 archives and processing uasset files in them
+  * [B] Fixed a bug where files using QuickBMS compression wouldn't be extracted if there were more
+        than ~100 files selected, or if you chose the Extract All button.
+        
 * Version 3.10
   * [I] Heaps of new features and improvements...
     * [I] Support for more games (archive formats, image/audio previews, and thumbnails)

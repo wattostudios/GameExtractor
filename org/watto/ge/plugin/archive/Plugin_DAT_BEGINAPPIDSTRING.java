@@ -16,14 +16,18 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.ErrorLogger;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.QuickBMSHelper;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.exporter.BlockQuickBMSExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
@@ -47,24 +51,42 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
     super("DAT_BEGINAPPIDSTRING", "DAT_BEGINAPPIDSTRING");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
-    setGames("LEGO Lord of the Rings",
+    setGames("LEGO Batman 2",
+        "LEGO Batman 3",
+        "LEGO Indiana Jones",
+        "LEGO Lord of the Rings",
+        "LEGO Pirates of the Caribbean",
         "LEGO The Hobbit");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    setFileTypes(new FileType("cd", "Character Definition", FileType.TYPE_OTHER),
+    setFileTypes(new FileType("ai2", "AI Level Path", FileType.TYPE_OTHER),
+        new FileType("an3", "Animation", FileType.TYPE_OTHER),
+        new FileType("ani", "Animation", FileType.TYPE_OTHER),
+        new FileType("anm", "Animation", FileType.TYPE_OTHER),
+        new FileType("cd", "Character Definition", FileType.TYPE_OTHER),
+        new FileType("cft", "Font", FileType.TYPE_OTHER),
+        new FileType("cu2", "Cutscene", FileType.TYPE_VIDEO),
+        new FileType("fnt", "Font", FileType.TYPE_OTHER),
         new FileType("ft2", "Font", FileType.TYPE_OTHER),
+        new FileType("git", "Git Options", FileType.TYPE_DOCUMENT),
+        new FileType("giz", "Giz Obstacle", FileType.TYPE_OTHER),
+        new FileType("gsc", "GSC Image Archive", FileType.TYPE_ARCHIVE),
         new FileType("par", "Part", FileType.TYPE_OTHER),
+        new FileType("scp", "Script File", FileType.TYPE_DOCUMENT),
         new FileType("sf", "Script File", FileType.TYPE_DOCUMENT),
+        new FileType("spl", "Spline", FileType.TYPE_OTHER),
         new FileType("sub", "Subtitles", FileType.TYPE_DOCUMENT),
         new FileType("subopt", "Subtitles", FileType.TYPE_DOCUMENT),
         new FileType("txm", "Minikit", FileType.TYPE_DOCUMENT),
         new FileType("txc", "Collectable", FileType.TYPE_DOCUMENT),
         new FileType("tex", "Texture Image", FileType.TYPE_IMAGE),
         new FileType("fmv", "FMV Video", FileType.TYPE_VIDEO));
+
+    setTextPreviewExtensions("ats", "git", "gix", "h", "scp"); // LOWER CASE
 
   }
 
@@ -266,6 +288,9 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
     */
   }
 
+  /** older archives use name entries of length 8, newer ones are length 12. This is here to support Replacing to the right size. **/
+  int nameEntrySize = 12;
+
   /**
    **********************************************************************************************
    * Reads an [archive] File into the Resources
@@ -383,7 +408,23 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
 
       // 4 - Names Directory Length
       int nameDirLength = fm.readInt();
-      FieldValidator.checkLength(nameDirLength, arcSize);
+
+      nameEntrySize = 12;
+      try {
+        FieldValidator.checkLength(nameDirLength, arcSize);
+      }
+      catch (Throwable t) {
+        // this was for name entries of length 12 (newer games - eg Hobbit, LotR).
+        // try again for name entries of length 8 (older games - eg Indiana Jones).
+
+        nameEntrySize = 8;
+
+        fm.seek(nameDirOffset + (numNames * 8));
+
+        // 4 - Names Directory Length
+        nameDirLength = fm.readInt();
+        FieldValidator.checkLength(nameDirLength, arcSize);
+      }
 
       // read the names into memory
       byte[] nameBytes = fm.readBytes(nameDirLength);
@@ -459,8 +500,10 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
             FieldValidator.checkOffset(nameOffset, nameDirLength);
           }
 
-          // 4 - Unknown
-          fm.skip(4);
+          if (nameEntrySize == 12) {
+            // 4 - Unknown
+            fm.skip(4);
+          }
 
           // get the actual name
           if (nameOffset >= 0) {
@@ -544,7 +587,7 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
 
           fm.seek(resource.getOffset());
 
-          int numBlocks = (decompLength / 32768) + 1; // guess
+          int numBlocks = (decompLength / 16384) + 1; // guess (older games use block size 16384, newer use 32768)
           int realNumBlocks = 0;
 
           String[] compressionTypes = new String[numBlocks];
@@ -585,10 +628,10 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
 
           // if we originally allocated too many blocks, resize the arrays
           if (realNumBlocks != numBlocks) {
-            String[] oldCompressionTypes = new String[numBlocks];
-            long[] oldBlockDecompLengths = new long[numBlocks];
-            long[] oldBlockLengths = new long[numBlocks];
-            long[] oldBlockOffsets = new long[numBlocks];
+            String[] oldCompressionTypes = compressionTypes;
+            long[] oldBlockDecompLengths = blockDecompLengths;
+            long[] oldBlockLengths = blockLengths;
+            long[] oldBlockOffsets = blockOffsets;
 
             compressionTypes = new String[realNumBlocks];
             blockDecompLengths = new long[realNumBlocks];
@@ -632,6 +675,151 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
       return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "TXT");
     }
     return null;
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      // Work out where the first file is, so we know how much to copy at the beginning
+      int firstOffset = Integer.MAX_VALUE;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        if (!resource.isReplaced()) {
+          int offset = (int) resource.getOffset();
+          if (offset < firstOffset) {
+            firstOffset = offset;
+          }
+        }
+      }
+
+      // Write Header Data
+
+      // 4 - Directory Offset
+      int srcDirOffset = src.readInt();
+      fm.writeInt(0); // dummy for now - will set it correctly later on
+
+      // 4 - Directory Length
+      // X - App ID String (BEGIN_APP_ID_STRINGPakDat v1.01END_APP_ID_STRING)
+      // 1 - null App ID String Terminator
+      // X - Unknown
+      // 0-255 - null Padding to a multiple of 256 bytes
+      fm.writeBytes(src.readBytes(firstOffset - 4));
+
+      // Write Files (compressed files will stay compressed, replaced files will come in as raw data)
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      Exporter_Default exporterDefault = Exporter_Default.getInstance();
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        ExporterPlugin realExporter = resource.getExporter();
+        resource.setExporter(exporterDefault);
+
+        // X - File Data
+        write(resource, fm);
+
+        resource.setExporter(realExporter);
+
+        // 0-511 - null Padding to a multiple of 512 bytes
+        int length = (int) fm.getLength();
+        int padding = calculatePadding(length, 512);
+        for (int p = 0; p < padding; p++) {
+          fm.writeByte(0);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      src.seek(srcDirOffset);
+
+      long dirOffset = fm.getOffset();
+
+      // 4 - Unknown (-5)
+      // 4 - Number of Files
+      fm.writeBytes(src.readBytes(8));
+
+      int offset = firstOffset;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getLength();
+        long decompLength = resource.getDecompressedLength();
+
+        // 4 - File Offset [*256] [+FileOffsetAdditionalValue]
+        fm.writeInt(offset >> 8);
+
+        // 4 - Compressed Length
+        fm.writeInt(length);
+
+        // 4 - Decompressed Length
+        fm.writeInt(decompLength);
+
+        // 3 - Unknown
+        // 1 - File Offset Additional Value
+        fm.writeInt(0);
+
+        offset += length;
+        offset += calculatePadding(length, 512);
+      }
+
+      src.skip(numFiles * 16);
+
+      // 4 - Number of Names
+      int numNames = src.readInt();
+      fm.writeInt(numNames);
+
+      // NAME DETAILS DIRECTORY
+      fm.writeBytes(src.readBytes(numNames * nameEntrySize));
+
+      // 4 - Names Directory Length
+      int nameDirLength = src.readInt();
+      fm.writeInt(nameDirLength);
+
+      // NAMES DIRECTORY
+      fm.writeBytes(src.readBytes(nameDirLength));
+
+      // FILENAME CRC DIRECTORY
+      fm.writeBytes(src.readBytes(numFiles * 4));
+
+      // 8 - null
+      fm.writeLong(0);
+
+      int dirLength = (int) (fm.getLength() - dirOffset);
+
+      // Now after all this, go back and write the header details
+      fm.seek(0);
+
+      // 4 - Directory Offset
+      fm.writeInt(dirOffset);
+
+      // 4 - Directory Length
+      fm.writeInt(dirLength);
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

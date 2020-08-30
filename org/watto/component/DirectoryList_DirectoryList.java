@@ -200,7 +200,7 @@ public class DirectoryList_DirectoryList extends DirectoryListPanel implements W
   **********************************************************************************************
   **/
   @Override
-  @SuppressWarnings({ "unchecked", "static-access" })
+  @SuppressWarnings({ "unchecked" })
   public void constructInterface(File directory) {
     removeAll();
 

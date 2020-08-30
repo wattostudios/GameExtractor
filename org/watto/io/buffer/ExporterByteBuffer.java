@@ -1,20 +1,16 @@
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       WATTO STUDIOS                                        //
-//                             Java Code, Programs, and Software                              //
-//                                    http://www.watto.org                                    //
-//                                                                                            //
-//                           Copyright (C) 2004-2010  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.io.buffer;
 
@@ -24,7 +20,8 @@ import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Custom_RGSSAD_RGSSAD;
 
 /***********************************************************************************************
-A class that reads, writes, and buffers data from a <code>byte[]</code> data source.
+Reading and Buffering data that comes from an <i>ExporterPlugin</i> data source. Used for thumbnail
+previews, among other things.
 ***********************************************************************************************/
 public class ExporterByteBuffer implements ManipulatorBuffer {
 
@@ -35,16 +32,13 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   /** The buffer size **/
   int bufferSize = 2048;
 
-  /** whether the buffer is writable or not **/
-  boolean writable = false;
-
   /** The virtual pointer location in the file **/
   long filePointer = 0;
 
   /** The buffer **/
   byte[] buffer = new byte[bufferSize];
 
-  /** The read and write position in the buffer **/
+  /** The read position in the buffer **/
   int bufferLevel = 0;
 
   /***********************************************************************************************
@@ -61,14 +55,6 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
     this.resource = resource;
 
     this.exporter = resource.getExporter();
-
-    /*
-    // V3.10 this setting is no longer relevant, as we now have a Task_QuickBMSBulkExport which is really fast 
-    if (this.exporter instanceof Exporter_QuickBMS_Decompression && !(Settings.getBoolean("AllowQuickBMSThumbnails"))) {
-      // Exclude this exporter from being used for thumbnail generation
-      this.exporter = Exporter_Default.getInstance();
-    }
-    */
 
     if (exporter instanceof Exporter_Custom_RGSSAD_RGSSAD) {
       if (resource.getExtension().equals("png")) {
@@ -91,15 +77,14 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   public void checkFill(int length) {
     try {
 
-      if (bufferLevel + length >= bufferSize) {
-        filePointer += bufferLevel;
-        //seek(filePointer);
+      //if (bufferLevel + length >= bufferSize) {
+      if (bufferLevel + length > bufferSize) {
 
         // Move the remaining buffered data to the start of the buffer
         int remainingBufferSize = bufferSize - bufferLevel;
         System.arraycopy(buffer, bufferLevel, buffer, 0, remainingBufferSize);
-        // fill the rest of the buffer with fresh data from the file
 
+        //fill the rest of the buffer with fresh data from the file
         while (remainingBufferSize < bufferSize) {
           boolean available = exporter.available(); // important - some exporters only load the bytes from the file when calling this (eg ZLib_CompressedSizeOnly)
           if (!available) { // TODO 3.03 ADDED THIS IF-ELSE BIT - CHECK THUMBNAILS STILL WORK WELL!
@@ -110,6 +95,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
             buffer[remainingBufferSize] = (byte) exporter.read();
             remainingBufferSize++;
           }
+          filePointer++;
         }
 
         // reset the bufferLevel
@@ -123,9 +109,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Checks to see whether <code>length</code> bytes can be written to the buffer. If not, the buffer
-  is written to disk and cleared out, to allow <code>length</code> bytes to be written.
-  @param length the length of data to be written to the buffer
+  Not Supported
   ***********************************************************************************************/
   @Override
   public void checkWrite(int length) {
@@ -133,7 +117,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Closes the file. If the file is writable, it performs a forceWrite() to flush the buffer to disk.
+  Closes the file
   ***********************************************************************************************/
   @Override
   public void close() {
@@ -155,6 +139,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
       else {
         buffer[i] = (byte) exporter.read();
       }
+      filePointer++;
     }
 
   }
@@ -169,7 +154,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Writes all the buffered data to disk, and flushes the buffer.
+  Not Supported
   ***********************************************************************************************/
   @Override
   public void forceWrite() {
@@ -221,14 +206,14 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Gets the current position in this file. Data will be read or written from this point.
+  Gets the current position in this file. Data will be read from this point.
   @return the current position in the file
   ***********************************************************************************************/
   @Override
   public long getPointer() {
     try {
 
-      return filePointer + bufferLevel;
+      return filePointer - bufferSize + bufferLevel;
 
     }
     catch (Throwable t) {
@@ -327,47 +312,18 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
           bufferLevel += sizeToRead;
 
           length -= sizeToRead;
-          checkFill(length); // TODO 3.03 changed from checkFill(sizeToRead); to checkFill(length); 
+          checkFill(length);
           readLevel += sizeToRead;
         }
 
       }
 
-      //return length; // TODO 3.03 change to below
       return requestedLength;
-
     }
     catch (Throwable t) {
       ErrorLogger.log(t);
       return -1;
     }
-
-    /*
-    try {
-      byte[] bytes = new byte[length];
-    
-      int readSize = 0;
-      while (readSize < length) {
-        //if (!exporter.available()) {
-        //  break;
-        //}
-        bytes[readSize] = (byte) exporter.read();
-        readSize++;
-      }
-    
-      int copySize = length;
-      if (readSize < copySize) {
-        copySize = readSize;
-      }
-    
-      System.arraycopy(bytes, 0, destination, offset, copySize);
-      return copySize;
-    }
-    catch (Throwable t) {
-      ErrorLogger.log(t);
-      return 0;
-    }
-    */
   }
 
   /***********************************************************************************************
@@ -380,14 +336,18 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   public void relativeSeek(long offset) {
     try {
 
+      /*
       long newPosition = offset - filePointer;
-
+      
       if (newPosition >= 0 && newPosition < bufferSize) {
         bufferLevel = (int) newPosition;
       }
       else {
         seek(offset);
       }
+      */
+
+      seek(offset);
 
     }
     catch (Throwable t) {
@@ -433,74 +393,68 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
       int skipAmount = (int) (offset - getPointer());
 
       if (bufferLevel + skipAmount < bufferSize) {
-        bufferLevel += skipAmount; // the buffer already contains the data for this point - only a small skip
+        // the buffer already contains the data for this point - only a small skip
+        bufferLevel += skipAmount;
       }
       else {
-        skipAmount = (int) (offset - (filePointer + bufferSize));
+        // the buffer isn't big enough for the skip, so need to find the right place in the file, and read in more data
 
-        // skip and discard the remaining skip amount
+        // we have already read in some buffer - we don't need to read that again
+        skipAmount -= (bufferSize - bufferLevel);
+
+        // now we're at the end of the buffer, so read some actual data from the file, until we reach the offset
         for (int i = 0; i < skipAmount; i++) {
-          //if (exporter.available()) {
-          exporter.available(); // important - some exporters only load the bytes from the file when calling this (eg ZLib_CompressedSizeOnly)
-          exporter.read();
-          //}
-          //else {
-          //  break;
-          //}
+          boolean available = exporter.available();
+          if (!available) {
+          }
+          else {
+            exporter.read();
+          }
+          filePointer++;
         }
 
-        // move the filePointer to the new offset
-        filePointer = offset;
-
-        // now that we're at the right spot, fill the buffer
-        fill(); // does a flush() as part of this.
-
+        // now we're at the right place, so fill the buffer
+        fill();
       }
+
     }
     else {
-      // seeking to an earlier spot in the file, so re-open (start again at 0) then skip some bytes
-      exporter.close();
-      exporter.open(resource);
+      // seeking to an earlier spot in the file
 
-      /*
-      // v3.10 fixed this, because it doesn't increment the file pointer, so just do skip() instead (which works) and reset the globals.
-      // Also don't want to fill(), as this will be handled properly on the next read()
-      for (int i = 0; i < offset; i++) {
-        //if (exporter.available()) {
-        exporter.available(); // important - some exporters only load the bytes from the file when calling this (eg ZLib_CompressedSizeOnly)
-        exporter.read();
-        //}
-        //else {
-        //  break;
-        //}
+      // see if we can just move the buffer back a little...
+      int difference = (int) (getPointer() - offset);
+      if (difference <= bufferLevel) {
+        bufferLevel -= difference;
       }
-      
-      // now that we're at the right spot, fill the buffer
-      fill(); // does a flush() as part of this.
-      */
-      filePointer = 0;
-      bufferLevel = 0;
-      for (int i = 0; i < offset; i++) {
-        //if (exporter.available()) {
-        read();
-        //}
-        //else {
-        //  break;
-        //}
+      else {
+        // nope, can't move back in the buffer, so re-open (start again at 0) then skip some bytes
+        exporter.close();
+        exporter.open(resource);
+
+        filePointer = 0;
+        bufferLevel = 0;
+
+        // read to the right place
+        for (int i = 0; i < offset; i++) {
+          boolean available = exporter.available();
+          if (!available) {
+          }
+          else {
+            exporter.read();
+          }
+          filePointer++;
+        }
+
+        // fill the buffer
+        fill();
+
       }
-
-      //skip((int) offset);
-
     }
 
   }
 
   /***********************************************************************************************
   Sets the size of the buffer.
-  <br><br>
-  <b>WARNING:</b> If this file is opened as <i>writable</i>, this method will <code>forceWrite()</code>
-   any data in the buffer to the current position in the file. If you don't want this, make sure
-   you <code>flush()</code> before running this method.
    @param length the new length of the buffer
   ***********************************************************************************************/
   @Override
@@ -517,13 +471,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Sets the length of the file. If the file is smaller than this length, the file size is increased.
-  If the file is larger than this size, the file size is not changed.
-  <br>
-  <i>Note:</i> Setting the length does not force the file to be this length, it only sets the
-  minimum size of the file. If you write data past the length of the file, the file will become
-  longer.
-  @param length the new length of the file
+  Not Supported
   ***********************************************************************************************/
   @Override
   public void setLength(long length) {
@@ -539,12 +487,14 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   public int skip(int length) {
     try {
 
-      int bufferPos = length + bufferLevel;
-      if (bufferPos >= bufferSize) {
-        seek(filePointer + bufferPos);
+      int newBufferPos = length + bufferLevel;
+      if (newBufferPos <= bufferSize) {
+        // skip is within the existing buffer
+        bufferLevel = newBufferPos;
       }
       else {
-        bufferLevel += length;
+        // skip goes beyond the buffer, so we need to seek to a new offset, and fill the buffer 
+        seek(getPointer() + length);
       }
 
       return length;
@@ -557,8 +507,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Writes an array of data into the buffer
-  @param source the data to write to the buffer
+  Not Supported
   ***********************************************************************************************/
   @Override
   public void write(byte[] source) {
@@ -566,11 +515,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Writes <code>length</code> bytes of data from the <code>offset</code> in the <code>source</code>
-  array into the buffer
-  @param source the data to write to the buffer
-  @param offset the offset in the <code>source</code> to start reading from
-  @param length the length of data to write
+  Not Supported
   ***********************************************************************************************/
   @Override
   public void write(byte[] source, int offset, int length) {
@@ -578,8 +523,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
-  Writes a single byte of data to the buffer
-  @param source the byte to write
+  Not Supported
   ***********************************************************************************************/
   @Override
   public void write(int source) {

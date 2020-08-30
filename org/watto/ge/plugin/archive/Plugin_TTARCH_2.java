@@ -17,6 +17,7 @@ package org.watto.ge.plugin.archive;
 import java.io.File;
 import org.watto.ErrorLogger;
 import org.watto.Language;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -35,7 +36,7 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_TTARCH_2() {
@@ -50,9 +51,8 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("aud", "Audio File", FileType.TYPE_AUDIO),
+        new FileType("vox", "Vox Audio File", FileType.TYPE_OTHER));
 
   }
 
@@ -128,7 +128,7 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -214,7 +214,14 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
       }
 
       // 4 - File Data Length
-      fm.skip(4);
+      long relativeOffset = 0;
+      if (numCompressedBlocks > 0) {
+        fm.skip(4);
+      }
+      else {
+        relativeOffset = arcSize - fm.readInt();
+        FieldValidator.checkOffset(relativeOffset, arcSize);
+      }
 
       // 4 - Unknown (51824)
       int lastDecompLength = fm.readInt();
@@ -223,52 +230,54 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
         decompLengths[numCompressedBlocks - 1] = lastDecompLength;
       }
 
-      // 4 - Unknown (9999999)
-      // 8 - null
-      // 4 - Unknown (64)
-      // 1 - null
-      fm.skip(17);
+      if (numCompressedBlocks > 0) {
+        // 4 - Unknown (9999999)
+        // 8 - null
+        // 4 - Unknown (64)
+        // 1 - null
+        fm.skip(17);
 
-      // 4 - File Data Offset [+49 + (numCompressedBlocks*4)]
-      int decompressedDirectoryLength = fm.readInt();
-      int fileDataOffset = decompressedDirectoryLength + 49 + (numCompressedBlocks * 4);
-      FieldValidator.checkOffset(fileDataOffset, arcSize);
+        // 4 - File Data Offset [+49 + (numCompressedBlocks*4)]
+        int decompressedDirectoryLength = fm.readInt();
+        int fileDataOffset = decompressedDirectoryLength + 49 + (numCompressedBlocks * 4);
+        FieldValidator.checkOffset(fileDataOffset, arcSize);
 
-      if (compression == 2) {
-        // 4 - Compressed Folders Directory and Details Directory Length
-        int compressedLength = fm.readInt();
-        FieldValidator.checkLength(compressedLength, arcSize);
+        if (compression == 2) {
+          // 4 - Compressed Folders Directory and Details Directory Length
+          int compressedLength = fm.readInt();
+          FieldValidator.checkLength(compressedLength, arcSize);
 
-        fileDataOffset += 4;
+          fileDataOffset += 4;
 
-        long currentOffset = fm.getOffset();
+          long currentOffset = fm.getOffset();
 
-        // Now do the decompress of the directory...
-        byte[] dirBytes = new byte[decompressedDirectoryLength];
-        int decompWritePos = 0;
-        Exporter_Deflate exporter = Exporter_Deflate.getInstance();
-        exporter.open(fm, compressedLength, decompressedDirectoryLength);
+          // Now do the decompress of the directory...
+          byte[] dirBytes = new byte[decompressedDirectoryLength];
+          int decompWritePos = 0;
+          Exporter_Deflate exporter = Exporter_Deflate.getInstance();
+          exporter.open(fm, compressedLength, decompressedDirectoryLength);
 
-        for (int b = 0; b < decompressedDirectoryLength; b++) {
-          if (exporter.available()) { // make sure we read the next bit of data, if required
-            dirBytes[decompWritePos++] = (byte) exporter.read();
+          for (int b = 0; b < decompressedDirectoryLength; b++) {
+            if (exporter.available()) { // make sure we read the next bit of data, if required
+              dirBytes[decompWritePos++] = (byte) exporter.read();
+            }
           }
+
+          // Ensure we're at the correct place in the archive
+          fm.seek(currentOffset + compressedLength);
+
+          // now decompress the rest of the archive
+          FileManipulator decompFM = decompressArchive(fm, compLengths, decompLengths);
+          if (decompFM != null) {
+            path = decompFM.getFile(); // So the resources are stored against the decompressed file
+            arcSize = path.length();
+            decompFM.close(); // we don't want to read from this file, we're going to read from the decompressed directory below instead
+          }
+
+          // open the decompressed directory for processing
+          fm.close();
+          fm = new FileManipulator(new ByteBuffer(dirBytes));
         }
-
-        // Ensure we're at the correct place in the archive
-        fm.seek(currentOffset + compressedLength);
-
-        // now decompress the rest of the archive
-        FileManipulator decompFM = decompressArchive(fm, compLengths, decompLengths);
-        if (decompFM != null) {
-          path = decompFM.getFile(); // So the resources are stored against the decompressed file
-          arcSize = path.length();
-          decompFM.close(); // we don't want to read from this file, we're going to read from the decompressed directory below instead
-        }
-
-        // open the decompressed directory for processing
-        fm.close();
-        fm = new FileManipulator(new ByteBuffer(dirBytes));
       }
 
       // 4 - Number Of Folders
@@ -306,7 +315,7 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
         fm.skip(4);
 
         // 4 - File Offset (relative to the start of the file data)
-        int offset = fm.readInt();// + fileDataOffset;
+        long offset = fm.readInt() + relativeOffset;// + fileDataOffset;
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
@@ -318,6 +327,28 @@ public class Plugin_TTARCH_2 extends ArchivePlugin {
         resources[i].forceNotAdded(true);
 
         TaskProgressManager.setValue(i);
+      }
+
+      // now check all the AUD files, to remove the header from them
+      fm.getBuffer().setBufferSize(60);
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        if (resource.getExtension().equalsIgnoreCase("aud")) {
+          if (!resource.isCompressed()) {
+            fm.seek(resource.getOffset());
+            if (fm.readString(4).equals("ERTM")) {
+              fm.skip(52);
+              long offset = fm.getOffset();
+              if (fm.readString(4).equals("OggS")) {
+                long length = resource.getDecompressedLength() - 56;
+
+                resource.setLength(length);
+                resource.setDecompressedLength(length);
+                resource.setOffset(offset);
+              }
+            }
+          }
+        }
       }
 
       fm.close();

@@ -92,6 +92,99 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+  Interlace/deinterlace an image
+   **********************************************************************************************
+   **/
+  public static ImageResource interlaceVertically(ImageResource image, int interlaceSize) {
+    int[] pixels = image.getPixels();
+    int numPixels = pixels.length;
+
+    int width = image.getWidth();
+    int height = image.getHeight();
+
+    // split the image into columns
+    int[][] columns = new int[width][0];
+    for (int w = 0; w < width; w++) {
+      int[] column = new int[height];
+      for (int h = 0; h < height; h++) {
+        column[h] = pixels[h * width + w];
+      }
+      columns[w] = column;
+    }
+
+    // shuffle the columns based on the interlacing
+    int[][] oldColumns = columns;
+    columns = new int[width][0];
+    int columnPos = 0;
+
+    for (int i = 0; i < interlaceSize; i++) {
+      for (int w = i; w < width; w += interlaceSize) {
+        columns[columnPos] = oldColumns[w];
+        columnPos++;
+      }
+    }
+
+    // re-build the image
+    int[] interlacedPixels = new int[numPixels];
+    int pixelPos = 0;
+    for (int h = 0; h < height; h++) {
+      for (int w = 0; w < width; w++) {
+        interlacedPixels[pixelPos] = columns[w][h];
+        pixelPos++;
+      }
+    }
+
+    image.setPixels(interlacedPixels);
+    return image;
+  }
+
+  /**
+   **********************************************************************************************
+  Swaps every column pair so that they appear in the opposite order
+   **********************************************************************************************
+   **/
+  public static ImageResource swapColumnPairs(ImageResource image) {
+    int[] pixels = image.getPixels();
+    int numPixels = pixels.length;
+
+    int width = image.getWidth();
+    int height = image.getHeight();
+
+    // split the image into columns
+    int[][] columns = new int[width][0];
+    for (int w = 0; w < width; w++) {
+      int[] column = new int[height];
+      for (int h = 0; h < height; h++) {
+        column[h] = pixels[h * width + w];
+      }
+      columns[w] = column;
+    }
+
+    // shuffle the columns based on the interlacing
+    int[][] oldColumns = columns;
+    columns = new int[width][0];
+
+    for (int w = 0; w < width; w += 2) {
+      columns[w] = oldColumns[w + 1];
+      columns[w + 1] = oldColumns[w];
+    }
+
+    // re-build the image
+    int[] interlacedPixels = new int[numPixels];
+    int pixelPos = 0;
+    for (int h = 0; h < height; h++) {
+      for (int w = 0; w < width; w++) {
+        interlacedPixels[pixelPos] = columns[w][h];
+        pixelPos++;
+      }
+    }
+
+    image.setPixels(interlacedPixels);
+    return image;
+  }
+
+  /**
+   **********************************************************************************************
   Flips an image that is upside-down
    **********************************************************************************************
    **/
@@ -1150,6 +1243,57 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+   * Reads a BC7 Image
+   **********************************************************************************************
+   **/
+  public static ImageResource readBC7(FileManipulator fm, int width, int height) {
+
+    // ensure width and height are multiples of 4...
+    int heightMod = height % 4;
+    if (heightMod != 0) {
+      height += (4 - heightMod);
+    }
+    int widthMod = width % 4;
+    if (widthMod != 0) {
+      width += (4 - widthMod);
+    }
+
+    // X Bytes - Pixel Data
+    int numPixels = width * height;
+
+    long remainingLength = fm.getRemainingLength();
+    if (remainingLength < (numPixels / 2)) { // quick simple check to kill off some bad reads
+      return null;
+    }
+
+    int[] data = new int[numPixels];
+
+    NativeBC7Decomp bc7decomp = new NativeBC7Decomp();
+
+    for (int y = 0; y < height; y += 4) {
+      // DXT encodes 4x4 blocks of pixels
+      for (int x = 0; x < width; x += 4) {
+
+        byte[] blockData = fm.readBytes(16);
+        int[] decodedPixels = bc7decomp.unpackBC7Block(blockData);
+
+        int decodedPos = 0;
+
+        for (int by = 0; by < 4; ++by) {
+          for (int bx = 0; bx < 4; ++bx) {
+            data[(y + by) * width + x + bx] = decodedPixels[decodedPos];
+            decodedPos++;
+          }
+        }
+      }
+    }
+
+    return new ImageResource(data, width, height);
+
+  }
+
+  /**
+   **********************************************************************************************
    * Reads BGR888 Pixel Data
    **********************************************************************************************
    **/
@@ -1360,7 +1504,14 @@ public class ImageFormatReader {
     }
 
     // X Bytes - Pixel Data
-    int[] data = new int[width * height];
+    int numPixels = width * height;
+
+    long remainingLength = fm.getRemainingLength();
+    if (remainingLength < (numPixels / 2)) { // quick simple check to kill off some bad reads
+      return null;
+    }
+
+    int[] data = new int[numPixels];
 
     for (int y = 0; y < height; y += 4) {
       // DXT encodes 4x4 blocks of pixels
@@ -2582,6 +2733,10 @@ public class ImageFormatReader {
    **********************************************************************************************
    **/
   public static ImageResource reverseAlpha(ImageResource image) {
+    if (image == null) {
+      return null;
+    }
+
     int[] pixels = image.getPixels();
     int numPixels = pixels.length;
 
@@ -2939,6 +3094,35 @@ public class ImageFormatReader {
     return bytes;
   }
   */
+
+  /**
+   **********************************************************************************************
+   * Swaps the Red and Blue values in an image. Input should be in (effectively) ABGR format.
+   **********************************************************************************************
+   **/
+  public static ImageResource swapRedAndBlue(ImageResource imageResource) {
+
+    // X Bytes - Pixel Data
+    int[] pixels = imageResource.getPixels();
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      int pixel = pixels[i];
+
+      // INPUT = ABGR
+      int rPixel = (pixel & 255);
+      int gPixel = ((pixel >> 8) & 255);
+      int bPixel = ((pixel >> 16) & 255);
+      int aPixel = (pixel >> 24);
+
+      // OUTPUT = ARGB
+      pixels[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+    }
+
+    imageResource.setPixels(pixels);
+
+    return imageResource;
+  }
 
   /**
   **********************************************************************************************

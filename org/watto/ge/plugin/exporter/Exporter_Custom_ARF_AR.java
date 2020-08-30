@@ -25,11 +25,12 @@ public class Exporter_Custom_ARF_AR extends ExporterPlugin {
   static Exporter_Custom_ARF_AR instance = new Exporter_Custom_ARF_AR();
 
   static FileManipulator readSource;
+
   static long readLength = 0;
 
   /**
   **********************************************************************************************
-
+  NO LONGER USED? REPLACED BY A BlockVariableExporterWrapper
   **********************************************************************************************
   **/
   public static Exporter_Custom_ARF_AR getInstance() {
@@ -37,6 +38,7 @@ public class Exporter_Custom_ARF_AR extends ExporterPlugin {
   }
 
   byte[] xorBytes;
+
   int xorPos = 0;
 
   int numRead = 0;
@@ -178,7 +180,13 @@ public class Exporter_Custom_ARF_AR extends ExporterPlugin {
       readLength--;
       if (numRead < 20) {
         numRead++;
-        return (readSource.readByte() ^ xorBytes[3]);
+
+        int xorVal = xorBytes[3];
+        if (xorVal == 0) {
+          xorVal = xorBytes[0];
+        }
+
+        return (readSource.readByte() ^ xorVal);
       }
       else {
         return readSource.readByte();

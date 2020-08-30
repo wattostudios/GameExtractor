@@ -46,14 +46,17 @@ public class Plugin_000_9 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Tomb Raider Underworld");
+    setGames("Tomb Raider: Anniversary",
+        "Tomb Raider: Legend",
+        "Tomb Raider: Underworld");
     setExtensions("000"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    setFileTypes(new FileType("drm", "3D Models", FileType.TYPE_IMAGE),
+    setFileTypes(new FileType("drm", "3D Models", FileType.TYPE_OTHER),
         new FileType("mul", "MUL Audio", FileType.TYPE_AUDIO),
-        new FileType("fsb", "FSB Audio", FileType.TYPE_AUDIO));
+        new FileType("fsb", "FSB Audio", FileType.TYPE_AUDIO),
+        new FileType("war", "WAR Image", FileType.TYPE_IMAGE));
 
   }
 

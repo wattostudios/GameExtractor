@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.component.WSPluginManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -37,7 +38,7 @@ public class Plugin_PAK_44 extends ArchivePlugin {
   **/
   public Plugin_PAK_44() {
 
-    super("PAK_44", "PAK_44");
+    super("PAK_44", "Node-Webkit Archive");
 
     //         read write replace rename
     setProperties(true, false, false, false);
@@ -54,6 +55,7 @@ public class Plugin_PAK_44 extends ArchivePlugin {
         "Bloodbath Kavkaz",
         "Brute",
         "Bye-Bye, Wacky Planet",
+        "Camp Sunshine",
         "Carnage in Space: Ignition",
         "Cat Doesn't Like Banana",
         "Cave Adventures",
@@ -63,6 +65,7 @@ public class Plugin_PAK_44 extends ArchivePlugin {
         "Don't Tax Me, Bro!",
         "Donut Hunter",
         "Dragon Boar and Lady Rabbit",
+        "Dreaming Sarah",
         "Evil Come",
         "Fairyland: Blackberry Warrior",
         "Fairyland: Chronicle",
@@ -81,6 +84,7 @@ public class Plugin_PAK_44 extends ArchivePlugin {
         "Hexopods",
         "In The Fighting",
         "Injured By Space",
+        "Inner Space",
         "Invasion of Barbarians",
         "Inverted",
         "Last Fort",
@@ -96,6 +100,7 @@ public class Plugin_PAK_44 extends ArchivePlugin {
         "Murazu",
         "My Personal Angel",
         "NeonGalaxy Wars",
+        "Next Up Hero",
         "Ochkarik",
         "One Star",
         "OneScreen Solar Sails",
@@ -131,9 +136,8 @@ public class Plugin_PAK_44 extends ArchivePlugin {
     setCanScanForFileTypes(true);
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("woff2", "Web Open Font", FileType.TYPE_OTHER),
+        new FileType("pexe", "Portable Executable", FileType.TYPE_OTHER));
 
   }
 
@@ -188,6 +192,12 @@ public class Plugin_PAK_44 extends ArchivePlugin {
 
     if (headerInt1 == 2037149520) {
       return "js";
+    }
+    else if (headerInt1 == 843468663) {
+      return "woff2";
+    }
+    else if (headerInt1 == 1163412816) {
+      return "pexe";
     }
 
     int headerByte1 = headerBytes[0];

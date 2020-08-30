@@ -28,11 +28,12 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
   static Exporter_Custom_PAK_20 instance = new Exporter_Custom_PAK_20();
 
   static InflaterInputStream readSource;
+
   static long readLength = 0;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Exporter_Custom_PAK_20 getInstance() {
@@ -40,13 +41,14 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
   }
 
   FileManipulator readSourceNormal;
+
   FileManipulator fm;
 
   boolean readCompressed = true;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_Custom_PAK_20() {
@@ -55,7 +57,7 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -78,7 +80,7 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -100,7 +102,7 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -110,7 +112,7 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -119,8 +121,16 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
       fm = new FileManipulator(source.getSource(), false);
       fm.seek(source.getOffset());
 
+      boolean shortHeader = false;
       // 4 - Compressed File Length (including file data header fields and null padding)
-      fm.skip(4);
+      if (fm.readString(4).equals("zcmp")) {
+        // this has a shortened compression header
+
+        // 4 - Compressed File Length (including file data header fields and null padding) 
+        fm.skip(4);
+
+        shortHeader = true;
+      }
 
       // 4 - Decompressed File Length
       int decompLength = fm.readInt();
@@ -136,26 +146,28 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
       long offset = fm.getOffset();
 
       // 4 - Compression 2 Header
-      String comp2Head = fm.readString(4);
-      if (comp2Head.equals("zcmp")) {
-        // 4 - Compressed File Length (including file data header fields and null padding)
-        fm.skip(4);
+      if (!shortHeader) {
+        String comp2Head = fm.readString(4);
+        if (comp2Head.equals("zcmp")) {
+          // 4 - Compressed File Length (including file data header fields and null padding)
+          fm.skip(4);
 
-        // 4 - Decompressed File Length
-        decompLength = fm.readInt();
+          // 4 - Decompressed File Length
+          decompLength = fm.readInt();
 
-        // 4 - Compressed File Length
-        length = fm.readInt();
+          // 4 - Compressed File Length
+          length = fm.readInt();
 
-        // 4 - null
-        fm.skip(4);
+          // 4 - null
+          fm.skip(4);
 
-        // X - File Data
-        // 0-3 - null Padding to a multiple of 4 bytes
-        offset = fm.getOffset();
-      }
-      else {
-        fm.seek(offset);
+          // X - File Data
+          // 0-3 - null Padding to a multiple of 4 bytes
+          offset = fm.getOffset();
+        }
+        else {
+          fm.seek(offset);
+        }
       }
 
       if (decompLength != length) {
@@ -178,7 +190,7 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -213,7 +225,7 @@ public class Exporter_Custom_PAK_20 extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

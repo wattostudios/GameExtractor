@@ -30,7 +30,7 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PDT_PDI1() {
@@ -41,7 +41,8 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Rally Masters",
-        "Swedish Touring Car Championship 2");
+        "Swedish Touring Car Championship 2",
+        "Test Drive Rally");
     setExtensions("pdt");
     setPlatforms("PC");
 
@@ -49,7 +50,7 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -150,13 +151,91 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
 
       // Loop through directory
       int realNumFiles = 0;
+
+      String[] directories = new String[20]; // max 20 nested directories
+      int[] lastFileIDs = new int[20];
+      int numDirs = 0;
+      String dirName = "";
       for (int i = 0; i < numFiles; i++) {
-        // 2 - File/Directory ID (4=directory, 25=file, 0=padding file)
+
+        // see if any directories have ended
+        boolean changed = false;
+        /*
+        for (int d = numDirs - 1; d >= 0; d--) {
+          if (i >= lastFileIDs[d]) {
+            numDirs--;
+            changed = true;
+          }
+          else {
+            break;
+          }
+        }
+        */
+        for (int d = 0; d < numDirs; d++) {
+          if (i >= lastFileIDs[d]) {
+            numDirs = d;
+            changed = true;
+            break;
+          }
+        }
+
+        if (changed) {
+          dirName = "";
+          for (int d = 0; d < numDirs; d++) {
+            dirName += directories[d];
+          }
+        }
+
+        // 2 - File/Directory ID (4=directory, 24/25=file, 0=padding file)
         int entryType = fm.readShort();
-        if (entryType != 25) {
+        if (entryType == 4) {
+          // directory
+
+          // 2 - Parent File ID?
+          fm.skip(2);
+
+          // 2 - Last File ID (of the Last File in this directory, or -1 means until the end of the archive)
+          int lastFileID = fm.readShort();
+
+          // 2 - Unknown
+          int nextID = fm.readShort();
+
+          if (lastFileID == -1) {
+            if (nextID == -1) {
+              lastFileID = numFiles; // max
+            }
+            else {
+              lastFileID = nextID;
+            }
+          }
+
+          // 2 - File ID of this Directory
+          // 4 - Unknown
+          // 6 - null
+          fm.skip(12);
+
+          // 44 - Directory Name (null)
+          String filename = fm.readNullString(44);
+          FieldValidator.checkFilename(filename);
+
+          filename += "\\";
+
+          directories[numDirs] = filename;
+          lastFileIDs[numDirs] = lastFileID;
+          numDirs++;
+
+          dirName += filename;
+
+          // 4 - null
+          fm.skip(4);
+
+        }
+        else if (entryType != 24 && entryType != 25) {
           fm.skip(66);
         }
         else {
+          // file
+
           // 2 - File ID (incremental from -1)(some are -1, which skip over the number for this loop)
           // 2 - File ID (incremental from 1)(some are -1, which skip over the number for this loop)
           // 6 - Padding (all 255's)
@@ -173,6 +252,8 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
           // 44 - Filename (null)
           String filename = fm.readNullString(44);
           FieldValidator.checkFilename(filename);
+
+          filename = dirName + filename;
 
           // 4 - Unknown
           fm.skip(4);
@@ -202,8 +283,9 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
         }
 
         // 4 - Compression Flag? (1114112)
-        int compFlag = fm.readInt();
-        if (compFlag != 1114112) {
+        int empty = fm.readShort();
+        fm.skip(2);
+        if (empty != 0) {
           continue;
         }
 

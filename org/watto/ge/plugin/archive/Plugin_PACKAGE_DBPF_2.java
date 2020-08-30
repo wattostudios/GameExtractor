@@ -20,8 +20,8 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DAT_DBPF;
 import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_REFPACK;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.HexConverter;
@@ -50,7 +50,8 @@ public class Plugin_PACKAGE_DBPF_2 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("The Sims 4");
+    setGames("The Sims 3",
+        "The Sims 4");
     setExtensions("package", "world");
     setPlatforms("PC");
 
@@ -547,8 +548,8 @@ public class Plugin_PACKAGE_DBPF_2 extends ArchivePlugin {
   
   **********************************************************************************************
   **/
+  @SuppressWarnings({ "unused", "static-access" })
   @Override
-  @SuppressWarnings("unused")
   public Resource[] read(File path) {
     try {
 
@@ -557,7 +558,9 @@ public class Plugin_PACKAGE_DBPF_2 extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(path, false);
       long arcSize = fm.getLength();
 
-      ExporterPlugin exporterDBPF = Exporter_Custom_DAT_DBPF.getInstance();
+      //ExporterPlugin exporterDBPF = Exporter_Custom_DAT_DBPF.getInstance();
+      Exporter_REFPACK exporterRefPack = Exporter_REFPACK.getInstance();
+      exporterRefPack.setSkipHeaders(true);
       ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
       ExporterPlugin exporterDefault = Exporter_Default.getInstance();
 
@@ -624,11 +627,16 @@ public class Plugin_PACKAGE_DBPF_2 extends ArchivePlugin {
           int decompLength = fm.readInt();
           FieldValidator.checkLength(decompLength);
 
-          // 2 - Compression Flag (23106=Compressed, -32=Uncompressed)
+          // 2 - Compression Flag (23106=Compressed, -32/0=Uncompressed, -1=REFPACK)
           short compression = fm.readShort();
           ExporterPlugin exporter = exporterDefault;
           if (compression == 23106) {
             exporter = exporterZLib;
+          }
+          else if (compression == -1) {
+            exporter = exporterRefPack;
+            offset += 5;
+            length -= 5;
           }
 
           // 2 - Unknown (1)
@@ -684,6 +692,11 @@ public class Plugin_PACKAGE_DBPF_2 extends ArchivePlugin {
           ExporterPlugin exporter = exporterDefault;
           if (compression == 23106) {
             exporter = exporterZLib;
+          }
+          else if (compression == -1) {
+            exporter = exporterRefPack;
+            offset += 5;
+            length -= 5;
           }
 
           // 2 - Unknown (1)

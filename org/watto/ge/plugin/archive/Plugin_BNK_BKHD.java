@@ -42,14 +42,27 @@ public class Plugin_BNK_BKHD extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, true, false);
 
-    setGames("APB Reloaded",
+    setGames("ABZU",
+        "APB Reloaded",
+        "Assassins Creed: Syndicate",
+        "Batman: Arkham City",
+        "Bioshock Infinite",
         "Block Sport",
+        "Borderlands: The Pre-Sequel",
+        "Dauntless",
+        "Divinity 2: Ego Draconis",
+        "Enter The Gungeon",
         "F1 2015",
+        "For The King",
+        "Inside",
         "Tom Clancy's Ghost Recon Wildlands",
         "Resident Evil 2",
+        "Steep",
         "Sure Footing",
+        "The Alto Collection",
         "Warhammer 40,000 Space Marine",
-        "Warhammer: End Times: Vermintide");
+        "Warhammer: End Times: Vermintide",
+        "Yooka Laylee");
     setExtensions("bnk"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

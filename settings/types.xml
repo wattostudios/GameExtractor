@@ -44,6 +44,7 @@
 		<type extension="jpg"   function="Image"    description="JPEG Image" />
 		<type extension="kar"   function="Audio"    description="MIDI Audio" />
 		<type extension="log"   function="Document" description="Log Document" />
+		<type extension="lua"   function="Document" description="LUA Script" />
 		<type extension="mid"   function="Audio"    description="MIDI Audio" />
 		<type extension="mov"   function="Video"    description="Quicktime Movie" />
 		<type extension="mp3"   function="Audio"    description="MP3 Audio" />
@@ -59,11 +60,8 @@
 		<type extension="pptx"  function="Document" description="Powerpoint Presentation" />
 		<type extension="psd"   function="Image"    description="PSD Image" />
 		<type extension="qt"    function="Video"    description="Quicktime Movie" />
-		<type extension="ra"    function="Audio"    description="RealOne Audio" />
-		<type extension="ram"   function="Video"    description="RealOne Movie" />
 		<type extension="rar"   function="Archive"  description="RAR Archive" />
 		<type extension="raw"   function="Image"    description="Raw Image" />
-		<type extension="rm"    function="Video"    description="RealOne Movie" />
 		<type extension="rt"    function="Program"  description="Programming Script" />
 		<type extension="rtf"   function="Document" description="Rich Text Document" />
 		<type extension="swf"   function="Image"    description="Flash Animation" />

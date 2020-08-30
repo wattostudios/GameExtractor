@@ -111,7 +111,7 @@ public class Exporter_LZ77WII extends ExporterPlugin {
   **/
   @Override
   public String getDescription() {
-    return "This exporter decompresses RefPack-compressed files when exporting\n\n" + super.getDescription();
+    return "This exporter decompresses LZ77WII-compressed files when exporting\n\n" + super.getDescription();
   }
 
   HexInputStream readSourceHex = null;

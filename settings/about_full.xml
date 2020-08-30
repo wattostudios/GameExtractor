@@ -32,6 +32,8 @@
 <ul>
 <li>Java</li>
 <li>Apache Commons Compress</li>
+<li>aquarria (XNB Reader and Decoder)</li>
+<li>bc7enc</li>
 <li>Crunch</li>
 <li>dsdecmp</li>
 <li>FFMPEG</li>
@@ -41,6 +43,7 @@
 <li>java-dds</li>
 <li>Java Image Management Interface</li>
 <li>Java Imaging Utilities</li>
+<li>Java LZF Library (ning-compress)</li>
 <li>Java-LZO</li>
 <li>Java Media Framework</li>
 <li>JLayer</li>
@@ -51,6 +54,7 @@
 <li>puyotools</li>
 <li>python-fsb5</li>
 <li>QuickBMS</li>
+<li>QuickLZ</li>
 <li>Rainbow</li>
 <li>sflcomp.c Compression Functions</li>
 <li>tinf</li>

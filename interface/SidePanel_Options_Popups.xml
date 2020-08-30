@@ -2,7 +2,7 @@
 	
 	<WSScrollPane showLabel="false" code="SidePanel_Options_Popups_Label" position="CENTER" repository="false">
 		<WSPanel>
-			<WSPanel layout="GridLayout" position="NORTH" rows="48" columns="1" code="SidePanel_Options_Popups_Checkboxes">
+			<WSPanel layout="GridLayout" position="NORTH" rows="51" columns="1" code="SidePanel_Options_Popups_Checkboxes">
 				<WSOptionCheckBox code="WSLabel_AddFiles_FilesAdded_Text" setting="Popup_AddFiles_FilesAdded_Show" />
 				<WSOptionCheckBox code="WSLabel_AddFiles_FilesRemoved_Text" setting="Popup_AddFiles_FilesRemoved_Show" />
 				<WSOptionCheckBox code="WSLabel_CutArchive_CutFailed_Text" setting="Popup_CutArchive_CutFailed_Show" />
@@ -11,6 +11,9 @@
 				<WSOptionCheckBox code="WSLabel_ExportFileList_ListExported_Text" setting="Popup_ExportFileList_ListExported_Show" />
 				<WSOptionCheckBox code="WSLabel_ExportFileList_NoColumnsSelected_Text" setting="Popup_ExportFileList_NoColumnsSelected_Show" />
 				<WSOptionCheckBox code="WSLabel_ExportFiles_FilesExported_Text" setting="Popup_ExportFiles_FilesExported_Show" />
+				<WSOptionCheckBox code="WSLabel_ExportFiles_NoFilesExported_Text" setting="Popup_ExportFiles_NoFilesExported_Show" />
+				<WSOptionCheckBox code="WSLabel_ExportFiles_SomeFilesExported_Text" setting="Popup_ExportFiles_SomeFilesExported_Show" />
+				<WSOptionCheckBox code="WSLabel_ExportFiles_DirectoryNotWritable_Text" setting="Popup_ExportFiles_DirectoryNotWritable_Show" />
 				<WSOptionCheckBox code="WSLabel_ExportFiles_NoFilesSelected_Text" setting="Popup_ExportFiles_NoFilesSelected_Show" />
 				<WSOptionCheckBox code="WSLabel_FullVersionOnly_Text" setting="Popup_FullVersionOnly_Show" />
 				<WSOptionCheckBox code="WSLabel_Options_OptionsSaved_Text" setting="Popup_Options_OptionsSaved_Show" />

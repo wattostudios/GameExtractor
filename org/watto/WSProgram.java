@@ -169,9 +169,23 @@ public abstract class WSProgram extends JFrame implements WSHoverableInterface, 
     WSComponent rootComponent = (WSComponent) getContentPane().getComponent(0);
     XMLNode node = rootComponent.toXML();
 
+    // Write to a temporary file first
+    File tempPath = new File(interfaceFile.getAbsolutePath() + ".tmp");
+    if (tempPath.exists()) {
+      tempPath.delete();
+    }
+
+    boolean success = XMLWriter.writeWithValidation(tempPath, node);
+    if (!success) {
+      return; // something went wrong when writing the settings, so don't replace the real file with the corrupt one
+    }
+
+    // if all is OK, remove the Proper file and then rename the temp one to it.
+    // This helps to avoid the occasional issue where the settings file becomes corrupt during write, due to stream being closed.
     if (interfaceFile.exists()) {
       interfaceFile.delete();
     }
-    XMLWriter.write(interfaceFile, node);
+    tempPath.renameTo(interfaceFile);
+
   }
 }

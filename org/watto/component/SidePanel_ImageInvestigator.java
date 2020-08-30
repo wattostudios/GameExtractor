@@ -381,6 +381,7 @@ public class SidePanel_ImageInvestigator extends WSPanelPlugin implements WSSele
 
     if (alreadyLoaded) {
       previewPanel.loadFile(path);
+      loadPreview(previewPanel);
     }
     else {
       previewPanel = new PreviewPanel_ImageInvestigator(path);

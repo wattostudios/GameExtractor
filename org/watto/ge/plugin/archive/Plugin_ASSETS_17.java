@@ -39,99 +39,6 @@ import org.watto.task.TaskProgressManager;
 **/
 public class Plugin_ASSETS_17 extends ArchivePlugin {
 
-  /*
-  int fileType_TEX = -1;
-  int fileType_MAT = -1;
-  int fileType_SND = -1;
-  int fileType_MSH = -1;
-  int fileType_SCRIPT = -1;
-  int fileType_REF = -1;
-  int fileType_MATREF = -1;
-  int fileType_MSHREF = -1;
-  int fileType_SHADER = -1;
-  int fileType_TXT = -1;
-  int fileType_ANI = -1;
-  int fileType_TTF = -1;
-  int fileType_BIN = -1;
-  int fileType_OGM = -1;
-  int fileType_TER = -1;
-  int fileType_SBAM = -1;
-  int fileType_TES = -1;
-  int fileType_DIR = -1;
-  int fileType_CTX = -1;
-  */
-  int fileType_1 = -1;
-
-  int fileType_4 = -1;
-
-  int fileType_12 = -1;
-
-  int fileType_15 = -1;
-
-  int fileType_20 = -1;
-
-  int fileType_21 = -1;
-
-  int fileType_23 = -1;
-
-  int fileType_26 = -1;
-
-  int fileType_28 = -1;
-
-  int fileType_33 = -1;
-
-  int fileType_43 = -1;
-
-  int fileType_48 = -1;
-
-  int fileType_49 = -1;
-
-  int fileType_54 = -1;
-
-  int fileType_65 = -1;
-
-  int fileType_74 = -1;
-
-  int fileType_76 = -1;
-
-  int fileType_82 = -1;
-
-  int fileType_83 = -1;
-
-  int fileType_84 = -1;
-
-  int fileType_89 = -1;
-
-  int fileType_96 = -1;
-
-  int fileType_102 = -1;
-
-  int fileType_111 = -1;
-
-  int fileType_115 = -1;
-
-  int fileType_128 = -1;
-
-  int fileType_134 = -1;
-
-  int fileType_135 = -1;
-
-  int fileType_136 = -1;
-
-  int fileType_137 = -1;
-
-  int fileType_150 = -1;
-
-  int fileType_152 = -1;
-
-  int fileType_153 = -1;
-
-  int fileType_156 = -1;
-
-  int fileType_184 = -1;
-
-  int fileType_194 = -1;
-
   /**
   **********************************************************************************************
   
@@ -164,9 +71,13 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Alien Invaders",
         "aMAZE 3D",
         "Angel's Love",
+        "Anodyne 2",
+        "Ape Out",
         "Army of Squirrels",
         "Attack Of Insects",
         "Attrition: Tactical Fronts",
+        "Aztez",
+        "Bad North",
         "BAE 2",
         "BAE",
         "BARRIER X",
@@ -198,6 +109,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Bunny Adventure",
         "Burly Men at Sea",
         "Business Clicker",
+        "Carcassonne",
         "Caves!",
         "Chaos Reborn",
         "Cherry Kiss Strip Mahjong Solitaire",
@@ -259,12 +171,15 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Dungeon Rushers",
         "Dungeons Of The Dead",
         "Energy Nodes",
+        "Enter The Gungeon",
         "Eon Fleet",
         "Epic Roll",
         "Equalizer",
         "Escape From Here",
         "Euclidean",
+        "Everything",
         "Evolo.Evolution",
+        "Faeria",
         "Fairy Escape",
         "Falling Words",
         "Far Cnight",
@@ -282,6 +197,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Flux8",
         "Fly The Plane",
         "Food Hunter",
+        "For The King",
         "Fortune 499",
         "Freaky Awesome",
         "Freedom Defender",
@@ -293,10 +209,13 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Ghost Killer",
         "Ghoulboy",
         "Glass Masquerade",
+        "GNOG",
         "Goblins Keep Coming: Tower Defense",
         "Gold Digger Maze",
         "Golden Fever",
         "Golf Extreme",
+        "Gone Home",
+        "GoNNER",
         "Goodbye My King",
         "Grandpa",
         "Grape Jelly",
@@ -324,6 +243,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Hitch Hiker: First Ride",
         "Hitori",
         "Hoo-Boy",
+        "Horace",
         "I Want Cookies",
         "I'm Not A Monster",
         "Icons: Combat Arena",
@@ -335,10 +255,12 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Inca Marbles",
         "Infected Battlegrounds",
         "Infinite Road",
+        "Inner Space",
         "Insects Runner",
         "Instant Death",
         "It's Quiz Time",
         "JASEM Just Another Shooter with Electronic Music",
+        "Jotun",
         "Joumee The Hedgehog",
         "Jump Stop",
         "Jump To The Circle",
@@ -356,6 +278,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Knights Of Hearts",
         "Labyrinths of Atlantis",
         "Last Alive",
+        "Last Day Of June",
         "Last Encounter",
         "Lauren's Visit",
         "Let's Be Architects",
@@ -383,11 +306,13 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Minion Masters",
         "Mission - Wolf",
         "Molecule: A Chemical Challenge",
+        "Moonlighter",
         "Morendar: Goblin Slayer",
         "Moss Destruction",
         "Mr Jezko",
         "Muay Thai Fighting",
         "Murderous Pursuits",
+        "Mutazione",
         "Mutual Secret",
         "My Car",
         "My Coloring Book: Food and Beverage",
@@ -395,6 +320,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Need For Gowna",
         "Neko Navy",
         "Neon Void Runner",
+        "Next Up Hero",
         "Nice Way",
         "Night Fly",
         "Ninja Way",
@@ -402,10 +328,12 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Object Cleaning",
         "Obscurity",
         "Odysseus Kosmos and his Robot Quest: Episode 1",
+        "Offworld Trading Company",
         "Orb The Ball",
         "Orwell",
         "Outcast",
         "OutSplit",
+        "Overcooked",
         "Overfall",
         "Overhead",
         "Pain Train 2",
@@ -460,6 +388,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Royal Casino: Video Poker",
         "Run, My Little Pixel",
         "Russian World Cup Battlegrounds",
+        "Saint Kotar: The Yellow Mask",
         "SAWKOBAN",
         "Scalpers: Turtle & the Moonshine Gang",
         "School of Horror",
@@ -480,6 +409,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Slabo",
         "Slime-san",
         "Slippingcers",
+        "Sludge Life",
         "Smash It",
         "Sniper Squad Mission",
         "Solar Battle Glargaz",
@@ -506,6 +436,8 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Stickman Fighting",
         "Stickman In The Portal",
         "Stickman: Killer of Apples",
+        "Stories Untold",
+        "Stranger Things 3",
         "Subnautica",
         "Subsurface Circular",
         "Sudoku Universe",
@@ -528,6 +460,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "The Battle for the Hut",
         "The Best of Magicats",
         "The Elder Scrolls: Legends",
+        "The Escapists 2",
         "The First Thrust Of God",
         "The God Paradox",
         "The Greater Good",
@@ -535,6 +468,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "The Last Hope",
         "The Last Mission",
         "The Little Acre",
+        "The Messenger",
         "The Momo Game",
         "The Mooseman",
         "The Mystery Of Woolley Mountain",
@@ -545,6 +479,8 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "Timberman",
         "Tiny Echo",
         "Totally Accurate Battlegrounds",
+        "Totally Accurate Battle Simulator",
+        "Totally Reliable Delivery Service",
         "Travildorn",
         "Trials of The Illuminati: Animated Christmas Time Jigsaws",
         "Trio",
@@ -598,68 +534,12 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         "World Inside Out",
         "Wrestlers Without Boundaries",
         "XORPLE",
-        "Yatsumitsu Fists of Wrath");
+        "Yatsumitsu Fists of Wrath",
+        "Yooka Laylee");
 
     setExtensions("assets"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
-    /*
-    setFileTypes("mat", "Material",
-        "tex", "Texture",
-        "msh", "Mesh",
-        "shader", "Shader",
-        "ani", "Animation",
-        "snd", "Sound",
-        "script", "Script",
-        "ttf", "Font",
-        "ter", "Terrain",
-        "matref", "Material Reference",
-        "mshref", "Mesh Reference",
-        "ref", "File Reference",
-        "ctrl", "Controller",
-        "ctx", "Context",
-        "sprite", "Sprite");
-        */
-
-    /*
-    setFileTypes(new FileType("obj", "Game Object", FileType.TYPE_OTHER), // ALL LOWER CASE!!!
-        new FileType("ref", "Transform", FileType.TYPE_OTHER),
-        new FileType("particleanim", "Particle Animator", FileType.TYPE_OTHER),
-        new FileType("particleemit", "Ellipsoid Particle Emitter", FileType.TYPE_OTHER),
-        new FileType("camera", "Camera", FileType.TYPE_OTHER),
-        new FileType("mat", "Material", FileType.TYPE_OTHER),
-        new FileType("renderer", "Renderer", FileType.TYPE_OTHER),
-        new FileType("particlerend", "Particle Renderer", FileType.TYPE_OTHER),
-        new FileType("tex", "Texture2D", FileType.TYPE_IMAGE),
-        new FileType("meshfilter", "Mesh Filter", FileType.TYPE_OTHER),
-        new FileType("msh", "Mesh", FileType.TYPE_OTHER),
-        new FileType("shader", "Shader", FileType.TYPE_OTHER),
-        new FileType("txt", "Document", FileType.TYPE_OTHER),
-        new FileType("body", "Rigidbody", FileType.TYPE_OTHER),
-        new FileType("boxcoll", "Box Collider", FileType.TYPE_OTHER),
-        new FileType("ani", "Animation Clip", FileType.TYPE_OTHER),
-        new FileType("worldcoll", "World Particle Collider", FileType.TYPE_OTHER),
-        new FileType("audiosrc", "Audio Source", FileType.TYPE_OTHER),
-        new FileType("snd", "Audio Clip", FileType.TYPE_AUDIO),
-        new FileType("rendtex", "Render Texture", FileType.TYPE_OTHER),
-        new FileType("trailrend", "Trail Renderer", FileType.TYPE_OTHER),
-        new FileType("textmesh", "Text Mesh", FileType.TYPE_OTHER),
-        new FileType("anim", "Animation", FileType.TYPE_OTHER),
-        new FileType("script", "Mono Script", FileType.TYPE_OTHER),
-        new FileType("ttf", "Font", FileType.TYPE_OTHER),
-        new FileType("physic", "Physic Material", FileType.TYPE_OTHER),
-        new FileType("spherecoll", "Sphere Collider", FileType.TYPE_OTHER),
-        new FileType("capsulecoll", "Capsule Collider", FileType.TYPE_OTHER),
-        new FileType("skinmeshrend", "Skinned Mesh Renderer", FileType.TYPE_OTHER),
-        new FileType("bin", "Preload Data", FileType.TYPE_OTHER),
-        new FileType("joint", "Configurable Joint", FileType.TYPE_OTHER),
-        new FileType("behaviour", "Mono Behaviour", FileType.TYPE_OTHER),
-        new FileType("assetbundle", "Asset Bundle", FileType.TYPE_OTHER),
-        new FileType("avatar", "Avatar", FileType.TYPE_OTHER),
-        new FileType("animator", "Animator", FileType.TYPE_OTHER),
-        new FileType("particlesystem", "Particle System", FileType.TYPE_OTHER),
-        new FileType("particlesystemrenderer", "Particle System Renderer", FileType.TYPE_OTHER));
-    */
     setFileTypes(Unity3DHelper.getFileTypes());
 
   }
@@ -667,249 +547,6 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
   int[] fileTypeMapping = new int[1500]; // assuming a maximum of 1500 classes in a single file
 
   int numFileTypeMappings = 0;
-
-  /**
-   **********************************************************************************************
-   * Clear the file types, as the last archive read would have set some of them
-   **********************************************************************************************
-   **/
-  public void clearFileTypes() {
-    /*
-    fileType_TEX = -1;
-    fileType_MAT = -1;
-    fileType_SND = -1;
-    fileType_MSH = -1;
-    fileType_SCRIPT = -1;
-    fileType_REF = -1;
-    fileType_MATREF = -1;
-    fileType_MSHREF = -1;
-    fileType_SHADER = -1;
-    fileType_TXT = -1;
-    fileType_ANI = -1;
-    fileType_TTF = -1;
-    fileType_BIN = -1;
-    fileType_OGM = -1;
-    fileType_TER = -1;
-    fileType_SBAM = -1;
-    fileType_TES = -1;
-    fileType_DIR = -1;
-    fileType_CTX = -1;
-    */
-    fileType_1 = -1;
-    fileType_4 = -1;
-    fileType_12 = -1;
-    fileType_15 = -1;
-    fileType_20 = -1;
-    fileType_21 = -1;
-    fileType_23 = -1;
-    fileType_26 = -1;
-    fileType_28 = -1;
-    fileType_33 = -1;
-    fileType_43 = -1;
-    fileType_48 = -1;
-    fileType_49 = -1;
-    fileType_54 = -1;
-    fileType_65 = -1;
-    fileType_74 = -1;
-    fileType_76 = -1;
-    fileType_82 = -1;
-    fileType_83 = -1;
-    fileType_84 = -1;
-    fileType_89 = -1;
-    fileType_96 = -1;
-    fileType_102 = -1;
-    fileType_111 = -1;
-    fileType_115 = -1;
-    fileType_128 = -1;
-    fileType_134 = -1;
-    fileType_135 = -1;
-    fileType_136 = -1;
-    fileType_137 = -1;
-    fileType_150 = -1;
-    fileType_152 = -1;
-    fileType_153 = -1;
-    fileType_156 = -1;
-    fileType_184 = -1;
-    fileType_194 = -1;
-  }
-
-  /**
-   **********************************************************************************************
-   *
-   **********************************************************************************************
-   **/
-  public String convertFileType(int fileTypeCode) {
-    /*
-    if (fileTypeCode == fileType_TEX) {
-      return ".tex";
-    }
-    else if (fileTypeCode == fileType_MAT) {
-      return ".mat";
-    }
-    else if (fileTypeCode == fileType_SND) {
-      return ".snd";
-    }
-    else if (fileTypeCode == fileType_MSH) {
-      return ".msh";
-    }
-    else if (fileTypeCode == fileType_DIR) {
-      return ".dir";
-    }
-    else if (fileTypeCode == fileType_SCRIPT) {
-      return ".script";
-    }
-    else if (fileTypeCode == fileType_REF) {
-      return ".ref";
-    }
-    else if (fileTypeCode == fileType_MATREF) {
-      return ".matref";
-    }
-    else if (fileTypeCode == fileType_MSHREF) {
-      return ".mshref";
-    }
-    else if (fileTypeCode == fileType_SHADER) {
-      return ".shader";
-    }
-    else if (fileTypeCode == fileType_TXT) {
-      return ".txt";
-    }
-    else if (fileTypeCode == fileType_ANI) {
-      return ".ani";
-    }
-    else if (fileTypeCode == fileType_TTF) {
-      return ".ttf";
-    }
-    else if (fileTypeCode == fileType_BIN) {
-      return ".bin";
-    }
-    else if (fileTypeCode == fileType_OGM) {
-      return ".ogm";
-    }
-    else if (fileTypeCode == fileType_TER) {
-      return ".ter";
-    }
-    else if (fileTypeCode == fileType_SBAM) {
-      return ".sbam";
-    }
-    else if (fileTypeCode == fileType_TES) {
-      return ".tes";
-    }
-    else if (fileTypeCode == fileType_CTX) {
-      return ".ctx";
-    }
-    */
-
-    if (fileTypeCode == fileType_1) {
-      return ".obj"; // GameObject
-    }
-    else if (fileTypeCode == fileType_4) {
-      return ".ref"; // Transform
-    }
-    else if (fileTypeCode == fileType_12) {
-      return ".particleAnim"; // ParticleAnimator
-    }
-    else if (fileTypeCode == fileType_15) {
-      return ".particleEmit"; // EllipsoidParticleEmitter
-    }
-    else if (fileTypeCode == fileType_20) {
-      return ".camera"; // Camera
-    }
-    else if (fileTypeCode == fileType_21) {
-      return ".mat"; // Material
-    }
-    else if (fileTypeCode == fileType_23) {
-      return ".renderer"; // Renderer
-    }
-    else if (fileTypeCode == fileType_26) {
-      return ".particleRend"; // ParticleRenderer
-    }
-    else if (fileTypeCode == fileType_28) {
-      return ".tex"; // Texture2D
-    }
-    else if (fileTypeCode == fileType_33) {
-      return ".meshFilter"; // MeshFilter
-    }
-    else if (fileTypeCode == fileType_43) {
-      return ".msh"; // Mesh
-    }
-    else if (fileTypeCode == fileType_48) {
-      return ".shader"; // Shader
-    }
-    else if (fileTypeCode == fileType_49) {
-      return ".txt"; // Document - sometimes plain text, sometimes XML, sometimes HTML, sometimes JSON...
-    }
-    else if (fileTypeCode == fileType_54) {
-      return ".body"; // Rigidbody
-    }
-    else if (fileTypeCode == fileType_65) {
-      return ".boxColl"; // BoxCollider
-    }
-    else if (fileTypeCode == fileType_74) {
-      return ".ani"; // AnimationClip
-    }
-    else if (fileTypeCode == fileType_76) {
-      return ".worldColl"; // WorldParticleCollider
-    }
-    else if (fileTypeCode == fileType_82) {
-      return ".audioSrc"; // AudioSource 
-    }
-    else if (fileTypeCode == fileType_83) {
-      return ".snd"; // AudioClip // Sound - can be ogg, wav, mp3, aif, ... 
-    }
-    else if (fileTypeCode == fileType_84) {
-      return ".rendTex"; // RenderTexture 
-    }
-    else if (fileTypeCode == fileType_89) {
-      return ".ctx";
-    }
-    else if (fileTypeCode == fileType_96) {
-      return ".trailRend"; // TrailRenderer 
-    }
-    else if (fileTypeCode == fileType_102) {
-      return ".textMesh"; // TextMesh 
-    }
-    else if (fileTypeCode == fileType_111) {
-      return ".anim"; // Animation 
-    }
-    else if (fileTypeCode == fileType_115) {
-      return ".script"; // MonoScript
-    }
-    else if (fileTypeCode == fileType_128) {
-      return ".ttf"; // Font
-    }
-    else if (fileTypeCode == fileType_134) {
-      return ".physic"; // PhysicMaterial
-    }
-    else if (fileTypeCode == fileType_135) {
-      return ".sphereColl"; // SphereCollider
-    }
-    else if (fileTypeCode == fileType_136) {
-      return ".capsuleColl"; // CapsuleCollider
-    }
-    else if (fileTypeCode == fileType_137) {
-      return ".skinMeshRend"; // SkinnedMeshRenderer
-    }
-    else if (fileTypeCode == fileType_150) {
-      return ".bin"; // PreloadData
-    }
-    else if (fileTypeCode == fileType_152) {
-      return ".ogm";
-    }
-    else if (fileTypeCode == fileType_153) {
-      return ".joint"; // ConfigurableJoint
-    }
-    else if (fileTypeCode == fileType_156) {
-      return ".ter";
-    }
-    else if (fileTypeCode == fileType_184) {
-      return ".sbam";
-    }
-    else if (fileTypeCode == fileType_194) {
-      return ".tes";
-    }
-
-    return "." + fileTypeCode;
-  }
 
   /**
    **********************************************************************************************
@@ -1147,9 +784,6 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
       }
       // Now we know we're pointing to the ASSETS file
 
-      // Clear the fileTypes that have been set from the last archive we read
-      clearFileTypes();
-
       fileTypeMapping = new int[1500]; // assuming a maximum of 1500 classes in a single file
       numFileTypeMappings = 0;
 
@@ -1189,7 +823,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         fm.skip(4);
 
         // 4 - Archive Length (BIG ENDIAN)
-        int arcLength = IntConverter.changeFormat(fm.readInt());
+        long arcLength = IntConverter.unsign(IntConverter.changeFormat(fm.readInt()));
         FieldValidator.checkLength(arcLength, arcSize);
 
         // 4 - Compressed Data Header Size (File Data Offset [+46]) (BIG ENDIAN)
@@ -1272,7 +906,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
             // 8 - Offset
             //long entryOffset = LongConverter.changeFormat(fmDir.readLong());
             fmDir.skip(4);
-            long entryOffset = IntConverter.changeFormat(fmDir.readInt());
+            long entryOffset = IntConverter.unsign(IntConverter.changeFormat(fmDir.readInt()));
             //FieldValidator.checkOffset(entryOffset, arcSize);
 
             // 8 - Decomp Length
@@ -1700,7 +1334,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
           // 4 - Number of Files
           numFiles = fm.readInt();
           //if (arcSize > 200000000) { // Unturned - big file
-          FieldValidator.checkNumFiles(numFiles / 8);
+          FieldValidator.checkNumFiles(numFiles / 20);
           //}
           //else {
           //  FieldValidator.checkNumFiles(numFiles);
@@ -2240,20 +1874,21 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
 
           // 4 - Folder Name Length
           int folderNameLength = fm.readInt();
-          FieldValidator.checkFilenameLength(folderNameLength);
+          if (folderNameLength != 0) {
+            FieldValidator.checkFilenameLength(folderNameLength);
 
-          // X - Folder Name
-          String folderName = fm.readString(folderNameLength);
-          FieldValidator.checkFilename(folderName);
+            // X - Folder Name
+            String folderName = fm.readString(folderNameLength);
+            FieldValidator.checkFilename(folderName);
 
-          // Set the folder name for each referenced file
-          for (int i = 0; i < numRefFiles; i++) {
-            Resource refResource = refResources[i];
+            // Set the folder name for each referenced file
+            for (int i = 0; i < numRefFiles; i++) {
+              Resource refResource = refResources[i];
 
-            // Otherwise for other refType files (and for the ref files as well), set the folder name on the file itself.
-            //System.out.println("Setting folder name " + folderName + " on Resource " + refResource.getName());
-            refResource.setName(folderName + "\\" + refResource.getName());
-
+              // Otherwise for other refType files (and for the ref files as well), set the folder name on the file itself.
+              //System.out.println("Setting folder name " + folderName + " on Resource " + refResource.getName());
+              refResource.setName(folderName + "\\" + refResource.getName());
+            }
           }
 
           TaskProgressManager.setValue(r);

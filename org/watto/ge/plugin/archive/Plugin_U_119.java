@@ -5,6 +5,7 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
+import org.watto.ge.plugin.exporter.Exporter_Custom_U_Sound_Generic;
 import org.watto.ge.plugin.exporter.Exporter_Custom_U_Texture_Generic;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
@@ -219,10 +220,9 @@ public class Plugin_U_119 extends PluginGroup_U {
         if (type.equals("Texture")) {
           resources[i].setExporter(Exporter_Custom_U_Texture_Generic.getInstance());
         }
-        /*
-         * else if (type.equals("Palette")){
-         * resources[i].setExporter(Exporter_Custom_U_Palette_119.getInstance()); }
-         */
+        else if (type.equals("Sound")) {
+          resources[i].setExporter(Exporter_Custom_U_Sound_Generic.getInstance());
+        }
 
         TaskProgressManager.setValue(i);
       }

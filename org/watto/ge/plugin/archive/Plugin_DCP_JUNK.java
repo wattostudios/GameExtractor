@@ -35,7 +35,7 @@ public class Plugin_DCP_JUNK extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_DCP_JUNK() {
@@ -47,8 +47,10 @@ public class Plugin_DCP_JUNK extends ArchivePlugin {
 
     setGames("Alpha Polaris",
         "Art of Murder: FBI Confidential",
+        "Dirty Split",
         "Oknytt",
-        "Reversion: The Escape");
+        "Reversion: The Escape",
+        "The White Chamber");
     setExtensions("dcp"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -56,11 +58,13 @@ public class Plugin_DCP_JUNK extends ArchivePlugin {
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
 
+    setTextPreviewExtensions("actor", "bat"); // LOWER CASE
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -165,19 +169,24 @@ public class Plugin_DCP_JUNK extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-
         // 1 - Filename Length (including the XOR'd null Terminator)
         int filenameLength = ByteConverter.unsign(fm.readByte()) - 1;
 
-        // X - Filename (XOR with (byte)68)
-        byte[] filenameBytes = fm.readBytes(filenameLength);
-        for (int n = 0; n < filenameLength; n++) {
-          filenameBytes[n] ^= 68;
-        }
-        String filename = new String(filenameBytes);
+        String filename = null;
+        if (filenameLength != -1) {
+          // X - Filename (XOR with (byte)68)
+          byte[] filenameBytes = fm.readBytes(filenameLength);
+          for (int n = 0; n < filenameLength; n++) {
+            filenameBytes[n] ^= 68;
+          }
+          filename = new String(filenameBytes);
 
-        // 1 - null Filename Terminator (XOR with (byte)68)
-        fm.skip(1);
+          // 1 - null Filename Terminator (XOR with (byte)68)
+          fm.skip(1);
+        }
+        else {
+          filename = Resource.generateFilename(i);
+        }
 
         // 4 - File Offset
         int offset = fm.readInt();

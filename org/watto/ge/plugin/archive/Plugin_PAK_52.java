@@ -46,7 +46,8 @@ public class Plugin_PAK_52 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Rebel Galaxy");
+    setGames("Hob",
+        "Rebel Galaxy");
     setExtensions("pak"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -164,6 +165,7 @@ public class Plugin_PAK_52 extends ArchivePlugin {
       // Go through the archive and get the file lengths
       fm.getBuffer().setBufferSize(8);
 
+      TaskProgressManager.setMaximum(numFiles);
       for (int i = 0; i < numFiles; i++) {
         Resource resource = resources[i];
         fm.seek(resource.getOffset());
@@ -183,6 +185,8 @@ public class Plugin_PAK_52 extends ArchivePlugin {
         resource.setLength(length);
         resource.setDecompressedLength(decompLength);
         resource.setExporter(exporter);
+
+        TaskProgressManager.setValue(i);
 
       }
 

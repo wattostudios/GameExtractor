@@ -29,11 +29,11 @@ public class Exporter_LZO_MiniLZO extends ExporterPlugin {
 
   static Exporter_LZO_MiniLZO instance = new Exporter_LZO_MiniLZO();
 
-  static long readLength = 0;
+  long readLength = 0;
 
-  static long compLength = 0;
+  long compLength = 0;
 
-  static int currentByte = 0;
+  int currentByte = 0;
 
   /**
   **********************************************************************************************
@@ -46,6 +46,17 @@ public class Exporter_LZO_MiniLZO extends ExporterPlugin {
   }
 
   boolean forceDecompress = false;
+
+  /** True to reset the buffer for each open(), False to retain the buffer to use for the next block **/
+  boolean resetBuffer = true;
+
+  public boolean isResetBuffer() {
+    return resetBuffer;
+  }
+
+  public void setResetBuffer(boolean resetBuffer) {
+    this.resetBuffer = resetBuffer;
+  }
 
   byte outBuf[] = null;
 
@@ -95,10 +106,19 @@ public class Exporter_LZO_MiniLZO extends ExporterPlugin {
           if (forceDecompress || inBufSize <= outBufSize) {
             // decompress
 
+            /*
             MInt out_len = new MInt();
             int r = MiniLZO.lzo1x_decompress(inBuf, (int) inBufSize, outBuf, out_len);
             // Allow INPUT_NOT_CONSUMED because we're only tracking the decompressed size, not the compressed size
             if ((r != Constants.LZO_E_OK && r != Constants.LZO_E_INPUT_NOT_CONSUMED) || (outBufReadPos + out_len.v) != outBufSize) {
+              throw new DataFormatException("compressed data violation");
+            }
+            */
+
+            MInt out_len = new MInt();
+            int r = MiniLZO.lzo1x_decompress(inBuf, (int) inBufSize, outBuf, outBufReadPos, out_len);
+            // Allow INPUT_NOT_CONSUMED because we're only tracking the decompressed size, not the compressed size
+            if ((r != Constants.LZO_E_OK && r != Constants.LZO_E_INPUT_NOT_CONSUMED) || (out_len.v) != outBufSize) {
               throw new DataFormatException("compressed data violation");
             }
           }
@@ -156,6 +176,14 @@ public class Exporter_LZO_MiniLZO extends ExporterPlugin {
   public void open(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
     try {
       fm = fmIn;
+
+      // RESET GLOBALS
+      if (resetBuffer) {
+        outBuf = null;
+        outBufReadPos = 0;
+        outBufSize = 0;
+        blockSize = 0;
+      }
 
       readStream = new ManipulatorInputStream(fm);
       readLength = decompLengthIn;

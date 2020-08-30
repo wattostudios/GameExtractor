@@ -39,10 +39,12 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
   **********************************************************************************************
   **/
   public Plugin_UE3_507() {
-    super("UE3_507", "Unreal Engine 3 version 507");
+    super("UE3_507", "Unreal Engine 3 [507,832]");
 
     setExtensions("upk");
-    setGames("Grimm",
+    setGames("Borderlands: The Pre-Sequel",
+        "Borderlands 2",
+        "Grimm",
         "Styx: Master of Shadows",
         "The Last Remnant",
         "Thief");
@@ -57,7 +59,7 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 507);
+    return super.getMatchRating(fm, 507, 832);
   }
 
   /**
@@ -313,13 +315,13 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
         // 4 - Unknown (0/1)
         // 4 - Unknown
         fm.skip(12);
-
+        
         // 16 - GUID Hash or NULL
         int hash1 = fm.readInt();
         int hash2 = fm.readInt();
         int hash3 = fm.readInt();
         int hash4 = fm.readInt();
-
+        
         if (hash1 != 0 || hash2 != 0 || hash3 != 0 || (hash4 != 0 && hash4 != 1)) {
           // 4 - Unknown (0/1)
           fm.skip(4);

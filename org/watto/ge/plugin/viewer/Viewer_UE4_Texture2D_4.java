@@ -60,7 +60,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -141,7 +141,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -230,6 +230,10 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
       long filesDirOffset = IntConverter.unsign(fm.readInt());
       FieldValidator.checkOffset(filesDirOffset, arcSize + 1);
 
+      if (filesDirOffset == 712) {
+        System.out.println("HERE");
+      }
+
       // 4 - Unknown (5)
       // 4 - Package Name (None)
       // 4 - null
@@ -277,11 +281,11 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
       // 12 - null
 
       // Read the Names Directory
-      fm.seek(nameDirOffset);
+      fm.relativeSeek(nameDirOffset);
       UE4Helper_4.readNamesDirectory(fm, nameCount);
 
       // Read the Import Directory
-      fm.seek(importDirOffset);
+      fm.relativeSeek(importDirOffset);
       UnrealImportEntry[] imports = UE4Helper_4.readImportDirectory(fm, importCount);
 
       int numFiles = importCount;
@@ -319,7 +323,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
         }
       }
 
-      fm.seek(filesDirOffset);
+      fm.relativeSeek(filesDirOffset);
       UE4Helper_4.readProperties(fm); // discard all this - we don't need it, we just need to get passed it all to find the image data
 
       // 4 - null
@@ -397,7 +401,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
 
         FieldValidator.checkLength(dataLength, arcSize); // delayed from above
 
-        fm.seek(largestMipmapOffset);
+        fm.relativeSeek(largestMipmapOffset);
 
         ImageResource imageResource = null;
 
@@ -479,7 +483,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
           }
         }
 
-        fm.seek(largestMipmapOffset);
+        fm.relativeSeek(largestMipmapOffset);
 
         ImageResource imageResource = ImageFormatReader.readBGRA(fm, width, height);
         imageResource.setProperty("ImageFormat", "BGRA");
@@ -534,7 +538,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
           }
         }
 
-        fm.seek(largestMipmapOffset);
+        fm.relativeSeek(largestMipmapOffset);
 
         ImageResource imageResource = ImageFormatReader.readBC5(fm, width, height);
         imageResource.setProperty("ImageFormat", "BC5");
@@ -577,7 +581,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
         FieldValidator.checkOffset(mipmapOffset, arcSize);
 
         // X - Greyscale Pixel Data
-        fm.seek(mipmapOffset);
+        fm.relativeSeek(mipmapOffset);
 
         ImageResource imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
         imageResource.setProperty("ImageFormat", "G8");
@@ -599,7 +603,7 @@ public class Viewer_UE4_Texture2D_4 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

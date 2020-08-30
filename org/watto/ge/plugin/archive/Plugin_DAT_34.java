@@ -38,7 +38,7 @@ public class Plugin_DAT_34 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_DAT_34() {
@@ -48,7 +48,8 @@ public class Plugin_DAT_34 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Nexus: The Kingdom Of The Winds");
+    setGames("Nexus: The Kingdom Of The Winds",
+        "Warhammer 40K: Rites of War");
     setExtensions("dat");
     setPlatforms("PC");
 
@@ -56,7 +57,7 @@ public class Plugin_DAT_34 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

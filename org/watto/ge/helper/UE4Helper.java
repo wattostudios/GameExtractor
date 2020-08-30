@@ -659,15 +659,32 @@ public class UE4Helper {
 
       for (int i = 0; i < nameCount; i++) {
         // 4 - Name Length (including null)
-        int nameLength = fm.readInt() - 1;
+        int nameLength = fm.readInt();
+        boolean unicode = false;
+        if (nameLength < 0) {
+          unicode = true;
+          nameLength = 0 - nameLength;
+        }
+        nameLength -= 1; // remove the null terminator
         FieldValidator.checkFilenameLength(nameLength);
 
-        // X - Name
-        names[i] = fm.readString(nameLength);
+        if (unicode) {
+          // X - Name (unicode)
+          names[i] = fm.readUnicodeString(nameLength);
 
-        // 1 - null Name Terminator
+          // 2 - null Unicode Name Terminator
+          fm.skip(2);
+        }
+        else {
+          // X - Name
+          names[i] = fm.readString(nameLength);
+
+          // 1 - null Name Terminator
+          fm.skip(1);
+        }
+
         // 4 - Flags
-        fm.skip(5);
+        fm.skip(4);
       }
     }
     catch (Throwable t) {
@@ -684,15 +701,55 @@ public class UE4Helper {
 
       // try reading again, but without the flag fields
       for (int i = 0; i < nameCount; i++) {
+        /*
         // 4 - Name Length (including null)
         int nameLength = fm.readInt() - 1;
+        if (i == nameCount - 1 && (nameLength <= 0 || nameLength > 500)) {
+          // sometimes the last name doesn't actually exist
+          names[i] = "";
+          continue;
+        }
         FieldValidator.checkFilenameLength(nameLength);
-
+        
         // X - Name
         names[i] = fm.readString(nameLength);
-
+        
         // 1 - null Name Terminator
         fm.skip(1);
+        */
+
+        // 4 - Name Length (including null)
+        int nameLength = fm.readInt();
+        boolean unicode = false;
+        if (nameLength < 0) {
+          unicode = true;
+          nameLength = 0 - nameLength;
+        }
+        nameLength -= 1; // remove the null terminator
+
+        if (i == nameCount - 1 && (nameLength <= 0 || nameLength > 500)) {
+          // sometimes the last name doesn't actually exist
+          names[i] = "";
+          continue;
+        }
+
+        FieldValidator.checkFilenameLength(nameLength);
+
+        if (unicode) {
+          // X - Name (unicode)
+          names[i] = fm.readUnicodeString(nameLength);
+
+          // 2 - null Unicode Name Terminator
+          fm.skip(2);
+        }
+        else {
+          // X - Name
+          names[i] = fm.readString(nameLength);
+
+          // 1 - null Name Terminator
+          fm.skip(1);
+        }
+
       }
     }
     catch (Throwable t) {

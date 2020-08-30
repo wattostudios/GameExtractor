@@ -1,30 +1,29 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -106,6 +105,8 @@ public class Plugin_QFM extends ArchivePlugin {
       // NOTE - Compressed files MUST know their DECOMPRESSED LENGTH
       //      - Uncompressed files MUST know their LENGTH
 
+      ExporterPlugin exporter = Exporter_ZLib_CompressedSizeOnly.getInstance();
+
       addFileTypes();
 
       // RESETTING THE GLOBAL VARIABLES
@@ -128,35 +129,85 @@ public class Plugin_QFM extends ArchivePlugin {
 
       // Loop through directory
       int realNumFiles = 0;
-      while (fm.getOffset() < arcSize) {
-        // X - Filename (unicode text)
-        // 2 - null Filename Terminator
-        String filename = fm.readNullString();
-        fm.skip(1);
-        filename = new String(filename.getBytes(), "UTF-16LE");
+      String dirName = "";
+      while (fm.getOffset() < arcSize - 8) { // -8 to just skip a little bit at the end, for a footer or anything
+        // 4 - Unknown (123456789)
+        fm.skip(4);
+
+        // 1 - Entry Type
+        int entryType = fm.readByte();
+
+        if (entryType == 1) {
+          // back a directory
+          if (dirName.equals("")) {
+            // do nothing - already at the root
+          }
+          else {
+            int slashPos = dirName.lastIndexOf("\\", dirName.length() - 2);
+            if (slashPos > 0) {
+              dirName = dirName.substring(0, slashPos + 1);
+            }
+            else {
+              dirName = "";
+            }
+          }
+          continue;
+        }
+
+        // 512 - Filename (unicode text) (null terminated, filled with nulls)
+        //System.out.println(fm.getOffset());
+        String filename = fm.readNullUnicodeString(256);
         FieldValidator.checkFilename(filename);
 
-        // 484 - null Padding
-        fm.skip(484);
+        // 2 - null Filename Terminator
+        fm.skip(2);
 
-        // 4 - File Extension Length [*2 for unicode]
-        // 8 - File Extension (unicode text) (including ".") (reversed?)
-        // 2 - null File Extension Terminator
-        fm.skip(14);
+        if (entryType == 0) {
+          // directory
+          dirName = dirName + filename + "\\";
+          continue;
+        }
+        else if (entryType == 2) {
+          // file
+          // 4 - File Extension Length [*2 for unicode]
+          int extensionLength = fm.readInt();
+          FieldValidator.checkFilenameLength(extensionLength);
 
-        // 4 - File Length
-        long length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
+          // 8 - File Extension (unicode text) (including ".")
+          String extension = fm.readUnicodeString(extensionLength);
 
-        // X - File Data
-        long offset = fm.getOffset();
-        fm.skip(length);
+          // 2 - null File Extension Terminator
+          fm.skip(2);
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
+          filename = dirName + filename + extension;
 
-        TaskProgressManager.setValue(offset);
-        realNumFiles++;
+          // 4 - Compressed File Length
+          long length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          // X - File Data
+          long offset = fm.getOffset();
+          if (fm.readString(1).equals("x")) {
+            // compressed
+
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, length, exporter);
+          }
+          else {
+            // uncompressed
+
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length);
+          }
+          fm.skip(length - 1); // -1 because we read 1 byte for compression checking
+
+          TaskProgressManager.setValue(offset);
+          realNumFiles++;
+        }
+        else {
+          ErrorLogger.log("[QFM] Unknown entry type: " + entryType);
+        }
+
       }
 
       resources = resizeResources(resources, realNumFiles);

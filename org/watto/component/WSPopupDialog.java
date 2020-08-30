@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,6 +34,8 @@ import javax.swing.SwingConstants;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.SingletonManager;
+import org.watto.TemporarySettings;
 import org.watto.event.WSClickableInterface;
 import org.watto.event.WSKeyableInterface;
 import org.watto.event.listener.WSKeyableListener;
@@ -48,6 +51,7 @@ public class WSPopupDialog extends JDialog implements WSPopupDialogInterface, WS
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** the popup that this dialog belongs to **/
   WSPopup popup;
 
@@ -81,6 +85,7 @@ public class WSPopupDialog extends JDialog implements WSPopupDialogInterface, WS
    * @param code the text code of the popup
    * @param hidable whether this popup can be disabled from appearing or not
    ***********************************************************************************************/
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public void constructInterface(String type, String code, boolean hidable) {
     try {
@@ -103,7 +108,7 @@ public class WSPopupDialog extends JDialog implements WSPopupDialogInterface, WS
       // Constructing the buttons
       WSButton buttonWithFocus = null;
 
-      if (type.equals(WSPopup.TYPE_MESSAGE)) {
+      if (type.equals(WSPopup.TYPE_MESSAGE) || type.equals(WSPopup.TYPE_OPTION)) {
         buttonWithFocus = constructButton(WSPopup.BUTTON_OK);
         buttonsPanel.add(buttonWithFocus);
       }
@@ -129,6 +134,24 @@ public class WSPopupDialog extends JDialog implements WSPopupDialogInterface, WS
       messageLabel.setOpaque(false);
       messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
       messagePanel.add(messageLabel, BorderLayout.CENTER);
+
+      // Construct the options (for an Options dialog)
+      if (type.equals(WSPopup.TYPE_OPTION)) {
+        // Get the list of options
+        try {
+          String[] optionsList = (String[]) SingletonManager.get("Options_" + code);
+          String selectedOption = TemporarySettings.getString("SelectedOption_" + code);
+
+          WSComboBox optionsCombo = new WSComboBox(XMLReader.read("<WSComboBox code=\"WSPopup_OptionsCombo\" />"));
+          optionsCombo.setInRepository(true);
+          optionsCombo.setModel(new DefaultComboBoxModel(optionsList));
+          optionsCombo.setSelectedItem(selectedOption);
+          messagePanel.add(optionsCombo, BorderLayout.SOUTH);
+
+        }
+        catch (Throwable t) {
+        }
+      }
 
       // Setting up the panel for the checkbox
       JPanel checkboxPanel = new JPanel(new BorderLayout(5, 5));

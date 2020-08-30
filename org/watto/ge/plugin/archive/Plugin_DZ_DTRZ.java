@@ -33,7 +33,7 @@ public class Plugin_DZ_DTRZ extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_DZ_DTRZ() {
@@ -43,7 +43,9 @@ public class Plugin_DZ_DTRZ extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Talisman");
+    setGames("Doomdarks Revenge",
+        "Talisman",
+        "The Lords of Midnight");
     setExtensions("dz"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -56,7 +58,7 @@ public class Plugin_DZ_DTRZ extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -208,9 +210,10 @@ public class Plugin_DZ_DTRZ extends ArchivePlugin {
 
         //System.out.println("--" + offset);
 
-        // 4 - Compressed Length
+        // 4 - Compressed Length (NOT RIGHT - IN SOME ARCHIVES THIS IS ALSO THE DECOMP LENGTH)
         int length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
+        //FieldValidator.checkLength(length, arcSize);
+        FieldValidator.checkLength(length);
 
         // 4 - Decompressed Length
         int decompLength = fm.readInt();
@@ -246,6 +249,17 @@ public class Plugin_DZ_DTRZ extends ArchivePlugin {
 
         TaskProgressManager.setValue(i);
       }
+
+      // now work out the real compressed lengths
+      for (int i = 0; i < numFiles - 1; i++) {
+        Resource resource = resources[i];
+        long compLength = resources[i + 1].getOffset() - resource.getOffset();
+        FieldValidator.checkLength(compLength, arcSize);
+        resource.setLength(compLength);
+      }
+      Resource lastResource = resources[numFiles - 1];
+      long lastLength = arcSize - lastResource.getOffset();
+      lastResource.setLength(lastLength);
 
       fm.close();
 

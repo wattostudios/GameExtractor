@@ -35,7 +35,7 @@ public class Plugin_PAK_48 extends ArchivePlugin {
   **/
   public Plugin_PAK_48() {
 
-    super("PAK_48", "PAK_48");
+    super("PAK_48", "Node-Webkit Archive");
 
     //         read write replace rename
     setProperties(true, false, false, false);

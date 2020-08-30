@@ -74,12 +74,12 @@ public class Plugin_PAK_53 extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // File Length
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+      if (FieldValidator.checkLength(fm.readInt() - 1, arcSize)) { // -1 will fail it if the length is 0
         rating += 5;
       }
 
       // File Length
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+      if (FieldValidator.checkLength(fm.readInt() - 1, arcSize)) { // -1 will fail it if the length is 0
         rating += 5;
       }
 

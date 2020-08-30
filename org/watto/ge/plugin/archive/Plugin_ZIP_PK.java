@@ -245,11 +245,15 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
         "The Chosen",
         "The Chronicles of Emerland Solitaire",
         "The Fall: Last Days Of Gaia",
+        "The Talos Principle",
+        "The Witness",
         "Thief 2: The Metal Age",
         "Thief: The Dark Age",
         "Tom Clancy's H.A.W.X",
         "ToolsMedia",
+        "Torchlight",
         "TrackMania Nations Forever",
+        "TrackMania Next",
         "Transport Tycoon",
         "Tremulous",
         "Tribes 2",
@@ -268,6 +272,7 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
         "Windows Media Player",
         "Wolfenstein: Enemy Territory",
         "World Of Padman",
+        "World War Z",
         "Worms Crazy Golf",
         "X-Men Legends 2",
         "XPand Rally",
@@ -449,9 +454,13 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           // File Entry
 
           // 2 - Unknown (2)
-          // 2 - Unknown (8)
+          fm.skip(2);
+
+          // 2 - Compression Method
+          short compType = fm.readShort();
+
           // 8 - Checksum?
-          fm.skip(12);
+          fm.skip(8);
 
           // 4 - Compressed File Size
           int length = fm.readInt();
@@ -461,21 +470,36 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           int decompLength = fm.readInt();
           FieldValidator.checkLength(decompLength);
 
-          // 4 - Filename Length
+          // 2 - Filename Length
           int filenameLength = fm.readShort();
-          fm.skip(2);
-          //System.out.println(fm.getOffset() + "\t" + filenameLength);
           FieldValidator.checkFilenameLength(filenameLength);
+
+          // 2 - Extra Data Length
+          int extraLength = fm.readShort();
+          FieldValidator.checkLength(extraLength, arcSize);
 
           // X - Filename
           String filename = fm.readString(filenameLength);
+
+          // X - Extra Data
+          fm.skip(extraLength);
 
           // X - File Data
           long offset = fm.getOffset();
           fm.skip(length);
 
-          //path,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+          if (compType == 0) {
+            // uncompressed
+
+            //path,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length);
+          }
+          else {
+            // compressed - probably Deflate
+
+            //path,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
           realNumFiles++;
 
           TaskProgressManager.setValue(offset);
@@ -493,7 +517,8 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           fm.skip(22);
 
           // 4 - Filename Length
-          int filenameLength = fm.readInt();
+          int filenameLength = fm.readShort();
+          fm.skip(2);
           FieldValidator.checkFilenameLength(filenameLength);
 
           // 10 - null
@@ -505,21 +530,54 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
 
         }
         else if (entryType == 656387) {
-          // Directory Entry (Short)
+          // Directory Entry (Short) (or sometimes a file)
 
           // 2 - Unknown (20)
+          fm.skip(2);
+
           // 2 - Unknown (2)
+          short compType = fm.readShort();
+
           // 8 - Checksum?
+          fm.skip(8);
+
           // 4 - Compressed File Size
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
           // 4 - Decompressed File Size
-          fm.skip(20);
+          int decompLength = fm.readInt();
+          FieldValidator.checkLength(decompLength);
 
           // 4 - Filename Length
-          int filenameLength = fm.readInt();
+          int filenameLength = fm.readShort();
+          fm.skip(2);
           FieldValidator.checkFilenameLength(filenameLength);
 
           // X - Filename
-          fm.skip(filenameLength);
+          String filename = fm.readString(filenameLength);
+
+          // X - File Data
+          if (length != 0) {
+            long offset = fm.getOffset();
+            fm.skip(length);
+
+            if (compType == 0) {
+              // uncompressed
+
+              //path,name,offset,length,decompLength,exporter
+              resources[realNumFiles] = new Resource(path, filename, offset, length);
+            }
+            else {
+              // compressed - probably Deflate
+
+              //path,name,offset,length,decompLength,exporter
+              resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+            }
+            realNumFiles++;
+
+            TaskProgressManager.setValue(offset);
+          }
 
         }
         else if (entryType == 1541) {

@@ -23,7 +23,6 @@ import org.watto.ErrorLogger;
 import org.watto.io.FileManipulator;
 import org.watto.io.Manipulator;
 
-
 /***********************************************************************************************
 Writes a tree of <code>XMLNode</code>s to an XML-format document 
 @see org.watto.xml.XMLNode
@@ -32,24 +31,26 @@ public class XMLWriter {
 
   /** The stream for reading the file **/
   protected static Manipulator manipulator = null;
+
   /** The depth of the currently-processed tag. Used for padding the lines **/
   protected static int level = 0;
+
   /** Is this the start of a new line? Used to determine when to apply line padding **/
   protected static boolean newLine = true;
+
   /** Whether the file is being read as Unicode or non-Unicode **/
   protected static boolean unicode = false;
-
 
   /***********************************************************************************************
   Constructor
   ***********************************************************************************************/
-  public XMLWriter(){}
-
+  public XMLWriter() {
+  }
 
   /***********************************************************************************************
   Prepares the output for the next line of input
   ***********************************************************************************************/
-  public static void nextLine(){
+  public static void nextLine() {
     try {
       if (unicode) {
         manipulator.writeUnicodeString("\n\r");
@@ -64,16 +65,23 @@ public class XMLWriter {
     }
   }
 
+  /***********************************************************************************************
+  Writes the <code>root</code> to the <code>file</code> in non-Unicode format
+  @param file the <code>File</code> to write to
+  @param root the tree to write
+  ***********************************************************************************************/
+  public static boolean writeWithValidation(File file, XMLNode root) {
+    return writeWithValidation(file, root, false);
+  }
 
   /***********************************************************************************************
   Writes the <code>root</code> to the <code>file</code> in non-Unicode format
   @param file the <code>File</code> to write to
   @param root the tree to write
   ***********************************************************************************************/
-  public static void write(File file,XMLNode root){
-    write(file,root,false);
+  public static void write(File file, XMLNode root) {
+    write(file, root, false);
   }
-
 
   /***********************************************************************************************
   Writes the <code>root</code> to the <code>file</code> in the <code>unicodeFormat</code>
@@ -82,20 +90,29 @@ public class XMLWriter {
   @param unicodeFormat <b>true</b> to write in Unicode format<br />
                        <b>false</b> to write in non-Unicode format
   ***********************************************************************************************/
-  public static void write(File file,XMLNode root,boolean unicodeFormat){
-    write(new FileManipulator(file,true),root,unicodeFormat);
+  public static boolean writeWithValidation(File file, XMLNode root, boolean unicodeFormat) {
+    return writeWithValidation(new FileManipulator(file, true), root, unicodeFormat);
   }
 
+  /***********************************************************************************************
+  Writes the <code>root</code> to the <code>file</code> in the <code>unicodeFormat</code>
+  @param file the <code>File</code> to write to
+  @param root the tree to write
+  @param unicodeFormat <b>true</b> to write in Unicode format<br />
+                       <b>false</b> to write in non-Unicode format
+  ***********************************************************************************************/
+  public static void write(File file, XMLNode root, boolean unicodeFormat) {
+    write(new FileManipulator(file, true), root, unicodeFormat);
+  }
 
   /***********************************************************************************************
   Writes the <code>root</code> to the <code>Manipulator</code> in non-Unicode format
   @param newManipulator the <code>Manipulator</code> to write to
   @param root the tree to write
   ***********************************************************************************************/
-  public static void write(Manipulator newManipulator,XMLNode root){
-    write(newManipulator,root,false);
+  public static void write(Manipulator newManipulator, XMLNode root) {
+    write(newManipulator, root, false);
   }
-
 
   /***********************************************************************************************
   Writes the <code>root</code> to the <code>Manipulator</code> in the <code>unicodeFormat</code>
@@ -104,15 +121,54 @@ public class XMLWriter {
   @param unicodeFormat <b>true</b> to write in Unicode format<br />
                        <b>false</b> to write in non-Unicode format
   ***********************************************************************************************/
-  public static void write(Manipulator newManipulator,XMLNode root,boolean unicodeFormat){
+  public static boolean writeWithValidation(Manipulator newManipulator, XMLNode root, boolean unicodeFormat) {
     try {
       unicode = unicodeFormat;
       manipulator = newManipulator;
 
       if (unicode) {
         // write unicode header
-        manipulator.writeByte((byte)255);
-        manipulator.writeByte((byte)254);
+        manipulator.writeByte((byte) 255);
+        manipulator.writeByte((byte) 254);
+      }
+
+      level = 0;
+
+      writeTag(root);
+
+      //File writePath = manipulator.getFile();
+      manipulator.close();
+
+      //if (writePath.getAbsolutePath() != path.getAbsolutePath()){
+      //  path.delete();
+      //  writePath.renameTo(path);
+      //  }
+
+      return true;
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return false;
+    }
+  }
+
+  /***********************************************************************************************
+  Writes the <code>root</code> to the <code>Manipulator</code> in the <code>unicodeFormat</code>
+  @param newManipulator the <code>Manipulator</code> to write to
+  @param root the tree to write
+  @param unicodeFormat <b>true</b> to write in Unicode format<br />
+                       <b>false</b> to write in non-Unicode format
+  ***********************************************************************************************/
+  public static void write(Manipulator newManipulator, XMLNode root, boolean unicodeFormat) {
+    try {
+      unicode = unicodeFormat;
+      manipulator = newManipulator;
+
+      if (unicode) {
+        // write unicode header
+        manipulator.writeByte((byte) 255);
+        manipulator.writeByte((byte) 254);
       }
 
       level = 0;
@@ -133,17 +189,16 @@ public class XMLWriter {
     }
   }
 
-
   /***********************************************************************************************
   Writes the attributes of the <code>currentNode</code>
   @param currentNode the current node
   ***********************************************************************************************/
-  public static void writeAttributes(XMLNode currentNode){
+  public static void writeAttributes(XMLNode currentNode) {
     try {
 
       String[][] attributes = currentNode.getAttributes();
 
-      for (int i = 0;i < attributes.length;i++) {
+      for (int i = 0; i < attributes.length; i++) {
         writePartialLine(" " + attributes[i][0] + "=\"" + attributes[i][1] + "\"");
       }
 
@@ -153,38 +208,35 @@ public class XMLWriter {
     }
   }
 
-
   /***********************************************************************************************
   Writes the XML DocType
   @param DTDFile the file with the document type declaration (DTD)
   ***********************************************************************************************/
-  public static void writeDocType(String DTDFile){
+  public static void writeDocType(String DTDFile) {
     writeLine("<!DOCTYPE resources SYSTEM \"" + DTDFile + "\">");
   }
-
 
   /***********************************************************************************************
   Writes the XML header
   @param version the XML version
   @param encoding the XML encoding
   ***********************************************************************************************/
-  public static void writeHeader(double version,String encoding){
+  public static void writeHeader(double version, String encoding) {
     writeLine("<?xml version=\"" + version + "\" encoding=\"" + encoding + "\"?>");
   }
-
 
   /***********************************************************************************************
   Pads the beginning of the line out to the correct position for the node depth
   ***********************************************************************************************/
-  public static void writeLevel(){
+  public static void writeLevel() {
     try {
       if (unicode) {
-        for (int i = 0;i < level;i++) {
+        for (int i = 0; i < level; i++) {
           manipulator.writeUnicodeString("\t");
         }
       }
       else {
-        for (int i = 0;i < level;i++) {
+        for (int i = 0; i < level; i++) {
           manipulator.writeString("\t");
         }
       }
@@ -194,22 +246,20 @@ public class XMLWriter {
     }
   }
 
-
   /***********************************************************************************************
   Writes a <code>line</code> of data to the <code>manipulator</code>
   @param line the <code>String</code> to write
   ***********************************************************************************************/
-  public static void writeLine(String line){
+  public static void writeLine(String line) {
     writePartialLine(line);
     nextLine();
   }
-
 
   /***********************************************************************************************
   Appends the <code>partialLine</code> to the <code>manipulator</code>
   @param partialLine the <code>String</code> to write
   ***********************************************************************************************/
-  public static void writePartialLine(String partialLine){
+  public static void writePartialLine(String partialLine) {
     try {
       if (newLine) {
         writeLevel();
@@ -228,12 +278,11 @@ public class XMLWriter {
     }
   }
 
-
   /***********************************************************************************************
   Writes the <code>currentNode</code>
   @param currentNode the current node
   ***********************************************************************************************/
-  public static void writeTag(XMLNode currentNode){
+  public static void writeTag(XMLNode currentNode) {
     try {
 
       String name = currentNode.getTag();
@@ -255,7 +304,7 @@ public class XMLWriter {
         level++;
 
         XMLNode[] children = currentNode.getChildren();
-        for (int i = 0;i < children.length;i++) {
+        for (int i = 0; i < children.length; i++) {
           writeTag(children[i]);
         }
 
@@ -278,7 +327,7 @@ public class XMLWriter {
         level++;
 
         XMLNode[] children = currentNode.getChildren();
-        for (int i = 0;i < children.length;i++) {
+        for (int i = 0; i < children.length; i++) {
           writeTag(children[i]);
         }
 
@@ -313,12 +362,11 @@ public class XMLWriter {
     }
   }
 
-
   /***********************************************************************************************
   Writes the content text of the <code>currentNode</code>
   @param currentNode the current node
   ***********************************************************************************************/
-  public static void writeText(XMLNode currentNode){
+  public static void writeText(XMLNode currentNode) {
     try {
       writePartialLine(currentNode.getContent());
     }

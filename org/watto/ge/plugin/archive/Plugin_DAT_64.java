@@ -34,7 +34,7 @@ public class Plugin_DAT_64 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_DAT_64() {
@@ -48,7 +48,8 @@ public class Plugin_DAT_64 extends ArchivePlugin {
         "Anomaly Defenders",
         "Anomaly Korea",
         "Anomaly Warzone Earth",
-        "Anomaly Warzone Earth Mobile Campaign");
+        "Anomaly Warzone Earth Mobile Campaign",
+        "This War Of Mine");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -60,7 +61,7 @@ public class Plugin_DAT_64 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

@@ -3,7 +3,6 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.component.WSTableColumn;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -29,6 +28,7 @@ import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.ge.plugin.resource.Resource_GTR_GMOTORMAS;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -39,7 +39,7 @@ public class Plugin_GTR_GMOTORMAS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_GTR_GMOTORMAS() {
@@ -49,10 +49,11 @@ public class Plugin_GTR_GMOTORMAS extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, true, true, true);
 
-    setGames("GTR: FIA GT Racing",
+    setGames("BMW M3 Challenge",
+        "GTR: FIA GT Racing",
         "GT Legends",
         "GTR2",
-        "BMW M3 Challenge");
+        "Race");
     setExtensions("gtr", "gtl", "bmw");
     setPlatforms("PC");
 
@@ -93,7 +94,7 @@ public class Plugin_GTR_GMOTORMAS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -111,7 +112,7 @@ public class Plugin_GTR_GMOTORMAS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -158,7 +159,7 @@ public class Plugin_GTR_GMOTORMAS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -226,7 +227,7 @@ public class Plugin_GTR_GMOTORMAS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

@@ -31,7 +31,7 @@ public class _Plugin_XXX_Replace extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public _Plugin_XXX_Replace() {
@@ -53,7 +53,7 @@ public class _Plugin_XXX_Replace extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -259,7 +259,7 @@ public class _Plugin_XXX_Replace extends ArchivePlugin {
       TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
       write(resources, fm);
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      //ExporterPlugin exporter = new Exporter_ZLib();
       //long[] compressedLengths = write(exporter,resources,fm);
 
       src.close();

@@ -1,29 +1,26 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,11 +41,36 @@ public class Plugin_DAT_35 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("The Chronicles of Narnia: The Lion, The Witch and The Wardrobe");
+    setGames("LEGO Star Wars 2: The Original Trilogy",
+        "The Chronicles of Narnia: The Lion, The Witch and The Wardrobe");
     setExtensions("dat");
     setPlatforms("PC");
 
-    setFileTypes("ani", "Animation");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("ai2", "AI Level Path", FileType.TYPE_OTHER),
+        new FileType("an3", "Animation", FileType.TYPE_OTHER),
+        new FileType("ani", "Animation", FileType.TYPE_OTHER),
+        new FileType("anm", "Animation", FileType.TYPE_OTHER),
+        new FileType("cd", "Character Definition", FileType.TYPE_OTHER),
+        new FileType("cft", "Font", FileType.TYPE_OTHER),
+        new FileType("cu2", "Cutscene", FileType.TYPE_VIDEO),
+        new FileType("fnt", "Font", FileType.TYPE_OTHER),
+        new FileType("ft2", "Font", FileType.TYPE_OTHER),
+        new FileType("git", "Git Options", FileType.TYPE_DOCUMENT),
+        new FileType("giz", "Giz Obstacle", FileType.TYPE_OTHER),
+        new FileType("gsc", "GSC Image Archive", FileType.TYPE_ARCHIVE),
+        new FileType("par", "Part", FileType.TYPE_OTHER),
+        new FileType("scp", "Script File", FileType.TYPE_DOCUMENT),
+        new FileType("sf", "Script File", FileType.TYPE_DOCUMENT),
+        new FileType("spl", "Spline", FileType.TYPE_OTHER),
+        new FileType("sub", "Subtitles", FileType.TYPE_DOCUMENT),
+        new FileType("subopt", "Subtitles", FileType.TYPE_DOCUMENT),
+        new FileType("txm", "Minikit", FileType.TYPE_DOCUMENT),
+        new FileType("txc", "Collectable", FileType.TYPE_DOCUMENT),
+        new FileType("tex", "Texture Image", FileType.TYPE_IMAGE),
+        new FileType("fmv", "FMV Video", FileType.TYPE_VIDEO));
+
+    setTextPreviewExtensions("ats", "git", "h", "scp"); // LOWER CASE
 
   }
 
@@ -198,7 +220,10 @@ public class Plugin_DAT_35 extends ArchivePlugin {
           dirName = filename + "\\";
         }
         else {
-          resources[fileNum].setName(dirName + filename);
+          String name = dirName + filename;
+          Resource resource = resources[fileNum];
+          resource.setName(name);
+          resource.setOriginalName(name);
           fileNum++;
         }
 
