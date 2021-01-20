@@ -130,7 +130,7 @@ public class Plugin_POD_POD5 extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // 4 - Header (POD5)
-      // 4 - null
+      // 4 - Checksum CRC-CCITT32
       // 80 - Archive Filename (null terminated)
       fm.skip(88);
 
@@ -138,9 +138,11 @@ public class Plugin_POD_POD5 extends ArchivePlugin {
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
-      // 4 - null
-      // 4 - Unknown (4096)
-      // 164 - null
+      // 4 - Number of Audit Files
+      // 4 - Revision
+      // 4 - Priority
+      // 80 - Author
+      // 80 - Copyright
       fm.skip(172);
 
       // 4 - Directory Offset
