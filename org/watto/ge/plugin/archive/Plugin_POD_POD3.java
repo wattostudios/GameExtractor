@@ -138,10 +138,11 @@ public class Plugin_POD_POD3 extends ArchivePlugin {
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
-      // 4 - Unknown
-      // 4 - Unknown (1000)
-      // 4 - Unknown (1000)
-      // 160 - null
+      // 4 - Number Of Audit Files
+      // 4 - Revision
+      // 4 - Priority
+      // 80 - Author
+      // 80 - Copyright
       fm.skip(172);
 
       // 4 - Directory Offset
