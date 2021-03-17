@@ -43,7 +43,7 @@ public class Plugin_BIG_ARCHIVE extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Homeworld 2");
+    setGames("Homeworld 2", "Homeworld Remastered");
     setExtensions("big"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

@@ -62,6 +62,7 @@ public class Exporter_XOR_RepeatingKey extends ExporterPlugin {
   **/
   public Exporter_XOR_RepeatingKey(int[] xorKey) {
     super();
+    setName("XOR Encrypted File (Repeating Key)");
     this.xorKey = xorKey;
     this.keyLength = xorKey.length;
     this.currentKeyPos = 0;

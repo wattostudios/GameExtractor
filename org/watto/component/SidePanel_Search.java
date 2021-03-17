@@ -23,9 +23,11 @@ import java.io.File;
 import javax.swing.JComponent;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.SingletonManager;
 import org.watto.datatype.Archive;
 import org.watto.event.WSEnterableInterface;
 import org.watto.task.Task;
+import org.watto.task.Task_ReloadFileListPanel;
 import org.watto.task.Task_SearchFileList;
 import org.watto.xml.XMLNode;
 import org.watto.xml.XMLReader;
@@ -39,6 +41,7 @@ public class SidePanel_Search extends WSPanelPlugin implements WSEnterableInterf
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   WSObjectCheckBox[] checkboxes;
 
   /**
@@ -183,6 +186,9 @@ public class SidePanel_Search extends WSPanelPlugin implements WSEnterableInterf
         //selectAllMatches();
         performSearch(false);
       }
+      else if (code.equals("SidePanel_Search_FilterButton")) {
+        applyFilter();
+      }
       return true;
     }
     return false;
@@ -224,7 +230,8 @@ public class SidePanel_Search extends WSPanelPlugin implements WSEnterableInterf
       String code = ((WSComponent) c).getCode();
 
       if (code.equals("SidePanel_Search_InputText")) {
-        performSearch(true);
+        applyFilter();
+        //performSearch(true);
         return true;
       }
     }
@@ -269,6 +276,7 @@ public class SidePanel_Search extends WSPanelPlugin implements WSEnterableInterf
 
       if (code.equals("SidePanel_Search_InputText") && e.getKeyCode() == KeyEvent.VK_F3) {
         performSearch(true);
+        //applyFilter();
         return true;
       }
     }
@@ -315,6 +323,49 @@ public class SidePanel_Search extends WSPanelPlugin implements WSEnterableInterf
     String searchVal = ((WSTextField) ComponentRepository.get("SidePanel_Search_InputText")).getText();
 
     Task_SearchFileList task = new Task_SearchFileList(columns, searchVal, firstMatchOnly);
+    task.setDirection(Task.DIRECTION_REDO);
+    new Thread(task).start();
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void applyFilter() {
+    String searchVal = ((WSTextField) ComponentRepository.get("SidePanel_Search_InputText")).getText();
+
+    if (searchVal.equals("")) {
+      // reset
+      SingletonManager.remove("FileListFilterValue");
+      SingletonManager.remove("FileListFilterColumns");
+    }
+    else {
+      // determine the columns to filter
+      int numColumns = 0;
+      WSTableColumn[] columns = new WSTableColumn[checkboxes.length];
+
+      for (int i = 0; i < checkboxes.length; i++) {
+        if (checkboxes[i].isSelected()) {
+          columns[numColumns] = (WSTableColumn) checkboxes[i].getObject();
+          numColumns++;
+        }
+      }
+
+      if (numColumns < columns.length) {
+        WSTableColumn[] temp = columns;
+        columns = new WSTableColumn[numColumns];
+        System.arraycopy(temp, 0, columns, 0, numColumns);
+      }
+
+      SingletonManager.set("FileListFilterValue", searchVal);
+      SingletonManager.set("FileListFilterColumns", columns);
+    }
+
+    // Reload the File List
+    WSFileListPanelHolder fileListPanelHolder = (WSFileListPanelHolder) ComponentRepository.get("FileListPanelHolder");
+    Task_ReloadFileListPanel task = new Task_ReloadFileListPanel(fileListPanelHolder);
     task.setDirection(Task.DIRECTION_REDO);
     new Thread(task).start();
 

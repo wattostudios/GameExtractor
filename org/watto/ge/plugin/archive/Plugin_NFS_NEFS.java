@@ -30,7 +30,7 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_NFS_NEFS() {
@@ -40,7 +40,9 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("F1 2015");
+    setGames("F1 2015",
+        "F1 2018",
+        "GRID Autosport");
     setExtensions("nfs"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -53,7 +55,7 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

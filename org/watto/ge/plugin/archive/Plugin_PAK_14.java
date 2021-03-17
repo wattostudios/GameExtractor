@@ -3,7 +3,6 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -26,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -117,7 +117,16 @@ public class Plugin_PAK_14 extends ArchivePlugin {
         FieldValidator.checkOffset(offset, arcSize);
 
         // X - Filename (null)
-        String filename = fm.readNullString();
+        //String filename = fm.readNullString();
+        long namePos = fm.getOffset();
+        String filename = fm.readNullString(512);
+        int nameLength = filename.length();
+        if (nameLength == 512) {
+          return null; // not the right kind of archive
+        }
+        else {
+          fm.relativeSeek(namePos + nameLength + 1);
+        }
 
         //path,id,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset);

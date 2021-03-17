@@ -761,7 +761,12 @@ public class UE4Helper_Short {
       currentProperty++;
 
       // read the next property
-      property = readProperty(fm);
+      if (fm.getOffset() > fm.getLength()) {
+        property = null;
+      }
+      else {
+        property = readProperty(fm);
+      }
     }
 
     // shrink the final array

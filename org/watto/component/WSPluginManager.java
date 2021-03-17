@@ -230,6 +230,17 @@ public class WSPluginManager {
         String locationName = locationNode.getContent();
         File location = new File(new File(locationName).getAbsolutePath());
 
+        if (!location.exists()) {
+          // Lets try swapping the / and \ characters, in case we're on Unix
+          locationName = locationName.replace('\\', '/');
+          location = new File(new File(locationName).getAbsolutePath());
+
+          if (!location.exists()) {
+            ErrorLogger.log("[WSPluginManager] Plugin location " + locationName + " could not be found");
+            continue;
+          }
+        }
+
         String locationType = locationNode.getAttribute("type");
         if (locationType.equals("zip")) {
           scanZip(location, prefixes);

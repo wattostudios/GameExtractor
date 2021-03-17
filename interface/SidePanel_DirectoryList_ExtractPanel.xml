@@ -8,8 +8,13 @@
 		</WSPanel>
 	</WSPanel>
 	
-	<WSPanel code="SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder" layout="GridLayout" rows="1" columns="1" position="SOUTH" showLabel="true" showBorder="true" opaque="false">
-		<WSComboBox code="SidePanel_DirectoryList_ExportPanel_ImageConverters" />
+	<WSPanel layout="GridLayout" rows="1" columns="2" position="SOUTH" opaque="false">
+		<WSPanel code="SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder" layout="GridLayout" rows="1" columns="1" showLabel="true" showBorder="true" opaque="false">
+			<WSComboBox code="SidePanel_DirectoryList_ExportPanel_ImageConverters" />
+		</WSPanel>
+		<WSPanel code="SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder" layout="GridLayout" rows="1" columns="1" showLabel="true" showBorder="true" opaque="false">
+			<WSComboBox code="SidePanel_DirectoryList_ExportPanel_ModelConverters" />
+		</WSPanel>
 	</WSPanel>
 		
 </WSPanel>

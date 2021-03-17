@@ -66,6 +66,8 @@ public class Plugin_ASSETS_20 extends ArchivePlugin {
 
     setFileTypes(Unity3DHelper.getFileTypes());
 
+    setTextPreviewExtensions("textasset"); // LOWER CASE
+
   }
 
   int[] fileTypeMapping = new int[1500]; // assuming a maximum of 1500 classes in a single file

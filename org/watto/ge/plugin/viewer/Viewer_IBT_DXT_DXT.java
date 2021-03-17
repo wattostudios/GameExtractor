@@ -24,6 +24,7 @@ import org.watto.ge.helper.ImageFormatReader;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.archive.Plugin_IBD;
 import org.watto.ge.plugin.archive.Plugin_IBT;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -75,15 +76,15 @@ public class Viewer_IBT_DXT_DXT extends ViewerPlugin {
       if (plugin instanceof Plugin_IBT) {
         rating += 50;
       }
+      else if (plugin instanceof Plugin_IBD) {
+        rating += 50;
+      }
       else if (!(plugin instanceof AllFilesPlugin)) {
         return 0;
       }
 
       if (FieldValidator.checkExtension(fm, extensions)) {
         rating += 25;
-      }
-      else {
-        return 0;
       }
 
       // version (1)

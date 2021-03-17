@@ -29,6 +29,46 @@ public class Resource_WAV_RawAudio extends Resource {
 
   int audioLength = 0;
 
+  short codec = 0x0001;
+
+  byte[] extraData = null;
+
+  int samples = -1;
+
+  short blockAlign = -1;
+
+  public short getBlockAlign() {
+    return blockAlign;
+  }
+
+  public void setBlockAlign(short blockAlign) {
+    this.blockAlign = blockAlign;
+  }
+
+  public int getSamples() {
+    return samples;
+  }
+
+  public void setSamples(int samples) {
+    this.samples = samples;
+  }
+
+  public byte[] getExtraData() {
+    return extraData;
+  }
+
+  public void setExtraData(byte[] extraData) {
+    this.extraData = extraData;
+  }
+
+  public short getCodec() {
+    return codec;
+  }
+
+  public void setCodec(short codec) {
+    this.codec = codec;
+  }
+
   boolean signed = true;
 
   public boolean isSigned() {
@@ -131,7 +171,10 @@ public class Resource_WAV_RawAudio extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

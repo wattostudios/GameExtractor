@@ -50,6 +50,7 @@ public class Plugin_PAK_TMSAMVOH extends ArchivePlugin {
         "Mob Enforcer",
         "Mystery Case Files: Prime Suspects",
         "Mystery Case Files: Ravenhearst",
+        "Republic: The Revolution",
         "Sprint Cars: Road To Knoxville");
     setExtensions("pak");
     setPlatforms("PC");

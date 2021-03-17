@@ -31,7 +31,7 @@ public class Plugin_RES_0TSR_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_RES_0TSR_2() {
@@ -53,7 +53,7 @@ public class Plugin_RES_0TSR_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -120,7 +120,7 @@ public class Plugin_RES_0TSR_2 extends ArchivePlugin {
 
       // 4 - Length of RES file [+128]
       // 4 - Length of RES file [+128]
-      // 4 - null
+      // 4 - Unknown (Either 0, 128, or 1152)
       fm.skip(12);
 
       // 4 - Filename Directory Length

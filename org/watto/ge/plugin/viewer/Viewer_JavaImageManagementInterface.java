@@ -39,7 +39,7 @@ public class Viewer_JavaImageManagementInterface extends ViewerPlugin {
   **/
   public Viewer_JavaImageManagementInterface() {
     super("JavaImageManagementInterface", "Java Image Management Interface");
-    setExtensions("tif", "tiff", "pict", "pct", "pic", "psd", "bmp", "ddb", "dib", "tga", "ico", "cur", "ras", "xbm", "xpm", "pcx");
+    setExtensions("tif", "tiff", "pict", "pct", "pic", "psd", "bmp", "ddb", "dib", "tga", /*"ico",*/ "cur", "ras", "xbm", "xpm", "pcx");
 
     try {
       Class.forName("com.sun.jimi.core.Jimi");

@@ -16,15 +16,25 @@ package org.watto.component;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import org.watto.Settings;
+import org.watto.datatype.Archive;
+import org.watto.event.WSClickableInterface;
+import org.watto.event.WSKeyableInterface;
 import org.watto.event.WSSelectableInterface;
+import org.watto.event.listener.WSKeyableListener;
 import org.watto.event.listener.WSSelectableListener;
+import org.watto.ge.GameExtractor;
+import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.task.Task;
+import org.watto.task.Task_WriteEditedTextFile;
 import org.watto.xml.XMLReader;
 
-public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInterface {
+public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInterface, WSKeyableInterface, WSClickableInterface {
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
@@ -35,6 +45,10 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   static Font monoFont = null;
 
+  boolean textChanged = false;
+
+  WSButton saveButton = null;
+
   /**
   **********************************************************************************************
   
@@ -42,6 +56,8 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
   **/
   public PreviewPanel_Text(String text) {
     super();
+
+    textChanged = false; // not edited
 
     WSOptionCheckBox wordwrapCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_Text_WordWrap\" setting=\"PreviewPanel_Text_WordWrap\" />"));
     WSOptionCheckBox monospacedFontCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_Text_MonospacedFont\" setting=\"PreviewPanel_Text_MonospacedFont\" />"));
@@ -58,6 +74,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
     add(topPanel, BorderLayout.NORTH);
 
     preview = new JTextArea(text);
+    preview.addKeyListener(new WSKeyableListener(this));
 
     defaultFont = preview.getFont();
     monoFont = new Font("monospaced", Font.PLAIN, 12);
@@ -69,7 +86,30 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       preview.setFont(defaultFont);
     }
 
-    preview.setEditable(false);
+    try {
+      ArchivePlugin archivePlugin = Archive.getReadPlugin();
+      if (archivePlugin != null) {
+        if (archivePlugin.canWrite() || archivePlugin.canReplace() || archivePlugin.canImplicitReplace()) {
+          if (GameExtractor.isFullVersion()) {
+            preview.setEditable(true);
+
+            WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"1\" />"));
+            saveButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_Text_SaveChanges\" showText=\"true\" />"));
+            saveButton.setEnabled(false);
+            bottomPanel.add(saveButton);
+
+            add(bottomPanel, BorderLayout.SOUTH);
+          }
+
+        }
+        else {
+          preview.setEditable(false);
+        }
+      }
+    }
+    catch (Throwable t) {
+      preview.setEditable(false);
+    }
     preview.setLineWrap(Settings.getBoolean("PreviewPanel_Text_WordWrap"));
     preview.setWrapStyleWord(true);
 
@@ -95,6 +135,11 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
   @Override
   public void onCloseRequest() {
     // Flush the variables clear for garbage collection
+
+    if (textChanged) {
+      saveChanges();
+    }
+
     preview = null;
   }
 
@@ -144,6 +189,159 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       return true; // changing the Setting is handled by a separate listener on the WSObjectCheckbox class, so we can return true here OK
     }
     return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
+  public boolean onKeyPress(JComponent source, KeyEvent event) {
+    if (source == preview) {
+      if (!textChanged) {
+        if (saveButton != null) {
+          saveButton.setEnabled(true);
+        }
+      }
+      textChanged = true;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
+  public boolean onClick(JComponent source, MouseEvent event) {
+    if (source instanceof WSComponent) {
+      WSComponent c = (WSComponent) source;
+      String code = c.getCode();
+      if (code.equals("PreviewPanel_Text_SaveChanges")) {
+        if (textChanged) {
+          saveChanges();
+        }
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public boolean isTextChanged() {
+    return textChanged;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void setTextChanged(boolean textChanged) {
+    this.textChanged = textChanged;
+    saveButton.setEnabled(textChanged);
+  }
+
+  /**
+  **********************************************************************************************
+  1. Export the file, if it isn't already
+  2. Save the changes to the exported file
+  3. Set the Archive as being edited
+  **********************************************************************************************
+  **/
+  public void saveChanges() {
+    /*
+    try {
+      Object resourceObject = SingletonManager.get("CurrentResource");
+      if (resourceObject == null) {
+        return;
+      }
+      Resource resource = (Resource) resourceObject;
+    
+      File exportedPath = resource.getExportedPath();
+      if (exportedPath == null || !exportedPath.exists()) {
+        // Export it
+        File directory = new File(new File(Settings.get("TempDirectory")).getAbsolutePath());
+    
+        Task_ExportFiles task = new Task_ExportFiles(directory, resource);
+        task.setShowPopups(false);
+        task.setShowProgressPopups(false); // this barely appears, and slows down the preview repainting significantly, so don't worry about it.
+        task.redo();
+      }
+    
+      exportedPath = resource.getExportedPath();
+      if (exportedPath == null || !exportedPath.exists()) {
+        return; // couldn't extract the file for some reason
+      }
+    
+      // Rename the original extracted file to _GE_ORIGINAL
+      File originalPath = new File(exportedPath.getAbsolutePath() + "_ge_original");
+      if (originalPath.exists()) {
+        // ignore it
+      }
+      else {
+        exportedPath.renameTo(originalPath);
+      }
+    
+      // Now save the changes to the proper Extracted filename
+      if (exportedPath.exists() && exportedPath.isFile()) {
+        // try to delete it first
+        exportedPath.delete();
+      }
+      if (exportedPath.exists() && exportedPath.isFile()) {
+        return; // Failed to delete for some reason
+      }
+    
+      FileManipulator fm = new FileManipulator(exportedPath, true);
+      fm.writeString(getText());
+      fm.close();
+    
+      if (!exportedPath.exists()) {
+        return; // failed to save for some reason
+      }
+    
+      boolean reloadRequired = !resource.isReplaced();
+    
+      // Set the Resource as being changed
+      resource.setReplaced(true);
+    
+      // Set the Archive as being changed
+      ChangeMonitor.change();
+    
+      // the changes have been saved to the temp file
+      textChanged = false;
+      saveButton.setEnabled(false);
+    
+      if (reloadRequired) {
+        FileListPanel fileListPanel = ((FileListPanel) ((WSFileListPanelHolder) ComponentRepository.get("FileListPanelHolder")).getCurrentPanel());
+        if (fileListPanel instanceof FileListPanel_TreeTable) {
+          // Only want to reload the table, as that's the only thing that's changed.
+          // This stops the tree from being reloaded, removing the filter.
+          ((FileListPanel_TreeTable) fileListPanel).reloadTable();
+        }
+        else {
+          fileListPanel.reload();
+        }
+      }
+    
+      WSPopup.showMessage("PreviewPanel_Text_ChangesSaved", true); // TODO Add to Settings and Language
+    
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+    }
+    */
+
+    Task_WriteEditedTextFile task = new Task_WriteEditedTextFile(this);
+    task.setDirection(Task.DIRECTION_REDO);
+    new Thread(task).start();
   }
 
 }

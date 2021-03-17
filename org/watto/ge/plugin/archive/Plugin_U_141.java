@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -257,6 +257,8 @@ public class Plugin_U_141 extends PluginGroup_U {
         else if (type.equals("Texture")) {
           resources[i].setExporter(Exporter_Custom_U_Texture_141.getInstance());
         }
+
+        resources[i].forceNotAdded(true);
 
         TaskProgressManager.setValue(i);
       }

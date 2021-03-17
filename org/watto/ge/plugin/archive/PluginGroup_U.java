@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.SingletonManager;
 import org.watto.component.WSPluginException;
 import org.watto.component.WSPopup;
 import org.watto.datatype.FileType;
@@ -543,6 +544,7 @@ public abstract class PluginGroup_U extends ArchivePlugin {
         }
 
         // create a temporary file
+        SingletonManager.set("BulkExport_KeepTempFiles", true); // otherwise the decompressed archive is deleted once the archive is opened
         File tempFile = new File(Settings.get("TempDirectory") + File.separator + "UnrealArchiveDecompressed");
         FileManipulator outfm = new FileManipulator(tempFile, true, 100000);
 

@@ -20,6 +20,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
+import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
@@ -33,7 +34,7 @@ public class Plugin_RPACK_RP6L extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_RPACK_RP6L() {
@@ -55,7 +56,7 @@ public class Plugin_RPACK_RP6L extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -225,7 +226,7 @@ public class Plugin_RPACK_RP6L extends ArchivePlugin {
 
         String filename = filenames[filenameID] + "." + blockID;
 
-        System.out.println(i + "\t" + filename);
+        //System.out.println(i + "\t" + filename);
 
         //path,name,offset,length,decompLength,exporter
         if (length == 0) { // empty files should use the default exporter (because they're empty)
@@ -236,6 +237,18 @@ public class Plugin_RPACK_RP6L extends ArchivePlugin {
         }
 
         TaskProgressManager.setValue(i);
+      }
+
+      // go and check for zlib compression
+      fm.getBuffer().setBufferSize(1);
+      ExporterPlugin exporterZLibCompressedOnly = Exporter_ZLib_CompressedSizeOnly.getInstance();
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        fm.seek(resource.getOffset());
+        if (fm.readString(1).equals("x")) {
+          resource.setExporter(exporterZLibCompressedOnly);
+        }
       }
 
       fm.close();

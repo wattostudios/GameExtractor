@@ -22,12 +22,14 @@ import org.watto.ge.plugin.exporter.Exporter_Custom_VPK;
 public class Resource_VPK extends Resource {
 
   long preloadDataOffset = 0;
+
   int preloadDataLength = 0;
+
   File preloadDataSource = null;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource_VPK() {
@@ -85,7 +87,7 @@ public class Resource_VPK extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -117,7 +119,10 @@ public class Resource_VPK extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

@@ -136,8 +136,8 @@ public class Plugin_POD_POD2 extends ArchivePlugin {
 
       FileManipulator fm = new FileManipulator(path, false);
 
-      // 4 - Header
-      // 4 - CRC Checksum?
+      // 4 - Header (should be POD2)
+      // 4 - Checksum (CRC-CCITT32 of data after it)
       // 80 - Archive Name
       fm.skip(88);
 
@@ -182,10 +182,9 @@ public class Plugin_POD_POD2 extends ArchivePlugin {
         long offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - Group ID
+        // 4 - Timestamp time32_t
+        // 4 - Checksum CRC-CCITT32
         fm.skip(8);
-
-        // 4 - Unknown
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);

@@ -213,6 +213,11 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   public long getPointer() {
     try {
 
+      if (bufferLevel < 0) {
+        // not sure how it gets in to this situation, but sometimes the bufferLevel is like -6224859, so we need to cater for it here
+        // so that it's use in seek() will hit the correct if/else statement (usually to close/open the move forward from the beginning)
+        return filePointer - bufferSize;
+      }
       return filePointer - bufferSize + bufferLevel;
 
     }

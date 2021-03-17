@@ -41,6 +41,18 @@ public class TemporarySettings {
   }
 
   /***********************************************************************************************
+  
+  ***********************************************************************************************/
+  public static boolean has(String code) {
+    try {
+      return settings.containsKey(code);
+    }
+    catch (Throwable t) {
+      return false;
+    }
+  }
+
+  /***********************************************************************************************
   Gets the <code>boolean</code> value for the <code>code</code> setting
   @param code the setting to get the value for
   @return the setting value as a <code>boolean</code>

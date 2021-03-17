@@ -23,6 +23,7 @@ import org.watto.SingletonManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.BlankImageResource;
 import org.watto.datatype.Resource;
+import org.watto.ge.helper.FileListFilter;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.BlockQuickBMSExporterWrapper;
@@ -222,7 +223,12 @@ public class FileListModel_Thumbnails extends AbstractTableModel implements File
   **********************************************************************************************
   **/
   public void reload() {
-    reload(Archive.getResources());
+    Resource[] resources = Archive.getResources();
+
+    // Perform any filtering
+    resources = FileListFilter.filterResources(resources);
+
+    reload(resources);
   }
 
   /**

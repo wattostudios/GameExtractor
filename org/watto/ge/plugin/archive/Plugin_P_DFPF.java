@@ -23,6 +23,7 @@ import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
@@ -47,7 +48,8 @@ public class Plugin_P_DFPF extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Brutal Legend",
-        "Costume Quest");
+        "Costume Quest",
+        "Headlander");
     setExtensions("~p"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -249,6 +251,72 @@ public class Plugin_P_DFPF extends ArchivePlugin {
           filename += "." + types[fileType];
 
           if (compressionType == 4) {
+            // ZLib
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+          else {
+            // No compression?
+
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
+
+          TaskProgressManager.setValue(i);
+        }
+      }
+      else if (version == 6) {
+        // VERSION 6
+
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - Decompressed File Length
+          int decompLength = IntConverter.changeFormat(fm.readInt());
+
+          // 2 - Filename Offset
+          int nameOffset = ShortConverter.unsign(ShortConverter.changeFormat(fm.readShort()));
+
+          nameOffset |= ((decompLength & 31) << 16);
+          decompLength >>= 5;
+
+          FieldValidator.checkRange(nameOffset, 0, filenameDirLength);
+
+          // 2 - Flags
+          fm.skip(2);
+
+          // 3 - File Offset
+          byte[] offsetBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int offset = IntConverter.convertBig(offsetBytes) << 7;
+
+          // 1 - extraOffset
+          int extraOffset = ByteConverter.unsign(fm.readByte()) >> 1;
+          offset += extraOffset;
+
+          // 4 - Compressed File Length
+          //int length = IntConverter.changeFormat(fm.readInt());
+          byte[] lengthBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          int length = IntConverter.convertBig(lengthBytes);
+
+          // 1 - File Type and Compression Type
+          int lastByte = ByteConverter.unsign(fm.readByte());
+
+          int fileType = lastByte >> 2;
+
+          int compressionType = lastByte & 3;
+
+          // Do the checks
+          FieldValidator.checkOffset(offset, arcSize);
+          FieldValidator.checkLength(length, arcSize);
+          FieldValidator.checkLength(decompLength);
+
+          //String filename = filenames[i];
+          nameFM.seek(nameOffset);
+          String filename = nameFM.readNullString();
+          //String filename = Resource.generateFilename(i);
+
+          filename += "." + types[fileType];
+
+          if (compressionType == 2) {
             // ZLib
 
             //path,name,offset,length,decompLength,exporter

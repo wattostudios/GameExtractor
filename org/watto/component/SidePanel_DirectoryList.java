@@ -16,6 +16,7 @@ package org.watto.component;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -45,6 +46,7 @@ import org.watto.ge.script.ScriptManager;
 import org.watto.io.FilenameSplitter;
 import org.watto.task.Task;
 import org.watto.task.Task_AddFiles;
+import org.watto.task.Task_AnalyzeDirectory;
 import org.watto.task.Task_CutArchive;
 import org.watto.task.Task_ExportFiles;
 import org.watto.task.Task_Popup_ShowMessage;
@@ -68,6 +70,10 @@ import org.watto.xml.XMLReader;
 public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectableInterface,
     WSEnterableInterface {
 
+  String[] plugins = null;
+
+  String[] extensions = null;
+
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
 
@@ -90,6 +96,9 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   /** The controls for cutting archives **/
   WSPanel cutControls;
 
+  /** The controls for analyzing directories **/
+  WSPanel analyzeControls;
+
   /** The controls for reading script archives **/
   WSPanel scriptControls;
 
@@ -101,6 +110,12 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /** Holder for the directory list **/
   WSDirectoryListHolder dirHolder;
+
+  /** The first row of the control buttons **/
+  WSPanel buttonPanelRow1 = null;
+
+  /** The second row of the control buttons **/
+  WSPanel buttonPanelRow2 = null;
 
   /**
    **********************************************************************************************
@@ -233,6 +248,11 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       loadCutLengths();
       setCutFilename(dirHolder.getSelectedFile());
     }
+    else if (controlName.equals("AnalyzePanel")) {
+      newControl = analyzeControls;
+      loadAnalyzeReportFormats();
+      setAnalyzeFilename(dirHolder.getSelectedFile());
+    }
     else if (controlName.equals("ScriptPanel")) {
       newControl = scriptControls;
       loadScriptPlugins();
@@ -260,8 +280,43 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   **********************************************************************************************
   **/
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public void loadAnalyzeReportFormats() {
+
+    WSComboBox pluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins");
+
+    if (pluginList == null) {
+      return;
+    }
+    if (pluginList.getItemCount() > 0) {
+      // already loaded previously
+      return;
+    }
+
+    plugins = new String[] { "AnalyzeDirectory_Report_CSV", "AnalyzeDirectory_Report_Excel", "AnalyzeDirectory_Report_HTML", "AnalyzeDirectory_Report_JSON", "AnalyzeDirectory_Report_Tabbed", "AnalyzeDirectory_Report_XML" };
+    extensions = new String[] { "csv", "xls", "html", "json", "txt", "xml" };
+
+    int numPlugins = plugins.length;
+    for (int i = 0; i < numPlugins; i++) {
+      plugins[i] = Language.get(plugins[i]);
+    }
+
+    pluginList.setModel(new DefaultComboBoxModel(plugins));
+
+    try {
+      pluginList.setSelectedIndex(Settings.getInt("SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex"));
+    }
+    catch (Throwable t) {
+    }
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
   public boolean checkFullVersion() {
-    return false;
+    return checkFullVersion(true);
   }
 
   /**
@@ -270,11 +325,11 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   **********************************************************************************************
   **/
   public boolean checkFullVersion(boolean showPopup) {
-    // basic version
-    if (showPopup) {
-      WSPopup.showErrorInNewThread("FullVersionOnly", true);
-    }
-    return false;
+      // basic version
+      if (showPopup) {
+        WSPopup.showErrorInNewThread("FullVersionOnly", true);
+      }
+      return false;
   }
 
   /**
@@ -447,6 +502,52 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   **********************************************************************************************
   **/
+  public void analyzeDirectory() {
+
+    String dirName = dirHolder.getCurrentDirectory().getAbsolutePath();
+    File directoryPath = new File(dirName);
+
+    if (directoryPath == null || !directoryPath.exists()) {
+      WSPopup.showError("AnalyzeDirectory_FilenameMissing", true);
+      return;
+    }
+
+    if (!directoryPath.isDirectory()) {
+      WSPopup.showError("AnalyzeDirectory_FileNotADirectory", true);
+      return;
+    }
+
+    WSTextField reportFilenameField = (WSTextField) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField");
+    String reportFile = reportFilenameField.getText();
+
+    if (reportFile.length() == 0) {
+      WSPopup.showErrorInNewThread("AnalyzeDirectory_InvalidReportFile", true);
+      return;
+    }
+
+    analyzeDirectory(directoryPath, reportFile);
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public void analyzeDirectory(File inputPath, String reportFile) {
+    Task_AnalyzeDirectory task = new Task_AnalyzeDirectory(inputPath, reportFile);
+    task.setDirection(Task.DIRECTION_REDO);
+
+    // If the user chose any Converter plugins, set them here
+    task.setConverterPlugins(getChosenAnalysisConverters());
+
+    new Thread(task).start();
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
   public void exportAllFiles() {
     /*
     File directory = new File(((WSTextField) ComponentRepository.get("SidePanel_DirectoryList_ExportFilenameField")).getText());
@@ -540,16 +641,74 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  Only Image Conversion supported at this stage
+
   **********************************************************************************************
   **/
   public ViewerPlugin[] getChosenExportConverters() {
+    WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ImageConverters");
+    ViewerPlugin[] imageConverters = getChosenConverters(imagePluginList);
+
+    WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ModelConverters");
+    ViewerPlugin[] modelConverters = getChosenConverters(modelPluginList);
+
+    int numConverters = imageConverters.length + modelConverters.length;
+    if (numConverters == 2) {
+      return new ViewerPlugin[] { imageConverters[0], modelConverters[0] };
+    }
+    else if (numConverters == 1) {
+      if (imageConverters.length == 1) {
+        return imageConverters;
+      }
+      else if (modelConverters.length == 1) {
+        return modelConverters;
+      }
+    }
+
+    return new ViewerPlugin[0];
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public ViewerPlugin[] getChosenAnalysisConverters() {
+    //WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins");
+    //return getChosenConverters(imagePluginList);
+
+    WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins");
+    ViewerPlugin[] imageConverters = getChosenConverters(imagePluginList);
+
+    WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins");
+    ViewerPlugin[] modelConverters = getChosenConverters(modelPluginList);
+
+    int numConverters = imageConverters.length + modelConverters.length;
+    if (numConverters == 2) {
+      return new ViewerPlugin[] { imageConverters[0], modelConverters[0] };
+    }
+    else if (numConverters == 1) {
+      if (imageConverters.length == 1) {
+        return imageConverters;
+      }
+      else if (modelConverters.length == 1) {
+        return modelConverters;
+      }
+    }
+
+    return new ViewerPlugin[0];
+  }
+
+  /**
+  **********************************************************************************************
+  Only Image Conversion supported at this stage
+  **********************************************************************************************
+  **/
+  public ViewerPlugin[] getChosenConverters(WSComboBox imagePluginList) {
 
     ViewerPlugin[] converters = new ViewerPlugin[1];
     int numConverters = 0;
 
     // IMAGE conversion type
-    WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ImageConverters");
     if (imagePluginList != null) {
       ViewerPlugin imagePlugin = (ViewerPlugin) imagePluginList.getSelectedItem();
       if (imagePlugin != null) {
@@ -627,9 +786,12 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
     cutControls = (WSPanel) WSHelper.toComponent(XMLReader.read(new File("interface" + File.separator + "SidePanel_DirectoryList_CutPanel.xml")));
 
+    analyzeControls = (WSPanel) WSHelper.toComponent(XMLReader.read(new File("interface" + File.separator + "SidePanel_DirectoryList_AnalyzePanel.xml")));
+
     invalidControls = (WSPanel) WSHelper.toComponent(XMLReader.read("<WSPanel code=\"SidePanel_DirectoryList_ReadPanel_Main\" repository=\"false\" showBorder=\"true\" layout=\"BorderLayout\"><WSLabel code=\"SidePanel_DirectoryList_InvalidControls\" wrap=\"true\" vertical-alignment=\"true\" height=\"80\" position=\"CENTER\" /></WSPanel>"));
 
     loadExportConverters();
+    loadAnalysisConverters();
   }
 
   /**
@@ -660,19 +822,47 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  Only Image Conversion supported at this stage
+
+  **********************************************************************************************
+  **/
+  public void loadExportConverters() {
+    WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ImageConverters");
+    PreviewPanel imagePreviewPanel = new PreviewPanel_Image(); // a dummy preview panel
+    loadConverters(imagePluginList, imagePreviewPanel);
+
+    WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ModelConverters");
+    PreviewPanel modelPreviewPanel = new PreviewPanel_3DModel(); // a dummy preview panel
+    loadConverters(modelPluginList, modelPreviewPanel);
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public void loadAnalysisConverters() {
+    WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins");
+    PreviewPanel imagePreviewPanel = new PreviewPanel_Image(); // a dummy preview panel
+    loadConverters(imagePluginList, imagePreviewPanel);
+
+    WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins");
+    PreviewPanel modelPreviewPanel = new PreviewPanel_3DModel(); // a dummy preview panel
+    loadConverters(modelPluginList, modelPreviewPanel);
+  }
+
+  /**
+  **********************************************************************************************
+  Loads all the available converters of a given type into a combobox.
+  @param pluginList the list to load the plugins into
+  @param convertType the type of conversion (eg Image, Model, etc)
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public void loadExportConverters() {
-
-    // IMAGE conversion type
-    WSComboBox imagePluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ImageConverters");
-
-    if (imagePluginList == null) {
+  public void loadConverters(WSComboBox pluginList, PreviewPanel convertType) {
+    if (pluginList == null) {
       return;
     }
-    if (imagePluginList.getItemCount() > 0) {
+    if (pluginList.getItemCount() > 0) {
       // already loaded previously
       return;
     }
@@ -684,13 +874,11 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       plugin.setCode("ConversionInFullVersionOnly");
 
       ViewerPlugin[] plugins = new ViewerPlugin[] { plugin };
-      imagePluginList.setModel(new DefaultComboBoxModel(plugins));
+      pluginList.setModel(new DefaultComboBoxModel(plugins));
       return;
     }
 
-    PreviewPanel previewPanel = new PreviewPanel_Image(); // a dummy image preview panel
-
-    ViewerPlugin[] plugins = PluginListBuilder.getWriteViewers(previewPanel);
+    ViewerPlugin[] plugins = PluginListBuilder.getWriteViewers(convertType);
     if (plugins == null || plugins.length <= 0) {
       return;
     }
@@ -722,7 +910,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
     System.arraycopy(oldPlugins, 0, plugins, 1, numViewerPlugins);
     plugins[0] = new NoConversionPlugin();// add the No Conversion plugin to the top of the list
 
-    imagePluginList.setModel(new DefaultComboBoxModel(plugins));
+    pluginList.setModel(new DefaultComboBoxModel(plugins));
 
     return;
   }
@@ -850,6 +1038,9 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       else if (code.equals("SidePanel_DirectoryList_ScriptPanelButton")) {
         changeControls("ScriptPanel", false);
       }
+      else if (code.equals("SidePanel_DirectoryList_AnalyzePanelButton")) {
+        changeControls("AnalyzePanel", false);
+      }
 
       // Buttons on the Control Panels
       else if (code.equals("SidePanel_DirectoryList_ReadArchiveButton")) {
@@ -902,6 +1093,9 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       else if (code.equals("SidePanel_DirectoryList_CutArchiveButton")) {
         cutArchive();
       }
+      else if (code.equals("SidePanel_DirectoryList_AnalyzeDirectoryButton")) {
+        analyzeDirectory();
+      }
 
       else {
         return false;
@@ -930,6 +1124,9 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
         }
         else if (currentControl == cutControls) {
           setCutFilename(dirHolder.getSelectedFile());
+        }
+        else if (currentControl == analyzeControls) {
+          setAnalyzeFilename(dirHolder.getSelectedFile());
         }
         else {
           return false;
@@ -1054,6 +1251,9 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       else if (code.equals("SidePanel_DirectoryList_CutOutputFilenameField")) {
         cutArchive();
       }
+      else if (code.equals("SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField")) {
+        analyzeDirectory();
+      }
       return true;
     }
     return false;
@@ -1106,10 +1306,30 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   public void onOpenRequest() {
     String controlName = Settings.getString("SidePanel_DirectoryList_CurrentControl");
     boolean fullVersionOnly = true;
-    if (controlName.equals("ReadPanel") || controlName.equals("ScriptPanel") || controlName.equals("CutPanel") || controlName.equals("ExportPanel")) {
+    if (controlName.equals("ReadPanel") || controlName.equals("ScriptPanel") || controlName.equals("CutPanel") || controlName.equals("AnalyzePanel") || controlName.equals("ExportPanel")) {
       fullVersionOnly = false;
     }
     changeControls(controlName, fullVersionOnly);
+
+    // Show/Hide the Advanced controls
+    if (buttonPanelRow2 == null) {
+      buttonPanelRow1 = ((WSPanel) ComponentRepository.get("SidePanel_DirectoryList_ButtonsPanelRow1"));
+      buttonPanelRow2 = ((WSPanel) ComponentRepository.get("SidePanel_DirectoryList_ButtonsPanelRow2"));
+    }
+
+    WSPanel buttonPanel = ((WSPanel) ComponentRepository.get("SidePanel_DirectoryList_ButtonsPanel"));
+
+    if (Settings.getBoolean("ShowAdvancedControlsInDirectoryList")) {
+      buttonPanel.removeAll();
+      buttonPanel.setLayout(new GridLayout(2, 1));
+      buttonPanel.add(buttonPanelRow1);
+      buttonPanel.add(buttonPanelRow2);
+    }
+    else {
+      buttonPanel.removeAll();
+      buttonPanel.setLayout(new GridLayout(1, 1));
+      buttonPanel.add(buttonPanelRow1);
+    }
 
     dirHolder.checkFiles();
     dirHolder.scrollToSelected();
@@ -1139,6 +1359,18 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       if (code.equals("SidePanel_DirectoryList_ScriptPluginList")) {
         String scriptName = ((PluginList) ((WSComboBox) c).getSelectedItem()).getPlugin().getName();
         Settings.set("SelectedScript", scriptName);
+        return true;
+      }
+
+      if (code.equals("SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins")) {
+        setAnalyzeFilename(dirHolder.getSelectedFile());
+
+        try {
+          WSComboBox pluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins");
+          Settings.set("SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex", pluginList.getSelectedIndex());
+        }
+        catch (Throwable t) {
+        }
         return true;
       }
 
@@ -1398,6 +1630,31 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
     filename += ".zip";
 
     outputField.setText(filename);
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public void setAnalyzeFilename(File file) {
+    if (!file.isDirectory()) {
+      return;
+    }
+
+    String extension = "html";
+    WSComboBox pluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins");
+    if (pluginList != null) {
+      int selectedExtension = pluginList.getSelectedIndex();
+      if (selectedExtension >= 0 && extensions != null && selectedExtension < extensions.length) {
+        extension = extensions[selectedExtension];
+      }
+    }
+
+    WSTextField inputField = (WSTextField) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField");
+
+    String filename = file.getName() + "." + extension;
+    inputField.setText(filename);
   }
 
   /**

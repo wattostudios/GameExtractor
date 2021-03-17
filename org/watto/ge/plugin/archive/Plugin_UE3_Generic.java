@@ -284,6 +284,7 @@ public class Plugin_UE3_Generic extends PluginGroup_UE3 {
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource_Unreal(path, filename, offset, length);
+        resources[i].forceNotAdded(true);
 
         if (type.equals("SoundNodeWave")) {
           resources[i].setExporter(Exporter_Custom_UE3_SoundNodeWave_Generic.getInstance());

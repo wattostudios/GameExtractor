@@ -209,6 +209,11 @@ public class Viewer_Unity3D_TEX extends ViewerPlugin {
         imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readRGBA4444(fm, width, height));
         imageResource.addProperty("ImageFormat", "RGBA4444");
       }
+      else if (formatCode == 25) {
+        // 25 = BC7
+        imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readBC7(fm, width, height));
+        imageResource.addProperty("ImageFormat", "BC7");
+      }
       else if (formatCode == 28) {
         // 28 = DXT1Crunched
         imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readDXT1Crunched(fm, width, height));

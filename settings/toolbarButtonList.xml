@@ -15,6 +15,8 @@
 	
 	<WSButton code="CutArchive" opaque="false" showText="false" />
 	
+	<WSButton code="AnalyzeDirectory" opaque="false" showText="false" />
+	
 	<WSComboButton code="WriteArchive" opaque="false" showText="false" repository="false">
 		<WSButton code="WriteArchive" showText="false" />
 		<WSPopupMenu>

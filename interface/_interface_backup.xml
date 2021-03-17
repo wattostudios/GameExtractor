@@ -41,7 +41,7 @@
 			<WSMenu code="View" opaque="false" underline="V">
 				<WSMenuItem code="FileListView_Table" opaque="false" repository="false" underline="A" />
 				<WSMenuItem code="FileListView_Tree" opaque="false" repository="false" underline="R" />
-				<WSMenuItem code="FileListView_TreeTable" opaque="false" repository="false" underline="O" />
+				<WSMenuItem code="FileListView_TreeTable" opaque="false" underline="O" />
 				<WSMenuItem code="FileListView_Thumbnails" opaque="false" underline="U" />
 			</WSMenu>
 			<WSMenu code="Preview" opaque="false" underline="P">
@@ -57,7 +57,7 @@
 				<WSMenuItem code="PluginList" opaque="false" repository="false" underline="L" />
 				<WSMenuItem code="Information" opaque="false" repository="false" underline="I" />
 				<WSPopupMenuSeparator />
-				<WSMenuItem code="ScriptBuilder" opaque="false" />
+				<WSMenuItem code="ScriptBuilder" opaque="false" repository="false" />
 				<WSMenuItem code="FileListExporter" opaque="false" repository="false" underline="E" />
 			</WSMenu>
 			<WSMenu code="Help" opaque="false" repository="false" underline="H">
@@ -107,13 +107,13 @@
 					<WSPopupMenu visible="false">
 						<WSMenuItem code="FileListView_Table" opaque="false" repository="false" />
 						<WSMenuItem code="FileListView_Tree" opaque="false" repository="false" />
-						<WSMenuItem code="FileListView_TreeTable" opaque="false" repository="false" />
+						<WSMenuItem code="FileListView_TreeTable" opaque="false" />
 						<WSMenuItem code="FileListView_Thumbnails" opaque="false" />
 					</WSPopupMenu>
 				</WSComboButton>
 				<WSToolBarSeparator orientation="vertical" />
 				<WSButton code="FileListView_Thumbnails" opaque="false" showText="false" />
-				<WSButton code="FileListView_TreeTable" opaque="false" repository="false" showText="false" />
+				<WSButton code="FileListView_TreeTable" opaque="false" showText="false" />
 				<WSToolBarSeparator orientation="vertical" />
 				<WSButton code="Options" opaque="false" repository="false" showText="false" />
 				<WSButton code="PreviewResource" opaque="false" repository="false" showText="false" />
@@ -121,10 +121,8 @@
 				<WSButton code="ImageInvestigator" opaque="false" repository="false" showText="false" />
 				<WSButton code="Information" opaque="false" repository="false" showText="false" />
 				<WSToolBarSeparator orientation="vertical" />
-				<WSRedoTaskComboButton code="RedoTaskComboButton" opaque="false" repository="false" manager="TaskManager" />
-				<WSUndoTaskComboButton code="UndoTaskComboButton" opaque="false" repository="false" manager="TaskManager" />
-				<WSToolBarSeparator orientation="vertical" />
-				<WSButton code="ScriptBuilder" opaque="false" showText="false" />
+				<WSButton code="Search" opaque="false" repository="false" showText="false" />
+				<WSButton code="AnalyzeDirectory" opaque="false" repository="false" showText="false" />
 			</WSToolBar>
 		</WSPanel>
 		<WSStatusBar code="StatusBar" opaque="false" position="SOUTH" />

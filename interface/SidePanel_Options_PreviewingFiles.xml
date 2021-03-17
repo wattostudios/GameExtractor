@@ -13,11 +13,12 @@
 					</WSPanel>
 				</WSPanel>
 				
-				<WSPanel layout="GridLayout" rows="4" columns="1">
+				<WSPanel layout="GridLayout" rows="5" columns="1">
 					<WSOptionCheckBox code="Option_PreviewingFiles_PreviewOnDoubleClick" setting="PreviewOnDoubleClick" />
 					<WSOptionCheckBox code="Option_PreviewingFiles_PlayAudioOnLoad" setting="PlayAudioOnLoad" />
 					<WSOptionCheckBox code="Option_PreviewingFiles_ShowHexIfPreviewFailed" setting="ShowHexIfPreviewFailed" />
 					<WSOptionCheckBox code="Option_PreviewingFiles_AlwaysShowHexEditorSelectedTable" setting="AlwaysShowHexEditorSelectedTable" />
+					<WSOptionCheckBox code="Option_PreviewingFiles_NintendoSwitchSwizzle" setting="NintendoSwitchSwizzle" />
 				</WSPanel>
 			
 

@@ -21,6 +21,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
 import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundNodeWave_648;
+import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_StaticMesh_Generic;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -39,7 +40,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
   **********************************************************************************************
   **/
   public Plugin_UE3_868() {
-    super("UE3_868", "Unreal Engine 3 [648,678,706,740-2,787,849,854,860,864-8]");
+    super("UE3_868", "Unreal Engine 3 [648,678,706,740-2,787,849,854,860,864-8,870]");
 
     setExtensions("upk", "udk");
     setGames("Alien Rage",
@@ -48,6 +49,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
         "Deadlight",
         "Dirty Bomb",
         "Duty Calls",
+        "Get Even",
         "Hazard: Journey Of Life",
         "Killer Is Dead",
         "Mortal Royale",
@@ -72,7 +74,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706, 742);
+    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706, 742, 870);
   }
 
   /**
@@ -85,6 +87,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
     try {
 
       Exporter_Custom_UE3_SoundNodeWave_648 audioExporter = Exporter_Custom_UE3_SoundNodeWave_648.getInstance();
+      Exporter_Custom_UE3_StaticMesh_Generic staticMeshExporter = Exporter_Custom_UE3_StaticMesh_Generic.getInstance();
 
       addFileTypes();
 
@@ -352,6 +355,9 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
 
         if (type.equals("SoundNodeWave")) {
           resources[i].setExporter(audioExporter);
+        }
+        else if (type.equals("StaticMesh")) {
+          resources[i].setExporter(staticMeshExporter);
         }
 
         TaskProgressManager.setValue(i);

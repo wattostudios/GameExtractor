@@ -525,6 +525,15 @@ public class Viewer_UE4_Texture2D_6 extends ViewerPlugin {
 
         fm.seek(largestMipmapOffset);
 
+        if (Settings.getBoolean("NintendoSwitchSwizzle")) {
+          // Unswizzle the image data first
+          byte[] rawBytes = fm.readBytes(dataLength);
+          byte[] bytes = ImageFormatReader.unswizzleSwitch(rawBytes, width, height);
+
+          fm.close();
+          fm = new FileManipulator(new ByteBuffer(bytes));
+        }
+
         ImageResource imageResource = ImageFormatReader.readBGRA(fm, width, height);
         imageResource.setProperty("ImageFormat", "BGRA");
         imageResource.setProperty("MipmapCount", "" + mipmapCount);

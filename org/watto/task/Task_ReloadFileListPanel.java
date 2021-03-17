@@ -57,6 +57,7 @@ public class Task_ReloadFileListPanel extends AbstractTask {
   **/
   @Override
   public void redo() {
+    //System.out.println("TASK-->RELOAD FILE LIST");
     /*
     System.out.println("Reloading");
     try {

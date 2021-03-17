@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
 import java.io.File;
@@ -24,6 +25,7 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 import org.watto.component.PreviewPanel;
+import org.watto.component.PreviewPanel_3DModel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.FieldValidator;
@@ -63,6 +65,9 @@ public class Viewer_BMP_BMP extends ViewerPlugin {
   @Override
   public boolean canWrite(PreviewPanel panel) {
     if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    else if (panel instanceof PreviewPanel_3DModel) {
       return true;
     }
     return false;
@@ -189,14 +194,25 @@ public class Viewer_BMP_BMP extends ViewerPlugin {
   public void write(PreviewPanel preview, FileManipulator fm) {
     try {
 
-      if (!(preview instanceof PreviewPanel_Image)) {
+      Image image = null;
+      int imageWidth = -1;
+      int imageHeight = -1;
+
+      if (preview instanceof PreviewPanel_Image) {
+        PreviewPanel_Image ivp = (PreviewPanel_Image) preview;
+        image = ivp.getImage();
+        imageWidth = ivp.getImageWidth();
+        imageHeight = ivp.getImageHeight();
+      }
+      else if (preview instanceof PreviewPanel_3DModel) {
+        PreviewPanel_3DModel ivp = (PreviewPanel_3DModel) preview;
+        image = ivp.getImage();
+        imageWidth = ivp.getImageWidth();
+        imageHeight = ivp.getImageHeight();
+      }
+      else {
         return;
       }
-
-      PreviewPanel_Image ivp = (PreviewPanel_Image) preview;
-
-      int imageWidth = ivp.getImageWidth();
-      int imageHeight = ivp.getImageHeight();
 
       if (imageWidth == -1 || imageHeight == -1) {
         return;
@@ -206,7 +222,7 @@ public class Viewer_BMP_BMP extends ViewerPlugin {
 
       BufferedImage bufImage = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_RGB);
       Graphics g = bufImage.getGraphics();
-      g.drawImage(ivp.getImage(), 0, 0, null);
+      g.drawImage(image, 0, 0, null);
 
       BMPImageWriter pencoder = new BMPImageWriter(new BMPImageWriterSpi());
       pencoder.setOutput(out);

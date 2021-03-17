@@ -1140,7 +1140,7 @@ public class Unity3DHelper {
         new FileType("meshfilter", "Mesh  Filter", FileType.TYPE_OTHER),
         new FileType("gamemanager", "Game Manager", FileType.TYPE_OTHER),
         new FileType("occlusionportal", "Occlusion Portal", FileType.TYPE_OTHER),
-        new FileType("mesh", "Mesh", FileType.TYPE_OTHER),
+        new FileType("mesh", "Mesh", FileType.TYPE_MODEL),
         new FileType("skybox", "Skybox", FileType.TYPE_OTHER),
         new FileType("gamemanager", "Game Manager", FileType.TYPE_OTHER),
         new FileType("qualitysettings", "Quality Settings", FileType.TYPE_OTHER),

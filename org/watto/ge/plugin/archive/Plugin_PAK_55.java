@@ -46,6 +46,7 @@ public class Plugin_PAK_55 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Neon Brood",
+        "Psychical Madness",
         "Spaceguy 2");
     setExtensions("pak"); // MUST BE LOWER CASE
     setPlatforms("PC");

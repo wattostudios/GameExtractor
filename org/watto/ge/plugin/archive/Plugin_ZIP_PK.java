@@ -249,6 +249,7 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
         "The Witness",
         "Thief 2: The Metal Age",
         "Thief: The Dark Age",
+        "Time Machine: Evolution",
         "Tom Clancy's H.A.W.X",
         "ToolsMedia",
         "Torchlight",
@@ -505,7 +506,7 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           TaskProgressManager.setValue(offset);
 
         }
-        else if (entryType == 513) {
+        else if (entryType == 513 || entryType == 1311233) {
           // Directory Entry
 
           // 2 - Unknown (20)

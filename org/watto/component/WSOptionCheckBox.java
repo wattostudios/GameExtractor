@@ -76,6 +76,15 @@ public class WSOptionCheckBox extends WSOptionPanel implements WSSelectableInter
   }
 
   /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public boolean isSelected() {
+    return checkBox.isSelected();
+  }
+
+  /**
    **********************************************************************************************
    * The event that is triggered from a WSSelectableListener when an item is deselected
    * @param c the component that triggered the event

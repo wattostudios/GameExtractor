@@ -33,7 +33,7 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_STR_IOISNDSTREAM_2() {
@@ -43,7 +43,8 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Mini Ninjas");
+    setGames("Kane and Lynch: Dead Men",
+        "Mini Ninjas");
     setExtensions("str");
     setPlatforms("PC");
 
@@ -55,7 +56,7 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

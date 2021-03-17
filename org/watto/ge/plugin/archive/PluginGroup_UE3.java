@@ -189,7 +189,8 @@ public abstract class PluginGroup_UE3 extends ArchivePlugin {
 
     // MUST BE LOWER CASE!!!
     setFileTypes(new FileType("texture2d", "Texture2D Image", FileType.TYPE_IMAGE),
-        new FileType("soundnodewave", "SoundNodeWave Audio", FileType.TYPE_AUDIO));
+        new FileType("soundnodewave", "SoundNodeWave Audio", FileType.TYPE_AUDIO),
+        new FileType("staticmesh", "StaticMesh 3D Model", FileType.TYPE_MODEL));
 
   }
 

@@ -15,6 +15,7 @@
 package org.watto.task;
 
 import org.watto.Language;
+import org.watto.Settings;
 import org.watto.component.ComponentRepository;
 import org.watto.component.FileListPanel;
 import org.watto.component.WSFileListPanelHolder;
@@ -35,12 +36,14 @@ public class Task_SearchFileList extends AbstractTask {
   int direction = 1;
 
   WSTableColumn[] columns;
+
   String searchVal;
+
   boolean firstMatchOnly = true;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Task_SearchFileList(WSTableColumn[] columns, String searchVal, boolean firstMatchOnly) {
@@ -51,7 +54,7 @@ public class Task_SearchFileList extends AbstractTask {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -98,6 +101,18 @@ public class Task_SearchFileList extends AbstractTask {
       searchValBoolean = false;
     }
 
+    boolean regexSearch = false;
+
+    String searchValString = searchVal;
+    if (Settings.getBoolean("SearchWildcardConversion")) {
+      searchValString = searchVal.replace("*", "(.*)");
+      regexSearch = true;
+    }
+
+    if (Settings.getBoolean("SearchRegExConversion")) {
+      regexSearch = true;
+    }
+
     // determine the starting position
     int numFiles = Archive.getNumFiles();
     FileListPanel fileList = (FileListPanel) ((WSFileListPanelHolder) ComponentRepository.get("FileListPanelHolder")).getCurrentPanel();
@@ -125,7 +140,16 @@ public class Task_SearchFileList extends AbstractTask {
 
           boolean found = false;
           if (type == String.class) {
-            found = (((String) readPlugin.getColumnValue(resource, columnChar)).indexOf(searchVal) >= 0);
+            if (regexSearch) { // regex
+              try {
+                found = ((String) readPlugin.getColumnValue(resource, columnChar)).matches(searchValString);
+              }
+              catch (Throwable t) {
+              }
+            }
+            else { // literal
+              found = (((String) readPlugin.getColumnValue(resource, columnChar)).indexOf(searchValString) >= 0);
+            }
           }
           else if (isNumber && type == Long.class) {
             found = (((Long) readPlugin.getColumnValue(resource, columnChar)).longValue() == searchValNumber);
@@ -161,7 +185,16 @@ public class Task_SearchFileList extends AbstractTask {
 
           boolean found = false;
           if (type == String.class) {
-            found = (((String) readPlugin.getColumnValue(resource, columnChar)).indexOf(searchVal) >= 0);
+            if (regexSearch) { // regex
+              try {
+                found = ((String) readPlugin.getColumnValue(resource, columnChar)).matches(searchValString);
+              }
+              catch (Throwable t) {
+              }
+            }
+            else { // literal
+              found = (((String) readPlugin.getColumnValue(resource, columnChar)).indexOf(searchValString) >= 0);
+            }
           }
           else if (isNumber && type == Long.class) {
             found = (((Long) readPlugin.getColumnValue(resource, columnChar)).longValue() == searchValNumber);
@@ -197,7 +230,7 @@ public class Task_SearchFileList extends AbstractTask {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -216,7 +249,7 @@ public class Task_SearchFileList extends AbstractTask {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

@@ -165,6 +165,8 @@ public class QuickBMSHelper {
     script += "      comtype LZ2K\n";
     script += "    elif INCOMTYPE = DFLT\n";
     script += "      comtype DFLT\n";
+    script += "    elif INCOMTYPE = JCALG\n";
+    script += "      comtype JCALG\n";
     script += "    elif INCOMTYPE = RFPK\n";
     script += "      comtype RFPK\n";
     script += "    elif INCOMTYPE = RNC\n";

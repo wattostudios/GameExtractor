@@ -407,6 +407,18 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
     boolean doVerticalFlip = verticalFlipCheckbox.isSelected();
     boolean bigEndian = bigEndianRadioButton.isSelected(); // little-endian implied otherwise
 
+    /*
+    if (Settings.getBoolean("NintendoSwitchSwizzle")) {
+      // Unswizzle the image data first
+      int dataLength = imageWidth * imageHeight * 4;// max length, guess, caters for most image types
+      byte[] rawBytes = fm.readBytes(dataLength);
+      byte[] bytes = ImageFormatReader.unswizzleSwitch(rawBytes, imageWidth, imageHeight);
+    
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(bytes));
+    }
+    */
+
     try {
       imageResource = null;
 
@@ -620,6 +632,7 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       // Apply checkboxes
       if (doSwizzle) {
         imageResource.setPixels(ImageFormatReader.unswizzle(imageResource.getPixels(), imageWidth, imageHeight, 1));
+        //imageResource.setPixels(ImageFormatReader.unswizzlePS2(imageResource.getPixels(), imageWidth, imageHeight));
       }
       if (doVerticalFlip) {
         imageResource = ImageFormatReader.flipVertically(imageResource);

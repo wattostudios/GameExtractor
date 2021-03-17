@@ -1,0 +1,24 @@
+<WSPanel code="WelcomeWizard" layout="BorderLayout" showBorder="true" vertical-gap="6" border-width="4" minimum-width="775" maximum-width="775" minimum-height="600">
+	<WSLabel code="WelcomeWizard_WelcomeMessage" position="NORTH" showBorder="true" border-width="4" />
+	
+	<WSPanel position="CENTER" opaque="false" vertical-gap="6">
+		<WSPanel position="CENTER" opaque="false" vertical-gap="6" showBorder="true" >
+			<WSPanel position="CENTER" obeyBackgroundColor="true" border-width="4" >
+				<WSLabel code="WelcomeWizard_ScreenImage" position="CENTER" />
+				<WSPanel layout="GridLayout" opaque="false" rows="3" columns="1" position="SOUTH">
+					<WSLabel code="WelcomeWizard_ScreenLabel1" />
+					<WSLabel code="WelcomeWizard_ScreenLabel2" />
+					<WSLabel code="WelcomeWizard_ScreenLabel3" />
+				</WSPanel>
+			</WSPanel>
+		</WSPanel>
+		
+		<WSPanel layout="GridLayout" opaque="false" rows="1" columns="3" position="SOUTH">
+			<WSButton code="WelcomeWizard_PreviousScreen" />
+			<WSLabel code="WelcomeWizard_ScreenCount" />
+			<WSButton code="WelcomeWizard_NextScreen" />
+		</WSPanel>
+	</WSPanel>
+	
+	<WSButton code="WelcomeWizard_CloseWizard" position="SOUTH" />
+</WSPanel>

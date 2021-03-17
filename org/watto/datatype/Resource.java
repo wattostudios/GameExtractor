@@ -25,8 +25,32 @@ import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.resource.Resource_Property;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameChecker;
+import org.watto.io.FilenameSplitter;
 
 public class Resource implements Comparable<Resource> {
+
+  public long getExportedPathTimestamp() {
+    return exportedPathTimestamp;
+  }
+
+  public void setExportedPathTimestamp(long exportedPathTimestamp) {
+    this.exportedPathTimestamp = exportedPathTimestamp;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public boolean exportedPathTimestampChanged() {
+    if (exportedPath == null || exportedPathTimestamp == -1 || !exportedPath.exists()) {
+      return false;
+    }
+    if (exportedPathTimestamp == exportedPath.lastModified()) {
+      return false;
+    }
+    return true;
+  }
 
   /**
   **********************************************************************************************
@@ -72,6 +96,9 @@ public class Resource implements Comparable<Resource> {
   // The path after a resource has been exported
   protected File exportedPath = null;
 
+  // The timestamp of the exported file, so that we know when the file has been changed by another program
+  protected long exportedPathTimestamp = -1;
+
   // The original filename of this resource, before any renaming.
   // This is important for ZIP archives (they get entries by name).
   protected String origName = null;
@@ -106,7 +133,9 @@ public class Resource implements Comparable<Resource> {
   public Resource(File sourcePath) {
     this(sourcePath, sourcePath.getName(), 0, sourcePath.length(), sourcePath.length(), Exporter_Default.getInstance());
     this.origName = name;
-    this.exportedPath = sourcePath;
+
+    //this.exportedPath = sourcePath;
+    setExportedPath(sourcePath);
   }
 
   /**
@@ -127,7 +156,9 @@ public class Resource implements Comparable<Resource> {
   public Resource(File sourcePath, String name) {
     this(sourcePath, name, 0, sourcePath.length(), sourcePath.length(), Exporter_Default.getInstance());
     this.origName = name;
-    this.exportedPath = sourcePath;
+
+    //this.exportedPath = sourcePath;
+    setExportedPath(sourcePath);
   }
 
   /**
@@ -275,7 +306,10 @@ public class Resource implements Comparable<Resource> {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    setExportedPath(resource.getExportedPath());
+    //this.exportedPath = resource.getExportedPath();
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
     this.properties = resource.getProperties();
@@ -294,12 +328,27 @@ public class Resource implements Comparable<Resource> {
 
       destination = FilenameChecker.correctFilename(destination, '_');
 
+      if (destination.exists() && destination.isFile()) {
+        // to cater for archives with multiple files of the same name, append a number to the end of the name
+        String path = FilenameSplitter.getDirectory(destination) + File.separator + FilenameSplitter.getFilename(destination);
+        String extension = "." + FilenameSplitter.getExtension(destination);
+
+        for (int i = 1; i < 1000; i++) {
+          File testDestination = new File(path + i + extension);
+          if (!testDestination.exists()) {
+            destination = testDestination;
+            break;
+          }
+        }
+      }
+
       FileManipulator fm = new FileManipulator(destination, true);
       destination = fm.getFile();
       extract(fm);
       fm.close();
 
-      exportedPath = destination;
+      //exportedPath = destination;
+      setExportedPath(destination);
 
       return destination;
     }
@@ -717,7 +766,26 @@ public class Resource implements Comparable<Resource> {
 
     replaced = true;
 
-    this.exportedPath = file; // so previews get updated
+    //this.exportedPath = file; // so previews get updated
+    setExportedPath(file);
+
+    setImageResource(null); // so thumbnails get updated
+  }
+
+  /**
+  **********************************************************************************************
+  Update the timestamps, file sizes, etc from the exported file
+  **********************************************************************************************
+  **/
+  public void updatePropertiesFromExportFile() {
+
+    offset = 0;
+    length = exportedPath.length();
+    decompLength = length;
+    exporter = Exporter_Default.getInstance();
+    replaced = true;
+
+    setExportedPath(exportedPath); // also updates the timestamp
 
     setImageResource(null); // so thumbnails get updated
   }
@@ -777,6 +845,12 @@ public class Resource implements Comparable<Resource> {
   **/
   public void setExportedPath(File exportedPath) {
     this.exportedPath = exportedPath;
+    if (exportedPath != null && exportedPath.exists()) {
+      this.exportedPathTimestamp = exportedPath.lastModified();
+    }
+    else {
+      this.exportedPathTimestamp = -1;
+    }
   }
 
   /**

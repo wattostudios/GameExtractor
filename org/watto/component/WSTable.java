@@ -44,20 +44,28 @@ public class WSTable extends JTable implements WSComponent {
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** The code for the language and settings **/
   String code = null;
+
   /** The position of this <code>WSComponent</code> in its parent <code>Container</code> **/
   String position = null;
+
   /** The width of this <code>WSComponent</code>s <code>Border</code> **/
   int borderWidth = -1;
+
   /** Whether the height of this <code>WSComponent</code> is fixed or not **/
   boolean fixedHeight = false;
+
   /** Whether the width of this <code>WSComponent</code> is fixed or not **/
   boolean fixedWidth = false;
+
   /** Whether the minimum height of this <code>WSComponent</code> is fixed or not **/
   boolean fixedMinimumHeight = false;
+
   /** Whether the minimum width of this <code>WSComponent</code> is fixed or not **/
   boolean fixedMinimumWidth = false;
+
   /**
    * Whether this <code>WSComponent</code> is initialised or not. Used to determine whether to
    * fire events.

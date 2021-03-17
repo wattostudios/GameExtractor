@@ -14,11 +14,13 @@
 					<WSMenuItem code="ExtractSelectedResources" opaque="false" underline="X" />
 					<WSMenuItem code="ExtractAllResources" opaque="false" underline="T" shortcut="ctrl E" />
 				</WSMenu>
-				<WSMenu code="WriteArchive" opaque="false" underline="W">
-					<WSMenuItem code="CutArchive" opaque="false" repository="false" underline="U" />
-					<WSMenuItem code="WriteArchive" opaque="false" underline="W" shortcut="ctrl S" />
-					<WSMenuItem code="ConvertArchive" opaque="false" underline="C" />
-				</WSMenu>
+				<WSMenu code="WriteArchive" opaque="false" repository="false" underline="W">
+
+					<WSMenuItem code="WriteArchive" opaque="false" repository="false" underline="W" shortcut="ctrl S" />
+
+					<WSMenuItem code="ConvertArchive" opaque="false" underline="C" />
+
+				</WSMenu>
 				<WSPopupMenuSeparator />
 				<WSRecentFileMenu code="RecentFileMenu" opaque="false" />
 				<WSPopupMenuSeparator />
@@ -59,6 +61,12 @@
 				<WSPopupMenuSeparator />
 				<WSMenuItem code="ScriptBuilder" opaque="false" />
 				<WSMenuItem code="FileListExporter" opaque="false" repository="false" underline="E" />
+				
+				<WSPopupMenuSeparator />
+				
+				<WSMenuItem code="CutArchive" opaque="false" repository="false" underline="U" />
+
+				<WSMenuItem code="AnalyzeDirectory" opaque="false" repository="false" underline="A" />
 			</WSMenu>
 			<WSMenu code="Help" opaque="false" repository="false" underline="H">
 				<WSMenuItem code="Help" opaque="false" repository="false" underline="E" shortcut="F1" />

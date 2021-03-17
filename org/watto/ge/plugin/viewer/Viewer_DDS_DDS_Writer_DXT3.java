@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import org.watto.component.PreviewPanel;
+import org.watto.component.PreviewPanel_3DModel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.ImageFormatWriter;
@@ -31,7 +32,7 @@ public class Viewer_DDS_DDS_Writer_DXT3 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Viewer_DDS_DDS_Writer_DXT3() {
@@ -42,7 +43,7 @@ public class Viewer_DDS_DDS_Writer_DXT3 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -50,12 +51,15 @@ public class Viewer_DDS_DDS_Writer_DXT3 extends ViewerPlugin {
     if (panel instanceof PreviewPanel_Image) {
       return true;
     }
+    else if (panel instanceof PreviewPanel_3DModel) {
+      return true;
+    }
     return false;
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -88,21 +92,32 @@ public class Viewer_DDS_DDS_Writer_DXT3 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public void write(PreviewPanel preview, FileManipulator fm) {
     try {
 
-      if (!(preview instanceof PreviewPanel_Image)) {
+      ImageManipulator im = null;
+      int imageWidth = -1;
+      int imageHeight = -1;
+
+      if (preview instanceof PreviewPanel_Image) {
+        PreviewPanel_Image ivp = (PreviewPanel_Image) preview;
+        im = new ImageManipulator(ivp);
+        imageWidth = ivp.getImageWidth();
+        imageHeight = ivp.getImageHeight();
+      }
+      else if (preview instanceof PreviewPanel_3DModel) {
+        PreviewPanel_3DModel ivp = (PreviewPanel_3DModel) preview;
+        im = new ImageManipulator(ivp);
+        imageWidth = ivp.getImageWidth();
+        imageHeight = ivp.getImageHeight();
+      }
+      else {
         return;
       }
-
-      ImageManipulator im = new ImageManipulator((PreviewPanel_Image) preview);
-
-      int imageWidth = im.getWidth();
-      int imageHeight = im.getHeight();
 
       if (imageWidth == -1 || imageHeight == -1) {
         return;
@@ -113,10 +128,12 @@ public class Viewer_DDS_DDS_Writer_DXT3 extends ViewerPlugin {
       int mipmapCount = mipmaps.length;
 
       // Now try to get the property values from the ImageResource, if they exist
-      ImageResource imageResource = ((PreviewPanel_Image) preview).getImageResource();
+      if (preview instanceof PreviewPanel_Image) {
+        ImageResource imageResource = ((PreviewPanel_Image) preview).getImageResource();
 
-      if (imageResource != null) {
-        mipmapCount = imageResource.getProperty("MipmapCount", mipmapCount);
+        if (imageResource != null) {
+          mipmapCount = imageResource.getProperty("MipmapCount", mipmapCount);
+        }
       }
 
       if (mipmapCount > mipmaps.length) {

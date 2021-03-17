@@ -22,8 +22,11 @@ import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio_Chunks;
 public class Resource_WAV_RawAudio_Chunks extends Resource {
 
   int frequency = 22050;
+
   short bitrate = 16;
+
   short channels = 1;
+
   boolean writeHeader = true;
 
   long[] offsets = new long[0];
@@ -118,7 +121,10 @@ public class Resource_WAV_RawAudio_Chunks extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

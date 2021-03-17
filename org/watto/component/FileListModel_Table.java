@@ -21,6 +21,7 @@ import org.watto.TypecastSingletonManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.GameExtractor;
+import org.watto.ge.helper.FileListFilter;
 import org.watto.ge.helper.FileListSorter;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.RenamerPlugin;
@@ -165,6 +166,10 @@ public class FileListModel_Table implements FileListModel, TableModel {
   **/
   public void reload() {
     resources = Archive.getResources();
+
+    // Perform any filtering
+    resources = FileListFilter.filterResources(resources);
+
     readPlugin = Archive.getReadPlugin();
     columns = readPlugin.getViewingColumns();
   }

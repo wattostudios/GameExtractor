@@ -297,7 +297,11 @@ public class Exporter_QuickBMS_Decompression extends Exporter_Default {
 
       String sourceName = sourceFile.getName();
 
-      script += "set NAME " + sourceName + " \n";
+      // Spaces in filenames aren't handled well by the bulk exporter, so replace the spaces with underscores
+      String sourceNameNoSpace = sourceName.replace(' ', '_');
+      //sourceFile.setName(sourceNameNoSpace);
+
+      script += "set NAME " + sourceNameNoSpace + " \n";
       script += "comtype " + compressionType + " \n";
       script += "clog NAME " + sourceFile.getOffset() + " " + sourceFile.getLength() + " " + sourceFile.getDecompressedLength() + " \n";
 

@@ -2,7 +2,7 @@
 	
 	<WSScrollPane showLabel="false" code="SidePanel_Options_Popups_Label" position="CENTER" repository="false">
 		<WSPanel>
-			<WSPanel layout="GridLayout" position="NORTH" rows="51" columns="1" code="SidePanel_Options_Popups_Checkboxes">
+			<WSPanel layout="GridLayout" position="NORTH" rows="55" columns="1" code="SidePanel_Options_Popups_Checkboxes">
 				<WSOptionCheckBox code="WSLabel_AddFiles_FilesAdded_Text" setting="Popup_AddFiles_FilesAdded_Show" />
 				<WSOptionCheckBox code="WSLabel_AddFiles_FilesRemoved_Text" setting="Popup_AddFiles_FilesRemoved_Show" />
 				<WSOptionCheckBox code="WSLabel_CutArchive_CutFailed_Text" setting="Popup_CutArchive_CutFailed_Show" />
@@ -52,6 +52,12 @@
 				<WSOptionCheckBox code="WSLabel_TaskManager_RedoComplete_Text" setting="Popup_TaskManager_RedoComplete_Show" />
 				<WSOptionCheckBox code="WSLabel_QuickBMSMissing_Text" setting="Popup_QuickBMSMissing_Show" />
 				<WSOptionCheckBox code="WSLabel_AddBMSOnDoubleClick_Text" setting="Popup_AddBMSOnDoubleClick_Show" />
+				<WSOptionCheckBox code="WSLabel_AnalyzeDirectory_DirectoryAnalyzed_Text" setting="Popup_AnalyzeDirectory_DirectoryAnalyzed_Show" />
+				<WSOptionCheckBox code="WSLabel_AnalyzeDirectory_InvalidReportFile_Text" setting="Popup_AnalyzeDirectory_InvalidReportFile_Show" />
+				<WSOptionCheckBox code="WSLabel_AnalyzeDirectory_FilenameMissing_Text" setting="Popup_AnalyzeDirectory_FilenameMissing_Show" />
+				<WSOptionCheckBox code="WSLabel_AnalyzeDirectory_FileNotADirectory_Text" setting="Popup_AnalyzeDirectory_FileNotADirectory_Show" />
+				<WSOptionCheckBox code="WSLabel_PreviewPanel_Text_ChangesSaved_Text" setting="Popup_PreviewPanel_Text_ChangesSaved_Show" />
+				<WSOptionCheckBox code="WSLabel_ModifiedFilesImported_Text" setting="Popup_ModifiedFilesImported_Show" />
 			</WSPanel>
 		</WSPanel>
 	</WSScrollPane>

@@ -52,6 +52,7 @@ public class Plugin_NoExt_2 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Helldivers",
+        "Memphis",
         "Warhammer: End Times: Vermintide");
     setExtensions(""); // MUST BE LOWER CASE
     setPlatforms("PC");

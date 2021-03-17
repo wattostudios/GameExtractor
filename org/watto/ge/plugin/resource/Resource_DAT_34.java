@@ -21,7 +21,9 @@ import org.watto.datatype.Resource;
 public class Resource_DAT_34 extends Resource {
 
   Palette palette = null;
+
   short width = 0;
+
   short height = 0;
 
   /**
@@ -72,7 +74,10 @@ public class Resource_DAT_34 extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

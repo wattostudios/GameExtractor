@@ -120,11 +120,14 @@ public class Exporter_Custom_U_Sound_Generic extends ExporterPlugin {
       PluginGroup_U.readIndex(readSource);
 
       // 1-5 - File Length
+      PluginGroup_U.readIndex(readSource);
+      /*
       int length = (int) PluginGroup_U.readIndex(readSource);
       if (length == 0) { // Redneck Kentucky
         readSource.skip(7);
         PluginGroup_U.readIndex(readSource);
       }
+      */
 
       // Find the RIFF header (some files have other fields in here)
       // Want to do this because this is the Generic plugin, so want to suit as many cases as possible
@@ -135,7 +138,7 @@ public class Exporter_Custom_U_Sound_Generic extends ExporterPlugin {
       byte byte3 = readSource.readByte();
       byte byte4 = readSource.readByte();
 
-      for (int i = 0; i < 20; i++) {
+      for (int i = 0; i < 30; i++) {
         if (byte1 == 82 && byte2 == 73 && byte3 == 70 && byte4 == 70) {
           // found RIFF
           break;

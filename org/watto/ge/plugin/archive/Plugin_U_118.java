@@ -1,3 +1,16 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
@@ -5,6 +18,7 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
+import org.watto.ge.plugin.exporter.Exporter_Custom_U_Sound_Generic;
 import org.watto.ge.plugin.exporter.Exporter_Custom_U_Texture_Generic;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
@@ -27,7 +41,7 @@ public class Plugin_U_118 extends PluginGroup_U {
     super("U_118", "Unreal Engine (Version 118)");
 
     setExtensions("u", "uax", "ukx", "umx", "upx", "usx", "utx", "uvx");
-    setGames("Devastation");
+    setGames("Devastation", "Americas Army: Operations");
     setPlatforms("PC", "XBox");
 
   }
@@ -218,6 +232,9 @@ public class Plugin_U_118 extends PluginGroup_U {
 
         if (type.equals("Texture")) {
           resources[i].setExporter(Exporter_Custom_U_Texture_Generic.getInstance());
+        }
+        else if (type.equals("Sound")) {
+          resources[i].setExporter(Exporter_Custom_U_Sound_Generic.getInstance());
         }
         /*
          * else if (type.equals("Palette")){

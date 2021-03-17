@@ -18,7 +18,9 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.exporter.Exporter_Encryption_ICE;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -30,7 +32,7 @@ public class Plugin_PAZ extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PAZ() {
@@ -53,7 +55,7 @@ public class Plugin_PAZ extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -102,7 +104,13 @@ public class Plugin_PAZ extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      //
+      //
+      // TODO WE'VE ADDED THE DECRYPTION, NOW WE NEED TO ADD THE DECOMPRESSION
+      //
+      //
+      byte[] key = new byte[] { 81, (byte) 243, 15, 17, 4, 36, 106, 0 };
+      Exporter_Encryption_ICE exporter = new Exporter_Encryption_ICE(key);
 
       // RESETTING GLOBAL VARIABLES
 
@@ -121,15 +129,48 @@ public class Plugin_PAZ extends ArchivePlugin {
       int dirLength = fm.readInt();
       FieldValidator.checkLength(dirLength, arcSize);
 
+      // read the filename directory
+      fm.skip(numFiles * 24);
+
+      exporter.open(fm, dirLength, dirLength);
+      byte[] nameBytes = new byte[dirLength];
+      for (int i = 0; i < dirLength; i++) {
+        exporter.available();
+        nameBytes[i] = (byte) exporter.read();
+      }
+
+      int maxNames = numFiles * 2;
+      int numNames = 0;
+      String[] names = new String[maxNames];
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+      while (nameFM.getRemainingLength() > 0) {
+        // X - File/Folder Name
+        String name = nameFM.readNullString();
+        if (name.length() <= 0) {
+          break;
+        }
+        names[numNames] = name;
+        numNames++;
+      }
+      nameFM.close();
+
+      fm.seek(12);
+
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
         // 4 - Hash?
+        fm.skip(4);
+
         // 4 - Folder Name ID?
+        int folderID = fm.readInt();
+        FieldValidator.checkRange(folderID, 0, numNames);
+
         // 4 - File Name ID?
-        fm.skip(12);
+        int nameID = fm.readInt();
+        FieldValidator.checkRange(nameID, 0, numNames);
 
         // 4 - File Offset
         int offset = fm.readInt();
@@ -143,10 +184,11 @@ public class Plugin_PAZ extends ArchivePlugin {
         int decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
 
-        String filename = Resource.generateFilename(i);
+        //String filename = Resource.generateFilename(i);
+        String filename = names[folderID] + names[nameID];
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length, decompLength);
+        resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
 
         TaskProgressManager.setValue(i);
       }

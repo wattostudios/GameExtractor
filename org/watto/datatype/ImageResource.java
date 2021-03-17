@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.ge.plugin.resource.Resource_Property;
+import org.watto.io.converter.ByteConverter;
 
 public class ImageResource {
 
@@ -74,6 +75,43 @@ public class ImageResource {
     this.pixels = pixels;
     this.width = width;
     this.height = height;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public ImageResource(Image image, int width, int height) {
+
+    this.width = width;
+    this.height = height;
+
+    try {
+      PixelGrabber pixelGrabber = new PixelGrabber(image, 0, 0, width, height, true);
+      pixelGrabber.grabPixels();
+
+      // get the pixels, and convert them to positive values in an int[] array
+      try {
+        pixels = (int[]) pixelGrabber.getPixels();
+      }
+      catch (ClassCastException e) {
+        byte[] pixelBytes = (byte[]) pixelGrabber.getPixels();
+
+        int numPixels = pixelBytes.length;
+        pixels = new int[numPixels];
+
+        for (int i = 0; i < numPixels; i++) {
+          pixels[i] = ByteConverter.unsign(pixelBytes[i]);
+        }
+      }
+    }
+    catch (Throwable t) {
+      this.width = 0;
+      this.height = 0;
+      this.pixels = new int[0];
+    }
+
   }
 
   /**

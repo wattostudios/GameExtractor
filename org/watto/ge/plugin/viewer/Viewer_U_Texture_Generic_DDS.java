@@ -164,10 +164,25 @@ public class Viewer_U_Texture_Generic_DDS extends ViewerPlugin {
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
+      /*
       // 1 - Number Of Mipmaps (5)
       int numMipmaps = ByteConverter.unsign(fm.readByte());
       if (numMipmaps == 0) {
         numMipmaps = ByteConverter.unsign(fm.readByte()); // Unreal 2 - The Awakening
+      }
+      */
+      int numMipmaps = 1;
+      try {
+        // 1 - Number Of Mipmaps (9)
+        numMipmaps = ByteConverter.unsign(fm.readByte());
+        FieldValidator.checkLength(numMipmaps, 20);
+      }
+      catch (Throwable t) {
+        // skip another 3 bytes and try again
+        fm.skip(3);
+
+        numMipmaps = ByteConverter.unsign(fm.readByte());
+        FieldValidator.checkLength(numMipmaps, 20);
       }
 
       // for each mipmap

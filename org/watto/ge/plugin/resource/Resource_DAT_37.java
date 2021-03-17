@@ -24,7 +24,7 @@ public class Resource_DAT_37 extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource_DAT_37() {
@@ -79,7 +79,7 @@ public class Resource_DAT_37 extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -109,7 +109,10 @@ public class Resource_DAT_37 extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 
@@ -120,7 +123,7 @@ public class Resource_DAT_37 extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public int getID() {
@@ -129,7 +132,7 @@ public class Resource_DAT_37 extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setID(int fileID) {

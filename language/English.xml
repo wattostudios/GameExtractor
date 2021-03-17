@@ -1,6 +1,6 @@
 <languagePack>
 	<name>English</name>
-	<version>3.11</version>
+	<version>3.12</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -315,7 +315,7 @@
 		<lang code="SidePanel_PluginList_SidePanel_PluginList_Text" value="List of Plugins" />
 		<lang code="SidePanel_Preview_SidePanel_Preview_Text" value="File Previewer" />
 		<lang code="SidePanel_ScriptBuilder_SidePanel_ScriptBuilder_Text" value="Script Builder" />
-		<lang code="SidePanel_Search_SidePanel_Search_Text" value="Search" />
+		
 		<lang code="Task_AddFiles" value="&number& Files Added" />
 		<lang code="Task_RemoveFiles" value="&number& Files Removed" />
 		<lang code="Task_RenameFiles_NoSearch" value="&number& Files renamed with value &value&" />
@@ -399,8 +399,6 @@
 		<lang code="WSButton_ReplaceResources_Text" value="Replace Files" />
 		<lang code="WSButton_ReplaceResources_Tooltip" value="Replaces files in the archive with files on your computer." />
 		<lang code="WSButton_ScriptBuilder_Tooltip" value="Displays the SidePanel for building scripts." />
-		<lang code="WSButton_Search_Text" value="Search" />
-		<lang code="WSButton_Search_Tooltip" value="Search for files in the archive." />
 		<lang code="WSButton_SelectResources_All_Text" value="Select All" />
 		<lang code="WSButton_SelectResources_All_Tooltip" value="Select files in the archive." />
 		<lang code="WSButton_Separator_Tooltip" value="Provides a spacer between buttons on the toolbar." />
@@ -703,7 +701,7 @@
 		<lang code="WSLabel_ComponentList_RenameResources_Text" value="Rename Files" />
 		<lang code="WSLabel_ComponentList_ReplaceResources_Text" value="Replace Files" />
 		<lang code="WSLabel_ComponentList_ScriptBuilder_Text" value="Script Builder" />
-		<lang code="WSLabel_ComponentList_Search_Text" value="Search" />
+
 		<lang code="WSLabel_ComponentList_SelectResources_All_Text" value="Select Files" />
 		<lang code="WSLabel_ComponentList_Separator_Text" value="Separator" />
 		<lang code="WSLabel_ComponentList_UndoTaskComboButton_Text" value="Undo Change" />
@@ -886,8 +884,6 @@
 		<lang code="WSMenuItem_Scanner_Text" value="Scanner" />
 		<lang code="WSMenuItem_ScriptBuilder_Text" value="Script Builder" />
 		<lang code="WSMenuItem_ScriptBuilder_Tooltip" value="Displays the SidePanel that allows you to create a script." />
-		<lang code="WSMenuItem_Search_Text" value="Search" />
-		<lang code="WSMenuItem_Search_Tooltip" value="Opens the SidePanel where you can search for files in the archive." />
 		<lang code="WSMenuItem_SelectResources_All_Text" value="Select All" />
 		<lang code="WSMenuItem_SelectResources_All_Tooltip" value="Selects all the files in the FileList" />
 		<lang code="WSMenuItem_SelectResources_Inverse_Text" value="Select Inverse" />
@@ -1002,9 +998,6 @@
 		<lang code="WSPanel_SidePanel_ScriptBuilder_ExistingScript_Tooltip" value="A script that already exists." />
 		<lang code="WSPanel_SidePanel_ScriptBuilder_NewScript_Label" value="Make a New Script..." />
 		<lang code="WSPanel_SidePanel_ScriptBuilder_NewScript_Tooltip" value="Make a new script." />
-		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Label" value="Searchable Columns" />
-		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Tooltip" value="The columns that are searched." />
-		<lang code="WSPanel_SidePanel_Search_Tooltip" value="Search for files in the archive." />
 		<lang code="WSRadioButton_SidePanel_HexEditor_ShowByte_Text" value="Bytes" />
 		<lang code="WSRadioButton_SidePanel_HexEditor_ShowByte_Tooltip" value="Display the file as a series of Bytes." />
 		<lang code="WSRadioButton_SidePanel_HexEditor_ShowChar_Text" value="Characters" />
@@ -1080,8 +1073,6 @@
 		<lang code="WSTextArea_SidePanel_ScriptBuilder_Script_Tooltip" value="The script." />
 		<lang code="WSTextField_ExtractDirectory_Label" value="Extract Directory" />
 		<lang code="WSTextField_ExtractDirectory_Tooltip" value="The directory where files are extracted." />
-		<lang code="WSTextField_FileListExporterDirectory_Label" value="Saved File Lists" />
-		<lang code="WSTextField_FileListExporterDirectory_Tooltip" value="The directory where file lists are saved." />
 		<lang code="WSTextField_HexEditorFileSizeLimit_Label" value="Hex Viewer File Size Limit" />
 		<lang code="WSTextField_HexEditorFileSizeLimit_Tooltip" value="The amount of data to display in the hex viewer." />
 		<lang code="WSTextField_InterfaceColors_Label" value="Interface Colors" />
@@ -1132,8 +1123,6 @@
 		<lang code="WSTextField_SidePanel_RenameFile_SearchValue_Tooltip" value="The value to search for" />
 		<lang code="WSTextField_SidePanel_ScriptBuilder_ScriptName_Label" value="Script Name" />
 		<lang code="WSTextField_SidePanel_ScriptBuilder_ScriptName_Tooltip" value="The name of the new script." />
-		<lang code="WSTextField_SidePanel_Search_InputText_Label" value="Search Value" />
-		<lang code="WSTextField_SidePanel_Search_InputText_Tooltip" value="The value to search for." />
 		<lang code="WSTextField_TempDirectory_Label" value="Temporary Directory" />
 		<lang code="WSTextField_TempDirectory_Tooltip" value="The directory where temporary files are stored." />
 		<lang code="WSTextField_FFMPEG_Path_Label" value="Location of FFMPEG" />
@@ -1173,7 +1162,7 @@
 		<lang code="WSButton_RenameResources_Name" value="Rename Files" />
 		<lang code="WSButton_ReplaceResources_Name" value="Replace Files" />
 		<lang code="WSButton_ScriptBuilder_Name" value="Script Builder" />
-		<lang code="WSButton_Search_Name" value="Search" />
+
 		<lang code="WSButton_SelectResources_All_Name" value="Select All Files" />
 		<lang code="WSButton_WriteArchive_Name" value="Save Archive" />
 		<lang code="WSButton_RedoTaskComboButton_Name" value="Redo" />
@@ -1351,7 +1340,165 @@
 		<lang code="ResourceProperty_Width" value="Image Width" />
 		<lang code="ResourceProperty_XOffset" value="Image X Offset" />
 		<lang code="ResourceProperty_YOffset" value="Image Y Offset" />
-				
+		
+<!-- New with 3.12 -->
+
+		<lang code="WSCheckBox_SearchWildcardConversion_Text" value="Use * for Wildcards in Search/Filter" />
+		<lang code="WSCheckBox_SearchWildcardConversion_Tooltip" value="Using the * character in the Search/Filter box will perform a wildcard search" />
+		<lang code="WSCheckBox_SearchRegExConversion_Text" value="Allow Regular Expressions (RegEx) in Search/Filter" />
+		<lang code="WSCheckBox_SearchRegExConversion_Tooltip" value="The Search/Filter box will evaluate Regular Expressions (RegEx)" />
+		<lang code="WSButton_SidePanel_Search_FilterButton_Text" value="Filter Files" />
+		<lang code="WSButton_SidePanel_Search_FilterButton_Tooltip" value="Filters the File List to show only matching files" />
+		
+		<lang code="SidePanel_Search_SidePanel_Search_Text" value="Search" />
+		<lang code="WSButton_Search_Name" value="Search" />
+		<lang code="WSButton_Search_Text" value="Search or Filter" />
+		<lang code="WSButton_Search_Tooltip" value="Search for files in the archive, or filter the files in the File List" />
+		<lang code="WSLabel_ComponentList_Search_Text" value="Search or Filter" />
+		<lang code="WSMenuItem_Search_Text" value="Search or Filter" />
+		<lang code="WSMenuItem_Search_Tooltip" value="Opens the SidePanel where you can search for files in the archive, or filter the files in the File List" />
+		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Label" value="Search or Filter Columns" />
+		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Tooltip" value="The columns that are searched or filtered." />
+		<lang code="WSPanel_SidePanel_Search_Tooltip" value="Search for files in the archive, or filter the files in the File List" />
+		<lang code="WSTextField_SidePanel_Search_InputText_Label" value="Search or Filter Value" />
+		<lang code="WSTextField_SidePanel_Search_InputText_Tooltip" value="The value to search or filter for" />
+		
+		<lang code="WSButton_WelcomeWizard_CloseWizard_Text" value="Close the Welcome Wizard" />
+		<lang code="WSButton_WelcomeWizard_CloseWizard_Tooltip" value="Close the welcome wizard." />
+		<lang code="WSButton_WelcomeWizard_PreviousScreen_Text" value="Previous" />
+		<lang code="WSButton_WelcomeWizard_PreviousScreen_Tooltip" value="Show the previous screen in the welcome wizard." />
+		<lang code="WSButton_WelcomeWizard_NextScreen_Text" value="Next" />
+		<lang code="WSButton_WelcomeWizard_NextScreen_Tooltip" value="Show the next screen in the welcome wizard." />
+		
+		<lang code="WSLabel_WelcomeWizard_WelcomeMessage_Text" value="New to Game Extractor? This wizard will show you the basics." />
+		<lang code="WelcomeWizard_Screen01_Label" value="Click the Read Archive button at the top of the screen.\nThe Directory List will open on the Right." />
+		<lang code="WelcomeWizard_Screen02_Label" value="Double-click the archive you want to open.\nThe files in the archives are shown in the File List." />
+		<lang code="WelcomeWizard_Screen03_Label" value="If you want to extract files to your computer, click the Extract Files button\nat the top of the screen. The Directory List will open on the Right." />
+		<lang code="WelcomeWizard_Screen04_Label" value="Choose the directory where you want to extract the files. Click the Extract All\nbutton to extract everything, or if you only want certain files, choose the ones you want\nand click the Extract Selected button." />
+		
+		<lang code="WSCheckBox_ShowWelcomeWizard_Text" value="Show the Welcome Wizard again" />
+		<lang code="WSCheckBox_ShowWelcomeWizard_Tooltip" value="Shows the Welcome Wizard the next time you start Game Extractor." />
+		
+		<lang code="WSCheckBox_NintendoSwitchSwizzle_Text" value="Nintendo Switch Image Swizzle" />
+		<lang code="WSCheckBox_NintendoSwitchSwizzle_Tooltip" value="Unswizzles images in Nintendo Switch archives" />
+		
+		<lang code="Progress_AnalyzingDirectory" value="Analyzing the Directory" />
+		<lang code="WSButton_AnalyzeDirectory_Name" value="Analyze a Directory" />
+		<lang code="WSButton_AnalyzeDirectory_Tooltip" value="Analyzes a directory, to find archives and other files that can be opened by Game Extractor." />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzeDirectoryButton_Name" value="Analyze the Archive" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzeDirectoryButton_Tooltip" value="Analyzes a directory" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzePanelButton_Name" value="Show the Analyze Directory Controls" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzePanelButton_Tooltip" value="Displays the Analyze Directory controls." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_DirectoryAnalyzed_Show_Text" value="Analyze Directory Succeeded" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_DirectoryAnalyzed_Show_Tooltip" value="Show a popup message when a directory has been analyzed successfully." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FilenameMissing_Show_Text" value="Analysis Directory is Missing" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FilenameMissing_Show_Tooltip" value="Show a popup message when the directory you're analyzing is missing or invalid." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FileNotADirectory_Show_Text" value="Analysis Location is not a Directory" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FileNotADirectory_Show_Tooltip" value="Show a popup message when the location you're analyzing isn't a directory." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_InvalidReportFile_Show_Text" value="Analysis Directory Report Name is Missing" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_InvalidReportFile_Show_Tooltip" value="Show a popup message when the report name is missing or invalid when analyzing a directory." />
+		<lang code="WSLabel_ComponentList_AnalyzeDirectory_Text" value="Analyze Directory" />
+		<lang code="WSLabel_AnalyzeDirectory_DirectoryAnalyzed_Text" value="The directory was analyzed successfully." />
+		<lang code="WSLabel_AnalyzeDirectory_FilenameMissing_Text" value="The input directory is invalid or missing." />
+		<lang code="WSLabel_AnalyzeDirectory_FileNotADirectory_Text" value="The selected location is not a directory." />
+		<lang code="WSLabel_AnalyzeDirectory_InvalidReportFile_Text" value="The report filename is missing or invalid." />
+		<lang code="WSLabel_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameLabel_Text" value="Input" />
+		<lang code="WSMenuItem_AnalyzeDirectory_Text" value="Analyze Directory" />
+		<lang code="WSMenuItem_AnalyzeDirectory_Tooltip" value="Opens the SidePanel that allows you to analyze a directory." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzePanel_Main_Label" value="Analyze a Directory" />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzePanel_Main_Tooltip" value="The controls for analyzing a directory." />
+		<lang code="WSTextField_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField_Label" value="Generated Report Filename" />
+		<lang code="WSTextField_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField_Tooltip" value="This is the filename of the analysis report that will be generated." />
+
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins_Text" value="Identify Previewable Formats" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins_Tooltip" value="Whether to identify files that are previewable, such as images and audio files." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories_Text" value="Analyze sub-directories" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories_Tooltip" value="Whether to analyze files in sub-directories as well, or only the current directory." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives_Text" value="Identify formats within Archives" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives_Tooltip" value="Whether to open archives and identify all the file types within them, or only identify the archive types themselves." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles_Text" value="Extract all Files from Archives" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles_Tooltip" value="Extract the files in all archives to the filesystem." />
+		
+		<lang code="WSCheckBox_ShowAdvancedControlsInDirectoryList_Text" value="Show Advanced Function Control under the Directory List" />
+		<lang code="WSCheckBox_ShowAdvancedControlsInDirectoryList_Tooltip" value="Shows additional buttons under the Directory List to perform Advanced Functions" />
+
+		<lang code="WSTextField_FileListExporterDirectory_Label" value="Saved File Lists" />
+		<lang code="WSTextField_FileListExporterDirectory_Tooltip" value="The directory where file lists are saved." />
+		
+		<lang code="WSTextField_AnalysisExtractDirectory_Label" value="Analysis Reports and Extracts" />
+		<lang code="WSTextField_AnalysisExtractDirectory_Tooltip" value="The directory where files are extracted by the analysis tool, and where the analysis report is generated." />
+		
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Tooltip" value="The analysis report will be saved in this format." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label_Label" value="Generated Report Format" />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label_Tooltip" value="The format to use when generating the report" />
+		
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Tooltip" value="Images will be converted into this format when extracting." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label_Label" value="Convert Images to..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label_Tooltip" value="Images will be converted into this format when extracting." />
+
+		<lang code="AnalyzeDirectory_Report_CSV" value="Comma Separated Values" />
+		<lang code="AnalyzeDirectory_Report_Tabbed" value="Text Document" />
+		<lang code="AnalyzeDirectory_Report_HTML" value="HTML Webpage" />
+		<lang code="AnalyzeDirectory_Report_Excel" value="Excel Spreadsheet" />
+		<lang code="AnalyzeDirectory_Report_JSON" value="JSON Document" />
+		<lang code="AnalyzeDirectory_Report_XML" value="XML Document" />
+		
+		<lang code="WSLabel_DeleteAnalysisDirectory_Text" value="Do you want to delete the contents of the Analysis directory?" />
+		
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Wireframe_Text" value="Wireframe" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Wireframe_Tooltip" value="Displays the model as a wireframe drawing." />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Smoothing_Text" value="Smoothing" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Smoothing_Tooltip" value="Whether to smooth the model, or leave it with hard edges." />
+		
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Name" value="Save Changes" />
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Text" value="Save Changes" />
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Tooltip" value="Saves any changes you made to the text file." />
+		
+		<lang code="WSCheckBox_Popup_PreviewPanel_Text_ChangesSaved_Show_Text" value="Text File Changes Saved" />
+		<lang code="WSCheckBox_Popup_PreviewPanel_Text_ChangesSaved_Show_Tooltip" value="Show a popup message when changes to a text file have been saved." />
+		<lang code="WSLabel_PreviewPanel_Text_ChangesSaved_Text" value="The changes to the text file have been saved." />
+		
+		<lang code="WSLabel_ImportModifiedExportFiles_Text" value="Some of the Extracted or Previewed Files have been modified by other programs.\nDo you want to import the changed files to this Archive?" />
+		<lang code="WSCheckBox_AutoImportModifiedExportFiles_Text" value="Automatically import extracted files that have been modified by other programs" />
+		<lang code="WSCheckBox_AutoImportModifiedExportFiles_Tooltip" value="When you extract or preview files, if you modify them in other programs, Game Extractor can automatically import them if they change." />
+		<lang code="WSCheckBox_Popup_ModifiedFilesImported_Show_Text" value="Files modified by external programs have been imported" />
+		<lang code="WSCheckBox_Popup_ModifiedFilesImported_Show_Tooltip" value="Show a popup message when files that have been modified by external programs have been imported to the Archive." />
+		<lang code="WSLabel_ModifiedFilesImported_Text" value="The modified files have been imported." />
+		
+		<lang code="WSButton_PreviewPanel_Image_PreviousPaletteButton_Text" value="Previous Palette" />
+		<lang code="WSButton_PreviewPanel_Image_PreviousPaletteButton_Tooltip" value="Changes the color palette to the previous one in the collection." />
+		<lang code="WSButton_PreviewPanel_Image_NextPaletteButton_Text" value="Next Palette" />
+		<lang code="WSButton_PreviewPanel_Image_NextPaletteButton_Tooltip" value="Changes the color palette to the next one in the collection." />
+		
+		<lang code="WSLabel_PreviewPanel_3DModel_RotateLabel_Text" value="Rotate" />
+		<lang code="WSLabel_PreviewPanel_3DModel_RotateLabel_Tooltip" value="Rotate the model" />
+		<lang code="WSLabel_PreviewPanel_3DModel_MoveLabel_Text" value="Move" />
+		<lang code="WSLabel_PreviewPanel_3DModel_MoveLabel_Tooltip" value="Move the model" />
+		<lang code="WSLabel_PreviewPanel_3DModel_ZoomLabel_Text" value="Zoom" />
+		<lang code="WSLabel_PreviewPanel_3DModel_ZoomLabel_Tooltip" value="Zoom the model" />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_RotateUp_Tooltip" value="Rotates the model up" />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateDown_Tooltip" value="Rotates the model down" />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateLeft_Tooltip" value="Rotates the model left" />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateRight_Tooltip" value="Rotates the model right" />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_MoveUp_Tooltip" value="Moves the model up" />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveDown_Tooltip" value="Moves the model down" />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveLeft_Tooltip" value="Moves the model left" />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveRight_Tooltip" value="Moves the model right" />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_ZoomIn_Tooltip" value="Zooms the model in" />
+		<lang code="WSButton_PreviewPanel_3DModel_ZoomOut_Tooltip" value="Zooms the model out" />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder_Label" value="Convert Models to..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder_Tooltip" value="When extracting files, Game Extractor will try to convert Models to this format." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ExportPanel_ModelConverters_Tooltip" value="When extracting files, Game Extractor will try to convert Models to this format." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ExportPanel_ImageConverters_Tooltip" value="When extracting files, Game Extractor will try to convert Images to this format." />
+
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Tooltip" value="Models will be converted into this format when extracting." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Label" value="Convert Models to..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Tooltip" value="Models will be converted into this format when extracting." />
+
 		<lang code="" value="" />
 		
 	</texts>

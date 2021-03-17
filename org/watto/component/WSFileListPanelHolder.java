@@ -20,6 +20,7 @@ import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.event.WSResizableInterface;
 import org.watto.event.listener.WSResizableListener;
+import org.watto.ge.GameExtractor;
 import org.watto.task.Task;
 import org.watto.task.Task_ReloadFileListPanel;
 import org.watto.xml.XMLNode;
@@ -150,6 +151,7 @@ public class WSFileListPanelHolder extends WSPanel {
   **********************************************************************************************
   **/
   public void loadPanel(String code) {
+    //System.out.println("WSFileListPanelHolder-->LOADPANEL(STRING)");
     WSPanel newPanel = (WSPanel) WSPluginManager.getGroup("FileList").getPlugin(code);
     if (newPanel == null) {
       return;
@@ -174,6 +176,7 @@ public class WSFileListPanelHolder extends WSPanel {
   **********************************************************************************************
   **/
   public void loadPanel(WSPanel panel) {
+    //System.out.println("WSFileListPanelHolder-->LOADPANEL(WSPANEL)");
     if (panel == null) {
       return;
     }
@@ -205,6 +208,10 @@ public class WSFileListPanelHolder extends WSPanel {
     repaint();
 
     if (panel instanceof FileListPanel) {
+      if (!GameExtractor.isFullVersion() && Settings.getBoolean("ShowWelcomeWizard")) { // isFullVersion() is IMPORTANT to not break the File List loading
+        // if we're showing the welcome wizard, we don't want to overwrite it with this reload
+        return;
+      }
       Task_ReloadFileListPanel task = new Task_ReloadFileListPanel((FileListPanel) panel);
       task.setDirection(Task.DIRECTION_REDO);
       new Thread(task).start();
@@ -236,6 +243,7 @@ public class WSFileListPanelHolder extends WSPanel {
   **********************************************************************************************
   **/
   public void onOpenRequest() {
+    //System.out.println("WSFileListPanelHolder-->ONOPENREQUEST");
     if (currentPanel != null && currentPanel instanceof WSPanelPlugin) {
       ((WSPanelPlugin) currentPanel).onOpenRequest();
     }
@@ -247,6 +255,7 @@ public class WSFileListPanelHolder extends WSPanel {
   **********************************************************************************************
   **/
   public void rebuild() {
+    //System.out.println("WSFileListPanelHolder-->REBUILD");
     WSPlugin[] plugins = WSPluginManager.getGroup("FileList").getPlugins();
     for (int i = 0; i < plugins.length; i++) {
       ((FileListPanel) plugins[i]).constructInterface();
@@ -260,6 +269,7 @@ public class WSFileListPanelHolder extends WSPanel {
   **********************************************************************************************
   **/
   public void reload() {
+    //System.out.println("WSFileListPanelHolder-->RELOAD");
 
     /*
     try {
@@ -269,6 +279,11 @@ public class WSFileListPanelHolder extends WSPanel {
       t.printStackTrace();
     }
     */
+
+    if (Settings.getBoolean("ShowWelcomeWizard")) {
+      // if we're showing the welcome wizard, we don't want to overwrite it with this reload
+      return;
+    }
 
     if (currentPanel instanceof FileListPanel) {
 

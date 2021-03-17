@@ -50,6 +50,7 @@ public class Plugin_ASSETS_5 extends ArchivePlugin {
     setPlatforms("PC");
 
     setFileTypes(Unity3DHelper.getFileTypes());
+    setTextPreviewExtensions("textasset"); // LOWER CASE
 
   }
 

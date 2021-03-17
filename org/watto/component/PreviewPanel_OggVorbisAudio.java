@@ -36,17 +36,29 @@ public class PreviewPanel_OggVorbisAudio extends PreviewPanel implements WSClick
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   Task_PlayAudio_OggVorbis task;
+
   Thread thread;
 
   WSButton playbutton;
+
   WSButton stopbutton;
 
   File path;
 
   /**
   **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public File getOggFilePath() {
+    return path;
+  }
 
+  /**
+  **********************************************************************************************
+  
   **********************************************************************************************
   **/
   public PreviewPanel_OggVorbisAudio(File path) {
@@ -62,7 +74,7 @@ public class PreviewPanel_OggVorbisAudio extends PreviewPanel implements WSClick
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void constructInterface() {
@@ -87,7 +99,7 @@ public class PreviewPanel_OggVorbisAudio extends PreviewPanel implements WSClick
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -109,7 +121,7 @@ public class PreviewPanel_OggVorbisAudio extends PreviewPanel implements WSClick
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -119,7 +131,7 @@ public class PreviewPanel_OggVorbisAudio extends PreviewPanel implements WSClick
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void playAudio() {
@@ -133,7 +145,7 @@ public class PreviewPanel_OggVorbisAudio extends PreviewPanel implements WSClick
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void stopAudio() {

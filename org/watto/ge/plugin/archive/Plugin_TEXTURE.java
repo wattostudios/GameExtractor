@@ -110,13 +110,14 @@ public class Plugin_TEXTURE extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       long offset = 0;
+      char emptyByte = (char) 0;
       while (fm.getOffset() < txtSize) {
 
         // X - Filename
         // 1 - Separator Character (/)
         String filename = "";
         char filenameByte = (char) fm.readByte();
-        while (filenameByte != '/') {
+        while (filenameByte != '/' && filenameByte != emptyByte) {
           filename += filenameByte;
           filenameByte = (char) fm.readByte();
         }
@@ -126,7 +127,7 @@ public class Plugin_TEXTURE extends ArchivePlugin {
         String lengthString = "";
         char byte13 = (char) 13;
         char lengthByte = (char) fm.readByte();
-        while (lengthByte != byte13) {
+        while (lengthByte != byte13 && lengthByte != emptyByte) {
           lengthString += lengthByte;
           lengthByte = (char) fm.readByte();
         }

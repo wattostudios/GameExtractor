@@ -35,7 +35,7 @@ public class Plugin_PKDWIN extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PKDWIN() {
@@ -45,7 +45,8 @@ public class Plugin_PKDWIN extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("PixelJunk Shooter",
+    setGames("Frozen Synapse Prime",
+        "PixelJunk Shooter",
         "Super Cloudbuilt");
     setExtensions("pkdwin"); // MUST BE LOWER CASE
     setPlatforms("PC");
@@ -60,7 +61,7 @@ public class Plugin_PKDWIN extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -116,6 +117,18 @@ public class Plugin_PKDWIN extends ArchivePlugin {
     else if (headerInt1 == 1868983913) {
       return "font";
     }
+    else if (headerInt1 == 1295069508) {
+      return "d11mesh";
+    }
+    else if (headerInt1 == 1414285642) {
+      return "jilt";
+    }
+    else if (headerInt1 == 305419896) {
+      return "xv4";
+    }
+    else if (headerInt3 == 1111577667) {
+      return "ctab";
+    }
 
     if (headerShort1 == 30792) {
       return "hx";
@@ -131,6 +144,10 @@ public class Plugin_PKDWIN extends ArchivePlugin {
     }
     else if (headerShort1 == 512) {
       return "tree";
+    }
+
+    if (headerBytes[0] == 91) {
+      return "txt";
     }
 
     return null;
@@ -184,37 +201,69 @@ public class Plugin_PKDWIN extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
+      try {
+        // FIRST TRY TO READ AS 16-BYTE ENTRIES (with compression - "PixelJunk Shooter" and "Super Cloudbuilt")
 
-        // 4 - Decompressed File Length
-        long decompLength = fm.readInt();
-        FieldValidator.checkLength(decompLength);
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
 
-        // 4 - Compressed File Length
-        long length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
+          // 4 - Decompressed File Length
+          long decompLength = fm.readInt();
+          FieldValidator.checkLength(decompLength);
 
-        // 4 - File Offset
-        long offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
+          // 4 - Compressed File Length
+          long length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Hash?
-        fm.skip(4);
+          // 4 - File Offset
+          long offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
 
-        String filename = Resource.generateFilename(i);
+          // 4 - Hash?
+          fm.skip(4);
 
-        //path,name,offset,length,decompLength,exporter
-        if (length == 0) {
-          // uncompressed
-          resources[i] = new Resource(path, filename, offset, decompLength);
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          if (length == 0) {
+            // uncompressed
+            resources[i] = new Resource(path, filename, offset, decompLength);
+          }
+          else {
+            // compressed
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+
+          TaskProgressManager.setValue(i);
         }
-        else {
-          // compressed
-          resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+
+      }
+      catch (Throwable t) {
+        // IF THAT FAILS, TRY TO READ AS 12-BYTE ENTRIES (without compression - "Frozen Synapse Prime")
+        fm.seek(12);
+
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+
+          // 4 - File Length
+          long length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - File Offset
+          long offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - Hash?
+          fm.skip(4);
+
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length);
+
+          TaskProgressManager.setValue(i);
         }
 
-        TaskProgressManager.setValue(i);
       }
 
       fm.close();

@@ -21,6 +21,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
 import javax.swing.JLabel;
+import org.watto.component.PreviewPanel_3DModel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
 import org.watto.datatype.Palette;
@@ -35,13 +36,16 @@ the number of colors, etc.
 public class ImageManipulator {
 
   int[] pixels = new int[0];
+
   Palette palette = new Palette();
+
   int width = 0;
+
   int height = 0;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public ImageManipulator(ImageResource imageResource) {
@@ -83,6 +87,24 @@ public class ImageManipulator {
     this.width = width;
     this.height = height;
     setPalette(palette);
+  }
+
+  /**
+  **********************************************************************************************
+  Gets the image from the PreviewPanel_3DModel
+  **********************************************************************************************
+  **/
+  public ImageManipulator(PreviewPanel_3DModel previewPanel) {
+
+    this.width = previewPanel.getImageWidth();
+    this.height = previewPanel.getImageHeight();
+
+    BufferedImage bufImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    Graphics g = bufImage.getGraphics();
+    g.drawImage(previewPanel.getImage(), 0, 0, null);
+
+    pixels = bufImage.getRGB(0, 0, width, height, null, 0, width);
+
   }
 
   /**

@@ -64,8 +64,10 @@ public class XMLReader {
 
   /** The stream for reading the file **/
   protected static Manipulator manipulator = null;
+
   /** The currently-read character **/
   protected static char character;
+
   /** Whether the file is being read as Unicode or non-Unicode **/
   protected static boolean unicode = false;
 

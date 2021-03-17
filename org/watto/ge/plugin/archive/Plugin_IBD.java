@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -24,6 +23,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -51,6 +51,8 @@ public class Plugin_IBD extends ArchivePlugin {
     //setFileTypes("","",
     //             "",""
     //             );
+
+    setCanScanForFileTypes(true);
 
   }
 
@@ -167,6 +169,27 @@ public class Plugin_IBD extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 1398360144) {
+      return "phys";
+    }
+    else if (headerInt1 == 1415070721) {
+      return "dxt";
+    }
+
+    return null;
   }
 
 }

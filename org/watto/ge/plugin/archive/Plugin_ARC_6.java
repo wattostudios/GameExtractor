@@ -32,7 +32,7 @@ public class Plugin_ARC_6 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_ARC_6() {
@@ -43,7 +43,7 @@ public class Plugin_ARC_6 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Renegade Ops",
-        "Just Cause");
+        "Just Cause 2");
     setExtensions("arc"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -51,11 +51,13 @@ public class Plugin_ARC_6 extends ArchivePlugin {
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
 
+    setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -136,17 +138,31 @@ public class Plugin_ARC_6 extends ArchivePlugin {
       fm.close();
 
       // Now go through the ARC file and work out if the file is compressed or not
-      fm = new FileManipulator(path, false);
-      fm.getBuffer().setBufferSize(4);
+      fm = new FileManipulator(path, false, 4);
+      //fm.getBuffer().setBufferSize(4);
 
       for (int i = 0; i < numFiles; i++) {
         Resource resource = resources[i];
-        fm.seek(resource.getOffset());
+        long offset = resource.getOffset();
+
+        fm.seek(offset);
 
         if (fm.readString(1).equals("x")) {
           // compressed
           resource.setExporter(exporter);
         }
+        /*
+        else {
+          fm.relativeSeek(offset);
+        
+          if (fm.readInt() == 4) { // SARC archive
+            resource.setOffset(offset + 4);
+            resource.setLength(resource.getLength() - 4);
+          }
+        }
+        */
+
+        TaskProgressManager.setValue(i);
       }
 
       fm.close();
@@ -158,6 +174,24 @@ public class Plugin_ARC_6 extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt2 == 1129464147) {
+      return "sarc";
+    }
+
+    return null;
   }
 
 }

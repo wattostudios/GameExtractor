@@ -520,7 +520,16 @@ public class Task_QuickBMSBulkExport extends AbstractTask {
         numExtracted++;
       }
       else {
-        ErrorLogger.log("[Task_QuickBMSBulkExport] File wasn't extracted: " + resource.getName());
+        String sourceNameNoSpace = resource.getName().replace(' ', '_');
+        outputFile = new File(absoluteTempPath + File.separator + sourceNameNoSpace);
+        if (outputFile.exists()) {
+          // found the exported file, update the resource accordingly
+          resource.setExportedPath(outputFile);
+          numExtracted++;
+        }
+        else {
+          ErrorLogger.log("[Task_QuickBMSBulkExport] File wasn't extracted: " + resource.getName());
+        }
       }
 
     }

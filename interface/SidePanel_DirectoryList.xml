@@ -6,13 +6,18 @@
 	
 		<WSPanel code="SidePanel_DirectoryList_ControlsHolder" position="CENTER" />
 	
-		<WSPanel code="SidePanel_DirectoryList_ButtonsPanel" showBorder="true" layout="GridLayout" rows="1" columns="6" position="SOUTH" >
-			<WSButton code="SidePanel_DirectoryList_ReadPanelButton" showText="false" />
-			<WSButton code="SidePanel_DirectoryList_ScriptPanelButton" showText="false" />
-			<WSButton code="SidePanel_DirectoryList_ModifyPanelButton" showText="false" />
-			<WSButton code="SidePanel_DirectoryList_ExportPanelButton" showText="false" />
-			<WSButton code="SidePanel_DirectoryList_WritePanelButton" showText="false" />
-			<WSButton code="SidePanel_DirectoryList_CutPanelButton" showText="false" />
+		<WSPanel code="SidePanel_DirectoryList_ButtonsPanel" showBorder="true" layout="GridLayout" rows="2" columns="1" position="SOUTH" >
+			<WSPanel code="SidePanel_DirectoryList_ButtonsPanelRow1" showBorder="true" layout="GridLayout" rows="1" columns="4">
+				<WSButton code="SidePanel_DirectoryList_ReadPanelButton" showText="false" />
+				<WSButton code="SidePanel_DirectoryList_ModifyPanelButton" showText="false" />
+				<WSButton code="SidePanel_DirectoryList_ExportPanelButton" showText="false" />
+				<WSButton code="SidePanel_DirectoryList_WritePanelButton" showText="false" />
+			</WSPanel>
+			<WSPanel code="SidePanel_DirectoryList_ButtonsPanelRow2" showBorder="true" layout="GridLayout" rows="1" columns="3">
+				<WSButton code="SidePanel_DirectoryList_ScriptPanelButton" showText="false" />
+				<WSButton code="SidePanel_DirectoryList_CutPanelButton" showText="false" />
+				<WSButton code="SidePanel_DirectoryList_AnalyzePanelButton" showText="false" />
+			</WSPanel>
 		</WSPanel>
 	</WSPanel>
 	

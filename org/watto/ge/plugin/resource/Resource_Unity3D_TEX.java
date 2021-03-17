@@ -21,8 +21,11 @@ import org.watto.ge.plugin.ExporterPlugin;
 public class Resource_Unity3D_TEX extends Resource {
 
   int imageWidth = 0;
+
   int imageHeight = 0;
+
   int formatCode = 0;
+
   int mipmapCount = 0;
 
   /**
@@ -111,7 +114,10 @@ public class Resource_Unity3D_TEX extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

@@ -241,6 +241,7 @@ public class Plugin_ASSETS_15 extends ArchivePlugin {
     setFileTypes(Unity3DHelper.getFileTypes());
 
     setTextPreviewExtensions("textasset"); // LOWER CASE
+
   }
 
   /**

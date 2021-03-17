@@ -9,7 +9,7 @@
 					<WSOptionTextField code="Option_OpeningArchives_MaxNumberOfFiles4" setting="MaxNumberOfFiles4" />
 					<WSOptionTextField code="Option_OpeningArchives_MaxAllowedScriptErrors" setting="MaxAllowedScriptErrors" />
 				</WSPanel>
-				<WSPanel layout="GridLayout" position="CENTER" rows="9" columns="1">
+				<WSPanel layout="GridLayout" position="CENTER" rows="10" columns="1">
 					<WSOptionCheckBox code="Option_OpeningArchives_OpenArchiveOnDoubleClick" setting="OpenArchiveOnDoubleClick" />
 					<WSOptionCheckBox code="Option_OpeningArchives_ScanFileIfOpenFailed" setting="ScanFileIfOpenFailed" />
 					<WSOptionCheckBox code="Option_OpeningArchives_LoadScriptsAtStartup" setting="LoadScriptsAtStartup" />
@@ -19,6 +19,7 @@
 					<WSOptionCheckBox code="Option_OpeningArchives_IdentifyUnknownFileTypes" setting="IdentifyUnknownFileTypes" />
 					<WSOptionCheckBox code="Option_OpeningArchives_CheckScriptResourceValues" setting="CheckScriptResourceValues" />
 					<WSOptionCheckBox code="Option_OpeningArchives_OnlyShowStandardConverters" setting="OnlyShowStandardConverters" />
+					<WSOptionCheckBox code="Option_OpeningArchives_ShowAdvancedControlsInDirectoryList" setting="ShowAdvancedControlsInDirectoryList" />
 				</WSPanel>
 			</WSPanel>
 			<WSPanel position="CENTER">

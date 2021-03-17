@@ -109,7 +109,11 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
       short bitrate = 16;
       short channels = 1;
       int audioLength = (int) readLength;
+      short codec = 0x0001;
       signed = true;
+      byte[] extraData = null;
+      int samples = -1;
+      short blockAlign = -1;
 
       if (source instanceof Resource_WAV_RawAudio) {
         Resource_WAV_RawAudio audioSource = (Resource_WAV_RawAudio) source;
@@ -118,9 +122,14 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
         channels = audioSource.getChannels();
         audioLength = audioSource.getAudioLength();
         signed = audioSource.isSigned();
+        codec = audioSource.getCodec();
+        samples = audioSource.getSamples();
+        blockAlign = audioSource.getBlockAlign();
+
+        extraData = audioSource.getExtraData();
       }
 
-      header = pcmwav_header(frequency, channels, bitrate, audioLength);
+      header = pcmwav_header(frequency, channels, bitrate, audioLength, codec, samples, blockAlign, extraData);
 
       headerPos = 0;
       headerLength = header.length;
@@ -163,8 +172,13 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
   
   **********************************************************************************************
   **/
-  public byte[] pcmwav_header(int frequency, short channels, short bits, int dataLength) {
-    ByteBuffer byteBuffer = new ByteBuffer(44);
+  public byte[] pcmwav_header(int frequency, short channels, short bits, int dataLength, short codec, int samples, short blockAlign, byte[] extraData) {
+    int headerSize = 44;
+    if (extraData != null) {
+      headerSize += extraData.length;
+    }
+
+    ByteBuffer byteBuffer = new ByteBuffer(headerSize);
     FileManipulator fm = new FileManipulator(byteBuffer);
 
     // 4 - Header (RIFF)
@@ -172,6 +186,12 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
 
     // 4 - Length
     int length = 4 + 8 + 16 + 8 + dataLength;
+    if (extraData != null) {
+      length += extraData.length;
+    }
+    if (samples != -1) {
+      length += 12;
+    }
     fm.writeInt(length);
 
     // 4 - Header 2 (WAVE)
@@ -181,10 +201,14 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
     fm.writeString("fmt ");
 
     // 4 - Block Size (16)
-    fm.writeInt(16);
+    int blockSize = 16;
+    if (extraData != null) {
+      blockSize += extraData.length;
+    }
+    fm.writeInt(blockSize);
 
     // 2 - Format Tag (0x0001)
-    fm.writeShort(0x0001);
+    fm.writeShort(codec);
 
     // 2 - Channels
     fm.writeShort(channels);
@@ -196,10 +220,35 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
     fm.writeInt(frequency * (bits / 8 * channels));
 
     // 2 - Block Alignment (bits/8 * channels)
-    fm.writeShort(bits / 8 * channels);
+    if (blockAlign != -1) {
+      fm.writeShort(blockAlign);
+    }
+    else {
+      fm.writeShort(bits / 8 * channels);
+    }
 
     // 2 - Bits Per Sample (bits)
     fm.writeShort(bits);
+
+    // X - Extra Data
+    if (extraData != null) {
+      fm.writeBytes(extraData);
+    }
+
+    // Samples (optional)
+
+    if (samples != -1) {
+      // 4 - Header (fact)
+      fm.writeString("fact");
+
+      // 4 - Data Length 
+      fm.writeInt(4);
+
+      // 4 - Number of Samples 
+      fm.writeInt(samples);
+    }
+
+    // Raw Audio Data
 
     // 4 - Header 4 (data)
     fm.writeString("data");

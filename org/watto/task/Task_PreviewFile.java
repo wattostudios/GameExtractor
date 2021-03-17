@@ -18,6 +18,7 @@ import java.io.File;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.SingletonManager;
+import org.watto.TemporarySettings;
 import org.watto.component.ComponentRepository;
 import org.watto.component.SidePanel_ImageInvestigator;
 import org.watto.component.SidePanel_Preview;
@@ -69,10 +70,12 @@ public class Task_PreviewFile extends AbstractTask {
       // already extracted
     }
     else {
+      TemporarySettings.set("ExportForPreview", true);
       Task_ExportFiles task = new Task_ExportFiles(directory, resource);
       task.setShowPopups(false);
       task.setShowProgressPopups(false); // this barely appears, and slows down the preview repainting significantly, so don't worry about it.
       task.redo();
+      TemporarySettings.set("ExportForPreview", false);
     }
     File path = resource.getExportedPath();
 

@@ -46,7 +46,8 @@ public class Plugin_A_LECF extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Moonbase Commander");
+    setGames("Fatty Bear's Birthday Surprise",
+        "Moonbase Commander");
     setExtensions("(a)"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

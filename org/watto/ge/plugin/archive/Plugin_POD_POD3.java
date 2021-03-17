@@ -2,7 +2,6 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -24,6 +23,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -138,10 +138,11 @@ public class Plugin_POD_POD3 extends ArchivePlugin {
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
-      // 4 - Unknown
-      // 4 - Unknown (1000)
-      // 4 - Unknown (1000)
-      // 160 - null
+      // 4 - Number Of Audit Files
+      // 4 - Revision (1000)
+      // 4 - Priority (1000)
+      // 80 - Author
+      // 80 - Copyright
       fm.skip(172);
 
       // 4 - Directory Offset

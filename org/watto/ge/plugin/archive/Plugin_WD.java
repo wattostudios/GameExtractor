@@ -20,11 +20,11 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.StringConverter;
 import org.watto.task.TaskProgressManager;
@@ -109,7 +109,7 @@ public class Plugin_WD extends ArchivePlugin {
   public Resource[] read(File path) {
     try {
 
-      ExporterPlugin exporter = Exporter_ZLib_CompressedSizeOnly.getInstance();
+      Exporter_ZLib_CompressedSizeOnly exporter = Exporter_ZLib_CompressedSizeOnly.getInstance();
       addFileTypes();
 
       FileManipulator fm = new FileManipulator(path, false);
@@ -123,23 +123,50 @@ public class Plugin_WD extends ArchivePlugin {
       long dirOffset = arcSize - dirLength;
       dirLength -= 4;
 
+      /*
       fm.close();
-
+      
       // Decompress the directory
       File tempfile = new File("temp" + File.separator + "wd_directory_decompressed.dat");
       if (tempfile.exists()) {
         tempfile.delete();
       }
       FileManipulator extDir = new FileManipulator(tempfile, true);
-      String dirName = extDir.getFilePath();
-      Resource directory = new Resource(path, dirName, dirOffset, dirLength, dirLength * 20);
-
+      String dirTempName = extDir.getFilePath();
+      Resource directory = new Resource(path, dirTempName, dirOffset, dirLength, dirLength * 20);
+      
       exporter.extract(directory, extDir);
-
+      
       extDir.close();
-
+      
       // Now open the directory and read it
-      fm = new FileManipulator(new File(dirName), false);
+      fm = new FileManipulator(new File(dirTempName), false);
+      */
+
+      // X - Compressed Directory Data (ZLib)
+      int dirDecompLength = dirLength * 20; // not sure how big the decompressed data actually is
+      byte[] dirBytes = new byte[dirDecompLength];
+      int decompWritePos = 0;
+      fm.seek(dirOffset);
+      exporter.open(fm, dirLength, dirDecompLength);
+
+      for (int b = 0; b < dirDecompLength; b++) {
+        if (exporter.available()) { // make sure we read the next bit of data, if required
+          dirBytes[decompWritePos++] = (byte) exporter.read();
+        }
+        else {
+          break;
+        }
+      }
+
+      // resize to the actual decomp size
+      byte[] oldBytes = dirBytes;
+      dirBytes = new byte[decompWritePos];
+      System.arraycopy(oldBytes, 0, dirBytes, 0, decompWritePos);
+
+      // open the decompressed data for processing
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(dirBytes));
 
       // 8 - Unknown
       fm.skip(8);
@@ -155,7 +182,7 @@ public class Plugin_WD extends ArchivePlugin {
 
       // Loop through directory
       int realNumFiles = 0;
-      dirName = "";
+      String dirName = "";
       while (realNumFiles < numFiles && fm.getRemainingLength() > 0) {
         //for (int i=0;i<numFiles;i++){
         // 1 - Filename Length (NOT including the null terminator)

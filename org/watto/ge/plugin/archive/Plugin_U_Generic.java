@@ -86,7 +86,7 @@ public class Plugin_U_Generic extends PluginGroup_U {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, -1);
+    return super.getMatchRating(fm, -1) + 1; // +1 to make it favour this one slightly over any other ones that didn't match versions either.
   }
 
   /**

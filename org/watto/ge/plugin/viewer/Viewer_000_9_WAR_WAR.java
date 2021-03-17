@@ -25,6 +25,7 @@ import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_000_9;
+import org.watto.ge.plugin.archive.Plugin_DAT_77;
 import org.watto.io.FileManipulator;
 
 /**
@@ -43,7 +44,8 @@ public class Viewer_000_9_WAR_WAR extends ViewerPlugin {
     super("000_9_WAR_WAR", "Tomb Raider WAR Image");
     setExtensions("war");
 
-    setGames("Tomb Raider: Anniversary",
+    setGames("Legacy of Kain: Soul Reaver 2",
+        "Tomb Raider: Anniversary",
         "Tomb Raider: Legend",
         "Tomb Raider: Underworld");
     setPlatforms("PC");
@@ -72,7 +74,7 @@ public class Viewer_000_9_WAR_WAR extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (plugin instanceof Plugin_000_9) {
+      if (plugin instanceof Plugin_000_9 || plugin instanceof Plugin_DAT_77) {
         rating += 50;
       }
       else if (!(plugin instanceof AllFilesPlugin)) {
@@ -208,6 +210,9 @@ public class Viewer_000_9_WAR_WAR extends ViewerPlugin {
       ImageResource imageResource = null;
       if (imageFormat == 32) {
         imageResource = ImageFormatReader.readBGRA(fm, width, height);
+      }
+      else if (imageFormat == 16) {
+        imageResource = ImageFormatReader.readRGBA5551(fm, width, height);
       }
       else {
         ErrorLogger.log("[Viewer_000_9_WAR_WAR] Unknown image format: " + imageFormat);

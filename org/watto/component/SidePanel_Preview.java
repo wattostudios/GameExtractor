@@ -40,6 +40,7 @@ import org.watto.ge.plugin.PluginListBuilder;
 import org.watto.ge.plugin.RatedPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FilenameChecker;
+import org.watto.io.FilenameSplitter;
 import org.watto.task.Task;
 import org.watto.task.Task_PreviewFile;
 import org.watto.xml.XMLNode;
@@ -556,6 +557,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
         return false;
       }
 
+      //System.out.println("Opening with Viewer " + plugin.getCode());
       PreviewPanel panel = plugin.read(path);
 
       if (panel != null) {
@@ -636,6 +638,20 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
     File destination = new File(Settings.get("SavedPreviewDirectory") + File.separator + saveFilename + "." + plugin.getExtension(0));
     destination = FilenameChecker.correctFilename(destination); // Remove bad characters from the save filename
     //System.out.println(destination.getAbsolutePath());
+
+    if (destination.exists() && destination.isFile()) {
+      // to cater for archives with multiple files of the same name, append a number to the end of the name
+      String path = FilenameSplitter.getDirectory(destination) + File.separator + FilenameSplitter.getFilename(destination);
+      String extension = "." + FilenameSplitter.getExtension(destination);
+
+      for (int i = 1; i < 1000; i++) {
+        File testDestination = new File(path + i + extension);
+        if (!testDestination.exists()) {
+          destination = testDestination;
+          break;
+        }
+      }
+    }
 
     // Making a valid filename, and building the directories
     // DON'T THINK THESE LINE IS NEEDED ANY MORE, because new FileBuffer() does it automatically

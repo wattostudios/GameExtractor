@@ -23,18 +23,35 @@ import org.watto.plaf.LookAndFeelManager;
 public class FileType {
 
   public static int TYPE_ARCHIVE = 0;
+
   public static int TYPE_AUDIO = 1;
+
   public static int TYPE_DOCUMENT = 2;
+
   public static int TYPE_IMAGE = 3;
+
   public static int TYPE_PROGRAM = 4;
+
   public static int TYPE_VIDEO = 5;
+
+  public static int TYPE_MODEL = 6;
+
   public static int TYPE_OTHER = -1;
+
   public static Image IMAGE_ARCHIVE;
+
   public static Image IMAGE_AUDIO;
+
   public static Image IMAGE_DOCUMENT;
+
   public static Image IMAGE_IMAGE;
+
   public static Image IMAGE_PROGRAM;
+
   public static Image IMAGE_VIDEO;
+
+  public static Image IMAGE_MODEL;
+
   public static Image IMAGE_OTHER;
 
   /** The file extension **/
@@ -42,6 +59,7 @@ public class FileType {
 
   /** GE-set description **/
   String description;
+
   /** GE-set type **/
   int type;
 
@@ -53,7 +71,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public FileType() {
@@ -71,12 +89,13 @@ public class FileType {
     IMAGE_IMAGE = LookAndFeelManager.getImageIcon("images/FileTypes/Image.png").getImage();
     IMAGE_PROGRAM = LookAndFeelManager.getImageIcon("images/FileTypes/Program.png").getImage();
     IMAGE_VIDEO = LookAndFeelManager.getImageIcon("images/FileTypes/Video.png").getImage();
+    IMAGE_MODEL = LookAndFeelManager.getImageIcon("images/FileTypes/Model.png").getImage();
     IMAGE_OTHER = LookAndFeelManager.getImageIcon("images/FileTypes/Other.png").getImage();
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public FileType(String extension, String description) {
@@ -85,7 +104,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public FileType(String extension, String description, int type) {
@@ -98,7 +117,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public FileType(String extension, String description, String typeName) {
@@ -132,7 +151,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public String getDescription() {
@@ -152,7 +171,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public String getExtension() {
@@ -161,7 +180,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Image getImage() {
@@ -196,6 +215,9 @@ public class FileType {
     else if (type == TYPE_VIDEO) {
       return IMAGE_VIDEO;
     }
+    else if (type == TYPE_MODEL) {
+      return IMAGE_MODEL;
+    }
     else {
       return IMAGE_OTHER;
     }
@@ -204,7 +226,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public int getType() {
@@ -213,7 +235,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void loadSystemSpecificDetails() {
@@ -239,7 +261,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setDescription(String description) {
@@ -248,7 +270,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setExtension(String extension) {
@@ -257,7 +279,7 @@ public class FileType {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setType(int type) {

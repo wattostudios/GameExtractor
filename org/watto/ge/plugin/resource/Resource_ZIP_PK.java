@@ -21,6 +21,7 @@ import org.watto.ge.plugin.ExporterPlugin;
 public class Resource_ZIP_PK extends Resource {
 
   long crc = 0;
+
   long time = 0;
 
   /**
@@ -111,7 +112,10 @@ public class Resource_ZIP_PK extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

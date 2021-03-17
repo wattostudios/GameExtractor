@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@ public class _Plugin_XXX_Columns extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public _Plugin_XXX_Columns() {
@@ -80,7 +80,7 @@ public class _Plugin_XXX_Columns extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -98,7 +98,7 @@ public class _Plugin_XXX_Columns extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -233,7 +233,7 @@ public class _Plugin_XXX_Columns extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

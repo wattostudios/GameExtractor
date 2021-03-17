@@ -58,6 +58,7 @@ import org.watto.event.listener.WSClickableListener;
 import org.watto.event.listener.WSMouseReleasableListener;
 import org.watto.event.listener.WSResizableListener;
 import org.watto.event.listener.WSTransferableListener;
+import org.watto.ge.helper.FileListFilter;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.plaf.LookAndFeelManager;
 import org.watto.xml.XMLNode;
@@ -78,6 +79,8 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
   private static final long serialVersionUID = 1L;
 
   WSTable table;
+
+  WSTableHeaderFilter tableFilter = null;
 
   FileListModel_Table model;
 
@@ -290,6 +293,9 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
     }
     catch (Throwable t) {
     }
+
+    //tableFilter = new WSTableHeaderFilter(table);
+    //scrollPane.setColumnHeader(tableFilter);
 
   }
 
@@ -1231,31 +1237,35 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
   @Override
   public boolean onDoubleClick(JComponent c, java.awt.event.MouseEvent e) {
     if (c == tree) {
-      Object[] path = tree.getSelectionPath().getPath();
+      try {
+        Object[] path = tree.getSelectionPath().getPath();
 
-      // go to the root of the main tree
-      Object parent = root.getParent();
-      while (parent != null) {
-        root = (FileListModel_Tree) parent;
-        parent = root.getParent();
-      }
+        // go to the root of the main tree
+        Object parent = root.getParent();
+        while (parent != null) {
+          root = (FileListModel_Tree) parent;
+          parent = root.getParent();
+        }
 
-      // now navigate through the main tree, as per the path
-      for (int i = 0; i < path.length; i++) {
-        String nodeToFind = (String) ((FileListModel_Tree) path[i]).getUserObject();
-        for (int j = 0; j < root.getChildCount(); j++) {
-          if (((String) ((FileListModel_Tree) root.getChildAt(j)).getUserObject()).equals(nodeToFind)) {
-            root = (FileListModel_Tree) root.getChildAt(j);
-            break;
+        // now navigate through the main tree, as per the path
+        for (int i = 0; i < path.length; i++) {
+          String nodeToFind = (String) ((FileListModel_Tree) path[i]).getUserObject();
+          for (int j = 0; j < root.getChildCount(); j++) {
+            if (((String) ((FileListModel_Tree) root.getChildAt(j)).getUserObject()).equals(nodeToFind)) {
+              root = (FileListModel_Tree) root.getChildAt(j);
+              break;
+            }
           }
         }
+
+        tree.expandPath(tree.getSelectionPath());
+
+        reloadTable();
+        return true;
       }
-
-      tree.expandPath(tree.getSelectionPath());
-
-      reloadTable();
-      return true;
-
+      catch (Throwable t) {
+        return false;
+      }
     }
     else if (c == table) {
 
@@ -1618,7 +1628,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       int i = 0;
       while (e.hasMoreElements()) {
         TableColumn column = e.nextElement();
-        System.out.println("Column: " + columns[i].getWidth() + " vs E: " + column.getWidth());
+        //System.out.println("Column: " + columns[i].getWidth() + " vs E: " + column.getWidth());
         columns[i].setWidth(column.getWidth());
         i++;
       }
@@ -1719,6 +1729,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
    **/
   @Override
   public void reload() {
+    //System.out.println("FileListPanel_TreeTable-->RELOAD");
     Resource[] resources = Archive.getResources();
 
     int selected = Settings.getInt("SelectedTreeTableType");
@@ -1848,7 +1859,6 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
    **********************************************************************************************
    **/
   public void reloadTable() {
-
     TableColumnModel columnModel = table.getColumnModel();
     WSTableColumn[] columns = Archive.getReadPlugin().getViewingColumns();
 
@@ -1863,19 +1873,32 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       setModel = true;
     }
 
+    // Get the resources to display
+    Resource[] resources = null;
+
     if (root.getParent() == null) {
       // this is the root of the whole tree, so it should display all resources in the table
       // ie double-clicking the root node called "Archive"
-      model.reload(Archive.getResources());
+      resources = Archive.getResources();
     }
     else {
-      model.reload(root.getChildrenResources(false, true));
+      resources = root.getChildrenResources(false, true);
     }
+
+    // Perform any filtering
+    resources = FileListFilter.filterResources(resources);
+
+    // load the resources
+    model.reload(resources);
 
     if (setModel) {
       table.setColumnModel(new DefaultTableColumnModel());
       table.setModel(model);
       columnModel = table.getColumnModel();
+      if (tableFilter != null) {
+        tableFilter.columnModelChanged(table);
+      }
+
     }
 
     int screenWidth = getWidth();

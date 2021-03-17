@@ -24,7 +24,7 @@ public class Resource_FileID extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource_FileID() {
@@ -114,7 +114,7 @@ public class Resource_FileID extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -144,7 +144,10 @@ public class Resource_FileID extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 
@@ -155,7 +158,7 @@ public class Resource_FileID extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public long getID() {
@@ -164,7 +167,7 @@ public class Resource_FileID extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setID(long fileID) {

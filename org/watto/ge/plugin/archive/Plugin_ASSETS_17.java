@@ -542,6 +542,8 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
 
     setFileTypes(Unity3DHelper.getFileTypes());
 
+    setTextPreviewExtensions("textasset"); // LOWER CASE
+
   }
 
   int[] fileTypeMapping = new int[1500]; // assuming a maximum of 1500 classes in a single file
@@ -1476,6 +1478,10 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         // Go to the data offset
         long offset = resource.getOffset();
         fm.seek(offset);
+
+        //if (fileType.equals(".Mesh")) {
+        //  System.out.println(offset);
+        //}
 
         // 4 - Filename Length
         int filenameLength = fm.readInt();

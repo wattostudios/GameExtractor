@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -52,10 +52,14 @@ import javax.swing.JFrame;
 - Archive with nested directories that we need to read - Plugin_FMF_FMF
 - Archive where multiple files are stored in a single ZLib block, so you need to decompress the ZLib, then find the file within it - Plugin_RSB_1BSR
 - Archive where the user is asked to choose an option (from a ComboBox) in a popup when saving - Plugin_PAK_EYEDENTITY (see start of replace() method)
-- Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_UE3_Texture2D_648 / 539
-- Image Viewer where a separate Palette file is extracted from the archive, and then used to create the image - IFF_SPR
+- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_BAG_6 and Plugin_BNK_XBNK and Plugin_BAG)
+- Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
+- Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
+- Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
 - Image Viewer where the image data is a big image, but it's read as blocks of 32x32 - Viewer_RSB_1BSR_PTX (see reorderPixelBlocks() method)
 - Image Viewer where the image width and height are stored on the Resource by the Plugin, so need to be retrieved before processing the image in the Viewer (DAT_66_BITMAP)
+- 3D Model Viewer - Viewer_Unity3D_MESH or Viewer_BMOD_OMOD_OBST or Viewer_POD_BIN
+- 3D Model Writer - Viewer_OBJ
 - Scanning unknown files to determine their file type (by adding some custom types to the list of standard ones) - Plugin_PAK_44
 - Scanning unknown files to determine their file type (custom, rather than using the automatic scanner) - Plugin_000_9 (see end of read() method)
 
@@ -116,13 +120,9 @@ import javax.swing.JFrame;
 - The KeyListeners on the FileListPanels and DirPanel (for selecting next filename with given letter) should allow input of text strings
   - ie pressing 2 characters should look for files starting with these 2 characters.
   - Resets the search string after 1 second.
-- Popup when loading for the first time, offering wizards and help
-  - WSOverlayPopup with the ability to load in a custom Layout XML file
 - Integrate with Windows Explorer, like ZIP files.
   - Can then add right-click items to Windows Explorer, eg "Extract all to new folder", which calls the command-line interface of GE
     - https://superuser.com/questions/392212/how-can-i-add-a-program-to-the-context-menu-of-all-files?rq=1
-- Add filters to the thumbnail view, just like TreeTable
-  - Include a Filename Filter above the "Groups" for simple matching like *Texture* for all files with Texture in the name
 - Add a SidePanel for "Search in contents of selected files" and "search in all file contents"
   - Instead of reading through from the offset, need to extract using the exporter, then read from the file instead.
     - Task_SearchFileContents
@@ -135,6 +135,12 @@ import javax.swing.JFrame;
   - Delete file
 - Option to auto-shrink the SidePanel when on mouseout, and unshrink when on mouseover
 - LUA Decompiler (for converting LUA bytecode into LUA script - eg. Homeworld 2)
+- gemod files - a special ZIP used for applying a mod to an archive
+  - Contains a script for running GE, as well as details of the archive to edit and the files to replace
+  - Contains the files that are being replaced into an archive
+  - When opened by GE, will apply the mod to an archive.
+    - will also create an "undo" gemod file - ie one that will convert the archive back to the original, which should basically
+      be the same as the original gemod file but with the original "replaced" files in it
 
 // PLUGIN THINGS...
 - Write an FFMPEG converter, to add it to the bottom of Audio Previews, so you can convert WAV to OGG, for example
@@ -142,7 +148,7 @@ import javax.swing.JFrame;
 - PVRTC Decoder --> https://www.javatips.net/api/NearInfinity-master/src/org/infinity/resource/graphics/PvrDecoder.java
 - Password-protected ZIP files --> https://github.com/srikanth-lingala/zip4j
   - feed in a list of known passwords (from an external file), and ask the user to choose which game it is
-- Further Viewer Plugins for Unity3D Formats
+- Unreal Engine SkeletalMesh/StaticMesh Viewers
 - Use FFMPEG for more file types - eg for EA-ADPCM Audio in the SCHl archives
 - See about embedding FFPLAY in a Viewer window for displaying videos and/or audio?
   - Use JNA as per this link ... http://www.rgagnon.com/javadetails/java-detect-if-a-program-is-running-using-jna.html
@@ -153,7 +159,6 @@ import javax.swing.JFrame;
 - New scanners for common formats used in newer Engines (eg Unity3D formats) and common XBox/Playstation/DirectX formats (eg XWMA audio)
   - Also maybe find a better way of listing this stuff on the website - a separate table???
 - Add padding support to the ImplicitFileReplacing classes (for all XBox games mostly)
-- Integrate with ZModeller or Noesis or something, for generating 3D models
 
 // GAME THINGS...
 - Some Iron Defense TEX images don't show properly
@@ -177,6 +182,7 @@ import javax.swing.JFrame;
   - Useful so that we know a task has completed, even if the Popup has been dismissed.
 - Add Syntax Checker for QuickBMS (instead of just showing a "can't check this" error message) and color syntax highlighting for QuickBMS
 - Websites to update
+  - The Cutting Room Floor (tcrf.net)
   - Wikipedia
     - https://en.wikipedia.org/wiki/Comparison_of_file_archivers
   - http://www.nationalarchives.gov.uk/PRONOM/Default.aspx
@@ -185,7 +191,6 @@ import javax.swing.JFrame;
     - NexusMods
 - Write HTML help pages for Tutorials
   - Also add the tutorial pages to the website
-  - Add Facebook/Twitter links to the GameExtractor webpage
   - Topics...
     - how to preview images on disk by adding them to a blank archive
     - how to export images to PNG for editing, then mass export them back to a real game format for saving in an archive
@@ -279,12 +284,15 @@ import org.watto.ChangeMonitor;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.TemporarySettings;
 import org.watto.TypecastSingletonManager;
 import org.watto.WSProgram;
 import org.watto.component.ComponentRepository;
 import org.watto.component.DirectoryListPanel;
 import org.watto.component.PreviewPanel_Image;
+import org.watto.component.PreviewPanel_Text;
 import org.watto.component.SidePanel_DirectoryList;
+import org.watto.component.SidePanel_Preview;
 import org.watto.component.WSButton;
 import org.watto.component.WSComponent;
 import org.watto.component.WSFileListPanelHolder;
@@ -293,6 +301,8 @@ import org.watto.component.WSPanel;
 import org.watto.component.WSPanelPlugin;
 import org.watto.component.WSPlugin;
 import org.watto.component.WSPluginManager;
+import org.watto.component.WSPopup;
+import org.watto.component.WSPreviewPanelHolder;
 import org.watto.component.WSRecentFileMenu;
 import org.watto.component.WSRecentFileMenuItem;
 import org.watto.component.WSSidePanelHolder;
@@ -315,9 +325,13 @@ import org.watto.io.converter.StringConverter;
 import org.watto.plaf.LookAndFeelManager;
 import org.watto.task.Task;
 import org.watto.task.TaskProgressManager;
+import org.watto.task.Task_CheckForModifiedExportFiles;
 import org.watto.task.Task_NewArchive;
+import org.watto.task.Task_Popup_PromptToDeleteAnalysisDirectory;
 import org.watto.task.Task_Popup_PromptToSaveBeforeClose;
+import org.watto.task.Task_Popup_WelcomeWizard;
 import org.watto.task.Task_ReadArchive;
+import org.watto.task.Task_WriteEditedTextFile;
 import org.watto.xml.XMLNode;
 
 /**
@@ -455,6 +469,8 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
         //sidePanelHolder.reloadPanel();
       }
     }
+
+    ge.showWelcomeWizard();
   }
 
   WSSidePanelHolder sidePanelHolder;
@@ -697,6 +713,10 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
         setSidePanel("DirectoryList");
         ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("CutPanel", false);
       }
+      else if (code.equals("AnalyzeDirectory")) {
+        setSidePanel("DirectoryList");
+        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("AnalyzePanel", false);
+      }
       else if (code.equals("CloseProgram")) {
         onClose();
       }
@@ -821,6 +841,23 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
     }
 
     ChangeMonitor.reset();
+
+    // ask whether you want to delete any of the files from the Analyze Directory tool
+    if (TemporarySettings.getBoolean("AskToDeleteAnalysisDirectory")) {
+      File extractDirectory = new File(new File(Settings.get("AnalysisExtractDirectory")).getAbsolutePath());
+      if (extractDirectory.exists() && extractDirectory.isDirectory()) {
+        File[] filesInDirectory = extractDirectory.listFiles();
+        if (filesInDirectory != null && filesInDirectory.length > 0) {
+          // Run as a task, so the overlay popup is displayed
+          Task_Popup_PromptToDeleteAnalysisDirectory task = new Task_Popup_PromptToDeleteAnalysisDirectory();
+          task.setDirection(Task.DIRECTION_REDO);
+          new Thread(task).start();
+
+          // stop the remaining processing - don't want to actually exit.
+          return false;
+        }
+      }
+    }
 
     // so that the PreviewPanel loads on next startup
     Settings.set("AutoChangedToHexPreview", "false");
@@ -951,6 +988,21 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
    **********************************************************************************************
+   Check all the resources that are exported - if they have different Modified timestamps than
+   they had when they were exported, they might have been changed by other programs and we might
+   want to automatically replace it in the Archive.
+   **********************************************************************************************
+   **/
+  public void checkForModifiedExportFiles() {
+    if (isFullVersion()) {
+      Task_CheckForModifiedExportFiles task = new Task_CheckForModifiedExportFiles();
+      task.setDirection(Task.DIRECTION_REDO);
+      new Thread(task).start();
+    }
+  }
+
+  /**
+   **********************************************************************************************
    * The event that is triggered from a WSWindowFocusableListener when a component gains focus
    * @param c the component that triggered the event
    * @param e the event that occurred
@@ -962,6 +1014,10 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       // reload the directory list
       ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).reloadDirectoryList();
     }
+
+    // Check all the resources that are exported - if they have different Modified timestamps than they had when they were exported,
+    // they might have been changed by other programs and we might want to automatically replace it in the Archive
+    checkForModifiedExportFiles();
 
     return true;
   }
@@ -1088,6 +1144,31 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **********************************************************************************************
   **/
   public boolean promptToSave() {
+
+    // First, if we're editing a text file, save the changes. This causes the Archive to be edited, so is picked up below.
+    try {
+      if (isFullVersion()) {
+        if (sidePanelHolder.getCurrentPanel() instanceof SidePanel_Preview) {
+          WSPreviewPanelHolder previewHolder = (WSPreviewPanelHolder) ComponentRepository.get("SidePanel_Preview_PreviewPanelHolder");
+          if (previewHolder != null) {
+            if (previewHolder.getCurrentPanel() instanceof PreviewPanel_Text) {
+              PreviewPanel_Text textPreview = (PreviewPanel_Text) previewHolder.getCurrentPanel();
+              if (textPreview.isTextChanged()) {
+                //textPreview.saveChanges();
+                Task_WriteEditedTextFile task = new Task_WriteEditedTextFile(textPreview);
+                task.setDirection(Task.DIRECTION_REDO);
+                task.setShowPopups(false);
+                task.run();
+              }
+            }
+          }
+        }
+      }
+    }
+    catch (Throwable t) {
+    }
+
+    // Now check if the Archive was edited at all, and prompt to save
     if (ChangeMonitor.check()) {
       if (isFullVersion()) {
         if (ChangeMonitor.popup()) {
@@ -1099,6 +1180,22 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       }
     }
     return false;
+  }
+
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public void promptToDeleteAnalysisDirectory() {
+    TemporarySettings.set("AskToDeleteAnalysisDirectory", false); // so we only ask once
+
+    String ok = WSPopup.showConfirm("DeleteAnalysisDirectory");
+    if (ok.equals(WSPopup.BUTTON_YES)) {
+      deleteTempFiles(new File(new File(Settings.get("AnalysisExtractDirectory")).getAbsolutePath()));
+    }
+
+    onClose(false);
   }
 
   /**
@@ -1204,6 +1301,27 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
     //System.out.println(location);
     //mainSplit.resetToPreferredSizes();
     //mainSplit.setDividerLocation(splitPos);
+  }
+
+  /**
+   **********************************************************************************************
+   Shows a "Welcome" message to new users. This is only displayed if the user is a new user, and
+   only if we're using an OverlayPanel.
+   **********************************************************************************************
+   **/
+  public void showWelcomeWizard() {
+    if (!isFullVersion()) { // if you own the full version, you should have used GE before, so don't need the welcome message
+      if (Settings.getBoolean("ShowWelcomeWizard")) {
+        Task_Popup_WelcomeWizard popupTask = new Task_Popup_WelcomeWizard();
+        popupTask.setDirection(Task.DIRECTION_REDO);
+        new Thread(popupTask).start();
+        //SwingUtilities.invokeLater(popupTask);
+      }
+    }
+    else {
+      // IMPORTANT, so that it doesn't mess with the loading of the File List
+      Settings.set("ShowWelcomeWizard", false);
+    }
   }
 
   /**

@@ -245,16 +245,23 @@ public class FileTypeDetector {
           else if (headerInt1 == 1179011410 && headerInt3 == 1095587672) { // RIFF XWMA (XBox Audio)
             extension = "xwma";
           }
+          else if (headerInt1 == 1179011410 && headerInt3 == 542524742) { // RIFF FEV
+            extension = "fev";
+          }
           else if (headerInt1 == 1179011410) {
             extension = "riff"; // GENERIC RIFF, NEEDS TO BE AT THE END OF THE LIST!!! (or at least after WAV and WEBP)
           }
           else if (headerInt1 == 1836597052) {
             extension = "xml";
           }
+          else if (headerInt1 == 1178882085) {
+            extension = "pdf";
+          }
           else {
             // if we didn't find any matches...
             if (debugMode) {
-              extension = "unknown" + headerInt1;
+              //extension = "unknown" + headerInt1;
+              extension = "" + headerInt1;
             }
             else {
               extension = "unknown";

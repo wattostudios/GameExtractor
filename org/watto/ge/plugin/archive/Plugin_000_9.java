@@ -46,7 +46,8 @@ public class Plugin_000_9 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Tomb Raider: Anniversary",
+    setGames("Lara Croft and the Guardian of Light",
+        "Tomb Raider: Anniversary",
         "Tomb Raider: Legend",
         "Tomb Raider: Underworld");
     setExtensions("000"); // MUST BE LOWER CASE

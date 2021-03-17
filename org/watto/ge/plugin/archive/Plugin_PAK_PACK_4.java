@@ -15,6 +15,8 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.QuickBMSHelper;
@@ -42,10 +44,11 @@ public class Plugin_PAK_PACK_4 extends ArchivePlugin {
     super("PAK_PACK_4", "PAK_PACK_4");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Alpine Skiing 2006",
-        "Alpine Ski Racing 2007");
+        "Alpine Ski Racing 2007",
+        "Skispringen 2007");
     setExtensions("pak");
     setPlatforms("PC");
 
@@ -180,7 +183,10 @@ public class Plugin_PAK_PACK_4 extends ArchivePlugin {
         String filename = fm.readNullString();
         FieldValidator.checkFilename(filename);
 
-        resources[i].setName(filename);
+        Resource resource = resources[i];
+
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       fm.close();
@@ -191,6 +197,143 @@ public class Plugin_PAK_PACK_4 extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      long headerSize = 16;
+      long directorySize = numFiles * 24;
+
+      long filenameDirSize = 0;
+      for (int i = 0; i < numFiles; i++) {
+        filenameDirSize += resources[i].getNameLength() + 1;
+      }
+
+      long arcSize = headerSize + directorySize + filenameDirSize;
+      int paddingSize = calculatePadding(arcSize, 32);
+
+      // Write Header Data
+
+      // 4 - Header (PACK)
+      // 4 - Version (2)
+      // 4 - Number Of Files
+      // 4 - Directory Length
+      fm.writeBytes(src.readBytes(16));
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = arcSize + paddingSize;
+      long nameOffset = headerSize + directorySize;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long decompLength = resource.getDecompressedLength();
+        long length = resource.getLength();
+
+        if (!resource.isReplaced()) {
+          // unchanged
+
+          // 4 - Compressed File Size
+          // 4 - Decompressed File Size
+          fm.writeBytes(src.readBytes(8));
+
+          // 4 - File Offset
+          // 4 - Filename Offset
+          fm.writeInt(offset);
+          fm.writeInt(nameOffset);
+          src.skip(8);
+
+          // 4 - Hash?
+          // 4 - Compression Type (107)
+          fm.writeBytes(src.readBytes(8));
+        }
+        else {
+          // replaced
+
+          // 4 - Compressed File Size
+          fm.writeInt(length);
+
+          // 4 - Decompressed File Size
+          fm.writeInt(decompLength);
+
+          // 4 - File Offset
+          fm.writeInt(offset);
+
+          // 4 - Filename Offset
+          fm.writeInt(nameOffset);
+
+          src.skip(16);
+
+          // 4 - Hash?
+          fm.writeBytes(src.readBytes(4));
+
+          // 4 - Compression Type (107)
+          fm.writeInt(0);
+          src.skip(4);
+        }
+
+        offset += length;
+
+        int padding = calculatePadding(length, 32);
+        offset += padding;
+
+        nameOffset += resource.getNameLength() + 1;
+      }
+
+      for (int i = 0; i < numFiles; i++) {
+        // X - Filename (null)
+        fm.writeNullString(resources[i].getName());
+      }
+
+      for (int i = 0; i < paddingSize; i++) {
+        fm.writeString("U");
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        // set the exporter to the default, so it's copies with compression (or copied raw if replaced)
+        ExporterPlugin exporter = resource.getExporter();
+        resource.setExporter(exporterDefault);
+
+        // X - File Data
+        write(resource, fm);
+
+        resource.setExporter(exporter);
+
+        // X - Padding (using (byte) 170) to a multiple of 32? bytes
+        int padding = calculatePadding(resource.getLength(), 32);
+        for (int p = 0; p < padding; p++) {
+          fm.writeByte(170);
+        }
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

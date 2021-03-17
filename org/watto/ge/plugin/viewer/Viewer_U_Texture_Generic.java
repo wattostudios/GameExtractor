@@ -207,7 +207,10 @@ public class Viewer_U_Texture_Generic extends ViewerPlugin {
       // 1-5 - Number Of Colors
       int numColors = (int) PluginGroup_U.readIndex(fm);
       if (numColors == 0) {
-        return null;
+        numColors = (int) PluginGroup_U.readIndex(fm);
+        if (numColors == 0) {
+          return null;
+        }
       }
 
       if (fm.getLength() - (numColors * 4) > 50) {
@@ -295,6 +298,10 @@ public class Viewer_U_Texture_Generic extends ViewerPlugin {
         // 4 - Height
         int height = fm.readInt();
         FieldValidator.checkNumFiles(height);
+
+        if ((width * height) != dataLength) {
+          return null; // not enough data - probably not actually paletted, might be DXT
+        }
 
         // 1 - ID
         // 1 - ID

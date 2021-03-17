@@ -162,8 +162,15 @@ public class Viewer_P_DFPF_TEXTURE extends ViewerPlugin {
         fm.skip(4);
       }
       else {
-        // version 2
-        fm.skip(32);
+        fm.skip(4);
+        if (fm.readString(4).equals("rtxT")) {
+          // version 6
+          fm.skip(4);
+        }
+        else {
+          // version 2
+          fm.skip(24);
+        }
       }
 
       // X - DDS Image

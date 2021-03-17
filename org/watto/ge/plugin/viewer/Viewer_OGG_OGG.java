@@ -30,7 +30,7 @@ public class Viewer_OGG_OGG extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Viewer_OGG_OGG() {
@@ -48,17 +48,21 @@ public class Viewer_OGG_OGG extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public boolean canWrite(PreviewPanel panel) {
+    // NOTE: Write isn't normally triggered. Special case only for extracting OGGs from Unreal Engine 4 (PAK_38)
+    if (panel instanceof PreviewPanel_OggVorbisAudio) {
+      return true;
+    }
     return false;
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -91,7 +95,7 @@ public class Viewer_OGG_OGG extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -111,7 +115,7 @@ public class Viewer_OGG_OGG extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -121,11 +125,28 @@ public class Viewer_OGG_OGG extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public void write(PreviewPanel preview, FileManipulator fm) {
+    // NOTE: Write isn't normally triggered. Special case only for extracting OGGs from Unreal Engine 4 (PAK_38)
+    if (!(preview instanceof PreviewPanel_OggVorbisAudio)) {
+      return;
+    }
+
+    File oggFile = ((PreviewPanel_OggVorbisAudio) preview).getOggFilePath();
+    if (!oggFile.exists() || !oggFile.isFile()) {
+      return;
+    }
+
+    int length = (int) oggFile.length();
+
+    FileManipulator oggFM = new FileManipulator(oggFile, false);
+    for (int i = 0; i < length; i++) {
+      fm.writeByte(oggFM.readByte());
+    }
+    oggFM.close();
   }
 
 }

@@ -1,7 +1,7 @@
 <settingsStore>
 	<program>Game Extractor</program>
 	<settings>
-		<setting code="Version" value="3.11" changable="false" />
+		<setting code="Version" value="3.12" changable="false" />
 		<setting code="AboutFile" value="settings/about.xml" />
 		
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
@@ -21,6 +21,8 @@
 		<setting code="AutoResizeTableColumns" value="true" />
 		<setting code="CheckScriptResourceValues" value="true" />
 		<setting code="ColorScriptSyntax" value="true" />
+		
+		<setting code="NintendoSwitchSwizzle" value="false" />
 		<setting code="CurrentArchive" value="C:\_WATTOz\+Backups\+++Testing_For_GE\GE_Test.zip" />
 		<setting code="CurrentDirectory" value="" />
 		<setting code="CurrentFileList" value="TreeTable" />
@@ -45,6 +47,8 @@
 		<setting code="ExtendedLanguageDebug" value="false" />
 		<setting code="ExtendedSettingsDebug" value="false" />
 		<setting code="ExtractDirectory" value="extract" />
+		
+		
 		<setting code="FFMPEG_Path" value="external_bins\ffmpeg" />
 		
 		<setting code="dwebp_Path" value="external_bins\dwebp" />
@@ -76,6 +80,10 @@
 		<setting code="MaxFilenameLength" value="255" />
 		<setting code="MaxNumberOfFiles2" value="40000" />
 		<setting code="MaxNumberOfFiles4" value="100000" />
+		
+		<setting code="MaxNumberOfFaces4" value="1000000" />
+		
+		<setting code="MaxNumberOfVertices4" value="10000000" />
 		<setting code="MaximumDirectoryFileLength" value="524800" />
 		<setting code="NumberOfRecentFiles" value="4" />
 		<setting code="NumberOfUndoTasks" value="4" />
@@ -259,6 +267,33 @@
 		<setting code="WSTableColumn_r_Width" value="18" />
 		
 		<setting code="PreviewPanel_ImageInvestigator_LittleEndianRadioButtonSelected" value="true" />
+		
+		<setting code="SearchWildcardConversion" value="true" />
+		
+		<setting code="SearchRegExConversion" value="false" />
+		
+		<setting code="ShowWelcomeWizard" value="true" />
+		
+		<setting code="AnalysisExtractDirectory" value="extract" />
+		
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" value="false" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" value="true" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" value="false" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" value="false" />
+		
+		<setting code="Popup_PreviewPanel_Text_ChangesSaved_Show" value="false" />
+		
+		<setting code="Popup_AnalyzeDirectory_DirectoryAnalyzed_Show" value="true" />
+		<setting code="Popup_AnalyzeDirectory_InvalidReportFile_Show" value="true" />
+		<setting code="Popup_AnalyzeDirectory_FilenameMissing_Show" value="true" />
+		<setting code="Popup_AnalyzeDirectory_FileNotADirectory_Show" value="true" />
+		
+		<setting code="ShowAdvancedControlsInDirectoryList" value="false" />
+		
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex" value="0" />
+		
+		<setting code="AutoImportModifiedExportFiles" value="false" />
+		<setting code="Popup_ModifiedFilesImported_Show" value="true" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

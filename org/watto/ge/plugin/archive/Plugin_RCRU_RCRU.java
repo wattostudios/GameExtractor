@@ -229,7 +229,7 @@ public class Plugin_RCRU_RCRU extends ArchivePlugin {
 
         return resources;
       }
-      else if (archiveType == 5) {
+      else if (archiveType == 5 || archiveType == 3) {
         //
         // ONLY DIRECTORY IS COMPRESSED
         //

@@ -17,7 +17,9 @@ package org.watto.task;
 import java.io.File;
 import java.util.Arrays;
 import org.watto.Language;
+import org.watto.Settings;
 import org.watto.SingletonManager;
+import org.watto.TemporarySettings;
 import org.watto.component.ComponentRepository;
 import org.watto.component.PreviewPanel;
 import org.watto.component.WSDirectoryListHolder;
@@ -31,6 +33,8 @@ import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.exporter.BlockQuickBMSExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_QuickBMSWrapper;
 import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.resource.Resource_PAK_38;
+import org.watto.ge.plugin.viewer.Viewer_OGG_OGG;
 import org.watto.io.DirectoryBuilder;
 import sun.awt.shell.ShellFolder;
 
@@ -178,6 +182,11 @@ public class Task_ExportFiles extends AbstractTask {
     Resource[] bulkResources = new Resource[numResources];
     int numBulkResources = 0;
 
+    boolean exportForPreview = TemporarySettings.has("ExportForPreview");
+    if (exportForPreview) {
+      exportForPreview = TemporarySettings.getBoolean("ExportForPreview");
+    }
+
     for (int i = 0; i < numResources; i++) {
       Resource resource = resources[i];
       ExporterPlugin exporter = resource.getExporter();
@@ -188,8 +197,44 @@ public class Task_ExportFiles extends AbstractTask {
       }
       else {
         // extract it normally
-        resources[i].extract(directory);
+        Resource resourceToExtract = resources[i];
+        resourceToExtract.extract(directory);
         TaskProgressManager.setValue(i, 1); // update the value of the second progress bar
+
+        if (resourceToExtract instanceof Resource_PAK_38 && !exportForPreview) { // !exportForPreview, because preview exports are loaded into buffer, not to file
+          // For Unreal Engine 4 files, also unpack the releated resources (the uexp, ubulk, ... files)
+          Resource_PAK_38 resource38 = (Resource_PAK_38) resourceToExtract;
+
+          Resource[] relatedResources = resource38.getRelatedResources();
+          if (relatedResources != null) {
+            int numRelatedResources = relatedResources.length;
+            for (int r = 0; r < numRelatedResources; r++) {
+              relatedResources[r].extract(directory);
+            }
+          }
+
+          // Also add a converter for SoundWave files, so they get exported to OGG files
+          try {
+            if (resource38.getExtension().equalsIgnoreCase("SoundWave")) {
+
+              if (converterPlugins == null || converterPlugins.length == 0) {
+                converterPlugins = new ViewerPlugin[] { new Viewer_OGG_OGG() };
+              }
+              else {
+                int addPoint = converterPlugins.length;
+                ViewerPlugin[] oldPlugins = converterPlugins;
+                converterPlugins = new ViewerPlugin[addPoint + 1];
+                System.arraycopy(oldPlugins, 0, converterPlugins, 0, addPoint);
+                converterPlugins[addPoint] = new Viewer_OGG_OGG();
+              }
+
+            }
+          }
+          catch (Throwable t) {
+            // Will occur for the Basic version (as the Viewer doesn't exist)
+          }
+        }
+
       }
     }
     // Now run the bulk extract
@@ -226,6 +271,10 @@ public class Task_ExportFiles extends AbstractTask {
     }
 
     if (numConverters > 0) {
+
+      // Disable "Play Audio On Preview"
+      boolean playAudioOnLoad = Settings.getBoolean("PlayAudioOnLoad");
+      Settings.set("PlayAudioOnLoad", false);
 
       TaskProgressManager.setMessage(Language.get("Progress_ConvertingFiles"));
       TaskProgressManager.setValue(0, 1); // update the value of the second progress bar
@@ -276,6 +325,9 @@ public class Task_ExportFiles extends AbstractTask {
 
         TaskProgressManager.setValue(r, 1); // update the value of the second progress bar
       }
+
+      // Reset "Play Audion On Preview" back to original value
+      Settings.set("PlayAudioOnLoad", playAudioOnLoad);
     }
 
     TaskProgressManager.stopTask();

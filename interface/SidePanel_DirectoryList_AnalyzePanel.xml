@@ -1,0 +1,31 @@
+<WSPanel code="SidePanel_DirectoryList_AnalyzePanel_Main" showLabel="true" showBorder="true" layout="BorderLayout" >
+	
+	<WSPanel layout="GridLayout" opaque="false" position="CENTER" rows="4" columns="1">
+		<WSOptionCheckBox code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" setting="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" opaque="false" />
+		<WSOptionCheckBox code="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" setting="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" opaque="false" />
+		<WSOptionCheckBox code="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" setting="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" opaque="false" />
+		<WSOptionCheckBox code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" setting="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" opaque="false" />
+	</WSPanel>
+	
+	<WSPanel layout="BorderLayout" opaque="false" position="SOUTH">
+		<WSPanel layout="GridLayout" opaque="false" position="NORTH" rows="2" columns="1">
+			
+			<WSPanel layout="GridLayout" rows="1" columns="2" position="SOUTH" opaque="false">
+				<WSPanel code="SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label" layout="GridLayout" rows="1" columns="1" showLabel="true" showBorder="true" opaque="false">
+					<WSComboBox code="SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins" />
+				</WSPanel>
+				<WSPanel code="SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label" layout="GridLayout" rows="1" columns="1" showLabel="true" showBorder="true" opaque="false">
+					<WSComboBox code="SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins" />
+				</WSPanel>
+			</WSPanel>
+			
+			
+			<WSPanel layout="BorderLayout" code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label" showLabel="true" showBorder="true" opaque="false">
+				<WSComboBox code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins" position="NORTH" />
+			</WSPanel>
+		</WSPanel>
+		<WSTextField code="SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField" opaque="false" showLabel="true" position="CENTER" />
+		<WSButton code="SidePanel_DirectoryList_AnalyzeDirectoryButton" showText="false" position="EAST" />
+	</WSPanel>
+
+</WSPanel>

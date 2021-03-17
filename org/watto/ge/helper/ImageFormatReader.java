@@ -1507,7 +1507,7 @@ public class ImageFormatReader {
     int numPixels = width * height;
 
     long remainingLength = fm.getRemainingLength();
-    if (remainingLength < (numPixels / 2)) { // quick simple check to kill off some bad reads
+    if (remainingLength < ((numPixels / 2) - 256)) { // quick simple check to kill off some bad reads (adds 256 bytes as a little tolerance)
       return null;
     }
 
@@ -2186,6 +2186,42 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+   * Reads a color palette in ARGB format
+   **********************************************************************************************
+   **/
+  public static int[] readPaletteARGB(FileManipulator fm, int colorCount) {
+
+    int[] palette = new int[colorCount];
+
+    for (int i = 0; i < colorCount; i++) {
+      // INPUT = ARGB
+      // OUTPUT = ARGB
+      palette[i] = ((ByteConverter.unsign(fm.readByte()) << 24) | (ByteConverter.unsign(fm.readByte()) << 16) | (ByteConverter.unsign(fm.readByte()) << 8) | (ByteConverter.unsign(fm.readByte())));
+    }
+
+    return palette;
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads a color palette in ABGR format
+   **********************************************************************************************
+   **/
+  public static int[] readPaletteABGR(FileManipulator fm, int colorCount) {
+
+    int[] palette = new int[colorCount];
+
+    for (int i = 0; i < colorCount; i++) {
+      // INPUT = ABGR
+      // OUTPUT = ARGB
+      palette[i] = ((ByteConverter.unsign(fm.readByte()) << 24) | (ByteConverter.unsign(fm.readByte())) | (ByteConverter.unsign(fm.readByte()) << 8) | (ByteConverter.unsign(fm.readByte()) << 16));
+    }
+
+    return palette;
+  }
+
+  /**
+   **********************************************************************************************
    * Reads PVRTC 4bpp Pixel Data
    * Calls "Noesis" to convert the compressed data into raw RGBA
    * THIS IS VERY SLOW!!!
@@ -2720,7 +2756,30 @@ public class ImageFormatReader {
       int bPixel = pixel & 255;
       bPixel = 255 - bPixel;
 
-      reversedPixels[i] = (aPixel << 24) | (rPixel << 16) | (gPixel << 8) | (bPixel); // <<8 >>8 removes the alpha from the top of the pixel
+      reversedPixels[i] = (aPixel << 24) | (rPixel << 16) | (gPixel << 8) | (bPixel);
+    }
+
+    image.setPixels(reversedPixels);
+    return image;
+  }
+
+  /**
+   **********************************************************************************************
+  Converts alpha values 0-127 to 0-255
+   **********************************************************************************************
+   **/
+  public static ImageResource doubleAlpha(ImageResource image) {
+    int[] pixels = image.getPixels();
+    int numPixels = pixels.length;
+
+    int[] reversedPixels = new int[numPixels];
+    for (int i = 0; i < numPixels; i++) {
+      int pixel = pixels[i];
+
+      int alphaValue = pixel >> 24;
+      alphaValue *= 2;
+
+      reversedPixels[i] = (pixel & 0xFFFFFF) | (alphaValue << 24);
     }
 
     image.setPixels(reversedPixels);
@@ -2747,7 +2806,7 @@ public class ImageFormatReader {
       int aPixel = pixel >> 24;
       aPixel = 255 - aPixel;
 
-      reversedPixels[i] = ((pixel << 8) >> 8) | (aPixel << 24); // <<8 >>8 removes the alpha from the top of the pixel
+      reversedPixels[i] = (pixel & 0xFFFFFF) | (aPixel << 24);
     }
 
     image.setPixels(reversedPixels);
@@ -2941,6 +3000,15 @@ public class ImageFormatReader {
     }
 
     return bytes;
+  }
+
+  /**
+   **********************************************************************************************
+  Un-swizzles an image for the Switch
+   **********************************************************************************************
+   **/
+  public static byte[] unswizzleSwitch(byte[] bytes, int width, int height) {
+    return NintendoSwitchSwizzleHelper.unswizzle(bytes, width, height);
   }
 
   /**

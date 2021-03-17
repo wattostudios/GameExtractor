@@ -8,9 +8,10 @@
 			<WSPanel showBorder="true" code="SidePanel_Search_ColumnsHolder" position="CENTER" opaque="false" />
 		</WSPanel>
 	
-		<WSPanel layout="GridLayout" rows="1" columns="2" position="SOUTH">
+		<WSPanel layout="GridLayout" rows="1" columns="3" position="SOUTH">
 			<WSButton code="SidePanel_Search_FindNextButton" showText="true" />
 			<WSButton code="SidePanel_Search_SelectAllButton" showText="true" />
+			<WSButton code="SidePanel_Search_FilterButton" showText="true" />
 		</WSPanel>
 		
 	</WSPanel>

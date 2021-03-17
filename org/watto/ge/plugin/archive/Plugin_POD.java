@@ -1,30 +1,27 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2020 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -49,29 +46,31 @@ public class Plugin_POD extends ArchivePlugin {
     setGames("4x4 Evolution",
         "4x4 Evolution 2",
         "Terminal Velocity",
-        "CART Precision Racing");
+        "CART Precision Racing",
+        "Monster Truck Madness 2");
     setPlatforms("PC");
 
-    setFileTypes("lst", "File List",
-        "opa", "Encrypted Image?",
-        "act", "Image Mapping?",
-        "smf", "3D Model",
-        "rpl", "Replay File",
-        "tex", "Texture Listing",
-        "clr", "Clear Image?",
-        "rtd", "Unknown File",
-        "sdw", "Unknown File",
-        "lvl", "Level Descriptor",
-        "sit", "Race Settings",
-        "trk", "Truck Information",
-        "bin", "Binary Data",
-        "lte", "Unknown File",
-        "map", "Map File",
-        "pbm", "PBM Image",
-        "sfx", "Sound Settings",
-        "loc", "Text Description",
-        "vox", "Configuration List",
-        "rsp", "File List");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("lst", "File List", FileType.TYPE_OTHER),
+        new FileType("opa", "Encrypted Image?", FileType.TYPE_OTHER),
+        new FileType("act", "Image Mapping?", FileType.TYPE_OTHER),
+        new FileType("smf", "3D Model", FileType.TYPE_OTHER),
+        new FileType("rpl", "Replay File", FileType.TYPE_OTHER),
+        new FileType("tex", "Texture Listing", FileType.TYPE_OTHER),
+        new FileType("clr", "Clear Image?", FileType.TYPE_OTHER),
+        new FileType("rtd", "Unknown File", FileType.TYPE_OTHER),
+        new FileType("sdw", "Unknown File", FileType.TYPE_OTHER),
+        new FileType("lvl", "Level Descriptor", FileType.TYPE_OTHER),
+        new FileType("sit", "Race Settings", FileType.TYPE_OTHER),
+        new FileType("trk", "Truck Information", FileType.TYPE_OTHER),
+        new FileType("bin", "3D Model", FileType.TYPE_MODEL),
+        new FileType("lte", "Unknown File", FileType.TYPE_OTHER),
+        new FileType("map", "Map File", FileType.TYPE_OTHER),
+        new FileType("pbm", "PBM Image", FileType.TYPE_OTHER),
+        new FileType("sfx", "Sound Settings", FileType.TYPE_OTHER),
+        new FileType("loc", "Text Description", FileType.TYPE_OTHER),
+        new FileType("vox", "Configuration List", FileType.TYPE_OTHER),
+        new FileType("rsp", "File List", FileType.TYPE_OTHER));
 
   }
 

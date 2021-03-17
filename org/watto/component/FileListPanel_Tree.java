@@ -48,6 +48,7 @@ import org.watto.event.WSRightClickableInterface;
 import org.watto.event.WSTransferableInterface;
 import org.watto.event.listener.WSClickableListener;
 import org.watto.event.listener.WSTransferableListener;
+import org.watto.ge.helper.FileListFilter;
 import org.watto.ge.helper.FileListSorter;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.plaf.LookAndFeelManager;
@@ -1020,6 +1021,9 @@ public class FileListPanel_Tree extends FileListPanel implements WSClickableInte
     }
 
     Resource[] resources = FileListSorter.sort(Archive.getColumn(0), false);
+
+    // Perform any filtering
+    resources = FileListFilter.filterResources(resources);
 
     for (int i = 0; i < resources.length; i++) {
       // get the resource

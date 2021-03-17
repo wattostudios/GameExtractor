@@ -28,6 +28,7 @@ public class Exporter_XOR extends ExporterPlugin {
   static Exporter_XOR instance = new Exporter_XOR();
 
   static FileManipulator readSource;
+
   static long readLength = 0;
 
   /**
@@ -57,6 +58,7 @@ public class Exporter_XOR extends ExporterPlugin {
   **/
   public Exporter_XOR(int xorValue) {
     super();
+    setName("XOR Encrypted File");
     this.xorValue = xorValue;
   }
 

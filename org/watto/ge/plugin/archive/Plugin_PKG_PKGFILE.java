@@ -21,6 +21,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.exporter.Exporter_XOR_RepeatingKey;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -33,7 +34,7 @@ public class Plugin_PKG_PKGFILE extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PKG_PKGFILE() {
@@ -55,7 +56,7 @@ public class Plugin_PKG_PKGFILE extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -69,7 +70,8 @@ public class Plugin_PKG_PKGFILE extends ArchivePlugin {
       }
 
       // 42 - Header (Unicode String "PKG_FILE_VERSION:0004")
-      if (fm.readUnicodeString(42).equals("PKG_FILE_VERSION:0004")) {
+      String header = fm.readUnicodeString(21);
+      if (header.equals("PKG_FILE_VERSION:0004") || header.equals("PKG_FILE_VERSION:0005")) {
         rating += 50;
       }
 
@@ -109,7 +111,7 @@ public class Plugin_PKG_PKGFILE extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      //ExporterPlugin exporter = Exporter_Default.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -117,19 +119,50 @@ public class Plugin_PKG_PKGFILE extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // skip to the end and read the footer
-      fm.seek(arcSize - 8);
+      // 42 - Header (Unicode String "PKG_FILE_VERSION:0004")
+      String header = fm.readUnicodeString(21);
 
-      // 4 - Directory Length
-      int dirLength = fm.readInt() - 8;
-      FieldValidator.checkLength(dirLength, arcSize);
+      int dirLength = 0;
+      boolean encrypted = false;
+      //int[] baseXorKey = new int[] { 0x5c, 0x7b, 0xe3, 0xea, 0xec, 0xac, 0x5e, 0xb8, 0x6d, 0x0b, 0xd4, 0xcd, 0xce, 0x85, 0x34, 0xea, 0x80, 0x56, 0x52, 0x86, 0x23, 0x68, 0x6a, 0x83, 0x24, 0x0b, 0xeb, 0xee, 0x4e, 0xcf, 0x15, 0x0f, 0x38, 0xbc, 0x15, 0x09, 0x79, 0xb9, 0x76, 0xa3, 0x9c, 0x85, 0xc6, 0xe1, 0xdd, 0x9c, 0xfb, 0x4d, 0xb6, 0xc3 };
+      int[] baseXorKey = new int[] { 92, 123, 227, 234, 236, 172, 94, 184, 109, 11, 212, 205, 206, 133, 52, 234, 128, 86, 82, 134, 35, 104, 106, 131, 36, 11, 235, 238, 78, 207, 21, 15, 56, 188, 21, 9, 121, 185, 118, 163, 156, 133, 198, 225, 221, 156, 251, 77, 182, 195 };
 
-      // 4 - Directory Offset
-      int dirOffset = fm.readInt();
-      FieldValidator.checkOffset(dirOffset, arcSize);
+      if (header.equals("PKG_FILE_VERSION:0005")) {
+        // skip to the end and read the footer
+        fm.seek(arcSize - 12);
 
-      // skip to the directory
-      fm.seek(dirOffset);
+        // 4 - Directory Length
+        dirLength = fm.readInt() - 12;
+        FieldValidator.checkLength(dirLength, arcSize);
+
+        // 4 - Directory Offset
+        int dirOffset = fm.readInt();
+        FieldValidator.checkOffset(dirOffset, arcSize);
+
+        // 4 - Encryption Flag
+        if ((fm.readInt() & 0x100) == 0x100) {
+          encrypted = true;
+        }
+
+        // skip to the directory
+        fm.seek(dirOffset);
+      }
+      else {
+
+        // skip to the end and read the footer
+        fm.seek(arcSize - 8);
+
+        // 4 - Directory Length
+        dirLength = fm.readInt() - 8;
+        FieldValidator.checkLength(dirLength, arcSize);
+
+        // 4 - Directory Offset
+        int dirOffset = fm.readInt();
+        FieldValidator.checkOffset(dirOffset, arcSize);
+
+        // skip to the directory
+        fm.seek(dirOffset);
+      }
 
       int numFiles = Archive.getMaxFiles();
 
@@ -172,7 +205,29 @@ public class Plugin_PKG_PKGFILE extends ArchivePlugin {
         FieldValidator.checkFilename(filename);
 
         //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
+        Resource resource = new Resource(path, filename, offset, length);
+        if (encrypted) {
+          /*
+          int[] xorKey = new int[50];
+          int xorStartPos = (offset - 14) % 50;
+          if (xorStartPos == 0) {
+            xorKey = baseXorKey;
+          }
+          else {
+            System.arraycopy(baseXorKey, xorStartPos, xorKey, 0, 50 - xorStartPos);
+            System.arraycopy(baseXorKey, 0, xorKey, 50 - xorStartPos, xorStartPos);
+          }
+          if (filename.equals("user/profile.xml")) {
+            System.out.println("BOO");
+          }
+          */
+          int[] xorKey = baseXorKey;
+          int xorStartPos = offset % 50;
+          Exporter_XOR_RepeatingKey exporter = new Exporter_XOR_RepeatingKey(xorKey);
+          exporter.setCurrentKeyPos(xorStartPos);
+          resource.setExporter(exporter);
+        }
+        resources[realNumFiles] = resource;
         realNumFiles++;
 
         TaskProgressManager.setValue(dirPos);

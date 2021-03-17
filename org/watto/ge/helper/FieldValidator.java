@@ -22,8 +22,14 @@ import org.watto.io.FilenameSplitter;
 public class FieldValidator {
 
   static int maxNumFiles2 = Settings.getInt("MaxNumberOfFiles2");
+
   static int maxNumFiles4 = Settings.getInt("MaxNumberOfFiles4");
+
   static int maxFilenameLength = Settings.getInt("MaxFilenameLength");
+
+  static int maxNumFaces4 = Settings.getInt("MaxNumberOfFaces4");
+
+  static int maxNumVertices4 = Settings.getInt("MaxNumberOfVertices4");
 
   /**
   **********************************************************************************************
@@ -147,6 +153,24 @@ public class FieldValidator {
   **/
   public static boolean checkNumColors(long numColors, long maxNumColors) throws Exception {
     return numColors(numColors, maxNumColors);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static boolean checkNumFaces(int numFaces) throws Exception {
+    return numFaces(numFaces);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static boolean checkNumVertices(int numVertices) throws Exception {
+    return numVertices(numVertices);
   }
 
   /**
@@ -344,6 +368,30 @@ public class FieldValidator {
   public static boolean numColors(long numColors, long maxNumColors) throws Exception {
     if (numColors <= 0 || numColors > maxNumColors) {
       throw new WSPluginException("Invalid Number Of Colors: " + numColors);
+    }
+    return true;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static boolean numFaces(int numFaces) throws Exception {
+    if (maxNumFaces4 != -1 && numFaces <= 0 || numFaces > maxNumFaces4) {
+      throw new WSPluginException("Invalid Number Of Faces: " + numFaces);
+    }
+    return true;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static boolean numVertices(int numVertices) throws Exception {
+    if (maxNumVertices4 != -1 && numVertices <= 0 || numVertices > maxNumVertices4) {
+      throw new WSPluginException("Invalid Number Of Vertices: " + numVertices);
     }
     return true;
   }

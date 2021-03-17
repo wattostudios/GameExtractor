@@ -25,7 +25,7 @@ public class Resource_Unreal extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource_Unreal() {
@@ -74,7 +74,7 @@ public class Resource_Unreal extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -105,7 +105,10 @@ public class Resource_Unreal extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 
@@ -116,7 +119,7 @@ public class Resource_Unreal extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public UnrealProperty[] getUnrealProperties() {
@@ -125,7 +128,7 @@ public class Resource_Unreal extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public UnrealProperty getUnrealProperty(String name) {
@@ -144,7 +147,7 @@ public class Resource_Unreal extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setUnrealProperties(UnrealProperty[] unrealProperties) {

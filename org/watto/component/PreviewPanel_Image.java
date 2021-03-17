@@ -22,9 +22,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import org.watto.Settings;
 import org.watto.datatype.ImageResource;
+import org.watto.datatype.PalettedImageResource;
 import org.watto.event.WSClickableInterface;
 import org.watto.event.WSSelectableInterface;
 import org.watto.event.listener.WSSelectableListener;
+import org.watto.ge.helper.PaletteManager;
 import org.watto.plaf.ButterflyImageBackgroundPanelUI;
 import org.watto.task.Task;
 import org.watto.task.Task_ImagePreviewAnimation;
@@ -300,13 +302,36 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
 
     add(scrollPane, BorderLayout.CENTER);
 
+    WSPanel frameControls = null;
     if (imageResource != null && imageResource.isManualFrameTransition()) {
       // Add buttons to move to the next frame
-      WSPanel buttonPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"GridLayout\" position=\"CENTER\" rows=\"1\" columns=\"2\"><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" /></WSPanel></WSPanel>"));
-      add(buttonPanel, BorderLayout.SOUTH);
+      frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"GridLayout\" position=\"CENTER\" rows=\"1\" columns=\"2\"><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" /></WSPanel></WSPanel>"));
     }
-    else {
-      // remove the buttons for manual transition
+    WSPanel paletteControls = null;
+    if (imageResource != null && imageResource instanceof PalettedImageResource && PaletteManager.getNumPalettes() > 1) {
+      // Add buttons to change the color palette
+      paletteControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ChangePaletteButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ChangePaletteButtons\" layout=\"ReverseBorderLayout\" position=\"CENTER\" ><WSButton code=\"PreviewPanel_Image_PreviousPaletteButton\" opaque=\"true\" showText=\"true\" position=\"WEST\" /><WSLabel code=\"PreviewPanel_Image_PaletteCountLabel\" opaque=\"true\" width=\"100\" /><WSButton code=\"PreviewPanel_Image_NextPaletteButton\" opaque=\"true\" showText=\"true\" position=\"EAST\" /></WSPanel></WSPanel>"));
+
+      WSLabel paletteCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_PaletteCountLabel");
+      paletteCountLabel.setText((PaletteManager.getCurrentPaletteNumber() + 1) + "  /  " + PaletteManager.getNumPalettes());
+    }
+
+    WSPanel buttonPanel = null;
+
+    if (frameControls != null && paletteControls != null) {
+      buttonPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" layout=\"GridLayout\" position=\"CENTER\" rows=\"2\" columns=\"1\"></WSPanel>"));
+      buttonPanel.add(frameControls);
+      buttonPanel.add(paletteControls);
+    }
+    else if (frameControls != null) {
+      buttonPanel = frameControls;
+    }
+    else if (paletteControls != null) {
+      buttonPanel = paletteControls;
+    }
+
+    if (buttonPanel != null) {
+      add(buttonPanel, BorderLayout.SOUTH);
     }
 
     WSOptionCheckBox fitToPanelCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_Image_FitToPanel\" setting=\"PreviewPanel_Image_FitToPanel\" />"));
@@ -436,6 +461,40 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
 
           Settings.set("PreviewPanel_Image_CurrentFrame", Settings.getInt("PreviewPanel_Image_CurrentFrame") - 1);
         }
+      }
+      else if (((WSComponent) source).getCode().equals("PreviewPanel_Image_NextPaletteButton")) {
+        // change to the next color palette
+        PalettedImageResource paletteImage = (PalettedImageResource) imageResource;
+        paletteImage.setPalette(PaletteManager.getNextPalette().getPalette());
+
+        image = paletteImage.getImage(); // important, so the Export Preview button exports the right image
+        generateZoomImage();
+
+        WSLabel imageLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_ImageLabel");
+        imageLabel.setIcon(new ImageIcon(zoomImage));
+
+        WSLabel paletteCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_PaletteCountLabel");
+        paletteCountLabel.setText((PaletteManager.getCurrentPaletteNumber() + 1) + "  /  " + PaletteManager.getNumPalettes());
+        paletteCountLabel.repaint();
+
+        return true;
+      }
+      else if (((WSComponent) source).getCode().equals("PreviewPanel_Image_PreviousPaletteButton")) {
+        // change to the previous color palette
+        PalettedImageResource paletteImage = (PalettedImageResource) imageResource;
+        paletteImage.setPalette(PaletteManager.getPreviousPalette().getPalette());
+
+        image = paletteImage.getImage(); // important, so the Export Preview button exports the right image
+        generateZoomImage();
+
+        WSLabel imageLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_ImageLabel");
+        imageLabel.setIcon(new ImageIcon(zoomImage));
+
+        WSLabel paletteCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_PaletteCountLabel");
+        paletteCountLabel.setText((PaletteManager.getCurrentPaletteNumber() + 1) + "  /  " + PaletteManager.getNumPalettes());
+        paletteCountLabel.repaint();
+
+        return true;
       }
     }
 

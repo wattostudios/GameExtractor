@@ -21,11 +21,12 @@ import org.watto.ge.plugin.ExporterPlugin;
 public class Resource_CAB_MSCF extends Resource {
 
   long blockOffset = 0;
+
   long blockDiscardBytes = 0;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource_CAB_MSCF() {
@@ -34,7 +35,7 @@ public class Resource_CAB_MSCF extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Resource_CAB_MSCF(File sourcePath, String name, long blockOffset, long blockDiscardBytes, long decompLength, ExporterPlugin exporter) {
@@ -53,7 +54,7 @@ public class Resource_CAB_MSCF extends Resource {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -83,7 +84,10 @@ public class Resource_CAB_MSCF extends Resource {
     this.offset = resource.getOffset();
     this.name = resource.getName();
     this.sourcePath = resource.getSource();
-    this.exportedPath = resource.getExportedPath();
+
+    //this.exportedPath = resource.getExportedPath();
+    setExportedPath(resource.getExportedPath());
+
     this.origName = resource.getOriginalName();
     this.replaced = resource.isReplaced();
 

@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -312,9 +313,17 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
       ProcessBuilder pb = new ProcessBuilder(commandPath, "-m", inputPath);
 
       Process convertProcess = pb.start();
+      /*
       int returnCode = convertProcess.waitFor(); // wait for the command to finish
-
+      
       if (returnCode != 0) {
+        // Nope, not a valid audio file (or some other error)
+        return null;
+      }
+      */
+      boolean returnCode = convertProcess.waitFor(5, TimeUnit.SECONDS); // wait for the command to finish
+
+      if (!returnCode || convertProcess.exitValue() != 0) {
         // Nope, not a valid audio file (or some other error)
         return null;
       }
@@ -330,12 +339,28 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
       TaskProgressManager.startTask();
 
       convertProcess = pb.start();
+
+      /*
       returnCode = convertProcess.waitFor(); // wait for the command to finish
+      
+      // Stop the task
+      TaskProgressManager.stopTask();
+      
+      if (returnCode == 0) {
+        // successful conversion
+        File outputFile = new File(outputFilePath);
+        if (outputFile.exists()) {
+          return outputFile;
+        }
+      }
+      */
+
+      returnCode = convertProcess.waitFor(10, TimeUnit.SECONDS); // wait for the command to finish
 
       // Stop the task
       TaskProgressManager.stopTask();
 
-      if (returnCode == 0) {
+      if (returnCode && convertProcess.exitValue() == 0) {
         // successful conversion
         File outputFile = new File(outputFilePath);
         if (outputFile.exists()) {

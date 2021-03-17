@@ -31,7 +31,6 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicButtonUI;
 import org.watto.component.WSButton;
 
-
 /***********************************************************************************************
 Used to paint the GUI for <code>WSButton</code>s
 ***********************************************************************************************/
@@ -41,23 +40,22 @@ public class ButterflyButtonUI extends BasicButtonUI {
   Sets up the painting properties for painting on the <code>Component</code>
   @param component the <code>Component</code> that will be painted
   ***********************************************************************************************/
-  public void installUI(JComponent component){
+  public void installUI(JComponent component) {
     super.installUI(component);
 
-    JButton button = (JButton)component;
+    JButton button = (JButton) component;
 
     button.setBorderPainted(false);
     button.setOpaque(false);
   }
-
 
   /***********************************************************************************************
   Paints the <code>component</code> on the <code>graphics</code>
   @param graphics the <code>Graphics</code> to paint the <code>component</code> on
   @param component the <code>Component</code> to paint
   ***********************************************************************************************/
-  public void paint(Graphics graphics,JComponent component){
-    JButton button = (JButton)component;
+  public void paint(Graphics graphics, JComponent component) {
+    JButton button = (JButton) component;
 
     int borderWidth = LookAndFeelManager.getPropertyInt("BORDER_WIDTH");
 
@@ -67,8 +65,8 @@ public class ButterflyButtonUI extends BasicButtonUI {
     int h = button.getHeight();
 
     int orientation = 0;
-    if (button instanceof WSButton){
-      orientation = ((WSButton)button).getTextOrientation();
+    if (button instanceof WSButton) {
+      orientation = ((WSButton) button).getTextOrientation();
     }
     boolean sideways = (orientation == WSButton.ORIENTATION_LEFT || orientation == WSButton.ORIENTATION_RIGHT);
 
@@ -76,13 +74,13 @@ public class ButterflyButtonUI extends BasicButtonUI {
 
     ButtonModel model = button.getModel();
     if (model.isArmed() && model.isPressed()) {
-      ButterflyPainter.paintCurvedGradient((Graphics2D)graphics,x,y,w,h);
+      ButterflyPainter.paintCurvedGradient((Graphics2D) graphics, x, y, w, h);
     }
     //    else if (component instanceof WSButton && ((WSButton)component).isCurrentPanel()){
     //      AquanauticPainter.paintFocusedBorder((Graphics2D)graphics,x,y,w,h);
     //      }
     else {
-      ButterflyPainter.paintCurvedGradient((Graphics2D)graphics,x,y,w,h,LookAndFeelManager.getLightColor(),LookAndFeelManager.getMidColor());
+      ButterflyPainter.paintCurvedGradient((Graphics2D) graphics, x, y, w, h, LookAndFeelManager.getLightColor(), LookAndFeelManager.getMidColor());
     }
 
     ButterflyPainter.setSidewaysGradient(false);
@@ -107,7 +105,7 @@ public class ButterflyButtonUI extends BasicButtonUI {
         }
       }
 
-      paintIcon(graphics,button,new Rectangle(iconLeft,iconTop,iconWidth,iconHeight));
+      paintIcon(graphics, button, new Rectangle(iconLeft, iconTop, iconWidth, iconHeight));
     }
 
     if (text != null && !text.equals("")) {
@@ -129,7 +127,7 @@ public class ButterflyButtonUI extends BasicButtonUI {
 
       if (button instanceof WSButton && ((!sideways && ((textLeft <= borderWidth) || (textLeft + textWidth + borderWidth >= w))) || (sideways && ((textTop <= borderWidth) || (textTop + textWidth + borderWidth >= h))))) {
         // try to get the small text
-        text = ((WSButton)button).getSmallText();
+        text = ((WSButton) button).getSmallText();
 
         textWidth = metrics.stringWidth(text);
         textLeft = button.getWidth() / 2 - textWidth / 2;
@@ -140,54 +138,57 @@ public class ButterflyButtonUI extends BasicButtonUI {
       }
 
       // If the orientation is not normal (UP), rotate the painting canvas
-      AffineTransform originalTransformation = ((Graphics2D)graphics).getTransform();
+      AffineTransform originalTransformation = ((Graphics2D) graphics).getTransform();
       if (orientation == WSButton.ORIENTATION_UP) {
         // here to speed things up slightly, as most components are painted the right way up!
       }
       else if (orientation == WSButton.ORIENTATION_LEFT) {
-        ((Graphics2D)graphics).rotate(-Math.PI / 2,(w + borderWidth) / 2 + 1,textTop);
+        ((Graphics2D) graphics).rotate(-Math.PI / 2, (w + borderWidth) / 2 + 1, textTop);
       }
       else if (orientation == WSButton.ORIENTATION_RIGHT) {
-        ((Graphics2D)graphics).rotate(Math.PI / 2,(w - borderWidth) / 2,textTop);
+        ((Graphics2D) graphics).rotate(Math.PI / 2, (w - borderWidth) / 2, textTop);
       }
       else if (orientation == WSButton.ORIENTATION_DOWN) {
-        ((Graphics2D)graphics).rotate(Math.PI,(w - borderWidth) / 2 + 2,textTop);
+        ((Graphics2D) graphics).rotate(Math.PI, (w - borderWidth) / 2 + 2, textTop);
       }
 
       if (model.isArmed() && model.isPressed()) {
-        ButterflyPainter.paintShadowText((Graphics2D)graphics,text,textLeft,textTop);
+        ButterflyPainter.paintShadowText((Graphics2D) graphics, text, textLeft, textTop);
       }
       else {
-        ButterflyPainter.paintText((Graphics2D)graphics,text,textLeft,textTop);
+        if (!button.isEnabled()) {
+          ButterflyPainter.paintShadowText((Graphics2D) graphics, text, textLeft, textTop, LookAndFeelManager.getMidColor(), LookAndFeelManager.getLightColor());
+        }
+        else {
+          ButterflyPainter.paintText((Graphics2D) graphics, text, textLeft, textTop);
+        }
       }
 
       // Return the transformation on the graphics back to the original transform
-      ((Graphics2D)graphics).setTransform(originalTransformation);
+      ((Graphics2D) graphics).setTransform(originalTransformation);
 
     }
   }
-
 
   /***********************************************************************************************
   Removes the painting properties from the <code>Component</code>
   @param component the <code>Component</code> to remove the properties from
   ***********************************************************************************************/
-  public void uninstallUI(JComponent component){
+  public void uninstallUI(JComponent component) {
     super.uninstallUI(component);
 
-    JButton button = (JButton)component;
+    JButton button = (JButton) component;
 
     button.setBorderPainted(true);
     button.setOpaque(true);
   }
-
 
   /***********************************************************************************************
   Creates a <code>ButterflyButtonUI</code> instance for rendering the <code>component</code>
   @param component the <code>Component</code> to get the painter for
   @return a new <code>ButterflyButtonUI</code> instance
   ***********************************************************************************************/
-  public static ComponentUI createUI(JComponent component){
+  public static ComponentUI createUI(JComponent component) {
     return new ButterflyButtonUI();
   }
 }

@@ -47,6 +47,7 @@ public class Plugin_GZ extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Generic GZip Archive",
+        "Cathedral",
         "Minority Report: Everybody Runs");
     setExtensions("gz");
     setPlatforms("PC", "XBox");

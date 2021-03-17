@@ -11,9 +11,13 @@
 				<WSPanel layout="BorderLayout" code="Option_General_DragDropOption_Label" position="CENTER" showLabel="true" showBorder="true">
 					<WSOptionComboBox_DragDropOption opaque="false" code="Option_General_DragDropOption" setting="DragDropOption" position="CENTER" />
 				</WSPanel>
-				<WSPanel layout="GridLayout" position="SOUTH" rows="3" columns="1">
+				<WSPanel layout="GridLayout" position="SOUTH" rows="7" columns="1">
+					<WSOptionCheckBox code="Option_General_ShowWelcomeWizard" setting="ShowWelcomeWizard" />
 					<WSOptionCheckBox code="Option_General_AutoResizeTableColumns" setting="AutoResizeTableColumns" />
 					<WSOptionCheckBox code="Option_General_AllowInlineFileListEditing" setting="AllowInlineFileListEditing" />
+					<WSOptionCheckBox code="Option_General_SearchWildcardConversion" setting="SearchWildcardConversion" />
+					<WSOptionCheckBox code="Option_General_SearchRegExConversion" setting="SearchRegExConversion" />
+					<WSOptionCheckBox code="Option_General_AutoImportModifiedExportFiles" setting="AutoImportModifiedExportFiles" />
 					<WSOptionCheckBox code="Option_General_DebugMode" setting="DebugMode" />
 				</WSPanel>
 			</WSPanel>

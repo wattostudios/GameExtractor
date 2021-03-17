@@ -90,6 +90,7 @@ public class Plugin_ASSETS_6 extends ArchivePlugin {
         new FileType("particlesystemrenderer", "Particle System Renderer", FileType.TYPE_OTHER));
         */
     setFileTypes(Unity3DHelper.getFileTypes());
+    setTextPreviewExtensions("textasset"); // LOWER CASE
 
   }
 
