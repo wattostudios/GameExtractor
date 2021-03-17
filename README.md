@@ -51,6 +51,33 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.12
+  * [I] Heaps of new features and improvements...
+    * [I] Support for more games (archive formats, image/audio previews, and thumbnails)
+    * [I] Analysis tools for mass-analyzing directories, extracting files, and converting formats
+    * [I] Previews for 3D Models in certain games, including some Unity3D and Unreal Engine meshes
+    * [I] Improved modification of files within GE, and detection of external modifications
+  * [+] A Welcome Wizard is now shown when new users run Game Extractor for the first time
+  * [+] The files in the File List can now be filtered using the Search panel
+  * [+] Added directory analysis tools for finding game archives in a directory, analyzing the 
+        contents of archives, and extracting/converting all the files en masse
+  * [+] Created a Preview Panel that can be used by Viewers for rendering 3D Models, including the
+        generation of screenshots in standard Image formats, and exporting to other 3D model formats
+  * [+] If you extract or preview a file, and then modify the file in another program, you can now
+        automatically import the changed files back into Game Extractor
+  * [+] Text files can now be edited within Game Extractor, if the Archive supports replacing/writing
+  * [+] You can now change color palettes for images that have multiple different palettes
+  * [+] Added support for unswizzling of Nintendo Switch images
+  * [A] RegEx and Wildcards will now be evaluated by the Search panel
+  * [A] Changed the language of the Search panel to Search and Filter
+  * [A] Moved some of the more advanced Directory List buttons to a separate hidable panel
+  * [A] When extracting files where the name already exists, a number will be prepended to it
+  * [A] Pressing the Enter key in the Search/Filter panel will do a filter rather than a search
+  * [A] When extracting Unreal Engine 4 archives, related files (uexp, ubulk) are also extracted,
+        and SoundWave files are also converted to OGG audio if possible
+  * [B] Fixed an issue where decompressed Unreal Engine 1/2 archives would be deleted prematurely
+  * [B] Fixed an issue where bulk QuickBMS extracts wouldn't work for filenames with spaces in them
+
 * Version 3.11
   * [I] Support for more games, with a focus on adding previews (image and audio) and thumbnails
   * [+] Better support for more Unreal Engine 1/2/3/4 games, including Sound and Texture previews
