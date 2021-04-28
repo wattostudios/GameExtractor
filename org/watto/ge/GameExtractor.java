@@ -28,9 +28,8 @@ import javax.swing.JFrame;
 - Upload the Basic Version and Source Code to a new folder on SourceForge and set it as the default
 - Update the Supported Games List on the website
 - Update the schema.org code at the bottom of the GameExtractor.html page
-- Deploy the Full Version to Google App Engine (refresh the project first!)
+- Deploy the Full Version to Google App Engine (run a localhost app engine before changing/replacing files!)
 - Post an update on Facebook and Twitter
-- Inform SoftPedia of the new Release and the Changes
 - Update the Plugins Spreadsheet
 - Update GitHub (and remove the Full Version code from it)
 
@@ -40,7 +39,7 @@ import javax.swing.JFrame;
 
 // EXAMPLE PLUGINS...
 - Archive Properties (Resource_Property) - Plugin_FPK_FKP
-- Forcing TXT Previews for some files - Plugin_VPK --> see method previewHint(Resource)
+- Forcing certain viewers/previews for some files - Plugin_VPK --> see method previewHint(Resource)
 - Custom Table Columns - Plugin_ZIP_PK
 - Replaceable Archive writing (including renaming of files) - Plugin_FPK_FKP
 - Using QuickBMS for decompressing files with uncommon compression formats - Plugin_PAK_PACK_4
@@ -52,13 +51,16 @@ import javax.swing.JFrame;
 - Archive with nested directories that we need to read - Plugin_FMF_FMF
 - Archive where multiple files are stored in a single ZLib block, so you need to decompress the ZLib, then find the file within it - Plugin_RSB_1BSR
 - Archive where the user is asked to choose an option (from a ComboBox) in a popup when saving - Plugin_PAK_EYEDENTITY (see start of replace() method)
-- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_BAG_6 and Plugin_BNK_XBNK and Plugin_BAG)
+- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG) 
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
 - Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
 - Image Viewer where the image data is a big image, but it's read as blocks of 32x32 - Viewer_RSB_1BSR_PTX (see reorderPixelBlocks() method)
 - Image Viewer where the image width and height are stored on the Resource by the Plugin, so need to be retrieved before processing the image in the Viewer (DAT_66_BITMAP)
+- Image Viewer (example WRITE code) - Viewer_XAF_XAF_STX
+- Audio Viewer where raw audio is read from a file, a WAV header is prepended, and it's played as an ordinary WAV file - Viewer_A00_MEL
 - 3D Model Viewer - Viewer_Unity3D_MESH or Viewer_BMOD_OMOD_OBST or Viewer_POD_BIN
+- 3D Model Viewer with Textures and multiple Mesh Groups - Viewer_GTC_MD2_MDL3
 - 3D Model Writer - Viewer_OBJ
 - Scanning unknown files to determine their file type (by adding some custom types to the list of standard ones) - Plugin_PAK_44
 - Scanning unknown files to determine their file type (custom, rather than using the automatic scanner) - Plugin_000_9 (see end of read() method)
@@ -400,11 +402,17 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static boolean isFullVersion() {
-    return false;
+    try {
+      new FullVersionVerifier();
+      return true;
+    }
+    catch (Throwable t) {
+      return false;
+    }
   }
 
   /**
@@ -533,7 +541,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       if (redoMenu != null) {
         taskManager.addMonitor(redoMenu);
       }
-
+    
       WSUndoTaskComboButton undoButton = ((WSUndoTaskComboButton) ComponentRepository.get("UndoTaskComboButton"));
       if (undoButton != null) {
         taskManager.addMonitor(undoButton);
@@ -553,33 +561,33 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
     if (commandLineOnly) {
       return; // stop here - don't want to display the interface
     }
-
+    
     pack();
     setExtendedState(JFrame.MAXIMIZED_BOTH);
-
+    
     fileListPanelHolder.setMinimumSize(new Dimension(0, 0));
     sidePanelHolder.setMinimumSize(new Dimension(0, 0));
-
+    
     WSSplitPane mainSplit = (WSSplitPane) ComponentRepository.get("MainSplit");
     mainSplit.setDividerSize(5);
-
+    
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
+    
     //double splitPos = Settings.getDouble("DividerLocation");
     //if (splitPos < 0 || splitPos > 1){
     //  splitPos = 0.7;
     //  }
-
+    
     //mainSplit.setDividerLocation(splitPos);
     //mainSplit.setResizeWeight(1);
     setVisible(true);
     //pack();
-
+    
     //int location = (int)(mainSplit.getWidth() * splitPos);
     //System.out.println(location);
     //mainSplit.resetToPreferredSizes();
     //mainSplit.setDividerLocation(splitPos);
-
+    
      */
 
     // writes out the list of ArchivePlugins and ViewerPlugins, for the excel spreadsheet
@@ -619,7 +627,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void makeNewArchive() {
@@ -628,7 +636,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void makeNewArchive(boolean runInNewThread) {
@@ -652,162 +660,168 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
    **/
   @Override
   public boolean onClick(JComponent c, java.awt.event.MouseEvent e) {
-    if (!(c instanceof WSComponent)) {
-      return false;
-    }
-
-    String code = ((WSComponent) c).getCode();
-
-    if (c instanceof WSRecentFileMenuItem) {
-      // opening a recent file - the 'code' is the filename to open
-      File recentFile = new File(code);
-      if (recentFile.exists()) {
-        Task_ReadArchive task = new Task_ReadArchive(recentFile);
-        task.setDirection(Task.DIRECTION_REDO);
-        new Thread(task).start();
-      }
-    }
-    else if (c instanceof WSTaskMenuItem) {
-      // an undo or redo task
-      Task task = ((WSTaskMenuItem) c).getTask();
-      int taskParentType = ((WSTaskMenuItem) c).getParentType();
-
-      if (taskParentType == WSTaskMenuItem.PARENT_REDO) {
-        // redo a task
-        TypecastSingletonManager.getTaskManager("TaskManager").redo(task);
-      }
-      else if (taskParentType == WSTaskMenuItem.PARENT_UNDO) {
-        // undo a task
-        TypecastSingletonManager.getTaskManager("TaskManager").undo(task);
-      }
-    }
-    else if (c instanceof WSMenuItem || c instanceof WSButton) {
-      if (code.equals("NewArchive")) {
-        makeNewArchive(true); // run in a new thread so that the "do you want to save" popup will appear
-      }
-      else if (code.equals("ReadArchive_Normal")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ReadPanel", false);
-      }
-      else if (code.equals("ReadArchive_OpenWith")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ReadPanel", false);
-      }
-      else if (code.equals("ReadArchive_Script")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ScriptPanel", false);
-      }
-      else if (code.equals("ReadArchive_Scanner")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ReadPanel", false);
-      }
-      else if (code.equals("WriteArchive")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("WritePanel", true);
-      }
-      else if (code.equals("ConvertArchive")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("WritePanel", true);
-      }
-      else if (code.equals("CutArchive")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("CutPanel", false);
-      }
-      else if (code.equals("AnalyzeDirectory")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("AnalyzePanel", false);
-      }
-      else if (code.equals("CloseProgram")) {
-        onClose();
-      }
-      else if (code.equals("AddResources")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ModifyPanel", true);
-      }
-      else if (code.equals("RemoveResources")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ModifyPanel", true);
-      }
-      else if (code.equals("RenameResources")) {
-        setSidePanel("RenameFile");
-      }
-      else if (code.equals("ReplaceResources")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ModifyPanel", true);
-      }
-      else if (code.equals("Search")) {
-        setSidePanel("Search");
-      }
-      else if (code.equals("SelectResources_All")) {
-        fileListPanelHolder.selectAll();
-      }
-      else if (code.equals("SelectResources_None")) {
-        fileListPanelHolder.selectNone();
-      }
-      else if (code.equals("SelectResources_Inverse")) {
-        fileListPanelHolder.selectInverse();
-      }
-      else if (code.equals("FileListView_Table")) {
-        setFileListPanel("Table");
-      }
-      else if (code.equals("FileListView_Tree")) {
-        setFileListPanel("Tree");
-      }
-      else if (code.equals("FileListView_Thumbnails")) {
-        setFileListPanel("Thumbnails");
-      }
-      //else if (code.equals("FileListView_FolderTable")){
-      //  setFileListPanel("FolderTable");
-      //  }
-      else if (code.equals("FileListView_TreeTable")) {
-        setFileListPanel("TreeTable");
-      }
-      else if (code.equals("ExtractSelectedResources")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ExportPanel", false);
-      }
-      else if (code.equals("ExtractAllResources")) {
-        setSidePanel("DirectoryList");
-        ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ExportPanel", false);
-      }
-      else if (code.equals("PreviewResource")) {
-        setSidePanel("Preview");
-      }
-      else if (code.equals("ImageInvestigator")) {
-        setSidePanel("ImageInvestigator");
-      }
-      else if (code.equals("HexEditor")) {
-        Settings.set("AutoChangedToHexPreview", "false");
-        setSidePanel("HexEditor");
-      }
-      else if (code.equals("Options")) {
-        setSidePanel("Options");
-      }
-      else if (code.equals("ScriptBuilder")) {
-        setSidePanel("ScriptBuilder");
-      }
-      else if (code.equals("PluginList")) {
-        setSidePanel("PluginList");
-      }
-      else if (code.equals("Information")) {
-        setSidePanel("Information");
-      }
-      else if (code.equals("FileListExporter")) {
-        setSidePanel("FileListExporter");
-      }
-      else if (code.equals("Help")) {
-        setSidePanel("Help");
-      }
-      else if (code.equals("About")) {
-        setSidePanel("About");
-      }
-      else {
+    try {
+      if (!(c instanceof WSComponent)) {
         return false;
       }
-      return true;
-    }
 
-    return false;
+      String code = ((WSComponent) c).getCode();
+
+      if (c instanceof WSRecentFileMenuItem) {
+        // opening a recent file - the 'code' is the filename to open
+        File recentFile = new File(code);
+        if (recentFile.exists()) {
+          Task_ReadArchive task = new Task_ReadArchive(recentFile);
+          task.setDirection(Task.DIRECTION_REDO);
+          new Thread(task).start();
+        }
+      }
+      else if (c instanceof WSTaskMenuItem) {
+        // an undo or redo task
+        Task task = ((WSTaskMenuItem) c).getTask();
+        int taskParentType = ((WSTaskMenuItem) c).getParentType();
+
+        if (taskParentType == WSTaskMenuItem.PARENT_REDO) {
+          // redo a task
+          TypecastSingletonManager.getTaskManager("TaskManager").redo(task);
+        }
+        else if (taskParentType == WSTaskMenuItem.PARENT_UNDO) {
+          // undo a task
+          TypecastSingletonManager.getTaskManager("TaskManager").undo(task);
+        }
+      }
+      else if (c instanceof WSMenuItem || c instanceof WSButton) {
+        if (code.equals("NewArchive")) {
+          makeNewArchive(true); // run in a new thread so that the "do you want to save" popup will appear
+        }
+        else if (code.equals("ReadArchive_Normal")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ReadPanel", false);
+        }
+        else if (code.equals("ReadArchive_OpenWith")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ReadPanel", false);
+        }
+        else if (code.equals("ReadArchive_Script")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ScriptPanel", false);
+        }
+        else if (code.equals("ReadArchive_Scanner")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ReadPanel", false);
+        }
+        else if (code.equals("WriteArchive")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("WritePanel", true);
+        }
+        else if (code.equals("ConvertArchive")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("WritePanel", true);
+        }
+        else if (code.equals("CutArchive")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("CutPanel", false);
+        }
+        else if (code.equals("AnalyzeDirectory")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("AnalyzePanel", false);
+        }
+        else if (code.equals("CloseProgram")) {
+          onClose();
+        }
+        else if (code.equals("AddResources")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ModifyPanel", true);
+        }
+        else if (code.equals("RemoveResources")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ModifyPanel", true);
+        }
+        else if (code.equals("RenameResources")) {
+          setSidePanel("RenameFile");
+        }
+        else if (code.equals("ReplaceResources")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ModifyPanel", true);
+        }
+        else if (code.equals("Search")) {
+          setSidePanel("Search");
+        }
+        else if (code.equals("SelectResources_All")) {
+          fileListPanelHolder.selectAll();
+        }
+        else if (code.equals("SelectResources_None")) {
+          fileListPanelHolder.selectNone();
+        }
+        else if (code.equals("SelectResources_Inverse")) {
+          fileListPanelHolder.selectInverse();
+        }
+        else if (code.equals("FileListView_Table")) {
+          setFileListPanel("Table");
+        }
+        else if (code.equals("FileListView_Tree")) {
+          setFileListPanel("Tree");
+        }
+        else if (code.equals("FileListView_Thumbnails")) {
+          setFileListPanel("Thumbnails");
+        }
+        //else if (code.equals("FileListView_FolderTable")){
+        //  setFileListPanel("FolderTable");
+        //  }
+        else if (code.equals("FileListView_TreeTable")) {
+          setFileListPanel("TreeTable");
+        }
+        else if (code.equals("ExtractSelectedResources")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ExportPanel", false);
+        }
+        else if (code.equals("ExtractAllResources")) {
+          setSidePanel("DirectoryList");
+          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("ExportPanel", false);
+        }
+        else if (code.equals("PreviewResource")) {
+          setSidePanel("Preview");
+        }
+        else if (code.equals("ImageInvestigator")) {
+          setSidePanel("ImageInvestigator");
+        }
+        else if (code.equals("HexEditor")) {
+          Settings.set("AutoChangedToHexPreview", "false");
+          setSidePanel("HexEditor");
+        }
+        else if (code.equals("Options")) {
+          setSidePanel("Options");
+        }
+        else if (code.equals("ScriptBuilder")) {
+          setSidePanel("ScriptBuilder");
+        }
+        else if (code.equals("PluginList")) {
+          setSidePanel("PluginList");
+        }
+        else if (code.equals("Information")) {
+          setSidePanel("Information");
+        }
+        else if (code.equals("FileListExporter")) {
+          setSidePanel("FileListExporter");
+        }
+        else if (code.equals("Help")) {
+          setSidePanel("Help");
+        }
+        else if (code.equals("About")) {
+          setSidePanel("About");
+        }
+        else {
+          return false;
+        }
+        return true;
+      }
+
+      return false;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return false;
+    }
   }
 
   /**
@@ -988,7 +1002,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
    **********************************************************************************************
-   Check all the resources that are exported - if they have different Modified timestamps than
+   Check all the resources that are exported - if they have different Modified timestamps than 
    they had when they were exported, they might have been changed by other programs and we might
    want to automatically replace it in the Archive.
    **********************************************************************************************
@@ -1015,7 +1029,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).reloadDirectoryList();
     }
 
-    // Check all the resources that are exported - if they have different Modified timestamps than they had when they were exported,
+    // Check all the resources that are exported - if they have different Modified timestamps than they had when they were exported, 
     // they might have been changed by other programs and we might want to automatically replace it in the Archive
     checkForModifiedExportFiles();
 
@@ -1024,7 +1038,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -1034,7 +1048,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void openSidePanelOnStartup() {
@@ -1046,7 +1060,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void outputPluginExcelList() {
@@ -1140,7 +1154,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public boolean promptToSave() {
@@ -1184,7 +1198,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void promptToDeleteAnalysisDirectory() {
@@ -1249,7 +1263,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setFileListPanel(String name) {
@@ -1259,7 +1273,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setSidePanel(String name) {

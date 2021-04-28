@@ -40,6 +40,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultTreeModel;
+import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Archive;
@@ -1011,147 +1012,157 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
   **/
   @Override
   public boolean onClick(JComponent c, java.awt.event.MouseEvent e) {
-    if (c instanceof JTableHeader) {
-      TableColumnModel columnModel = table.getColumnModel();
-      int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-      int column = table.convertColumnIndexToModel(viewColumn);
+    try {
 
-      if (column != -1) {
-        // if inline editing, stop the editing first.
-        if (table.isEditing()) {
-          table.getCellEditor().stopCellEditing();
+      if (c instanceof JTableHeader) {
+        TableColumnModel columnModel = table.getColumnModel();
+        int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+        int column = table.convertColumnIndexToModel(viewColumn);
+
+        if (column != -1) {
+          // if inline editing, stop the editing first.
+          if (table.isEditing()) {
+            table.getCellEditor().stopCellEditing();
+          }
+
+          FileListModel_Table model = (FileListModel_Table) table.getModel();
+          model.sortResources(column, true);
+          table.repaint();
+          return true;
         }
-
-        FileListModel_Table model = (FileListModel_Table) table.getModel();
-        model.sortResources(column, true);
-        table.repaint();
+      }
+      else if (c == table) {
+        int column = table.getSelectedColumn();
+        int row = table.getSelectedRow();
+        if (model.isCellEditable(row, column)) {
+          table.editCellAt(row, column);
+          JTextField textField = ((JTextField) ((DefaultCellEditor) table.getCellEditor()).getComponent());
+          textField.selectAll();
+          textField.requestFocus();
+        }
+        ((WSPanelPlugin) ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder")).getCurrentPanel()).onClick(c, e);
         return true;
       }
-    }
-    else if (c == table) {
-      int column = table.getSelectedColumn();
-      int row = table.getSelectedRow();
-      if (model.isCellEditable(row, column)) {
-        table.editCellAt(row, column);
-        JTextField textField = ((JTextField) ((DefaultCellEditor) table.getCellEditor()).getComponent());
-        textField.selectAll();
-        textField.requestFocus();
-      }
-      ((WSPanelPlugin) ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder")).getCurrentPanel()).onClick(c, e);
-      return true;
-    }
-    else {
-      if (c instanceof WSMenuItem) {
-        String code = ((WSMenuItem) c).getCode();
-        if (code.equals("FileListDrop_Add")) {
-          addFilesFromDrop();
-          return true;
-        }
-        else if (code.equals("FileListDrop_ReplaceCurrent")) {
-          replaceCurrentFileFromDrop();
-          return true;
-        }
-        else if (code.equals("FileListDrop_ReplaceMatching")) {
-          replaceMatchingFilesFromDrop();
-          return true;
-        }
-        else if (code.equals("FileListDrop_ReadArchive")) {
-          readArchiveFromDrop();
-          return true;
-        }
-
-        else if (code.equals("FileList_RightClick_PreviewResource")) {
-          // select only the 1 row chosen, for the preview
-          int[] selRows = table.getSelectedRows();
-          table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
-
-          setSidePanel("Preview");
-
-          // re-select the rows
-          table.clearSelection();
-          for (int i = 0; i < selRows.length; i++) {
-            changeSelection(selRows[i]);
+      else {
+        if (c instanceof WSMenuItem) {
+          String code = ((WSMenuItem) c).getCode();
+          if (code.equals("FileListDrop_Add")) {
+            addFilesFromDrop();
+            return true;
           }
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_HexEditor")) {
-          // select only the 1 row chosen, for the hex editor
-          int[] selRows = table.getSelectedRows();
-          table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
-
-          setSidePanel("HexEditor");
-
-          // re-select the rows
-          table.clearSelection();
-          for (int i = 0; i < selRows.length; i++) {
-            changeSelection(selRows[i]);
+          else if (code.equals("FileListDrop_ReplaceCurrent")) {
+            replaceCurrentFileFromDrop();
+            return true;
           }
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_ImageInvestigator")) {
-          // select only the 1 row chosen, for the preview
-          int[] selRows = table.getSelectedRows();
-          table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
-
-          setSidePanel("ImageInvestigator");
-
-          // re-select the rows
-          table.clearSelection();
-          for (int i = 0; i < selRows.length; i++) {
-            changeSelection(selRows[i]);
+          else if (code.equals("FileListDrop_ReplaceMatching")) {
+            replaceMatchingFilesFromDrop();
+            return true;
           }
-          return true;
+          else if (code.equals("FileListDrop_ReadArchive")) {
+            readArchiveFromDrop();
+            return true;
+          }
+
+          else if (code.equals("FileList_RightClick_PreviewResource")) {
+            // select only the 1 row chosen, for the preview
+            int[] selRows = table.getSelectedRows();
+            table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
+
+            setSidePanel("Preview");
+
+            // re-select the rows
+            table.clearSelection();
+            for (int i = 0; i < selRows.length; i++) {
+              changeSelection(selRows[i]);
+            }
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_HexEditor")) {
+            // select only the 1 row chosen, for the hex editor
+            int[] selRows = table.getSelectedRows();
+            table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
+
+            setSidePanel("HexEditor");
+
+            // re-select the rows
+            table.clearSelection();
+            for (int i = 0; i < selRows.length; i++) {
+              changeSelection(selRows[i]);
+            }
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_ImageInvestigator")) {
+            // select only the 1 row chosen, for the preview
+            int[] selRows = table.getSelectedRows();
+            table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
+
+            setSidePanel("ImageInvestigator");
+
+            // re-select the rows
+            table.clearSelection();
+            for (int i = 0; i < selRows.length; i++) {
+              changeSelection(selRows[i]);
+            }
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_ExtractResources_Selected")) {
+            ((SidePanel_DirectoryList) ComponentRepository.get("SidePanel_DirectoryList")).exportSelectedFiles();
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_ExtractResources_All")) {
+            ((SidePanel_DirectoryList) ComponentRepository.get("SidePanel_DirectoryList")).exportAllFiles();
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_RemoveResources")) {
+            ((SidePanel_DirectoryList) ComponentRepository.get("SidePanel_DirectoryList")).removeFiles(getSelected());
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_RenameResources")) {
+            setSidePanel("RenameFile");
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_SelectResources_All")) {
+            selectAll();
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_SelectResources_None")) {
+            selectNone();
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_SelectResources_Inverse")) {
+            selectInverse();
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_FileListView_Table")) {
+            setFileListPanel("Table");
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_FileListView_Tree")) {
+            setFileListPanel("Tree");
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_FileListView_TreeTable")) {
+            setFileListPanel("TreeTable");
+            return true;
+          }
+          else if (code.equals("FileList_RightClick_FileListView_Thumbnails")) {
+            setFileListPanel("Thumbnails");
+            return true;
+          }
+
         }
-        else if (code.equals("FileList_RightClick_ExtractResources_Selected")) {
-          ((SidePanel_DirectoryList) ComponentRepository.get("SidePanel_DirectoryList")).exportSelectedFiles();
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_ExtractResources_All")) {
-          ((SidePanel_DirectoryList) ComponentRepository.get("SidePanel_DirectoryList")).exportAllFiles();
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_RemoveResources")) {
-          ((SidePanel_DirectoryList) ComponentRepository.get("SidePanel_DirectoryList")).removeFiles(getSelected());
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_RenameResources")) {
-          setSidePanel("RenameFile");
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_SelectResources_All")) {
-          selectAll();
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_SelectResources_None")) {
-          selectNone();
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_SelectResources_Inverse")) {
-          selectInverse();
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_FileListView_Table")) {
-          setFileListPanel("Table");
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_FileListView_Tree")) {
-          setFileListPanel("Tree");
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_FileListView_TreeTable")) {
-          setFileListPanel("TreeTable");
-          return true;
-        }
-        else if (code.equals("FileList_RightClick_FileListView_Thumbnails")) {
-          setFileListPanel("Thumbnails");
-          return true;
-        }
+
+        ((WSPanelPlugin) ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder")).getCurrentPanel()).onClick(c, e);
+        return true;
 
       }
-      ((WSPanelPlugin) ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder")).getCurrentPanel()).onClick(c, e);
-      return true;
+      return false;
+
     }
-    return false;
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return false;
+    }
   }
 
   /**
