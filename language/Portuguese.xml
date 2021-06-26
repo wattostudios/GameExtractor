@@ -1,6 +1,6 @@
 <languagePack>
 	<name>Portuguese</name>
-	<version>3.12</version>
+	<version>3.13</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -392,7 +392,7 @@
 		<lang code="WSButton_RenameResources_Text" value="Renomear Arquivos" />
 		<lang code="WSButton_RenameResources_Tooltip" value="Renomeia os arquivos selecionados no arquivo." />
 		
-		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Text" value="Regenerar" />
+		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Text" value="Generar" />
 		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Tooltip" value="Regenera a imagem usando as propriedades definidas nos outros campos" />
 		
 		<lang code="WSButton_ReplaceResources_Text" value="Substituir arquivos" />
@@ -1080,12 +1080,11 @@
 		<lang code="WSTextField_MaxAllowedScriptErrors_Label" value="Numero maximo de erros de script" />
 		<lang code="WSTextField_MaxAllowedScriptErrors_Tooltip" value="O numero maximo de erros que um script pode fazer antes do Game Extractor deixar de executa-lo." />
 		
-		
-		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Label" value="Offset aos dados da imagem" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Label" value="Data Offset" />
 		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Tooltip" value="O deslocamento no arquivo para o inicio dos dados da imagem" />
-		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Label" value="Largura da imagem" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Label" value="Width" />
 		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Tooltip" value="A largura da imagem" />
-		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Label" value="Altura da imagem" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Label" value="Height" />
 		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Tooltip" value="A altura da imagem" />
 		
 		
@@ -1270,7 +1269,7 @@
 		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_LittleEndianRadioButton_Tooltip" value="Values are read in Little-Endian Order" />
 		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_BigEndianRadioButton_Text" value="Big" />
 		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_BigEndianRadioButton_Tooltip" value="Values are read in Big-Endian Order" />
-		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Label" value="Endian Order" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Label" value="Endian" />
 		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Tooltip" value="The Endian Order used to read the values from the file" />
 		
 		<lang code="WSCheckBox_Popup_AddBMSOnDoubleClick_Show_Text" value="Add BMS script on double-click" />
@@ -1499,6 +1498,77 @@
 		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Tooltip" value="Models will be converted into this format when extracting." />
 		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Label" value="Convert Models to..." />
 		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Tooltip" value="Models will be converted into this format when extracting." />
+		
+<!-- New with 3.13 -->
+
+		<lang code="WSCheckBox_PreviewPanel_3DModel_ShowTextures_Text" value="Textures" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_ShowTextures_Tooltip" value="Whether to show texture images (if applicable), or just the plain mesh" />
+		
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_RegenerateMeshButton_Text" value="Generate Mesh" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_RegenerateMeshButton_Tooltip" value="Regenerates the mesh using the properties set in the other fields" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_ShowStatsLogButton_Text" value="Show Stats" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_ShowStatsLogButton_Tooltip" value="Shows detailed statistics of the mesh" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseStatsLogButton_Text" value="Close Log" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseStatsLogButton_Tooltip" value="Closes the statistics log popup" />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexOffsetField_Label" value="Data Offset" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexOffsetField_Tooltip" value="The offset in the file to the start of the vertex data" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexCountField_Label" value="Count" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexCountField_Tooltip" value="The number of vertices" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexBlockSizeField_Label" value="Block Size" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexBlockSizeField_Tooltip" value="The number of bytes used to store each vertex" />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceOffsetField_Label" value="Data Offset" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceOffsetField_Tooltip" value="The offset in the file to the start of the Face Index data" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceCountField_Label" value="Count" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceCountField_Tooltip" value="The number of face indices" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceBlockSizeField_Label" value="Block Size" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceBlockSizeField_Tooltip" value="The number of bytes used to store each Face Index" />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_UVOffsetField_Label" value="Texture UV Offset (relative)" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_UVOffsetField_Tooltip" value="The offset in the Vertex Block to the Texture UV value" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CalculateUVButton_Text" value="Calculate UV" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CalculateUVButton_Tooltip" value="Calculates the Texture UV Image for the mesh" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseUVButton_Text" value="Close Popup" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseUVButton_Tooltip" value="Closes the UV Texture popup" />
+		
+		<lang code="SidePanel_MeshInvestigator_SidePanel_MeshInvestigator_Text" value="Mesh Investigator" />
+		<lang code="WSButton_MeshInvestigator_Text" value="Mesh Investigator" />
+		<lang code="WSButton_MeshInvestigator_Tooltip" value="Shows a panel where you can try to display unknown files as a 3D mesh" />
+		<lang code="WSLabel_ComponentList_MeshInvestigator_Text" value="Mesh Investigator" />		
+		<lang code="WSMenuItem_FileList_RightClick_MeshInvestigator_Text" value="Mesh Investigator" />
+		<lang code="WSMenuItem_FileList_RightClick_MeshInvestigator_Tooltip" value="Opens the SidePanel that tries to display unknown files as a 3D mesh" />
+		<lang code="WSMenuItem_MeshInvestigator_Text" value="Mesh Investigator" />
+		<lang code="WSMenuItem_MeshInvestigator_Tooltip" value="Opens the SidePanel that displays unknown files as a 3D mesh" />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_SelectedValues_Main_Tooltip" value="Displays unknown files as a 3D mesh" />
+		<lang code="WSButton_MeshInvestigator_Name" value="Mesh Investigator" />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_WritePreviewHolder_Label" value="Save the Mesh As..." />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_WritePreviewHolder_Tooltip" value="The type of file to save the mesh as." />
+		<lang code="WSButton_SidePanel_MeshInvestigator_WritePreviewButton_Tooltip" value="Save the mesh to the computer, in the chosen format." />
+		<lang code="WSCheckBox_Popup_MeshInvestigator_PreviewSaved_Show_Text" value="Mesh Investigator Mesh Saved" />
+		<lang code="WSCheckBox_Popup_MeshInvestigator_PreviewSaved_Show_Tooltip" value="Show a popup message when the Mesh Investigator mesh has been saved." />
+		<lang code="WSComboBox_SidePanel_MeshInvestigator_WritePreviewPlugins_Tooltip" value="The mesh will be saved in this format." />
+		<lang code="WSLabel_MeshInvestigator_PreviewSaved_Text" value="The mesh was saved successfully." />
+		<lang code="WSButton_SidePanel_MeshInvestigator_WritePreviewButton_Name" value="Save the Mesh" />
+		<lang code="WSLabel_BlankMeshInvestigatorPreview_Text" value="This file can not be previewed." />
+		<lang code="WSLabel_BlankMeshInvestigatorPreview_Tooltip" value="No plugin was able to preview this file." />
+		<lang code="MeshInvestigator" value="Mesh Investigator" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_VertexPanelLabel_Label" value="Vertices" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_VertexPanelLabel_Tooltip" value="Information about the Vertices in the mesh" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_FacePanelLabel_Label" value="Face Indices" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_FacePanelLabel_Tooltip" value="Information about the Face Indices in the mesh" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_UVPanelLabel_Label" value="Texture UV Offset (relative)" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_UVPanelLabel_Tooltip" value="The offset in the Vertex Block to the Texture UV value" />
+		
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SettingsPanelLabel_Label" value="Settings" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SettingsPanelLabel_Tooltip" value="Settings that affect the rendering of the image." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_OffsetWidthHeightPanelLabel_Label" value="Image Details" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_OffsetWidthHeightPanelLabel_Tooltip" value="The main details of the image you want to generate." />
+		
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Text" value="Swizzle (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Tooltip" value="Apply PlayStation 2 Swizzling to the Image" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Text" value="Swizzle (Switch)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Tooltip" value="Apply Nintendo Switch Swizzling to the Image" />
 		
 		<lang code="" value="" />
 		

@@ -102,6 +102,15 @@ website as well.
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+Version 3.13
+[I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
+[+] Added previews for Unity3D v20 Meshes that are stored in a separate resS file
+[+] Added a Mesh Investigator, for previewing unknown files as 3D meshes
+[+] Added additional swizzling options to the Image Investigator
+[A] New cleaner images for file types, and for some buttons and menu items that were confusing
+[A] If a plugin forces some file types to display as Text, the thumbnail icon will show as such
+[A] The command-line argument -list will now write to stdout if -output is omitted
+
 Version 3.12
 [I] Heaps of new features and improvements...
     [I] Support for more games (archive formats, image/audio previews, and thumbnails)

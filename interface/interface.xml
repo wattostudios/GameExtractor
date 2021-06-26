@@ -15,7 +15,6 @@
 					<WSMenuItem code="ExtractAllResources" opaque="false" underline="T" shortcut="ctrl E" />
 				</WSMenu>
 				<WSMenu code="WriteArchive" opaque="false" repository="false" underline="W">
-					<WSMenuItem code="CutArchive" opaque="false" repository="false" underline="U" />
 					<WSMenuItem code="WriteArchive" opaque="false" repository="false" underline="W" shortcut="ctrl S" />
 					<WSMenuItem code="ConvertArchive" opaque="false" underline="C" />
 				</WSMenu>
@@ -48,6 +47,7 @@
 				<WSMenuItem code="PreviewResource" opaque="false" repository="false" underline="R" shortcut="ctrl V" />
 				<WSMenuItem code="HexEditor" opaque="false" repository="false" underline="H" />
 				<WSMenuItem code="ImageInvestigator" opaque="false" repository="false" underline="I" />
+				<WSMenuItem code="MeshInvestigator" opaque="false" repository="false" underline="E" />
 			</WSMenu>
 			<WSMenu code="Tools" opaque="false" underline="T">
 				<WSMenuItem code="Options" opaque="false" repository="false" underline="O" shortcut="F11" />
@@ -59,6 +59,9 @@
 				<WSPopupMenuSeparator />
 				<WSMenuItem code="ScriptBuilder" opaque="false" repository="false" />
 				<WSMenuItem code="FileListExporter" opaque="false" repository="false" underline="E" />
+				<WSPopupMenuSeparator />
+				<WSMenuItem code="CutArchive" opaque="false" repository="false" underline="U" />
+				<WSMenuItem code="AnalyzeDirectory" opaque="false" repository="false" underline="A" />
 			</WSMenu>
 			<WSMenu code="Help" opaque="false" repository="false" underline="H">
 				<WSMenuItem code="Help" opaque="false" repository="false" underline="E" shortcut="F1" />
@@ -74,7 +77,7 @@
 				<WSButton code="NewArchive" opaque="false" repository="false" showText="false" />
 				<WSComboButton code="ReadArchive_Normal" opaque="false" repository="false">
 					<WSButton code="ReadArchive_Normal" opaque="false" repository="false" showText="false" />
-					<WSPopupMenu opaque="false" visible="false">
+					<WSPopupMenu visible="false">
 						<WSMenuItem code="ReadArchive_Normal" opaque="false" repository="false" />
 						<WSMenuItem code="ReadArchive_OpenWith" opaque="false" />
 						<WSMenuItem code="ReadArchive_Script" opaque="false" />
@@ -83,7 +86,7 @@
 				</WSComboButton>
 				<WSComboButton code="WriteArchive" opaque="false" repository="false">
 					<WSButton code="WriteArchive" opaque="false" repository="false" showText="false" />
-					<WSPopupMenu visible="false">
+					<WSPopupMenu opaque="false" visible="false">
 						<WSMenuItem code="WriteArchive" opaque="false" repository="false" />
 						<WSMenuItem code="ConvertArchive" opaque="false" />
 					</WSPopupMenu>
@@ -96,7 +99,7 @@
 				<WSToolBarSeparator orientation="vertical" />
 				<WSComboButton code="ExtractSelectedResources" opaque="false" repository="false">
 					<WSButton code="ExtractSelectedResources" opaque="false" repository="false" showText="false" />
-					<WSPopupMenu visible="false">
+					<WSPopupMenu opaque="false" visible="false">
 						<WSMenuItem code="ExtractSelectedResources" opaque="false" repository="false" />
 						<WSMenuItem code="ExtractAllResources" opaque="false" />
 					</WSPopupMenu>
@@ -104,7 +107,7 @@
 				<WSToolBarSeparator orientation="vertical" />
 				<WSComboButton code="FileListView" opaque="false" repository="false">
 					<WSButton code="FileListView" opaque="false" repository="false" showText="false" />
-					<WSPopupMenu visible="false">
+					<WSPopupMenu opaque="false" visible="false">
 						<WSMenuItem code="FileListView_Table" opaque="false" repository="false" />
 						<WSMenuItem code="FileListView_Tree" opaque="false" repository="false" />
 						<WSMenuItem code="FileListView_TreeTable" opaque="false" repository="false" />
@@ -119,6 +122,7 @@
 				<WSButton code="PreviewResource" opaque="false" repository="false" showText="false" />
 				<WSButton code="HexEditor" opaque="false" repository="false" showText="false" />
 				<WSButton code="ImageInvestigator" opaque="false" repository="false" showText="false" />
+				<WSButton code="MeshInvestigator" opaque="false" repository="false" showText="false" />
 				<WSButton code="Information" opaque="false" repository="false" showText="false" />
 				<WSToolBarSeparator orientation="vertical" />
 				<WSButton code="Search" opaque="false" repository="false" showText="false" />

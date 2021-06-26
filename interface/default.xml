@@ -50,6 +50,8 @@
 				<WSMenuItem code="PreviewResource" opaque="false" repository="false" underline="R" shortcut="ctrl V" />
 				<WSMenuItem code="HexEditor" opaque="false" repository="false" underline="H" />
 				<WSMenuItem code="ImageInvestigator" opaque="false" repository="false" underline="I" />
+				
+				<WSMenuItem code="MeshInvestigator" opaque="false" repository="false" underline="E" />
 			</WSMenu>
 			<WSMenu code="Tools" opaque="false" underline="T">
 				<WSMenuItem code="Options" opaque="false" repository="false" underline="O" shortcut="F11" />

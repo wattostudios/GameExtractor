@@ -46,10 +46,13 @@
 <li>Java LZF Library (ning-compress)</li>
 <li>Java-LZO</li>
 <li>Java Media Framework</li>
+<li>jbzip2</li>
 <li>JLayer</li>
+<li>JMPQ3</li>
 <li>JOrbis</li>
 <li>jsquish</li>
 <li>junrar</li>
+<li>LHA Decompressor for Java</li>
 <li>LZSS Compression Routines for Java</li>
 <li>puyotools</li>
 <li>python-fsb5</li>
@@ -58,6 +61,7 @@
 <li>Rainbow</li>
 <li>sflcomp.c Compression Functions</li>
 <li>tinf</li>
+<li>UNGTC</li>
 <li>UnRAR</li>
 <li>vgmstream</li>
 <li>XZ for Java</li>

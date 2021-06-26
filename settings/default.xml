@@ -1,7 +1,7 @@
 <settingsStore>
 	<program>Game Extractor</program>
 	<settings>
-		<setting code="Version" value="3.12" changable="false" />
+		<setting code="Version" value="3.13" changable="false" />
 		<setting code="AboutFile" value="settings/about.xml" />
 		
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
@@ -117,6 +117,8 @@
 		<setting code="Popup_Preview_PreviewSaved_Show" value="true" />
 		
 		<setting code="Popup_ImageInvestigator_PreviewSaved_Show" value="true" />
+		
+		<setting code="Popup_MeshInvestigator_PreviewSaved_Show" value="true" />
 		
 		<setting code="Popup_QuickBMSMissing_Show" value="true" />
 		<setting code="Popup_ReadArchive_ArchiveOpenedWithScanner_Show" value="true" />

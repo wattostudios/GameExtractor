@@ -21,16 +21,17 @@ of compression algorithms.
 * This is only the source for the *Basic Version*. The Full Version code is not included in this
   source repository, as the Full Version is a purchasable product and is not covered under the
   GPLv2 license.
-* Some of the *optional* functionality references executables and libraries that are not included
-  in this repository. You can find information about these executables in the NOTICE.txt if you
-  want to download and use them.
-* There should generally be no need to build these sources - if you want a working release of
-  Game Extractor (Basic Version), get it from the website at http://www.watto.org/extract
+* For most users, there should generally be no need to build these sources - if you want a working
+  build of Game Extractor (Basic Version), get it from the website at http://www.watto.org/extract
   
 ## Installation/Build Prerequisites
 
 Game Extractor requires you to have Java Runtime Environment 8.0 (or 1.8) or later installed on
 your computer. This is a free download from http://www.java.com 
+
+We maintain the project using Eclipse. You should be able to download the repository, and import
+it into Eclipse via the menu path File -- Open Projects from File System. The main entry point
+is under src/org/watto/ge/GameExtractor.java
 
 *Please note: While Java can theoretically run on many different operating systems, this
   doesn't necessarily mean that Game Extractor works correctly on those operating systems. 
@@ -50,6 +51,15 @@ common errors and problems, and information on the full version.
 There is a Contact Form on our website, if you need to contact us for any further purpose.
 
 ## Version History
+
+* Version 3.13
+  * [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
+  * [+] Added previews for Unity3D v20 Meshes that are stored in a separate resS file
+  * [+] Added a Mesh Investigator, for previewing unknown files as 3D meshes
+  * [+] Added additional swizzling options to the Image Investigator
+  * [A] New cleaner images for file types, and for some buttons and menu items that were confusing
+  * [A] If a plugin forces some file types to display as Text, the thumbnail icon will show as such
+  * [A] The command-line argument -list will now write to stdout if -output is omitted
 
 * Version 3.12
   * [I] Heaps of new features and improvements...

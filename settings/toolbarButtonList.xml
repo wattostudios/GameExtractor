@@ -66,6 +66,7 @@
 	<WSButton code="PreviewResource" opaque="false" showText="false" />
 	<WSButton code="HexEditor" opaque="false" showText="false" />
 	<WSButton code="ImageInvestigator" opaque="false" showText="false" />
+	<WSButton code="MeshInvestigator" opaque="false" showText="false" />
 	<WSButton code="Options" opaque="false" showText="false" />
 	<WSButton code="PluginList" opaque="false" showText="false" />
 	<WSButton code="Information" opaque="false" showText="false" />

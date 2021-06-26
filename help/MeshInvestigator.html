@@ -1,0 +1,68 @@
+<html>
+<link rel="stylesheet" type="text/css" href="style.css">
+<body>
+
+<center>
+
+<img src="images\game_extractor_front.png"><img src="images\game_extractor_back.png">
+
+<br/><br/>
+
+<div class="borderout width98"><div class="borderin"><div class="heading1 center">
+Mesh Investigator
+</div></div></div>
+<br />
+<a href="index.html" class="underline">Back to Index</a>
+<br /><br />
+
+<div class="width95 justify">
+Shows a Mesh Investigator representation of the selected file in the <a href="FileList.html" class="italic green">File List</a>.
+<br><br>
+The Mesh Investigator allow you to display an unknown file as a 3D mesh. This is useful for files that contain mesh data somewhere within them, but where the file itself isn't a standard or known file format. You can use the fields to describe the location of the vertices, face indices, and texture (uv) points in the file, and then render a mesh or texture (uv) map of the resulting data.
+<br><br>
+<center><img src="images/Button_MeshInvestigator.png"><br />
+<div class="height6"> </div><i>This is the button to show a file in the Mesh Investigator</i></center>
+
+<br />
+The assumption here is that the file you're trying to process contains at least a list of vertices, and a list of face indexes. Under that assumption, you fill the corresponding fields and can then generate a mesh.
+<br /><br />
+<table class="width100">
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Vertices: Data Offset:</i> The offset in the file to the table of vertices.</td>
+  </tr>
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Vertices: Count:</i> The number of vertices in the table.</td>
+  </tr>
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Vertices: Block Size:</i> The number of bytes used to represent each vertex in the table.</td>
+  </tr>
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Face Indices: Data Offset:</i> The offset in the file to the table of face indices.</td>
+  </tr>
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Face Indices: Count:</i> The number of face indices in the table.</td>
+  </tr>
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Face Indices: Block Size:</i> The number of bytes used to represent each face index in the table. Should be 2 or 4 bytes.</td>
+  </tr>
+</table>
+
+<br />
+If the mesh file also contains UV co-ordinates for a texture image, you can find them here. The assumption is that the UV co-ordinates are included in the vertex table. By clicking the Calculate UV button, it will read the co-ordinates and display an image of the corresponding texture file.
+<br /><br />
+<table class="width100">
+  <tr class="width100">
+    <td><img src="images/bullet.png" /></td><td class="width100"><i>Texture UV Offset:</i> The offset (in an individual vertex entry) to the UV data for that vertex. For example, a value of 12 means that, for each vertex, if you skip the first 12 bytes you will find the UV fields for that vertex.</td>
+  </tr>
+</table>
+
+<br />
+There is also a Show Stats button which will display some details about the mesh, including the vertex, face, and UV lists.
+<br /><br />
+
+</div>
+
+</center>
+
+</body>
+</html>

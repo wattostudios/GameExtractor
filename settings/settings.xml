@@ -1,277 +1,293 @@
 <settingsStore>
 	<program>WATTO Studios Program</program>
 	<settings>
-		<setting code="ShowTableColumn_CompressedLength" value="true" />
-		<setting code="SavedPreviewDirectory" value="previews" />
-		<setting code="ShowAdvancedControlsInDirectoryList" value="false" />
-		<setting code="ShowTableColumn_Icon" value="true" />
+		<setting code="Popup_QuickBMSMissing_Show" value="true" />
+		<setting code="PreviewPanel_3DModel_BackgroundColor" value="GREY" />
+		<setting code="WSGradientColorChooser_Color_Selected" value="-9725853" />
 		<setting code="Popup_ExportFileList_NoColumnsSelected_Show" value="true" />
-		<setting code="Popup_SelectResources_All_Show" value="false" />
-		<setting code="ExportFileListColumn_Filename" value="true" />
-		<setting code="Popup_AddFiles_NoFilesToAdd_Show" value="true" />
-		<setting code="Popup_RemoveFiles_FilesAdded_Show" value="true" />
-		<setting code="PreviewPanel_3DModel_Smoothing" value="false" />
+		<setting code="DividerLocation" value="0.7619791666666667" />
+		<setting code="DragDropOption" value="DragDrop_Ask" />
+		<setting code="LanguageDirectory" value="language" />
+		<setting code="SelectedScript" value="SND_Daggerfall" />
 		<setting code="ShowTableColumn_Directory" value="false" />
-		<setting code="ShowCharHexEditorField" value="false" />
-		<setting code="WSTableColumn_Description_Width" value="153" />
-		<setting code="PreviewPanel_ImageInvestigator_Format" value="DXT1" />
+		<setting code="ShowTableColumn_CompressedLength" value="true" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" value="true" />
+		<setting code="Noesis_Path" value="external_bins\noesis" />
+		<setting code="PreviewPanel_ImageInvestigator_Offset" value="0" />
+		<setting code="Popup_Search_NoColumnsSelected_Show" value="true" />
+		<setting code="MaximumDirectoryFileLength" value="524800" />
+		<setting code="Popup_FileListViewChanged_Show" value="false" />
+		<setting code="ExportFileListColumn_FilePath" value="true" />
+		<setting code="MaxNumberOfVertices4" value="10000000" />
+		<setting code="PreviewPanel_MeshInvestigator_VertexCountField" value="701" />
+		<setting code="Popup_AnalyzeDirectory_FileNotADirectory_Show" value="true" />
+		<setting code="PreviewPanel_ImageInvestigator_BigEndianRadioButtonSelected" value="false" />
+		<setting code="ExportFileListColumn_Directory" value="true" />
+		<setting code="PreviewPanel_MeshInvestigator_VertexOffsetField" value="224" />
+		<setting code="ToolbarButtonListFile" value="settings/toolbarButtonList.xml" />
+		<setting code="AutoChangedToHexPreview" value="false" />
+		<setting code="HexEditorFileSizeLimit" value="10000" />
+		<setting code="Popup_CutArchive_FilesCut_Show" value="true" />
+		<setting code="PreviewPanel_ImageInvestigator_SwizzlePS2CheckboxSelected" value="false" />
+		<setting code="Popup_ModifyArchive_NotWritable_Show" value="true" />
+		<setting code="NintendoSwitchSwizzle" value="false" />
+		<setting code="PreviewPanel_ImageInvestigator_SwizzleCheckboxSelected" value="false" />
+		<setting code="MaxNumberOfFaces4" value="1000000" />
+		<setting code="WSTableColumn_d_Width" value="107" />
+		<setting code="Popup_ScriptBuilder_NoNameSpecified_Show" value="true" />
+		<setting code="TypesFile" value="settings/types.xml" />
+		<setting code="AnalysisExtractDirectory" value="extract" />
+		<setting code="ExportFileListColumn_Filename" value="true" />
+		<setting code="Popup_TaskManager_UndoComplete_Show" value="true" />
+		<setting code="Popup_AddFiles_FilesAdded_Show" value="false" />
+		<setting code="ShowTableColumn_Compression" value="false" />
+		<setting code="AboutFile" value="settings/about.xml" />
+		<setting code="WSTableColumn_Icon_Width" value="18" />
+		<setting code="Popup_AnalyzeDirectory_FilenameMissing_Show" value="true" />
+		<setting code="LoadScriptsAtStartup" value="false" />
+		<setting code="ShowTableColumn_Icon" value="true" />
+		<setting code="Popup_RenameFiles_FilesRenamed_Show" value="true" />
+		<setting code="Popup_ReadArchive_FileNotAnArchive_Show" value="true" />
+		<setting code="CurrentFileList" value="TreeTable" />
+		<setting code="NumberOfUndoTasks" value="4" />
+		<setting code="Popup_ReadArchive_ArchiveOpened_Show" value="false" />
+		<setting code="Popup_RemoveFiles_NoFilesToRemove_Show" value="true" />
+		<setting code="PreviewPanel_MeshInvestigator_UVOffsetField" value="48" />
+		<setting code="PreviewPanel_ImageInvestigator_VerticalFlipCheckboxSelected" value="false" />
+		<setting code="ShowCustomColumns" value="true" />
+		<setting code="FileListView" value="TreeTable" />
+		<setting code="Popup_Preview_PreviewSaved_Show" value="true" />
+		<setting code="Popup_ReplaceFiles_FilesReplaced_Show" value="true" />
+		<setting code="PreviewPanel_ImageInvestigator_Width" value="1024" />
+		<setting code="AutoImportModifiedExportFiles" value="false" />
+		<setting code="Popup_ImageInvestigator_PreviewSaved_Show" value="true" />
+		<setting code="DirectoryListDoubleClickDoesOpenArchive" value="true" />
+		<setting code="ShowTableColumn_Extension" value="false" />
+		<setting code="Theme_ButterflyLookAndFeel_BackgroundColor" value="9999999999" />
+		<setting code="FileListTreeTable_DividerLocation" value="0.2" />
+		<setting code="LoadingPreviewFromHex" value="false" />
+		<setting code="Popup_SelectResources_Inverse_Show" value="false" />
+		<setting code="Popup_CutArchive_CutFailed_Show" value="true" />
+		<setting code="Scanner_pcx" value="true" />
+		<setting code="ShowTableColumn_Compressed" value="false" />
+		<setting code="Scanner_dds" value="true" />
+		<setting code="FileListExporterDirectory" value="lists" />
+		<setting code="SelectedTreeTableType" value="2" />
+		<setting code="WSTableColumn_r_Width" value="18" />
+		<setting code="Popup_ReadArchive_ReadWithScannerFailed_Show" value="true" />
+		<setting code="Scanner_jpg" value="true" />
+		<setting code="ShowLanguagePackOutdatedError" value="false" />
+		<setting code="PreviewType" value="Hex" />
+		<setting code="WSProgramClosesSplashScreen" value="true" />
+		<setting code="ShowWelcomeWizard" value="false" />
+		<setting code="PreviewOnFileListEnter" value="true" />
+		<setting code="WSFontChooser_FontSize_Selected" value="12" />
+		<setting code="WSSmallColorChooserXML" value="xml/WSSmallColorChooser.xml" />
+		<setting code="dwebp_Path" value="external_bins\dwebp" />
+		<setting code="WSTableColumn_R_Width" value="18" />
+		<setting code="Scanner_gif" value="true" />
+		<setting code="SelectedRenamer" value="4" />
+		<setting code="WSGradientColorChooserXML" value="xml/WSGradientColorChooser.xml" />
+		<setting code="Popup_RemoveFiles_FilesAdded_Show" value="true" />
+		<setting code="ExtendedSettingsDebug" value="false" />
+		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
+		<setting code="PreviewPanel_ImageInvestigator_Format" value="BC7" />
+		<setting code="Popup_AddFiles_NoFilesToAdd_Show" value="true" />
+		<setting code="ExtendedLanguageDebug" value="false" />
+		<setting code="OpenArchiveOnDoubleClick" value="true" />
+		<setting code="ShowTableColumn_DecompressedLength" value="true" />
+		<setting code="AlsoCutDirectoryFiles" value="true" />
+		<setting code="Popup_FullVersionOnly_Show" value="true" />
+		<setting code="Popup_PreviewPanel_Text_ChangesSaved_Show" value="false" />
+		<setting code="PreviewPanel_3DModel_ShowTextures" value="true" />
 		<setting code="DirectoryListView" value="List" />
+		<setting code="CheckScriptResourceValues" value="true" />
+		<setting code="PreviewPanel_MeshInvestigator_FaceOffsetField" value="47904" />
+		<setting code="SearchWildcardConversion" value="true" />
+		<setting code="Scanner_ogg" value="true" />
+		<setting code="ExtractDirectory" value="extract" />
+		<setting code="SavedPreviewDirectory" value="previews" />
+		<setting code="OnlyShowStandardConverters" value="false" />
+		<setting code="PreviewPanel_Image_BackgroundColor" value="BLACK" />
+		<setting code="WSFontChooser_FontName_Selected" value="Arial" />
+		<setting code="DefaultSettingsFile" value="settings/default.xml" />
+		<setting code="SearchColumn_FilePath" value="false" />
+		<setting code="Scanner_bmp" value="true" />
+		<setting code="ExportPreviewType_class PreviewPanel_Image" value="PNG Image" />
+		<setting code="Popup_AnalyzeDirectory_DirectoryAnalyzed_Show" value="true" />
+		<setting code="WSTableColumn_CompressedLength_Width" value="157" />
+		<setting code="ShowTableColumn_AddedIcon" value="true" />
+		<setting code="PluginListDisplayType" value="Game" />
+		<setting code="Popup_ConvertArchive_FilenameMissing_Show" value="true" />
+		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_TEST\ArmA - Cold War Assault\Missions\09SniperTeam.Cain.pbo" />
+		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
+		<setting code="ShowShortHexEditorField" value="true" />
+		<setting code="SearchColumn_Source" value="false" />
+		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_TEST\ArmA - Cold War Assault\AddOns\BISCamel.pbo" />
+		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_TEST\ArmA - Cold War Assault\Campaigns\resistance.pbo" />
+		<setting code="NumberOfRecentFiles" value="4" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" value="false" />
+		<setting code="SearchColumn_Extension" value="true" />
+		<setting code="RecentFile1" value="C:\Ariba_Users.xlsx" />
+		<setting code="IdentifyUnknownFileTypes" value="true" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex" value="0" />
+		<setting code="Popup_WriteArchive_FilenameMissing_Show" value="true" />
+		<setting code="PreviewPanel_Image_FitToPanel" value="true" />
+		<setting code="Popup_CutArchive_InvalidInputFile_Show" value="true" />
+		<setting code="AutoResizeTableColumns" value="true" />
+		<setting code="WSFontChooser_FontStyle_Selected" value="Plain" />
+		<setting code="HexEditorDisplayType" value="Char" />
 		<setting code="Popup_ModifiedFilesImported_Show" value="true" />
+		<setting code="OGG_Headers_Path" value="external_bins\ogg_headers" />
+		<setting code="ShowSystemSpecificIcons" value="false" />
+		<setting code="SearchColumn_Filename" value="true" />
+		<setting code="FFMPEG_Path" value="external_bins\ffmpeg" />
+		<setting code="Popup_ExportFiles_FilesExported_Show" value="true" />
+		<setting code="ShowTableColumn_CompressedLengthKB" value="false" />
+		<setting code="Popup_SelectResources_All_Show" value="false" />
+		<setting code="Popup_AnalyzeDirectory_InvalidReportFile_Show" value="true" />
+		<setting code="Popup_SidePanelChanged_Show" value="false" />
+		<setting code="WSTableColumn_X_Width" value="63" />
+		<setting code="ShowIntHexEditorField" value="true" />
+		<setting code="ShowTableColumn_DecompressedLengthKB" value="false" />
+		<setting code="ShowFloatHexEditorField" value="true" />
+		<setting code="InterfaceColors" value="-65536" />
+		<setting code="PluginPathsFile" value="settings/plugins.xml" />
+		<setting code="WSTableColumn_T_Width" value="62" />
+		<setting code="WSTableColumn_Offset_Width" value="155" />
+		<setting code="LoadingHex" value="false" />
+		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_3DModel" value="OBJ Model" />
+		<setting code="Popup_ExportFiles_SomeFilesExported_Show" value="true" />
+		<setting code="Popup_ReadArchive_FilenameMissing_Show" value="true" />
+		<setting code="ShowTableColumn_Source" value="false" />
+		<setting code="Scanner_html" value="true" />
+		<setting code="SettingsFile" value="settings\settings.xml" />
+		<setting code="WSTableColumn_c_Width" value="106" />
+		<setting code="PreviewPanel_ImageInvestigator_Height" value="512" />
+		<setting code="PreviewPanel_MeshInvestigator_VertexBlockSizeField" value="68" />
+		<setting code="ShowHexIfPreviewFailed" value="true" />
+		<setting code="Popup_ExportFiles_NoFilesSelected_Show" value="true" />
+		<setting code="WSFontChooserXML" value="xml/WSFontChooser.xml" />
+		<setting code="Scanner_wav" value="true" />
+		<setting code="Scanner_bik" value="true" />
+		<setting code="Popup_ExportFileList_ListExported_Show" value="true" />
+		<setting code="Theme_ButterflyLookAndFeel_TextColor" value="0" />
+		<setting code="QuickBMS_Path" value="external_bins\quickbms" />
+		<setting code="Popup_Search_NoSearchValue_Show" value="true" />
+		<setting code="SortPluginLists" value="true" />
+		<setting code="ShowDoubleHexEditorField" value="true" />
+		<setting code="ShowTableColumn_ReplacedIcon" value="true" />
 		<setting code="ShowBinaryHexEditorField" value="false" />
 		<setting code="ScanFileIfOpenFailed" value="true" />
-		<setting code="DirectoryListDoubleClickDoesOpenArchive" value="true" />
-		<setting code="NumberOfRecentFiles" value="4" />
-		<setting code="SearchColumn_FilePath" value="false" />
-		<setting code="WSTableColumn_X_Width" value="63" />
-		<setting code="SidePanel_DirectoryList_CurrentControl" value="ReadPanel" />
-		<setting code="ToolbarButtonListFile" value="settings/toolbarButtonList.xml" />
-		<setting code="Popup_ReadArchive_ArchiveOpenedWithScanner_Show" value="true" />
-		<setting code="ShowByteHexEditorField" value="true" />
-		<setting code="PreviewPanel_Text_WordWrap" value="false" />
-		<setting code="IdentifyUnknownFileTypes" value="true" />
-		<setting code="SelectedFileListExporter" value="0" />
-		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="Unreal Engine Paletted Texture Image" />
-		<setting code="ShowTableColumn_Value" value="true" />
-		<setting code="Popup_ConvertArchive_FilenameMissing_Show" value="true" />
-		<setting code="Scanner_tim" value="true" />
-		<setting code="Popup_ScriptBuilder_ScriptSaved_Show" value="true" />
-		<setting code="Popup_FullVersionOnly_Show" value="true" />
-		<setting code="Popup_Search_NoMatchFound_Show" value="true" />
-		<setting code="DefaultInterfaceFile" value="interface/default.xml" />
-		<setting code="Popup_RemoveFiles_NoFilesToRemove_Show" value="true" />
-		<setting code="AllowInlineFileListEditing" value="false" />
-		<setting code="LanguageDirectory" value="language" />
-		<setting code="SearchColumn_Filename" value="false" />
-		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Influent\sharedassets0.assets" />
-		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Influent\sharedassets1.assets" />
-		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" value="false" />
-		<setting code="WSFontChooser_FontSize_Selected" value="12" />
-		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Influent\sharedassets3.assets" />
-		<setting code="WSTableColumn_Icon_Width" value="18" />
-		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Influent\sharedassets4.assets" />
-		<setting code="Popup_Search_MatchFound_Show" value="false" />
-		<setting code="MaximumDirectoryFileLength" value="524800" />
-		<setting code="FileListExporterDirectory" value="lists" />
-		<setting code="WSTableColumn_CRC_Width" value="65" />
-		<setting code="WSTableColumn_AddedIcon_Width" value="18" />
-		<setting code="WSTableColumn_R_Width" value="18" />
-		<setting code="Popup_ExportFiles_DirectoryNotWritable_Show" value="true" />
-		<setting code="ShowHexHexEditorField" value="false" />
-		<setting code="SelectedScript" value="SND_Daggerfall" />
-		<setting code="PreviewPanel_3DModel_BackgroundColor" value="GREY" />
-		<setting code="WSTableColumn_T_Width" value="62" />
-		<setting code="Popup_ModifyArchive_NotWritable_Show" value="true" />
-		<setting code="Popup_SidePanelChanged_Show" value="false" />
-		<setting code="OpenArchiveOnDoubleClick" value="true" />
-		<setting code="Popup_TaskManager_UndoComplete_Show" value="true" />
-		<setting code="HexEditorFileSizeLimit" value="10000" />
-		<setting code="Scanner_wav" value="true" />
-		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Influent" />
-		<setting code="ExportFileListColumn_Offset" value="true" />
-		<setting code="CurrentSidePanel" value="SidePanel_Search" />
-		<setting code="PluginListDisplayType" value="Game" />
-		<setting code="ShowCustomColumns" value="true" />
-		<setting code="WSMonthCalendarXML" value="xml/WSMonthCalendar.xml" />
-		<setting code="WSTableColumn_P_Width" value="197" />
-		<setting code="PreviewPanel_Image_FitToPanel" value="true" />
-		<setting code="SettingsFile-Defaults" value="settings\default.xml" />
-		<setting code="dwebp_Path" value="external_bins\dwebp" />
-		<setting code="InterfaceFile" value="interface/interface.xml" />
-		<setting code="PreviewType" value="Hex" />
-		<setting code="Popup_ExportFileList_ListExported_Show" value="true" />
-		<setting code="WSTableColumn_FilePath_Width" value="589" />
-		<setting code="Theme_ButterflyLookAndFeel_InterfaceColors" value="-9725853" />
-		<setting code="ShowTableColumn_DecompressedLengthKB" value="false" />
-		<setting code="CheckScriptResourceValues" value="true" />
-		<setting code="DebugMode" value="true" />
-		<setting code="Popup_Search_NoSearchValue_Show" value="true" />
-		<setting code="UpscaleSmallThumbnails" value="false" />
-		<setting code="AboutFile" value="settings/about.xml" />
-		<setting code="Popup_RenameFiles_FilesRestored_Show" value="true" />
-		<setting code="Popup_AnalyzeDirectory_DirectoryAnalyzed_Show" value="true" />
-		<setting code="SearchRegExConversion" value="false" />
-		<setting code="Popup_SelectResources_None_Show" value="false" />
-		<setting code="InterfaceLookAndFeel" value="ButterflyLookAndFeel" />
-		<setting code="ShowFloatHexEditorField" value="true" />
-		<setting code="Popup_CutArchive_CutFailed_Show" value="true" />
-		<setting code="Scanner_bik" value="true" />
-		<setting code="UE4CullRelatedResources" value="true" />
-		<setting code="WSTableColumn_O_Width" value="83" />
-		<setting code="Popup_ExportFiles_FilesExported_Show" value="true" />
-		<setting code="WSTableColumn_ReplacedIcon_Width" value="18" />
-		<setting code="Popup_DecompressArchive_Show" value="false" />
-		<setting code="Popup_AddFiles_FilesRemoved_Show" value="true" />
-		<setting code="DragDropOption" value="DragDrop_Ask" />
-		<setting code="Popup_RenameFiles_NoFilesSelected_Show" value="true" />
-		<setting code="ShowTableColumn_Offset" value="true" />
-		<setting code="ShowLanguagePackOutdatedError" value="false" />
-		<setting code="Noesis_Path" value="external_bins\noesis" />
-		<setting code="Popup_ReadArchive_FileNotAnArchive_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Width" value="640" />
-		<setting code="SearchColumn_Extension" value="true" />
-		<setting code="ShowTableColumn_FilePath" value="true" />
-		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
 		<setting code="ShowUnicodeHexEditorField" value="false" />
-		<setting code="DefaultSettingsFile" value="settings/default.xml" />
-		<setting code="NintendoSwitchSwizzle" value="false" />
-		<setting code="AlsoCutDirectoryFiles" value="true" />
-		<setting code="ExportPreviewType_class PreviewPanel_Image" value="PNG Image" />
-		<setting code="Popup_ExportFiles_NoFilesSelected_Show" value="true" />
-		<setting code="WSTableColumn_I_Width" value="203" />
-		<setting code="WSTableColumn_CompressedLength_Width" value="86" />
-		<setting code="WSProgramClosesSplashScreen" value="true" />
-		<setting code="Popup_Search_NoColumnsSelected_Show" value="true" />
-		<setting code="PlayAudioOnLoad" value="true" />
-		<setting code="SelectedOptionGroup" value="9" />
-		<setting code="PreviewOnFileListEnter" value="true" />
-		<setting code="DividerLocation" value="0.7515625" />
-		<setting code="PreviewPanel_ImageInvestigator_LittleEndianRadioButtonSelected" value="true" />
-		<setting code="MaxNumberOfVertices4" value="10000000" />
-		<setting code="Popup_ReadArchive_MakeNewArchive_Show" value="false" />
-		<setting code="Popup_AnalyzeDirectory_FileNotADirectory_Show" value="true" />
-		<setting code="WSFontChooser_FontStyle_Selected" value="Plain" />
-		<setting code="ShowTableColumn_Filename" value="false" />
-		<setting code="WSFontChooser_FontName_Selected" value="Arial" />
-		<setting code="AutoImportModifiedExportFiles" value="false" />
-		<setting code="WSGradientColorChooserXML" value="xml/WSGradientColorChooser.xml" />
-		<setting code="WSTableColumn_r_Width" value="18" />
-		<setting code="PreviewPanel_Image_BackgroundColor" value="BLACK" />
-		<setting code="SortPluginLists" value="true" />
-		<setting code="NumberOfUndoTasks" value="4" />
-		<setting code="Popup_ScriptBuilder_NoNameSpecified_Show" value="true" />
-		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Influent\sharedassets4.assets" />
-		<setting code="MaxAllowedScriptErrors" value="10" />
-		<setting code="ShowWelcomeWizard" value="false" />
-		<setting code="ShowTimestampHexEditorField" value="false" />
-		<setting code="TypesFile" value="settings/types.xml" />
-		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
-		<setting code="Popup_ExportFiles_SomeFilesExported_Show" value="true" />
-		<setting code="ExtractDirectory" value="extract" />
-		<setting code="Popup_PreviewPanel_Text_ChangesSaved_Show" value="false" />
-		<setting code="WSTableColumn_E_Width" value="87" />
-		<setting code="Popup_ImageInvestigator_PreviewSaved_Show" value="true" />
-		<setting code="Popup_CutArchive_InvalidInputFile_Show" value="true" />
-		<setting code="ExportFileListColumn_Compressed" value="true" />
-		<setting code="Popup_ReadArchive_ArchiveOpened_Show" value="false" />
-		<setting code="AlwaysShowHexEditorSelectedTable" value="true" />
-		<setting code="TempDirectory" value="temp" />
-		<setting code="Popup_ReplaceFiles_FilesReplaced_Show" value="true" />
-		<setting code="Popup_AddBMSOnDoubleClick_Show" value="true" />
-		<setting code="Popup_AnalyzeDirectory_FilenameMissing_Show" value="true" />
-		<setting code="Popup_AnalyzeDirectory_InvalidReportFile_Show" value="true" />
-		<setting code="Popup_TaskManager_RedoComplete_Show" value="true" />
-		<setting code="OnlyShowStandardConverters" value="true" />
-		<setting code="FileListView" value="Thumbnails" />
-		<setting code="Popup_QuickBMSMissing_Show" value="true" />
-		<setting code="HexEditorDisplayType" value="Char" />
-		<setting code="PluginPathsFile" value="settings/plugins.xml" />
-		<setting code="MaxFilenameLength" value="255" />
-		<setting code="Scanner_pcx" value="true" />
-		<setting code="InterfaceColors" value="-65536" />
-		<setting code="AutoChangedToHexPreview" value="false" />
-		<setting code="ShowTableColumn_AddedIcon" value="true" />
-		<setting code="Popup_SelectResources_Inverse_Show" value="false" />
-		<setting code="ShowHexIfPreviewFailed" value="true" />
-		<setting code="Popup_CutArchive_FilesCut_Show" value="true" />
-		<setting code="MaxNumberOfFiles4" value="100000" />
-		<setting code="ShowTableColumn_Compression" value="false" />
-		<setting code="MaxNumberOfFiles2" value="40000" />
-		<setting code="Popup_RenameFiles_NoRenameValue_Show" value="true" />
-		<setting code="Scanner_dds" value="true" />
-		<setting code="LoadAllThumbnailsWhenOpeningArchive" value="false" />
-		<setting code="Popup_WriteArchive_FilenameMissing_Show" value="true" />
-		<setting code="Popup_Options_OptionsSaved_Show" value="false" />
-		<setting code="Scanner_jpg" value="true" />
-		<setting code="FileListTreeTable_DividerLocation" value="0.2" />
-		<setting code="WSFontChooserXML" value="xml/WSFontChooser.xml" />
-		<setting code="Popup_ReplaceFiles_FilesRestored_Show" value="true" />
-		<setting code="ShowLongHexEditorField" value="true" />
-		<setting code="Popup_ReadArchive_ReadWithPluginFailed_Show" value="true" />
-		<setting code="OGG_Headers_Path" value="external_bins\ogg_headers" />
-		<setting code="vgmstream_Path" value="external_bins\vgmstream" />
-		<setting code="CurrentLanguage" value="English" />
-		<setting code="SearchColumn_Source" value="false" />
-		<setting code="AnalysisExtractDirectory" value="extract" />
-		<setting code="WSTableColumn_DecompressedLength_Width" value="76" />
-		<setting code="WSTableColumn_i_Width" value="18" />
-		<setting code="SelectedRenamer" value="4" />
-		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" value="true" />
-		<setting code="ShowShortHexEditorField" value="true" />
-		<setting code="Scanner_mid" value="true" />
-		<setting code="SearchWildcardConversion" value="true" />
-		<setting code="ShowSystemSpecificIcons" value="false" />
-		<setting code="PreviewPanel_3DModel_Wireframe" value="false" />
-		<setting code="CurrentFileList" value="Thumbnails" />
-		<setting code="Popup_ReadArchive_FilenameMissing_Show" value="true" />
-		<setting code="ExtendedLanguageDebug" value="false" />
-		<setting code="ShowDoubleHexEditorField" value="true" />
-		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex" value="0" />
-		<setting code="Popup_FileListViewChanged_Show" value="false" />
-		<setting code="Popup_ReadArchive_ReadWithScannerFailed_Show" value="true" />
-		<setting code="Scanner_gif" value="true" />
-		<setting code="Theme_ButterflyLookAndFeel_TextColor" value="0" />
-		<setting code="Scanner_vag" value="true" />
-		<setting code="Scanner_png" value="true" />
-		<setting code="AllowQuickBMSThumbnails" value="true" />
-		<setting code="FFMPEG_Path" value="external_bins\ffmpeg" />
-		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" value="false" />
-		<setting code="ShowTableColumn_Property" value="true" />
-		<setting code="Popup_RemoveFiles_FilesRemoved_Show" value="true" />
-		<setting code="Crunch_Path" value="external_bins\crunch" />
-		<setting code="Popup_Preview_PreviewSaved_Show" value="true" />
-		<setting code="WSTableColumn_c_Width" value="106" />
-		<setting code="ShowTableColumn_Source" value="false" />
-		<setting code="Popup_RenameFiles_FilesRenamed_Show" value="true" />
-		<setting code="Popup_AddFiles_FilesAdded_Show" value="false" />
-		<setting code="RemoveImageAfterThumbnailGeneration" value="true" />
-		<setting code="ExtendedSettingsDebug" value="false" />
-		<setting code="WSTableColumn_d_Width" value="107" />
-		<setting code="LoadingHex" value="false" />
-		<setting code="Scanner_html" value="true" />
-		<setting code="WSTableColumn_Offset_Width" value="147" />
-		<setting code="PreviewOnDoubleClick" value="true" />
-		<setting code="DefaultInterfaceColors" value="-12814286" />
-		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
-		<setting code="ColorScriptSyntax" value="true" />
-		<setting code="Scanner_ogg" value="true" />
-		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" value="false" />
-		<setting code="SelectedTreeTableType" value="2" />
-		<setting code="WSTableColumn_a_Width" value="18" />
-		<setting code="ShowTableColumn_Extension" value="false" />
-		<setting code="WSTableColumn_Time_Width" value="65" />
-		<setting code="ShowTableColumn_ReplacedIcon" value="true" />
-		<setting code="ShowTableColumn_CompressedLengthKB" value="false" />
-		<setting code="ShowSplashScreen" value="true" />
-		<setting code="HighQualityThumbnails" value="true" />
-		<setting code="Popup_ExportFiles_NoFilesExported_Show" value="true" />
-		<setting code="ToolbarLocation" value="ToolbarLocation_Top" />
-		<setting code="QuickBMS_Path" value="external_bins\quickbms" />
-		<setting code="ShowTableColumn_Description" value="true" />
-		<setting code="ShowIntHexEditorField" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Height" value="448" />
-		<setting code="WSTableColumn_RenamedIcon_Width" value="18" />
-		<setting code="WSGradientColorChooser_Color_Selected" value="-9725853" />
-		<setting code="ExportFileListColumn_Directory" value="true" />
-		<setting code="LoadingPreviewFromHex" value="false" />
-		<setting code="Popup_WriteArchive_ArchiveSaved_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Offset" value="128" />
-		<setting code="LoadScriptsAtStartup" value="false" />
-		<setting code="ShowTableColumn_RenamedIcon" value="true" />
-		<setting code="MaxNumberOfFaces4" value="1000000" />
-		<setting code="Theme_ButterflyLookAndFeel_BackgroundColor" value="9999999999" />
-		<setting code="Scanner_bmp" value="true" />
-		<setting code="ExportFileListColumn_FilePath" value="true" />
-		<setting code="ShowTableColumn_Compressed" value="false" />
-		<setting code="ShowTableColumn_DecompressedLength" value="true" />
-		<setting code="Popup_ModifyArchive_NotReplacable_Show" value="true" />
-		<setting code="Popup_ReadArchive_NoPluginsFound_Show" value="true" />
-		<setting code="SettingsFile" value="settings\settings.xml" />
-		<setting code="ScriptsDirectory" value="scripts" />
-		<setting code="Popup_ReadArchive_ReadWithScriptFailed_Show" value="true" />
 		<setting code="TiledPreviewBackground" value="true" />
+		<setting code="WSTableColumn_RenamedIcon_Width" value="18" />
+		<setting code="WSTableColumn_Time_Width" value="57" />
+		<setting code="AlwaysShowHexEditorSelectedTable" value="true" />
+		<setting code="InterfaceFile" value="interface/interface.xml" />
+		<setting code="Popup_WriteArchive_ArchiveSaved_Show" value="true" />
+		<setting code="RemoveImageAfterThumbnailGeneration" value="true" />
+		<setting code="Popup_SelectResources_None_Show" value="false" />
+		<setting code="PlayAudioOnLoad" value="true" />
+		<setting code="MaxAllowedScriptErrors" value="10" />
+		<setting code="PreviewPanel_Text_WordWrap" value="false" />
+		<setting code="UpscaleSmallThumbnails" value="false" />
+		<setting code="ShowTableColumn_Value" value="true" />
+		<setting code="vgmstream_Path" value="external_bins\vgmstream" />
+		<setting code="ShowTableColumn_RenamedIcon" value="true" />
+		<setting code="ShowByteHexEditorField" value="true" />
+		<setting code="Popup_RenameFiles_NoRenameValue_Show" value="true" />
+		<setting code="ShowAdvancedControlsInDirectoryList" value="false" />
+		<setting code="MaxFilenameLength" value="255" />
+		<setting code="PreviewPanel_ImageInvestigator_LittleEndianRadioButtonSelected" value="true" />
+		<setting code="ShowTableColumn_FilePath" value="true" />
+		<setting code="WSTableColumn_i_Width" value="18" />
+		<setting code="CurrentLanguage" value="English" />
+		<setting code="PreviewPanel_ImageInvestigator_SwizzleSwitchCheckboxSelected" value="false" />
+		<setting code="WSTableColumn_DecompressedLength_Width" value="160" />
+		<setting code="HighQualityThumbnails" value="true" />
+		<setting code="SelectedOptionGroup" value="9" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" value="false" />
+		<setting code="Popup_TaskManager_RedoComplete_Show" value="true" />
+		<setting code="WSTableColumn_ReplacedIcon_Width" value="18" />
+		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="PNG Image" />
+		<setting code="WSTableColumn_I_Width" value="203" />
+		<setting code="CurrentArchive" value="C:\Ariba_Users.xlsx" />
+		<setting code="Theme_ButterflyLookAndFeel_InterfaceColors" value="-9725853" />
+		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
+		<setting code="ShowTableColumn_Filename" value="false" />
+		<setting code="ShowCharHexEditorField" value="false" />
+		<setting code="WSTableColumn_E_Width" value="87" />
+		<setting code="Popup_MeshInvestigator_PreviewSaved_Show" value="true" />
+		<setting code="DebugMode" value="true" />
+		<setting code="SearchRegExConversion" value="false" />
+		<setting code="Scanner_mid" value="true" />
+		<setting code="LoadAllThumbnailsWhenOpeningArchive" value="false" />
+		<setting code="Popup_RenameFiles_NoFilesSelected_Show" value="true" />
+		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_MeshInvestigator" value="JPEG Image" />
+		<setting code="ScriptsDirectory" value="scripts" />
+		<setting code="ShowTableColumn_Property" value="true" />
+		<setting code="Popup_ReplaceFiles_FilesRestored_Show" value="true" />
+		<setting code="ShowTimestampHexEditorField" value="false" />
+		<setting code="WSTableColumn_P_Width" value="197" />
+		<setting code="Scanner_png" value="true" />
+		<setting code="ToolbarLocation" value="ToolbarLocation_Top" />
+		<setting code="Scanner_vag" value="true" />
+		<setting code="DefaultInterfaceFile" value="interface/default.xml" />
+		<setting code="DefaultInterfaceColors" value="-12814286" />
+		<setting code="PreviewOnDoubleClick" value="true" />
+		<setting code="WSTableColumn_FilePath_Width" value="441" />
+		<setting code="Popup_Search_MatchFound_Show" value="false" />
+		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" value="false" />
+		<setting code="Popup_RenameFiles_FilesRestored_Show" value="true" />
+		<setting code="SidePanel_DirectoryList_CurrentControl" value="ReadPanel" />
+		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_TEST\ArmA - Cold War Assault\Campaigns" />
+		<setting code="PreviewPanel_MeshInvestigator_FaceCountField" value="1086" />
+		<setting code="ShowLongHexEditorField" value="true" />
+		<setting code="ShowSplashScreen" value="true" />
+		<setting code="Popup_ScriptBuilder_ScriptSaved_Show" value="true" />
+		<setting code="PreviewPanel_MeshInvestigator_FaceBlockSizeField" value="2" />
+		<setting code="Popup_ReadArchive_NoPluginsFound_Show" value="true" />
+		<setting code="Popup_ReadArchive_ReadWithPluginFailed_Show" value="true" />
+		<setting code="WSTableColumn_O_Width" value="83" />
+		<setting code="WSTableColumn_AddedIcon_Width" value="18" />
+		<setting code="Popup_ExportFiles_NoFilesExported_Show" value="true" />
+		<setting code="Popup_DecompressArchive_Show" value="false" />
+		<setting code="Popup_RemoveFiles_FilesRemoved_Show" value="true" />
+		<setting code="AllowQuickBMSThumbnails" value="true" />
+		<setting code="UE4CullRelatedResources" value="true" />
+		<setting code="ColorScriptSyntax" value="true" />
 		<setting code="LargeButtonIcons" value="false" />
-		<setting code="AutoResizeTableColumns" value="true" />
-		<setting code="WSSmallColorChooserXML" value="xml/WSSmallColorChooser.xml" />
+		<setting code="PreviewPanel_3DModel_Wireframe" value="false" />
+		<setting code="AllowInlineFileListEditing" value="false" />
+		<setting code="WSTableColumn_CRC_Width" value="58" />
+		<setting code="InterfaceLookAndFeel" value="ButterflyLookAndFeel" />
+		<setting code="ExportFileListColumn_Compressed" value="true" />
+		<setting code="ShowTableColumn_Offset" value="true" />
+		<setting code="WSMonthCalendarXML" value="xml/WSMonthCalendar.xml" />
+		<setting code="SettingsFile-Defaults" value="settings\default.xml" />
+		<setting code="Popup_ExportFiles_DirectoryNotWritable_Show" value="true" />
+		<setting code="PreviewPanel_3DModel_Smoothing" value="false" />
+		<setting code="ShowTableColumn_Description" value="true" />
+		<setting code="Crunch_Path" value="external_bins\crunch" />
+		<setting code="Popup_Options_OptionsSaved_Show" value="false" />
+		<setting code="Popup_ReadArchive_ReadWithScriptFailed_Show" value="true" />
+		<setting code="Popup_ReadArchive_MakeNewArchive_Show" value="false" />
+		<setting code="Popup_Search_NoMatchFound_Show" value="true" />
+		<setting code="TempDirectory" value="temp" />
+		<setting code="WSTableColumn_Description_Width" value="154" />
+		<setting code="MaxNumberOfFiles4" value="100000" />
+		<setting code="Popup_AddBMSOnDoubleClick_Show" value="true" />
+		<setting code="Popup_ReadArchive_ArchiveOpenedWithScanner_Show" value="true" />
+		<setting code="MaxNumberOfFiles2" value="40000" />
+		<setting code="Scanner_tim" value="true" />
+		<setting code="Popup_ModifyArchive_NotReplacable_Show" value="true" />
+		<setting code="SelectedFileListExporter" value="0" />
+		<setting code="ExportFileListColumn_Offset" value="true" />
+		<setting code="ShowHexHexEditorField" value="false" />
+		<setting code="Popup_AddFiles_FilesRemoved_Show" value="true" />
+		<setting code="WSTableColumn_a_Width" value="18" />
+		<setting code="CurrentSidePanel" value="SidePanel_DirectoryList" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>
