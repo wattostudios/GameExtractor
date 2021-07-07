@@ -24,6 +24,7 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
+import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.SingletonManager;
@@ -324,7 +325,6 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   **********************************************************************************************
   **/
   public boolean checkFullVersion(boolean showPopup) {
-    // basic version
     if (showPopup) {
       WSPopup.showErrorInNewThread("FullVersionOnly", true);
     }
@@ -381,7 +381,13 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
     }
     ArchivePlugin plugin = ((PluginList) pluginObj).getPlugin();
 
-    String dirName = dirHolder.getCurrentDirectory().getAbsolutePath();
+    File currentDir = dirHolder.getCurrentDirectory();
+    String dirName = currentDir.getAbsolutePath();
+    if (currentDir instanceof ShellFolderFile) {
+      // Converting special names into real names... [v3.13]
+      dirName = ((ShellFolderFile) currentDir).getPathSuper();
+    }
+
     String filename = ((WSTextField) ComponentRepository.get("SidePanel_DirectoryList_WriteFilenameField")).getText();
 
     if (filename == null || filename.equals("")) {
@@ -394,9 +400,30 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       filename += "." + plugin.getExtension(0);
     }
 
+    boolean filenameChecked = false;
     if (filename.indexOf(dirName) >= 0) {
+      // the filename already contains a full path in it... no action needed
+      filenameChecked = true;
     }
     else {
+      // To cater for something like this, where the names are equivalent... [v3.13]
+      // This PC\Downloads\extract\previews\   VS   C:\Users\User\Downloads\extract\previews\
+      int slashPos = dirName.indexOf("\\");
+      if (slashPos <= 0) {
+        slashPos = dirName.indexOf("/");
+      }
+      if (slashPos > 0) {
+        // strip off the first part of the dirname, and see if that matches anything in the path
+        String dirNameStripped = dirName.substring(slashPos + 1);
+        if (filename.indexOf(dirNameStripped) >= 0) {
+          // the filename already contains a full path in it... no action needed
+          filenameChecked = true;
+        }
+      }
+    }
+
+    if (!filenameChecked) {
+      // if the filename doesn't appear to contain the directory name, append them
       filename = dirName + File.separator + filename;
     }
 
@@ -562,7 +589,12 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       if (exportFilename == null || exportFilename.length() <= 0) {
         // we haven't loaded the export panel, so show it, and then try exporting to the location again
         changeControls("ExportPanel", false);
-        exportFilename = exportField.getText();
+
+        // [3.13] show a popup asking the user to check the extract directory, instead of just extracting to the current directory
+        //exportFilename = exportField.getText();
+
+        WSPopup.showMessageInNewThread("CheckExportDirectory");
+        return;
       }
 
       directory = new File(exportFilename);
@@ -616,7 +648,12 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       if (exportFilename == null || exportFilename.length() <= 0) {
         // we haven't loaded the export panel, so show it, and then try exporting to the location again
         changeControls("ExportPanel", false);
-        exportFilename = exportField.getText();
+
+        // [3.13] show a popup asking the user to check the extract directory, instead of just extracting to the current directory
+        //exportFilename = exportField.getText();
+
+        WSPopup.showMessageInNewThread("CheckExportDirectory");
+        return;
       }
 
       directory = new File(exportFilename);
@@ -829,9 +866,15 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
     PreviewPanel imagePreviewPanel = new PreviewPanel_Image(); // a dummy preview panel
     loadConverters(imagePluginList, imagePreviewPanel);
 
-    WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ModelConverters");
-    PreviewPanel modelPreviewPanel = new PreviewPanel_3DModel(); // a dummy preview panel
-    loadConverters(modelPluginList, modelPreviewPanel);
+    try {
+      WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_ExportPanel_ModelConverters");
+      PreviewPanel modelPreviewPanel = new PreviewPanel_3DModel(); // a dummy preview panel
+      loadConverters(modelPluginList, modelPreviewPanel);
+    }
+    catch (Throwable t) {
+      ErrorLogger.log("JAVAFX Libraries Missing (eg running a version of Java that doesn't contain them)");
+      ErrorLogger.log(t);
+    }
   }
 
   /**
@@ -844,9 +887,15 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
     PreviewPanel imagePreviewPanel = new PreviewPanel_Image(); // a dummy preview panel
     loadConverters(imagePluginList, imagePreviewPanel);
 
-    WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins");
-    PreviewPanel modelPreviewPanel = new PreviewPanel_3DModel(); // a dummy preview panel
-    loadConverters(modelPluginList, modelPreviewPanel);
+    try {
+      WSComboBox modelPluginList = (WSComboBox) ComponentRepository.get("SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins");
+      PreviewPanel modelPreviewPanel = new PreviewPanel_3DModel(); // a dummy preview panel
+      loadConverters(modelPluginList, modelPreviewPanel);
+    }
+    catch (Throwable t) {
+      ErrorLogger.log("JAVAFX Libraries Missing (eg running a version of Java that doesn't contain them)");
+      ErrorLogger.log(t);
+    }
   }
 
   /**
@@ -1821,9 +1870,31 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
     ArchivePlugin plugin = Archive.getReadPlugin();
     if (plugin != null) {
-      extension = plugin.getExtension(0);
-      if (extension == null || extension.length() == 0 || extension.equals("*")) {
-        extension = "unk";
+
+      // See if the currently-opened file has an extension that matches one of the extensions this plugin reads. If so, use that extension.
+      String currentExtension = Archive.getArchiveName();
+      if (currentExtension != null) {
+        currentExtension = FilenameSplitter.getExtension(currentExtension);
+      }
+      if (currentExtension != null) {
+        String[] arcExtensions = plugin.getExtensions();
+        int numExtensions = arcExtensions.length;
+        for (int e = 0; e < numExtensions; e++) {
+          if (arcExtensions[e].equalsIgnoreCase(currentExtension)) {
+            // found it, use it
+            extension = currentExtension;
+            break;
+          }
+        }
+      }
+
+      if (extension.equals("unk")) {
+        // wasn't found from above, so grab the default extension for this archive plugin
+
+        extension = plugin.getExtension(0);
+        if (extension == null || extension.length() == 0 || extension.equals("*")) {
+          extension = "unk";
+        }
       }
     }
 
@@ -1894,7 +1965,13 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       return;
     }
 
-    String dirName = dirHolder.getCurrentDirectory().getAbsolutePath();
+    File currentDir = dirHolder.getCurrentDirectory();
+    String dirName = currentDir.getAbsolutePath();
+    if (currentDir instanceof ShellFolderFile) {
+      // Converting special names into real names... [v3.13]
+      dirName = ((ShellFolderFile) currentDir).getPathSuper();
+    }
+
     String filename = ((WSTextField) ComponentRepository.get("SidePanel_DirectoryList_WriteFilenameField")).getText();
 
     if (filename == null || filename.equals("")) {
@@ -1907,9 +1984,30 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       filename += "." + plugin.getExtension(0);
     }
 
+    boolean filenameChecked = false;
     if (filename.indexOf(dirName) >= 0) {
+      // the filename already contains a full path in it... no action needed
+      filenameChecked = true;
     }
     else {
+      // To cater for something like this, where the names are equivalent... [v3.13]
+      // This PC\Downloads\extract\previews\   VS   C:\Users\User\Downloads\extract\previews\
+      int slashPos = dirName.indexOf("\\");
+      if (slashPos <= 0) {
+        slashPos = dirName.indexOf("/");
+      }
+      if (slashPos > 0) {
+        // strip off the first part of the dirname, and see if that matches anything in the path
+        String dirNameStripped = dirName.substring(slashPos + 1);
+        if (filename.indexOf(dirNameStripped) >= 0) {
+          // the filename already contains a full path in it... no action needed
+          filenameChecked = true;
+        }
+      }
+    }
+
+    if (!filenameChecked) {
+      // if the filename doesn't appear to contain the directory name, append them
       filename = dirName + File.separator + filename;
     }
 

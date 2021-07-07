@@ -29,11 +29,6 @@ import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_BIG_BIGF;
-import org.watto.ge.plugin.archive.Plugin_CCD_FKNL;
-import org.watto.ge.plugin.archive.Plugin_DAT_DBPF;
-import org.watto.ge.plugin.archive.Plugin_SHD_MRTS;
-import org.watto.ge.plugin.archive.Plugin_VIV;
-import org.watto.ge.plugin.exporter.Exporter_REFPACK;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
@@ -44,40 +39,19 @@ import org.watto.io.converter.IntConverter;
 
 **********************************************************************************************
 **/
-public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
+public class Viewer_BIG_BIGF_CMB extends ViewerPlugin {
 
   /**
   **********************************************************************************************
   
   **********************************************************************************************
   **/
-  public Viewer_BIG_BIGF_FSH_SHPI() {
-    super("BIG_BIGF_FSH_SHPI", "Electronic Arts FSH Image [BIG_BIGF_FSH_SHPI]");
-    setExtensions("fsh", "shpi", "ssh");
+  public Viewer_BIG_BIGF_CMB() {
+    super("BIG_BIGF_CMB", "BIG_BIGF_CMB");
+    setExtensions("cmb");
 
-    setGames("FIFA 06",
-        "FIFA 08",
-        "FIFA 07",
-        "FIFA 09",
-        "FIFA 10",
-        "FIFA 99",
-        "FIFA 2000",
-        "FIFA Manager 06",
-        "FIFA Manager 08",
-        "FIFA Manager 09",
-        "FIFA Manager 10",
-        "FIFA Manager 11",
-        "FIFA World Cup 2006",
-        "Harry Potter and the Order of the Phoenix",
-        "Harry Potter: Quidditch World Cup",
-        "Need For Speed 2",
-        "Need For Speed 3: Hot Pursuit",
-        "Need For Speed: Porsche Unleashed",
-        "NHL 2002",
-        "NHL 2003",
-        "NHL 06",
-        "SimCity 4");
-    setPlatforms("PC", "PS2");
+    setGames("NHL 2002");
+    setPlatforms("PS2");
     setStandardFileFormat(false);
   }
 
@@ -103,7 +77,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (plugin instanceof Plugin_BIG_BIGF || plugin instanceof Plugin_SHD_MRTS || plugin instanceof Plugin_CCD_FKNL || plugin instanceof Plugin_DAT_DBPF || plugin instanceof Plugin_VIV) {
+      if (plugin instanceof Plugin_BIG_BIGF) {
         rating += 50;
       }
       else if (!(plugin instanceof AllFilesPlugin)) {
@@ -117,22 +91,9 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         return 0;
       }
 
-      // 4 - Header (SHPI)
-      String header = fm.readString(4);
-      if (header.equals("SHPI") || header.equals("ShpF") || header.equals("SHPS")) {
-        rating += 5;
-      }
-      else {
-        // maybe compressed - see if it is
-        fm.skip(2);
-        if (fm.readString(4).equals("SHPI")) {
-          rating += 5;
-          return rating; // exit early, so we don't check the file length below 
-        }
-      }
-
-      // 4 - File Length
-      if (FieldValidator.checkEquals(fm.readInt(), fm.getLength())) {
+      // 4 - Offset to SSH Image
+      long offset = fm.readInt();
+      if (FieldValidator.checkOffset(offset, fm.getLength())) {
         rating += 5;
       }
 
@@ -187,58 +148,23 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
-      // 4 - Header (SHPI)
+      long arcSize = fm.getLength();
+
+      // 4 - Offset to SSH Image
+      int sshOffset = fm.readInt();
+      FieldValidator.checkOffset(sshOffset, arcSize);
+
+      int sshSkip = sshOffset - 4;
+      FieldValidator.checkPositive(sshSkip);
+      fm.skip(sshSkip);
+
+      // 4 - Header (SHPS)
       String header = fm.readString(4);
-      if (header.equals("SHPI") || header.equals("ShpF") || header.equals("SHPS")) {
-        // not compressed
+      if (header.equals("SHPS")) {
+        // Found the image
       }
       else {
-        // might be compressed - check it out
-        fm.skip(2);
-        if (fm.readString(4).equals("SHPI")) {
-          // yep, probably compressed, so decompress it before reading it
-
-          fm.seek(0);
-
-          int compLength = (int) fm.getLength();
-
-          // work out the decomp length
-          // 2 bytes - Signature
-          short signature = fm.readShort();
-          if (signature > 0) { // top bit is 0
-            // 3 bytes - Compressed Size
-            fm.skip(3);
-          }
-
-          // 3 bytes - Decompressed Size
-          byte[] decompBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
-          int decompLength = IntConverter.convertBig(decompBytes);
-
-          // go back to the start, ready for decompression
-          fm.seek(0);
-
-          Exporter_REFPACK exporter = Exporter_REFPACK.getInstance();
-          exporter.open(fm, compLength, decompLength);
-
-          byte[] fileData = new byte[decompLength];
-
-          int decompWritePos = 0;
-          while (exporter.available()) { // make sure we read the next bit of data, if required
-            fileData[decompWritePos++] = (byte) exporter.read();
-          }
-
-          fm.close();
-          fm = new FileManipulator(new ByteBuffer(fileData));
-
-          // Skip the SHPI header that we would have read at the beginning, if it were a raw file
-          header = fm.readString(4);
-
-          //exporter.close(); // THIS MIGHT CAUSE PROBLEMS WITH THE BYTE[]?
-
-        }
-        else {
-          return null;
-        }
+        return null;
       }
 
       // 4 - File Length
@@ -255,21 +181,16 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       // 4 - Image Group ID
       fm.skip(4);
 
-      if (numImages == 1 || header.equals("SHPI") || header.equals("ShpF")) {
-        // ie SHPI and ShpF are treated as 1 singel file for now. Also used for SHPS with a single image in it
+      if (numImages == 1) {
+        // A SHPS with a single image in it
 
         int offset = 0;
-        if (header.equals("SHPI") || header.equals("SHPS")) {
+        if (header.equals("SHPS")) {
           // 4 - (FIRST IMAGE) Image Code Name
           fm.skip(4);
 
           // 4 - (FIRST IMAGE) Offset to Image Data
-          offset = fm.readInt();
-          FieldValidator.checkOffset(offset, fm.getLength());
-        }
-        else if (header.equals("ShpF")) {
-          // 4 - (FIRST IMAGE) Offset to Image Data (BIG)
-          offset = IntConverter.changeFormat(fm.readInt());
+          offset = fm.readInt() + sshOffset; // NOTE: +sshOffset
           FieldValidator.checkOffset(offset, fm.getLength());
         }
 
@@ -281,7 +202,6 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       }
       else {
         // multiple images in an SHPS only
-        long arcSize = fm.getLength();
 
         int[] offsets = new int[numImages];
         for (int i = 0; i < numImages; i++) {
@@ -289,7 +209,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
           fm.skip(4);
 
           // 4 - Offset to Image Data
-          int offset = fm.readInt();
+          int offset = fm.readInt() + sshOffset; // NOTE: +sshOffset
           FieldValidator.checkOffset(offset, arcSize);
           offsets[i] = offset;
         }
@@ -342,7 +262,11 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
    **/
   public ImageResource readSingleImage(FileManipulator fm, long offset, String header) {
     try {
-      fm.seek(offset);
+
+      //fm.seek(offset);
+      int skipSize = (int) (offset - fm.getOffset());
+      FieldValidator.checkPositive(skipSize);
+      fm.skip(skipSize);
 
       // 1 - Image Format
       int imageType = ByteConverter.unsign(fm.readByte());
@@ -382,7 +306,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         ps2Striped = true;
       }
       else {
-        ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Unknown Image Format: " + imageType + " at offset " + offset);
+        ErrorLogger.log("[Viewer_BIG_BIGF_CMB] Unknown Image Format: " + imageType + " at offset " + offset);
         return null;
       }
 
@@ -393,7 +317,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
       int height = 0;
       int width = 0;
-      if (header.equals("SHPI") || header.equals("SHPS")) {
+      if (header.equals("SHPS")) {
         // 2 - Image Width
         width = fm.readShort();
         FieldValidator.checkWidth(width);
@@ -407,21 +331,6 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         // 2 - X Position from the Left
         // 2 - Y Position from the Top
         fm.skip(8);
-      }
-      else if (header.equals("ShpF")) {
-        // 4 - null
-        // 4 - Offset to Pixel Data (relative to the start of this file)(32)
-        // 4 - Image Data Length (including this 32-byte header)
-        // 8 - null
-        fm.skip(20);
-
-        // 4 - Image Width
-        width = fm.readInt();
-        FieldValidator.checkWidth(width);
-
-        // 4 - Image Height
-        height = fm.readInt();
-        FieldValidator.checkHeight(height);
       }
 
       // X - Image Data
@@ -554,7 +463,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
           }
         }
         else {
-          ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Unknown Palette Format: " + paletteFormat);
+          ErrorLogger.log("[Viewer_BIG_BIGF_CMB] Unknown Palette Format: " + paletteFormat);
           return null;
         }
 
@@ -620,6 +529,15 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
       // Build the new file using the src[] and adding in the new image content
 
+      // 4 - Offset to SSH Image
+      int sshOffset = src.readInt();
+      fm.writeInt(sshOffset);
+
+      // X - Unknown pre-data
+      int preSize = sshOffset - 4;
+      FieldValidator.checkPositive(preSize);
+      fm.writeBytes(src.readBytes(preSize));
+
       // 4 - Header
       String header = src.readString(4);
       fm.writeString(header);
@@ -647,7 +565,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       }
 
       // X - Data
-      int preDataLength = (int) (offsets[0] - src.getOffset()); // extra data between current position and first offset
+      int preDataLength = (int) (offsets[0] + sshOffset - src.getOffset()); // extra data between current position and first offset // NOTE +sshOffset
       fm.writeBytes(src.readBytes(preDataLength));
 
       for (int i = 0; i < numImages; i++) {
@@ -656,7 +574,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         if (i > 0) {
           imageResource = imageResource.getNextFrame();
           if (imageResource == null) {
-            ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Expected " + numImages + " images but only imported " + i + " from the filesystem");
+            ErrorLogger.log("[Viewer_BIG_BIGF_CMB] Expected " + numImages + " images but only imported " + i + " from the filesystem");
             return;
           }
           width = imageResource.getWidth();
@@ -700,7 +618,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
           imageFormat = "8BitPaletted";
         }
         else {
-          ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Image Format: " + imageType);
+          ErrorLogger.log("[Viewer_BIG_BIGF_CMB] Writing an Unknown Image Format: " + imageType);
           return;
         }
 
@@ -865,7 +783,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
             src.skip(numColors * 3);
           }
           else {
-            ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Palette Format: " + paletteFormat);
+            ErrorLogger.log("[Viewer_BIG_BIGF_CMB] Writing an Unknown Palette Format: " + paletteFormat);
             return;
           }
 
@@ -878,11 +796,11 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         }
         else {
           // length up to the start of the next file
-          postDataLength = (int) (offsets[i + 1] - src.getOffset());
+          postDataLength = (int) (offsets[i + 1] + sshOffset - src.getOffset()); // NOTE: +sshOffset
         }
 
         if (postDataLength < 0) {
-          ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Post Data length is negative for some reason: " + postDataLength);
+          ErrorLogger.log("[Viewer_BIG_BIGF_CMB] Post Data length is negative for some reason: " + postDataLength);
           postDataLength = 0;
         }
 

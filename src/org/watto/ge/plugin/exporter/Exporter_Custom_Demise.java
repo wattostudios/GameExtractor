@@ -14,16 +14,18 @@
 
 package org.watto.ge.plugin.exporter;
 
-import org.watto.ErrorLogger;
-import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.archive.PluginGroup_U;
 import org.watto.io.FileManipulator;
 
-public class Exporter_Custom_U_Object_Generic extends ExporterPlugin {
+/**
+**********************************************************************************************
+NOT CURRENTLY IN USE - NOT CORRECT
+**********************************************************************************************
+**/
+public class Exporter_Custom_Demise extends ExporterPlugin {
 
-  static Exporter_Custom_U_Object_Generic instance = new Exporter_Custom_U_Object_Generic();
+  static Exporter_Custom_Demise instance = new Exporter_Custom_Demise();
 
   static FileManipulator readSource;
 
@@ -34,17 +36,19 @@ public class Exporter_Custom_U_Object_Generic extends ExporterPlugin {
   
   **********************************************************************************************
   **/
-  public static Exporter_Custom_U_Object_Generic getInstance() {
+  public static Exporter_Custom_Demise getInstance() {
     return instance;
   }
+
+  int keyfield = 0xBF25F;
 
   /**
   **********************************************************************************************
   
   **********************************************************************************************
   **/
-  public Exporter_Custom_U_Object_Generic() {
-    setName("Unreal Object");
+  public Exporter_Custom_Demise() {
+    setName("Encryption from the game Demise");
   }
 
   /**
@@ -79,57 +83,41 @@ public class Exporter_Custom_U_Object_Generic extends ExporterPlugin {
   **********************************************************************************************
   **/
   @Override
-  public String getDescription() {
-    return "This exporter extracts a generic object from Unreal Engine files when exporting\n\n" + super.getDescription();
-  }
-
-  /**
-  **********************************************************************************************
-  
-  **********************************************************************************************
-  **/
-  @Override
   public void open(Resource source) {
     try {
 
-      PluginGroup_U readPlugin = (PluginGroup_U) Archive.getReadPlugin();
+      keyfield = 0xBF25F;
 
-      readSource = new FileManipulator(source.getSource(), false);
+      readLength = source.getLength();
+
+      // try to get the whole file in a single go, if it isn't too large (set to 200KB otherwise)
+      int bufferSize = (int) readLength;
+      if (bufferSize > 204800) {
+        bufferSize = 204800;
+      }
+
+      readSource = new FileManipulator(source.getSource(), false, bufferSize);
       readSource.seek(source.getOffset());
 
-      if (readSource.readInt() == 3 && readSource.readInt() == 0 && readSource.readInt() == 1) {
-        // skip these fields (SWAT4 Archives)
-      }
-      else {
-        // these fields don't exist, so return to the correct spot
-        readSource.seek(source.getOffset());
-      }
-
-      // X - Properties
-      readPlugin.skipProperties(readSource);
-
-      readLength = source.getLength() - (readSource.getOffset() - source.getOffset());
     }
     catch (Throwable t) {
-      ErrorLogger.log(t);
     }
   }
 
   /**
-   **********************************************************************************************
-   * // TEST - NOT DONE
-   **********************************************************************************************
-   **/
-  @SuppressWarnings("unused")
+  **********************************************************************************************
+  // NOT DONE
+  **********************************************************************************************
+  **/
   @Override
   public void pack(Resource source, FileManipulator destination) {
     try {
-      long decompLength = source.getDecompressedLength();
+
+      keyfield = 0xBF25F;
 
       ExporterPlugin exporter = source.getExporter();
       exporter.open(source);
 
-      //for (int i=0;i<decompLength;i++){
       while (exporter.available()) {
         destination.writeByte(exporter.read());
       }
@@ -153,7 +141,17 @@ public class Exporter_Custom_U_Object_Generic extends ExporterPlugin {
   public int read() {
     try {
       readLength--;
-      return readSource.readByte();
+
+      int currentByte = readSource.readByte();
+
+      // http://www.nightlycode.de/blog/post/reverse-engineering-the-demise-network-protocol-part-2-understanding-the-encryption
+      keyfield = keyfield ^ 0xAB4DBCDD;
+      int rotatedValue = Integer.rotateLeft(keyfield, 3);
+      keyfield ^= rotatedValue;
+      int transform = (keyfield >> 0x10) ^ keyfield;
+      currentByte = (byte) (((transform >> 8) ^ currentByte ^ (transform & 0xFF)) & 0xFF);
+
+      return currentByte;
     }
     catch (Throwable t) {
       return 0;

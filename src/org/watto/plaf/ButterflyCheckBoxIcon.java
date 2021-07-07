@@ -18,6 +18,7 @@
 
 package org.watto.plaf;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -62,12 +63,23 @@ public class ButterflyCheckBoxIcon extends MetalCheckBoxIcon {
 
     //ButterflyPainter.paintSquareGradient(cropBlock,0,0,w,h);
 
+    Color lightColor = LookAndFeelManager.getLightColor();
+    Color midColor = LookAndFeelManager.getMidColor();
+    Color darkColor = LookAndFeelManager.getDarkColor();
+    Color crossColor = LookAndFeelManager.getTextColor();
+    if (!checkbox.isEnabled()) {
+      lightColor = new Color(180, 180, 180);
+      midColor = new Color(160, 160, 160);
+      darkColor = new Color(140, 140, 140);
+      crossColor = midColor;
+    }
+
     if (model.isSelected()) {
-      ButterflyPainter.paintSquareGradient(cropBlock, 0, 0, w, h);
-      ButterflyPainter.paintCross(cropBlock, 1, 1, w - 1, h - 1);
+      ButterflyPainter.paintSquareGradient(cropBlock, 0, 0, w, h, darkColor, lightColor, lightColor, midColor);
+      ButterflyPainter.paintCross(cropBlock, 1, 1, w - 1, h - 1, crossColor);
     }
     else {
-      ButterflyPainter.paintSquareGradient(cropBlock, 0, 0, w, h, LookAndFeelManager.getLightColor(), LookAndFeelManager.getMidColor());
+      ButterflyPainter.paintSquareGradient(cropBlock, 0, 0, w, h, darkColor, lightColor, lightColor, midColor);
     }
 
   }

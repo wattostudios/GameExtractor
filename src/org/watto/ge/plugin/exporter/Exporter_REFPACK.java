@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.BooleanArrayConverter;
+import org.watto.io.converter.ByteArrayConverter;
 import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
 
@@ -26,16 +27,23 @@ public class Exporter_REFPACK extends ExporterPlugin {
   static Exporter_REFPACK instance = new Exporter_REFPACK();
 
   static FileManipulator readSource;
+
   static byte[] readBuffer = new byte[0];
+
   static int readBufferPos = 0;
+
   static long readLength = 0;
+
   static int readBufferLevel = 0;
+
   static boolean readDecompHeader = false;
+
   static boolean skipHeaders = false;
 
   /**
   **********************************************************************************************
   A.K.A. DBPF compression. Refer to http://wiki.niotso.org/RefPack for more info
+  Repacking works, but doesn't really "compress", it just wraps refpack headers around raw data
   **********************************************************************************************
   **/
   public static Exporter_REFPACK getInstance() {
@@ -349,19 +357,78 @@ public class Exporter_REFPACK extends ExporterPlugin {
 
   /**
    **********************************************************************************************
-   * // TEST - NOT DONE
+   Done - just writes it all as a raw file, basically
    **********************************************************************************************
    **/
   @Override
   public void pack(Resource source, FileManipulator destination) {
     try {
-      //long decompLength = source.getDecompressedLength();
+      long decompLength = source.getDecompressedLength();
 
+      // work out the compressed length (5-byte header + 113 bytes for every 112 bytes in the file + a 1-4 stop block at the end)
+      int numBlocks = (int) (decompLength / 112);
+      int lastBlock = (int) (decompLength - (numBlocks * 112));
+      int lastBlockRealSize = lastBlock;
+
+      // Write the header
+      // 2 - Header
+      destination.writeByte(16);
+      destination.writeByte(251);
+
+      // 3 - Decompressed Length
+      byte[] decompBytes = ByteArrayConverter.convertBig((int) decompLength);
+      destination.writeByte(decompBytes[1]);
+      destination.writeByte(decompBytes[2]);
+      destination.writeByte(decompBytes[3]);
+
+      // Write the file (for every 112 bytes, write 1 byte header then the 112 bytes of raw data).
+      // The last block might be smaller
       ExporterPlugin exporter = source.getExporter();
       exporter.open(source);
 
+      int bytesWritten = 112;
+      int blocksWritten = -1;
+
+      boolean stopWritten = false;
       while (exporter.available()) {
+        if (bytesWritten >= 112) {
+          // new block, write the header byte
+          blocksWritten++;
+          if (blocksWritten < numBlocks) {
+            // full 112 byte block
+            destination.writeByte(251);
+          }
+          else {
+            if (lastBlock >= 4) {
+              // last block - between 4-112 bytes in size
+              int compHeader = 224 | ((lastBlock - 4) >> 2);
+              destination.writeByte(compHeader);
+            }
+            else {
+              // don't need to write the 0-3 extra bytes, it's written out as the stop block later on
+            }
+          }
+          bytesWritten = 0;
+        }
         destination.writeByte(exporter.read());
+        bytesWritten++;
+      }
+
+      // write out the stop block, which will either be empty, or will contain 1-3 bytes of the remaining data
+      if (!stopWritten) {
+        if (lastBlockRealSize >= 4) {
+          lastBlockRealSize = 0; // don't need to write anything extra, just an empty stop
+        }
+
+        int compHeader = (252 | lastBlockRealSize);
+        destination.writeByte(compHeader);
+
+        // write 0-3 bytes to close out the file
+        for (int p = 0; p < lastBlockRealSize; p++) {
+          destination.writeByte(exporter.read());
+          bytesWritten++;
+        }
+
       }
 
       exporter.close();

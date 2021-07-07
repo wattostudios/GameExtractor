@@ -109,6 +109,21 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
   
   **********************************************************************************************
   **/
+  public void setImageResource(ImageResource imageResourceIn) {
+    imageResource = imageResourceIn;
+
+    image = imageResource.getImage();
+    imageWidth = imageResource.getWidth();
+    imageHeight = imageResource.getHeight();
+
+    zoomImage = image;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public PreviewPanel_Image(ImageResource imageResourceIn) {
     super();
 
@@ -306,6 +321,7 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     if (imageResource != null && imageResource.isManualFrameTransition()) {
       // Add buttons to move to the next frame
       frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"GridLayout\" position=\"CENTER\" rows=\"1\" columns=\"2\"><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" /></WSPanel></WSPanel>"));
+      Settings.set("PreviewPanel_Image_CurrentFrame", 0); // reset the frame position back to 0 when loading a new image
     }
     WSPanel paletteControls = null;
     if (imageResource != null && imageResource instanceof PalettedImageResource && PaletteManager.getNumPalettes() > 1) {

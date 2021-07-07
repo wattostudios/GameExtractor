@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -19,6 +19,10 @@ import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_LZO_SingleBlock;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -273,6 +277,100 @@ public class Plugin_BF_BIG extends ArchivePlugin {
       resources[numFiles - 1].setLength(length);
       resources[numFiles - 1].setDecompressedLength(length);
       */
+
+      // Now go to each file offset, work out if it's compressed, and if so, decompress it
+      fm.getBuffer().setBufferSize(17);
+
+      ExporterPlugin exporterLZO = Exporter_LZO_SingleBlock.getInstance();
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+
+      for (int i = 0; i < numFiles; i++) {
+        TaskProgressManager.setValue(i);
+
+        Resource resource = resources[i];
+        long offset = resource.getOffset();
+        long endOffset = offset + resource.getLength() - 8; // slightly smaller, to account for padding at the end of each file
+
+        // seek+skip, so the relativeSeek later is very quick
+        fm.seek(offset);
+        fm.skip(13);
+
+        if (fm.readInt() == -285228903) {
+          // compressed
+        }
+        else {
+          // uncompressed
+          continue;
+        }
+
+        fm.relativeSeek(offset);
+
+        int maxBlocks = 50000;
+        long[] blockOffsets = new long[maxBlocks];
+        long[] blockLengths = new long[maxBlocks];
+        long[] blockDecompLengths = new long[maxBlocks];
+        ExporterPlugin[] blockExporters = new ExporterPlugin[maxBlocks];
+
+        int totalDecompLength = 0;
+
+        int numBlocks = 0;
+        while (fm.getOffset() < endOffset) {
+          // 4 - Decompressed Block Length
+          int blockDecompLength = fm.readInt();
+          FieldValidator.checkLength(blockDecompLength);
+
+          if (blockDecompLength == 0) {
+            break; // padding at end of file
+          }
+
+          // 4 - Compressed Block Length
+          int blockCompLength = fm.readInt();
+          FieldValidator.checkLength(blockCompLength, arcSize);
+
+          // X - Compressed Data
+          long blockOffset = fm.getOffset();
+          fm.skip(blockCompLength);
+
+          blockOffsets[numBlocks] = blockOffset;
+          blockDecompLengths[numBlocks] = blockDecompLength;
+          blockLengths[numBlocks] = blockCompLength;
+
+          if (blockDecompLength == blockCompLength) {
+            // raw block
+            blockExporters[numBlocks] = exporterDefault;
+          }
+          else {
+            // compressed block
+            blockExporters[numBlocks] = exporterLZO;
+          }
+
+          totalDecompLength += blockDecompLength;
+
+          numBlocks++;
+        }
+
+        // shink the arrays
+        long[] tempLongArray = blockOffsets;
+        blockOffsets = new long[numBlocks];
+        System.arraycopy(tempLongArray, 0, blockOffsets, 0, numBlocks);
+
+        tempLongArray = blockDecompLengths;
+        blockDecompLengths = new long[numBlocks];
+        System.arraycopy(tempLongArray, 0, blockDecompLengths, 0, numBlocks);
+
+        tempLongArray = blockLengths;
+        blockLengths = new long[numBlocks];
+        System.arraycopy(tempLongArray, 0, blockLengths, 0, numBlocks);
+
+        ExporterPlugin[] tempPluginArray = blockExporters;
+        blockExporters = new ExporterPlugin[numBlocks];
+        System.arraycopy(tempPluginArray, 0, blockExporters, 0, numBlocks);
+
+        BlockVariableExporterWrapper exporter = new BlockVariableExporterWrapper(blockExporters, blockOffsets, blockLengths, blockDecompLengths);
+        resource.setExporter(exporter);
+
+        resource.setDecompressedLength(totalDecompLength);
+      }
 
       fm.close();
 

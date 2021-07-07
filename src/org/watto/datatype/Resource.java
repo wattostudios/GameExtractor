@@ -794,6 +794,7 @@ public class Resource implements Comparable<Resource> {
     exporter = Exporter_Default.getInstance();
     replaced = true;
 
+    setSource(exportedPath); // so that writing this file to an archive will pick up the changed file, not the original [3.13]
     setExportedPath(exportedPath); // also updates the timestamp
 
     setImageResource(null); // so thumbnails get updated

@@ -30,9 +30,9 @@ import javax.swing.JLabel;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Archive;
+import org.watto.datatype.ImageResource;
 import org.watto.datatype.Resource;
 import org.watto.event.WSSelectableInterface;
-import org.watto.ge.GameExtractor;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.PluginFinder;
@@ -128,7 +128,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
     WSPanel thumbnailPanel = new WSPanel(XMLReader.read("<WSPanel layout=\"GridLayout\" rows=\"3\" columns=\"1\" vertical-gap=\"8\" />"));
 
     WSPanel screen1Panel = new WSPanel(XMLReader.read("<WSPanel layout=\"CenteredLayout\" showBorder=\"true\" />"));
-    screen1Panel.add(new JLabel(new ImageIcon("images\\FullVersionScreenshots\\full01.png")));
+    screen1Panel.add(new JLabel(new ImageIcon("images" + File.separatorChar + "FullVersionScreenshots" + File.separatorChar + "full01.png")));
     WSPanel center1Panel = new WSPanel(XMLReader.read("<WSPanel layout=\"CenteredLayout\" showBorder=\"false\" />"));
     center1Panel.add(screen1Panel);
 
@@ -138,10 +138,10 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
     WSPanel bulletsTextPanel = new WSPanel(XMLReader.read("<WSPanel layout=\"BorderLayout\" opaque=\"false\" ><WSPanel layout=\"GridLayout\" rows=\"4\" columns=\"1\" opaque=\"false\" vertical-gap=\"4\" ><WSLabel code=\"BasicVersionPreview_FullVersionFeature1\" horizontal-alignment=\"left\" /><WSLabel code=\"BasicVersionPreview_FullVersionFeature2\" horizontal-alignment=\"left\" /><WSLabel code=\"BasicVersionPreview_FullVersionFeature3\" horizontal-alignment=\"left\" /><WSLabel code=\"BasicVersionPreview_FullVersionFeature4\" horizontal-alignment=\"left\" /></WSPanel></WSPanel>"));
 
     WSPanel bulletsPanel = new WSPanel(XMLReader.read("<WSPanel layout=\"GridLayout\" rows=\"4\" columns=\"1\" opaque=\"false\" vertical-gap=\"4\" ></WSPanel>"));
-    bulletsPanel.add(new JLabel(new ImageIcon("images\\General\\bullet.png")));
-    bulletsPanel.add(new JLabel(new ImageIcon("images\\General\\bullet.png")));
-    bulletsPanel.add(new JLabel(new ImageIcon("images\\General\\bullet.png")));
-    bulletsPanel.add(new JLabel(new ImageIcon("images\\General\\bullet.png")));
+    bulletsPanel.add(new JLabel(new ImageIcon("images" + File.separatorChar + "General" + File.separatorChar + "bullet.png")));
+    bulletsPanel.add(new JLabel(new ImageIcon("images" + File.separatorChar + "General" + File.separatorChar + "bullet.png")));
+    bulletsPanel.add(new JLabel(new ImageIcon("images" + File.separatorChar + "General" + File.separatorChar + "bullet.png")));
+    bulletsPanel.add(new JLabel(new ImageIcon("images" + File.separatorChar + "General" + File.separatorChar + "bullet.png")));
     bulletsTextPanel.add(bulletsPanel, BorderLayout.WEST);
 
     WSPanel bulletsCenterPanel = new WSPanel(XMLReader.read("<WSPanel layout=\"CenteredLayout\" opaque=\"false\" ></WSPanel>"));
@@ -155,7 +155,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
     centerPanel.add(linkPanel, BorderLayout.SOUTH);
 
     WSPanel screen2Panel = new WSPanel(XMLReader.read("<WSPanel layout=\"CenteredLayout\" showBorder=\"true\" />"));
-    screen2Panel.add(new JLabel(new ImageIcon("images\\FullVersionScreenshots\\full02.png")));
+    screen2Panel.add(new JLabel(new ImageIcon("images" + File.separatorChar + "FullVersionScreenshots" + File.separatorChar + "full02.png")));
     WSPanel center2Panel = new WSPanel(XMLReader.read("<WSPanel layout=\"CenteredLayout\" showBorder=\"false\" />"));
     center2Panel.add(screen2Panel);
 
@@ -341,12 +341,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
       String code = ((WSComponent) c).getCode();
 
       if (code.equals("FileList")) {
-        if (!GameExtractor.isFullVersion()) {
-          loadBasicVersionPreview();
-        }
-        else {
-          previewFile();
-        }
+        loadBasicVersionPreview();
         return true;
       }
 
@@ -399,12 +394,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
    **/
   @Override
   public void onOpenRequest() {
-    if (!GameExtractor.isFullVersion()) {
-      loadBasicVersionPreview();
-    }
-    else {
-      previewFile();
-    }
+    loadBasicVersionPreview();
   }
 
   /**
@@ -658,7 +648,62 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
     //destination = FileBuffer.checkFilename(destination);
     //FileBuffer.makeDirectory(new File(destination.getAbsolutePath()));
 
-    plugin.write(previewPanel, destination);
+    // If there are multiple frames in the image, and it's a manual transition (not an animation), we want to save each frame [3.13]
+    boolean previewsWritten = false;
+    if (previewPanel instanceof PreviewPanel_Image) {
+      PreviewPanel_Image imagePanel = (PreviewPanel_Image) previewPanel;
+      ImageResource imageResource = imagePanel.getImageResource();
+      if (imageResource.getNextFrame() != null) {
+        // many frames, not an animation, so save each of them
+
+        String baseFilePath = destination.getAbsolutePath();
+        String extension = "";
+        int dotPos = baseFilePath.lastIndexOf('.');
+        if (dotPos > 0) {
+          extension = baseFilePath.substring(dotPos);
+          baseFilePath = baseFilePath.substring(0, dotPos);
+        }
+
+        baseFilePath += "_ge_frame_";
+
+        // If we've already moved to show a different frame (ie we're not starting on frame #1), move back to frame 0 for export
+        int currentFrame = Settings.getInt("PreviewPanel_Image_CurrentFrame");
+        if (currentFrame < 0) {
+          currentFrame = 0;
+        }
+        for (int i = 0; i < currentFrame; i++) {
+          imageResource = imageResource.getPreviousFrame();
+        }
+
+        ImageResource firstResource = imageResource;
+
+        // now if we're on the first frame, check that it's not an animation
+        //if (imageResource.isManualFrameTransition()) {
+        for (int i = 0; i < 1000; i++) { // max 1000 frames to export
+          imagePanel.setImageResource(imageResource); // set the current frame
+
+          // prepare the filename
+          File frameDestination = new File(baseFilePath + i + extension);
+          plugin.write(previewPanel, frameDestination); // save the frame
+
+          imageResource = imageResource.getNextFrame();// prepare for the next frame
+
+          if (imageResource == firstResource) {
+            // back at the beginning
+            imagePanel.setImageResource(firstResource); // set the current frame
+            break;
+          }
+        }
+
+        previewsWritten = true;
+        //}
+      }
+    }
+    // Otherwise just save the current frame
+    if (!previewsWritten) {
+      plugin.write(previewPanel, destination);
+      previewsWritten = true;
+    }
 
     rememberSelectedExportPlugin();
 

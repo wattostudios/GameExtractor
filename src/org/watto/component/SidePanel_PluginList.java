@@ -25,85 +25,10 @@ import javax.swing.JComponent;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.event.WSSelectableInterface;
-import org.watto.ge.GameExtractor;
-import org.watto.ge.plugin.exporter.Exporter_Custom_ADF;
-import org.watto.ge.plugin.exporter.Exporter_Custom_ARCH00_LTAR;
-import org.watto.ge.plugin.exporter.Exporter_Custom_ARF_AR;
-import org.watto.ge.plugin.exporter.Exporter_Custom_CA2;
-import org.watto.ge.plugin.exporter.Exporter_Custom_CAR;
-import org.watto.ge.plugin.exporter.Exporter_Custom_COBI;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DAM_RZ;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DAT_25;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DAT_DBPF;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DAT_DRPK;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DAT_FAR;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DLL_MZ_BMP;
-import org.watto.ge.plugin.exporter.Exporter_Custom_DS2RES;
-import org.watto.ge.plugin.exporter.Exporter_Custom_FSB_Audio;
-import org.watto.ge.plugin.exporter.Exporter_Custom_GSC_GSCFMT;
-import org.watto.ge.plugin.exporter.Exporter_Custom_HPI_HAPI;
-import org.watto.ge.plugin.exporter.Exporter_Custom_JDLZ;
-import org.watto.ge.plugin.exporter.Exporter_Custom_JFL;
-import org.watto.ge.plugin.exporter.Exporter_Custom_MHK_MHWK_WAV;
-import org.watto.ge.plugin.exporter.Exporter_Custom_MHTML_Base64;
-import org.watto.ge.plugin.exporter.Exporter_Custom_MHTML_QuotedPrintable;
-import org.watto.ge.plugin.exporter.Exporter_Custom_PAK_20;
-import org.watto.ge.plugin.exporter.Exporter_Custom_PAK_30;
-import org.watto.ge.plugin.exporter.Exporter_Custom_PKG_3;
-import org.watto.ge.plugin.exporter.Exporter_Custom_RGSSAD_RGSSAD;
-import org.watto.ge.plugin.exporter.Exporter_Custom_RPKG_GKPR_Multi;
-import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundNodeWave_451;
-import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundNodeWave_648;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_Palette_Generic;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_Sound_141;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_Texture_127;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_Texture_141;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_Texture_Generic;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_WAV_119;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_WAV_127;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_WAV_159;
-import org.watto.ge.plugin.exporter.Exporter_Custom_U_WAV_172;
-import org.watto.ge.plugin.exporter.Exporter_Custom_VFS;
-import org.watto.ge.plugin.exporter.Exporter_Custom_VPK;
-import org.watto.ge.plugin.exporter.Exporter_Custom_WAD_12;
-import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio;
-import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio_Chunks;
-import org.watto.ge.plugin.exporter.Exporter_Custom_ZSM_ZSNDXBOX;
-import org.watto.ge.plugin.exporter.Exporter_Default;
-import org.watto.ge.plugin.exporter.Exporter_Deflate;
-import org.watto.ge.plugin.exporter.Exporter_Deflate_XOR;
-import org.watto.ge.plugin.exporter.Exporter_Explode;
-import org.watto.ge.plugin.exporter.Exporter_GZip;
-import org.watto.ge.plugin.exporter.Exporter_JDLZ;
-import org.watto.ge.plugin.exporter.Exporter_LZ4;
-import org.watto.ge.plugin.exporter.Exporter_LZ4X;
-import org.watto.ge.plugin.exporter.Exporter_LZ4_Framed;
-import org.watto.ge.plugin.exporter.Exporter_LZMA;
-import org.watto.ge.plugin.exporter.Exporter_LZO;
-import org.watto.ge.plugin.exporter.Exporter_LZO_SingleBlock;
-import org.watto.ge.plugin.exporter.Exporter_LZSS;
-import org.watto.ge.plugin.exporter.Exporter_LZSS_Old;
-import org.watto.ge.plugin.exporter.Exporter_MSZIP;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
-import org.watto.ge.plugin.exporter.Exporter_RAR_RAR;
-import org.watto.ge.plugin.exporter.Exporter_REFPACK;
-import org.watto.ge.plugin.exporter.Exporter_SFL_Bits;
-import org.watto.ge.plugin.exporter.Exporter_SFL_Block;
-import org.watto.ge.plugin.exporter.Exporter_SFL_Nulls;
-import org.watto.ge.plugin.exporter.Exporter_SFL_RLE;
-import org.watto.ge.plugin.exporter.Exporter_SLLZ;
-import org.watto.ge.plugin.exporter.Exporter_Snappy;
-import org.watto.ge.plugin.exporter.Exporter_SplitChunkDefault;
-import org.watto.ge.plugin.exporter.Exporter_SplitChunk_ZLib;
-import org.watto.ge.plugin.exporter.Exporter_XOR;
-import org.watto.ge.plugin.exporter.Exporter_XOR_RepeatingKey;
-import org.watto.ge.plugin.exporter.Exporter_ZIP;
-import org.watto.ge.plugin.exporter.Exporter_ZIP_Single;
-import org.watto.ge.plugin.exporter.Exporter_ZLib;
-import org.watto.ge.plugin.exporter.Exporter_ZLibX;
-import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
+import org.watto.ge.plugin.exporter.*;
 import org.watto.ge.script.ScriptArchivePlugin_MexCom3;
 import org.watto.ge.script.ScriptArchivePlugin_QuickBMS;
+import org.watto.ge.script.ScriptManager;
 import org.watto.xml.XMLNode;
 import org.watto.xml.XMLReader;
 
@@ -206,24 +131,19 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
     }
     else if (type.equals(Language.get("Plugin_Script_Name"))) {
       //plugins = loadScripts();
-      plugins = WSPluginManager.getGroup("Script").getPlugins();
+      try {
+        plugins = WSPluginManager.getGroup("Script").getPlugins();
+      }
+      catch (Throwable t) {
+        ScriptManager.loadScripts();
+        plugins = WSPluginManager.getGroup("Script").getPlugins();
+      }
     }
     else if (type.equals(Language.get("Plugin_SidePanel_Name"))) {
       plugins = WSPluginManager.getGroup("SidePanel").getPlugins();
     }
     else if (type.equals(Language.get("Plugin_Viewer_Name"))) {
 
-      if (GameExtractor.isFullVersion()) {
-        // The Viewer plugins exist in the Basic Version for showing Thumbnails, but we need to pretend they don't exist
-        // (they can't be used for real previews anyway, due to other functionality being removed)
-        WSPluginGroup group = WSPluginManager.getGroup("Viewer");
-        if (group != null) {
-          plugins = group.getPlugins();
-        }
-        else {
-          plugins = new WSPlugin[0];
-        }
-      }
     }
 
     if (Settings.getBoolean("SortPluginLists")) {
@@ -331,8 +251,10 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
         new Exporter_Custom_DLL_MZ_BMP(),
         new Exporter_Custom_DS2RES(),
         new Exporter_Custom_FSB_Audio(),
+        new Exporter_Custom_FSB5_OGG(),
         new Exporter_Custom_GSC_GSCFMT(),
         new Exporter_Custom_HPI_HAPI(),
+        new Exporter_Custom_JA_ARCHINFO_CFIL(),
         new Exporter_Custom_JDLZ(),
         new Exporter_Custom_JFL(),
         new Exporter_Custom_MHK_MHWK_WAV(),
@@ -343,41 +265,69 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
         new Exporter_Custom_PKG_3(),
         new Exporter_Custom_RGSSAD_RGSSAD(),
         new Exporter_Custom_RPKG_GKPR_Multi(),
+        new Exporter_Custom_U_Object_Generic(),
         new Exporter_Custom_U_Palette_Generic(),
         new Exporter_Custom_U_Sound_141(),
+        new Exporter_Custom_U_Sound_Generic(),
+        new Exporter_Custom_U_SoundNodeWave_200(),
         new Exporter_Custom_U_Texture_127(),
         new Exporter_Custom_U_Texture_141(),
+        new Exporter_Custom_U_Texture_200(),
         new Exporter_Custom_U_Texture_Generic(),
         new Exporter_Custom_U_WAV_119(),
         new Exporter_Custom_U_WAV_127(),
         new Exporter_Custom_U_WAV_159(),
         new Exporter_Custom_U_WAV_172(),
+        new Exporter_Custom_UE3_RFMODSound_576(),
         new Exporter_Custom_UE3_SoundNodeWave_451(),
         new Exporter_Custom_UE3_SoundNodeWave_648(),
+        new Exporter_Custom_UE3_SoundNodeWave_Generic(),
+        new Exporter_Custom_UE3_StaticMesh_Generic(),
+        new Exporter_Custom_UE4_SoundWave_Generic(),
         new Exporter_Custom_VFS(),
+        new Exporter_Custom_VIS_VIS3_PNG(),
+        new Exporter_Custom_VIS_VIS3_WEBP(),
         new Exporter_Custom_VPK(),
         new Exporter_Custom_WAD_12(),
         new Exporter_Custom_WAV_RawAudio(),
         new Exporter_Custom_WAV_RawAudio_Chunks(),
+        new Exporter_Custom_WAV_RawAudio_Compressed(),
+        new Exporter_Custom_WAV_RawAudio_XOR(),
         new Exporter_Custom_ZSM_ZSNDXBOX(),
         new Exporter_Default(),
+        new Exporter_Deflate_CompressedSizeOnly(),
         new Exporter_Deflate_XOR(),
         new Exporter_Deflate(),
+        new Exporter_Encryption_ICE(),
+        new Exporter_Encryption_RC4(),
         new Exporter_Explode(),
         new Exporter_GZip(),
         new Exporter_JDLZ(),
+        new Exporter_LH6(),
         new Exporter_LZ4_Framed(),
         new Exporter_LZ4(),
         new Exporter_LZ4X(),
+        new Exporter_LZ77WII(),
+        new Exporter_LZ77WII_Old(),
+        new Exporter_LZF(),
+        new Exporter_LZMA_BSP(),
         new Exporter_LZMA(),
         new Exporter_LZO(),
         new Exporter_LZO_SingleBlock(),
+        new Exporter_LZO_MiniLZO(),
         new Exporter_LZSS(),
         new Exporter_LZSS_Old(),
+        new Exporter_LZWX(),
+        new Exporter_LZX(),
+        new Exporter_LZX_2(),
         new Exporter_MSZIP(),
+        new Exporter_PRS_8ING(),
+        new Exporter_QCMP1(),
         new Exporter_QuickBMS_Decompression(""),
+        new Exporter_QuickLZ(),
         new Exporter_RAR_RAR(),
         new Exporter_REFPACK(),
+        new Exporter_RNC2(),
         new Exporter_SFL_Bits(),
         new Exporter_SFL_Block(),
         new Exporter_SFL_Nulls(),
@@ -388,6 +338,8 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
         new Exporter_SplitChunkDefault(),
         new Exporter_XOR(),
         new Exporter_XOR_RepeatingKey(),
+        new Exporter_Z(),
+        new Exporter_Z_CompressedSizeOnly(),
         new Exporter_ZIP_Single(),
         new Exporter_ZIP(),
         new Exporter_ZLib(),

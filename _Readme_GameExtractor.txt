@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            //
 //                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
+//                                  Extensible Archive Editor                                 //
+//                                https://www.watto.org/extract                               //
 //                                                                                            //
 //                            Copyright (C) 2002-2021 wattostudios                            //
 //                                                                                            //
@@ -19,7 +19,7 @@ big files that contain the sounds, images, and other content used to create the 
 for the player. The job of Game Extractor is to allow you to open these game archives, to view
 and edit the content.
 
-For further information, downloads, and help, visit the website at http://www.watto.org/extract
+For further information, downloads, and help, visit the website at https://www.watto.org/extract
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                            //
@@ -30,23 +30,28 @@ For further information, downloads, and help, visit the website at http://www.wa
 Game Extractor requires you to have Java Runtime Environment 8.0 (or 1.8) or later installed on
 your computer. This is a free download from http://www.java.com 
 
+If you are using Java version 10 or newer, you will need to install the JavaFX libraries as well,
+as they are no longer part of the Java installation. These are available from https://openjfx.io/
+and will need to be put in the main Game Extractor directory.
+
 When you install Game Extractor, several shortcuts are created in the Start Menu or the main
 Windows tile screen. If one of the shortcuts doesn't work for you, try one of the other ones.
 More detailed instructions can be found below, or on the Game Extractor website.
 
                                  Preferred Windows Method
 1. Install Java Runtime Environment 8.0 (or 1.8), or later, from http://www.java.com
-2. Download GameExtractor.exe from http://www.watto.org/extract
+2. Download the Game Extractor EXE installer from https://www.watto.org/extract to your computer
 3. Double-click on GameExtractor.exe to run the installation program
 4. Double-click on any one of the following programs to run Game Extractor...
    a. GameExtractor.exe
    b. GameExtractor.bat
    c. GameExtractor.jar
+   d. GameExtractor.ps1
 
                                 Alternative Windows Method
 1. Install Java Runtime Environment 8.0 (or 1.8), or later, from http://www.java.com
-2. Download GameExtractor.zip from http://www.watto.org/extract
-3. Right-click on GameExtractor.zip and choose Extract
+2. Download the Game Extractor ZIP archive from https://www.watto.org/extract to your computer
+3. Right-click on the Game Extractor ZIP and choose Extract
 4. Follow the screens, and tell it to extract the file to c:\extract
 5. Open a Command Prompt window (you can search for it in the Start Menu or Windows Tile screen)
 6. Change to the Game Extractor directory by typing "cd c:\extract"
@@ -57,16 +62,22 @@ More detailed instructions can be found below, or on the Game Extractor website.
       a. GameExtractor.exe
       b. GameExtractor.bat
       c. GameExtractor.jar
+      d. GameExtractor.ps1
 
                                  Other Operating Systems
 1. Install Java Runtime Environment 8.0 (or 1.8), or later, from http://www.java.com
-2. Download GameExtractor.zip from http://www.watto.org/extract
+2. Download GameExtractor.zip from https://www.watto.org/extract
 3. Using any zip program, unzip GameExtractor.zip to /usr/local/bin/extract
 4. Open a Command Prompt window
 5. Change to the Game Extractor directory by typing "cd /usr/local/bin/extract"
 6a. Run Game Extractor by typing "java -jar GameExtractor.jar"
-6b. If that doesn't work, try typing "/usr/java/bin/java -jar GameExtractor.jar"
-
+6b. If that doesn't work, try typing "/usr/java/latest/bin/java -jar GameExtractor.jar"
+7. If you are using a Linux-based operating system, you could also try one of the following 
+   script files in the /usr/local/bin/extract directory...
+      a. GameExtractor.sh
+      b. GameExtractor.csh
+      c. GameExtractor.ksh
+  
 * Please note: While Java can theoretically run on many different operating systems, this
   doesn't necessarily mean that Game Extractor works correctly on those operating systems. 
   Game Extractor is only officially supported on Windows.
@@ -82,8 +93,11 @@ within the Game Extractor program. It also contains some tutorials documenting h
 specific tasks, such as "How to Open an Archive". These help files can also be opened in any web
 browser - start with the file help/index.html
 
+In the "tutorials" directory of Game Extractor, you can also find some PDF documents that guide
+you through some basic tasks that you might want to perform.
+
 If you have any other Game Extractor questions, browse the Help/FAQ pages on the website -
-http://www.watto.org/extract . These pages include help on general Game Extractor queries,
+https://www.watto.org/extract . These pages include help on general Game Extractor queries,
 common errors and problems, and information on the full version.
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +106,7 @@ common errors and problems, and information on the full version.
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-For any questions, you should first visit the Game Extractor website at http://www.watto.org/extract
+For any questions, you should first visit the Game Extractor website at https://www.watto.org/extract
 to see if the answer to your question can be found. If not, you can find the contact form on the
 website as well.
 
@@ -106,10 +120,18 @@ Version 3.13
 [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
 [+] Added previews for Unity3D v20 Meshes that are stored in a separate resS file
 [+] Added a Mesh Investigator, for previewing unknown files as 3D meshes
-[+] Added additional swizzling options to the Image Investigator
+[+] The ImageInvestigator now does swizzling, and can read color palettes from the image file
+[+] Added scripts for running Game Extractor from PowerShell and Linux ksh/csh/bash
+[+] Added some tutorial PDF documents for performing common tasks in Game Extractor
 [A] New cleaner images for file types, and for some buttons and menu items that were confusing
 [A] If a plugin forces some file types to display as Text, the thumbnail icon will show as such
 [A] The command-line argument -list will now write to stdout if -output is omitted
+[A] Saving a preview where the image has multiple frames, will now save all frames at once
+[A] When extracting by right-click for the first time, the user is asked to choose a directory
+[B] Fixed some bugs related to the writing of archives to special Windows directories
+[B] Fixed bugs where inline-edited text files from PreviewPanel_Text, or files changed by
+    external programs (autodetected) would not write into archives properly when saving
+[B] Minor code changes to address incompatibilities with Linux operating systems
 
 Version 3.12
 [I] Heaps of new features and improvements...

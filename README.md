@@ -24,18 +24,33 @@ of compression algorithms.
 * For most users, there should generally be no need to build these sources - if you want a working
   build of Game Extractor (Basic Version), get it from the website at http://www.watto.org/extract
   
-## Installation/Build Prerequisites
+## Installation and Build Prerequisites
 
 Game Extractor requires you to have Java Runtime Environment 8.0 (or 1.8) or later installed on
 your computer. This is a free download from http://www.java.com 
+
+If you are using Java version 10 or newer, you will need to install the JavaFX libraries as well,
+as they are no longer part of the JRE. These are available from https://openjfx.io/ and will need
+to be on your classpath (or in the main Game Extractor directory).
 
 We maintain the project using Eclipse. You should be able to download the repository, and import
 it into Eclipse via the menu path File -- Open Projects from File System. The main entry point
 is under src/org/watto/ge/GameExtractor.java
 
-*Please note: While Java can theoretically run on many different operating systems, this
-  doesn't necessarily mean that Game Extractor works correctly on those operating systems. 
-  Game Extractor is only officially supported on Windows.*
+## Operating System Support
+
+Game Extractor is only officially supported on Windows. While Java can theoretically run on many
+different operating systems, this doesn't necessarily mean that Game Extractor works correctly
+or completely on those operating systems.
+
+We have performed some very basic tests on Linux-based operating systems (does the program open,
+and does it read an archive) - that's about it. We have provided some extremely basic scripts to
+assist running in ksh/csh/bash shells, however you should evaluate the scripts and adjust them
+appropriately for your system.
+
+We would expect that most functions would operate correctly in non-Windows environments, but
+offer no guarantees of this, and in some situations we may not be able to make it work in those
+environments at all.
 
 ## Troubleshooting and Contact Information
 
@@ -56,10 +71,18 @@ There is a Contact Form on our website, if you need to contact us for any furthe
   * [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
   * [+] Added previews for Unity3D v20 Meshes that are stored in a separate resS file
   * [+] Added a Mesh Investigator, for previewing unknown files as 3D meshes
-  * [+] Added additional swizzling options to the Image Investigator
+  * [+] The ImageInvestigator now does swizzling, and can read color palettes from the image file
+  * [+] Added scripts for running Game Extractor from PowerShell and Linux ksh/csh/bash
+  * [+] Added some tutorial PDF documents for performing common tasks in Game Extractor
   * [A] New cleaner images for file types, and for some buttons and menu items that were confusing
   * [A] If a plugin forces some file types to display as Text, the thumbnail icon will show as such
   * [A] The command-line argument -list will now write to stdout if -output is omitted
+  * [A] Saving a preview where the image has multiple frames, will now save all frames at once
+  * [A] When extracting by right-click for the first time, the user is asked to choose a directory
+  * [B] Fixed some bugs related to the writing of archives to special Windows directories
+  * [B] Fixed bugs where inline-edited text files from PreviewPanel_Text, or files changed by
+        external programs (autodetected) would not write into archives properly when saving
+  * [B] Minor code changes to address incompatibilities with Linux operating systems
 
 * Version 3.12
   * [I] Heaps of new features and improvements...

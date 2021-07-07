@@ -57,6 +57,16 @@ public class WSOptionCheckBox extends WSOptionPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
+  Toggles the enable on the checkbox as well as the panel
+  **********************************************************************************************
+  **/
+  public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
+    checkBox.setEnabled(enabled);
+  }
+
+  /**
+  **********************************************************************************************
   Adds an ItemListener to the Checkbox, for additional processing on Select/Deselect
   **********************************************************************************************
   **/

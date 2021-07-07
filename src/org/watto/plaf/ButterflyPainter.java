@@ -74,6 +74,20 @@ public class ButterflyPainter {
   }
 
   /***********************************************************************************************
+   * Paints a cross, as found in a checkbox
+   * @param graphics the <code>Graphics2D</code> to paint on
+   * @param x the x position to paint from
+   * @param y the y position to paint from
+   * @param w the width of the painting window
+   * @param h the height of the painting window
+   ***********************************************************************************************/
+  public static void paintCross(Graphics2D graphics, int x, int y, int w, int h, Color color) {
+    graphics.setColor(color);
+    graphics.drawLine(x + 4, y + 4, w - 5, h - 5);
+    graphics.drawLine(x + 4, h - 5, w - 5, y + 4);
+  }
+
+  /***********************************************************************************************
    * Paints a curved border
    * @param graphics the <code>Graphics2D</code> to paint on
    * @param x the x position to paint from

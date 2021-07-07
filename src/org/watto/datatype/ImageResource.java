@@ -283,6 +283,25 @@ public class ImageResource {
   Gets the property, if it exists, otherwise returns the <i>valueIfNotFound</i>
   **********************************************************************************************
   **/
+  public boolean getProperty(String code, boolean valueIfNotFound) {
+    String value = getProperty(code);
+    if (value == null || value.equals("")) {
+      return valueIfNotFound;
+    }
+
+    if (value.equalsIgnoreCase("true")) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  Gets the property, if it exists, otherwise returns the <i>valueIfNotFound</i>
+  **********************************************************************************************
+  **/
   public int getProperty(String code, int valueIfNotFound) {
     String value = getProperty(code);
     if (value == null || value.equals("")) {

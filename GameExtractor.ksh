@@ -1,4 +1,4 @@
-#!/usr/bin/?ksh
-export CLASSPATH=.;%CLASSPATH%
+#!/bin/ksh
+export CLASSPATH=".;$CLASSPATH"
 echo "==== Running Game Extractor ===="
 java -Xmx1024m -jar GameExtractor.jar

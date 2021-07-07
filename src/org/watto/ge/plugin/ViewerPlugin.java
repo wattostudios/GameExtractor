@@ -144,6 +144,7 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
     }
 
     description += "\n\n" + Language.get("Description_SupportedOperations");
+    description += "\n - " + Language.get("Description_ReadOperation");
     if (canWrite(new PreviewPanel_Image())) { // Only supports telling people about ImageWriters
       description += "\n - " + Language.get("Description_WriteOperation");
     }
@@ -338,7 +339,7 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setExtensions(String... extensions) {
@@ -347,7 +348,7 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setGames(String... games) {
@@ -356,7 +357,7 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void setPlatforms(String... platforms) {

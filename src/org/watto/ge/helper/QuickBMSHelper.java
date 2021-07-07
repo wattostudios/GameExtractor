@@ -258,7 +258,8 @@ public class QuickBMSHelper {
       // Extract it
       String quickBMSPath = Settings.getString("QuickBMS_Path");
       if (quickBMSPath == null || quickBMSPath.length() <= 0) {
-        quickBMSPath = "external_bins\\quickbms";
+        //quickBMSPath = "external_bins\\quickbms";
+        quickBMSPath = "external_bins" + File.separatorChar + "quickbms";
         Settings.set("QuickBMS_Path", quickBMSPath);
       }
 

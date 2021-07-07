@@ -28,7 +28,6 @@ import org.watto.event.WSKeyableInterface;
 import org.watto.event.WSSelectableInterface;
 import org.watto.event.listener.WSKeyableListener;
 import org.watto.event.listener.WSSelectableListener;
-import org.watto.ge.GameExtractor;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.task.Task;
 import org.watto.task.Task_WriteEditedTextFile;
@@ -90,16 +89,6 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       ArchivePlugin archivePlugin = Archive.getReadPlugin();
       if (archivePlugin != null) {
         if (archivePlugin.canWrite() || archivePlugin.canReplace() || archivePlugin.canImplicitReplace()) {
-          if (GameExtractor.isFullVersion()) {
-            preview.setEditable(true);
-
-            WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"1\" />"));
-            saveButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_Text_SaveChanges\" showText=\"true\" />"));
-            saveButton.setEnabled(false);
-            bottomPanel.add(saveButton);
-
-            add(bottomPanel, BorderLayout.SOUTH);
-          }
 
         }
         else {

@@ -783,6 +783,14 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
       description += "\n - " + Language.get("Description_ImplicitReplaceOperation");
     }
 
+    if (convertOnReplace) {
+      description += "\n\n" + Language.get("Description_ConvertOnReplace");
+    }
+
+    if (allowScanForFileTypes) {
+      description += "\n\n" + Language.get("Description_AllowScanForFileTypes");
+    }
+
     if (!isEnabled()) {
       description += "\n\n" + Language.get("Description_PluginDisabled");
     }

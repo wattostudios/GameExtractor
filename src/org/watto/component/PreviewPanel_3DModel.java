@@ -475,6 +475,16 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
       boolean showTextures = Settings.getBoolean("PreviewPanel_3DModel_ShowTextures");
 
       if (triangleMesh != null) {
+
+        // This mesh doesn't have textures, so disable the "show textures" checkbox
+        try {
+          WSCheckBox textureCheckbox = (WSCheckBox) ComponentRepository.get("PreviewPanel_3DModel_ShowTextures");
+          textureCheckbox.setEnabled(false);
+        }
+        catch (Throwable t) {
+          // don't worry about it - only cosmetic
+        }
+
         // Build it from a TriangleMesh
         MeshView view = new MeshView(triangleMesh);
         view.setDrawMode(DrawMode.FILL);
@@ -487,6 +497,15 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
       }
       else if (meshView != null) {
         // Build it from a MeshView
+
+        // This mesh might have textures, so enable the "show textures" checkbox
+        try {
+          WSCheckBox textureCheckbox = (WSCheckBox) ComponentRepository.get("PreviewPanel_3DModel_ShowTextures");
+          textureCheckbox.setEnabled(true);
+        }
+        catch (Throwable t) {
+          // don't worry about it - only cosmetic
+        }
 
         int numViews = meshView.length;
         for (int v = 0; v < numViews; v++) {

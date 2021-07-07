@@ -51,7 +51,8 @@ import javax.swing.JFrame;
 - Archive with nested directories that we need to read - Plugin_FMF_FMF
 - Archive where multiple files are stored in a single ZLib block, so you need to decompress the ZLib, then find the file within it - Plugin_RSB_1BSR
 - Archive where the user is asked to choose an option (from a ComboBox) in a popup when saving - Plugin_PAK_EYEDENTITY (see start of replace() method)
-- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG) 
+- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG)
+- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format (AND where a file contains multiple frames) (Plugin_BIG_BIGF) 
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
 - Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
@@ -81,6 +82,7 @@ import javax.swing.JFrame;
 - Offset
 - Length
 - DecompressedLength
+- PaletteStripedPS2 = true
 
 // COMMON ARCHIVE PLUGINS (Supported Game Engines, for example)...
 - Unreal Engine 4                 = Plugin_PAK_38
@@ -118,14 +120,19 @@ import javax.swing.JFrame;
 
 // NEW IDEAS...
 - YouTube videos showing how to do common tasks
-- Fields on the ImageInvestigator for specifying the color palette offset and numColors
-- ksh/csh/bash scripts for running GE from Linux
-  - Also fix things that are obviously broken in Linux (eg if the plugins/XML don't load, if dirList looks wrong, etc)
-- Try to build the GitHub version, add things that are missing, add information to the README.md to assist users to do it
-- GEMod
+- Write HTML help pages for Tutorials
+  - Also add the tutorial pages to the website
+  - Topics:
+    - How to use the MeshInvestigator
+- gemod files - a special ZIP used for applying a mod to an archive
+  - Contains a script for running GE, as well as details of the archive to edit and the files to replace
+  - Puts the files that are being replaced (the new files) into an archive
+  - When opened by GE, will apply the mod to an archive.
+    - will also create an "undo" gemod file - ie one that will convert the archive back to the original, which should basically
+      be the same as the original gemod file but with the original "replaced" files in it
+- If running on Java 11 or newer (ie where javafx packages aren't part of the JRE), show a popup alerting the user to download it?
 - Make an FFMPEG Helper class, for all the viewer plugins, for commonality, similar to the QuickBMS class.
   - Will also tell people if trying to use FFMPEG and it isn't installed. Maybe only tell them once each time they open GE?
-- Add legal info to GE similarly to the website - eg no refunds, no guarantees, no support for non-windows, etc.
 - The KeyListeners on the FileListPanels and DirPanel (for selecting next filename with given letter) should allow input of text strings
   - ie pressing 2 characters should look for files starting with these 2 characters.
   - Resets the search string after 1 second.
@@ -144,12 +151,6 @@ import javax.swing.JFrame;
   - Delete file
 - Option to auto-shrink the SidePanel when on mouseout, and unshrink when on mouseover
 - LUA Decompiler (for converting LUA bytecode into LUA script - eg. Homeworld 2)
-- gemod files - a special ZIP used for applying a mod to an archive
-  - Contains a script for running GE, as well as details of the archive to edit and the files to replace
-  - Contains the files that are being replaced into an archive
-  - When opened by GE, will apply the mod to an archive.
-    - will also create an "undo" gemod file - ie one that will convert the archive back to the original, which should basically
-      be the same as the original gemod file but with the original "replaced" files in it
 
 // PLUGIN THINGS...
 - Write an FFMPEG converter, to add it to the bottom of Audio Previews, so you can convert WAV to OGG, for example
@@ -198,11 +199,6 @@ import javax.swing.JFrame;
   - Game Modding Communities
     - Moddb
     - NexusMods
-- Write HTML help pages for Tutorials
-  - Also add the tutorial pages to the website
-  - Topics...
-    - how to preview images on disk by adding them to a blank archive
-    - how to export images to PNG for editing, then mass export them back to a real game format for saving in an archive
 - Other file signatures from https://www.filesignatures.net/index.php?page=search&search=EFBBBF&mode=SIG
 - www.fileformat.info for file format spec documents
 
@@ -226,9 +222,6 @@ import javax.swing.JFrame;
   anything to fix this, without finding another way to store the Resource[] changes applied by Tasks rather than
   Resource.clone() and Resource.copyFrom() as we currently use. Doesn't affect single undo/redo tasks, just multiples.
 - Need a better way of doing ColorConverter.changeColorCount() when going from 80000 colors to 256, for example.
-+- The Prince of Persia: Warrior Within *.bf archive shows the files as being 4 bytes decompressed (but they
-   do extract properly, so it is only a display bug?)
-+- Check Abomination: The Nemisis Project *.clt (why is numFiles -1? - need to fix in write() when know why!!!)
 
 // ARCHIVE PLUGINS
 - ISO CD Image (and other CD images)
@@ -285,7 +278,7 @@ import javax.swing.JFrame;
 
 // OTHER
 - Improvements to the ProgramUpdater
-  - Betting-looking interface (images, etc.)
+  - Better-looking interface (images, etc.)
   - NativeJ EXE files for running the ProgramUpdater?
 
 \*********************************************************************************************/

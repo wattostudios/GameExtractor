@@ -128,13 +128,10 @@
 				<WSButton code="Options" opaque="false" repository="false" showText="false" />
 				<WSButton code="PreviewResource" opaque="false" repository="false" showText="false" />
 				<WSButton code="HexEditor" opaque="false" repository="false" showText="false" />
-				<WSButton code="ImageInvestigator" opaque="false" repository="false" showText="false" />
 				<WSButton code="Information" opaque="false" repository="false" showText="false" />
 				<WSToolBarSeparator orientation="vertical" />
 				<WSRedoTaskComboButton code="RedoTaskComboButton" opaque="false" repository="false" manager="TaskManager" />
 				<WSUndoTaskComboButton code="UndoTaskComboButton" opaque="false" repository="false" manager="TaskManager" />
-				<WSToolBarSeparator orientation="vertical" />
-				<WSButton code="ScriptBuilder" opaque="false" showText="false" />
 			</WSToolBar>
 		</WSPanel>
 		<WSStatusBar code="StatusBar" opaque="false" position="SOUTH" />

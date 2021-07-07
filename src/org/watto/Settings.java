@@ -358,6 +358,10 @@ public class Settings {
     try {
 
       File path = new File(getString("SettingsFile"));
+      if (!path.exists()) {
+        // Lets try swapping the / and \ characters, in case we're on Unix
+        path = new File(new File(path.getAbsolutePath().replace('\\', '/')).getAbsolutePath());
+      }
 
       // Write to a temporary file first
       File tempPath = new File(path.getAbsolutePath() + ".tmp");

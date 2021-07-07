@@ -26,7 +26,7 @@ public class ImageFormatWriter {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static long computeDXTBitMask(ColorSplit[] colors, int extreme1, int extreme2) {
@@ -107,7 +107,7 @@ public class ImageFormatWriter {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   protected static int convertPixelTo565(ColorSplit color) {
@@ -119,7 +119,7 @@ public class ImageFormatWriter {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   protected static ColorSplit convertPixelTo565(int pixel) {
@@ -155,7 +155,7 @@ public class ImageFormatWriter {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   protected static int[] getExtremes(ColorSplit[] colors) {
@@ -243,6 +243,49 @@ public class ImageFormatWriter {
       int byte2 = g | b;
 
       // OUTPUT = ARGB4444
+      fm.writeByte(byte1);
+      fm.writeByte(byte2);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an ARGB1555 image
+   **********************************************************************************************
+   **/
+  public static void writeARGB1555(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      // OUTPUT = 1555ARGB
+      int pixel = pixels[i];
+
+      // 1 - Red
+      int rPixel = (((pixel >> 16) & 255) / 8);
+
+      // 1 - Green
+      int gPixel = (((pixel >> 8) & 255) / 8);
+
+      // 1 - Blue
+      int bPixel = ((pixel & 255) / 8);
+
+      // 1 - Alpha
+      int aPixel = (pixel >> 24) & 255;
+      if (aPixel != 0) {
+        aPixel = 1;
+      }
+
+      // 1bits - Alpha
+      // 5bits - Red
+      // 5bits - Green
+      // 5bits - Blue
+
+      int byte1 = (aPixel << 7) | (rPixel << 2) | (gPixel >> 3);
+      int byte2 = (gPixel & 8) << 5 | (bPixel);
+
       fm.writeByte(byte1);
       fm.writeByte(byte2);
     }
@@ -504,6 +547,66 @@ public class ImageFormatWriter {
       fm.writeByte(rPixel);
       fm.writeByte(gPixel);
       fm.writeByte(bPixel);
+      fm.writeByte(aPixel);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an RGB color palette
+   **********************************************************************************************
+   **/
+  public static void writePaletteRGB(FileManipulator fm, int[] palette) {
+    int numColors = palette.length;
+
+    for (int i = 0; i < numColors; i++) {
+      // INPUT = ARGB
+      int pixel = palette[i];
+
+      // 1 - Red
+      int rPixel = (pixel >> 16) & 255;
+
+      // 1 - Green
+      int gPixel = (pixel >> 8) & 255;
+
+      // 1 - Blue
+      int bPixel = pixel & 255;
+
+      // OUTPUT = RGB
+      fm.writeByte(rPixel);
+      fm.writeByte(gPixel);
+      fm.writeByte(bPixel);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an BGRA color palette
+   **********************************************************************************************
+   **/
+  public static void writePaletteBGRA(FileManipulator fm, int[] palette) {
+    int numColors = palette.length;
+
+    for (int i = 0; i < numColors; i++) {
+      // INPUT = ARGB
+      int pixel = palette[i];
+
+      // 1 - Red
+      int rPixel = (pixel >> 16) & 255;
+
+      // 1 - Green
+      int gPixel = (pixel >> 8) & 255;
+
+      // 1 - Blue
+      int bPixel = pixel & 255;
+
+      // 1 - Alpha
+      int aPixel = (pixel >> 24) & 255;
+
+      // OUTPUT = BGRA
+      fm.writeByte(bPixel);
+      fm.writeByte(gPixel);
+      fm.writeByte(rPixel);
       fm.writeByte(aPixel);
     }
   }

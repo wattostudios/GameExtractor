@@ -434,9 +434,9 @@
 		<lang code="WSButton_SidePanel_ScriptBuilder_OpenScript_Tooltip" value="Opens an existing script for editing." />
 		<lang code="WSButton_SidePanel_ScriptBuilder_SaveScript_Tooltip" value="Saves the script to a file." />
 		<lang code="WSButton_SidePanel_ScriptBuilder_TestScript_Tooltip" value="Test the script on an archive." />
-		<lang code="WSButton_SidePanel_Search_FindNextButton_Text" value="Find Next Match" />
+		<lang code="WSButton_SidePanel_Search_FindNextButton_Text" value="Find Next" />
 		<lang code="WSButton_SidePanel_Search_FindNextButton_Tooltip" value="Find the next matching file." />
-		<lang code="WSButton_SidePanel_Search_SelectAllButton_Text" value="Select All Matches" />
+		<lang code="WSButton_SidePanel_Search_SelectAllButton_Text" value="Select Matches" />
 		<lang code="WSButton_SidePanel_Search_SelectAllButton_Tooltip" value="Select all the files that match." />
 		<lang code="WSButton_UndoTaskComboButton_Tooltip" value="Reverses a change made to the archive." />
 		<lang code="WSButton_WriteArchive_Text" value="Save Archive" />
@@ -1569,7 +1569,25 @@
 		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Tooltip" value="Apply PlayStation 2 Swizzling to the Image" />
 		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Text" value="Swizzle (Switch)" />
 		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Tooltip" value="Apply Nintendo Switch Swizzling to the Image" />
+		
+		<lang code="WSLabel_CheckExportDirectory_Text" value="Please choose (or check) the extract directory at the bottom-right, then try extracting again." />
+		
+		<lang code="Description_ConvertOnReplace" value="When replacing files in archives of this type, some files may be converted into another format, such as from a standard format into a proprietary one." />
+		<lang code="Description_AllowScanForFileTypes" value="These archives may not contain filenames. In this case, files may be scanned and some file types may be identified from that process, such as standard image and audio formats." />
 
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteOffsetField_Label" value="Palette Offset" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteOffsetField_Tooltip" value="The offset in the file to the start of the palette data" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteNumColorsField_Label" value="Color Count" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteNumColorsField_Tooltip" value="The number of colors in the palette." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PaletteFormatChooserLabel_Label" value="Format" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PaletteFormatChooserLabel_Tooltip" value="The format of the palette data" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PalettePanelLabel_Label" value="Palette Details" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PalettePanelLabel_Tooltip" value="The main details of the color palette used for the image." />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Text" value="Stripe Palette (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Tooltip" value="Stripe the color palette (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Text" value="Remove Alpha" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Tooltip" value="Remove the alpha from the image" />
+		
 		<lang code="" value="" />
 		
 	</texts>
