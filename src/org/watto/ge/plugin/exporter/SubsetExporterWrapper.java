@@ -46,6 +46,17 @@ public class SubsetExporterWrapper extends ExporterPlugin {
   /** the decompressed length of the file in the decompressed block **/
   long fileDecompLength;
 
+  /** if there is raw data before any compressed data, this list the length here **/
+  long rawDataLengthAtStart = 0;
+
+  public long getRawDataLengthAtStart() {
+    return rawDataLengthAtStart;
+  }
+
+  public void setRawDataLengthAtStart(long rawDataLengthAtStart) {
+    this.rawDataLengthAtStart = rawDataLengthAtStart;
+  }
+
   /** after decompressing to a temp file, this will contain the file to read **/
   FileManipulator tempFM = null;
 
@@ -54,7 +65,7 @@ public class SubsetExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public SubsetExporterWrapper() {
@@ -63,7 +74,7 @@ public class SubsetExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public SubsetExporterWrapper(ExporterPlugin exporter, long blockOffset, long blockLength, long blockDecompLength, long fileOffset, long fileDecompLength) {
@@ -83,7 +94,7 @@ public class SubsetExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -99,7 +110,7 @@ public class SubsetExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -137,13 +148,18 @@ public class SubsetExporterWrapper extends ExporterPlugin {
       FileManipulator fm = new FileManipulator(sourceFile, false);
       fm.seek(blockOffset); // to fill the buffer from the start of the file, for efficient reading
 
+      if (rawDataLengthAtStart != 0) {
+        // some raw data before the compressed block
+        decompFM.writeBytes(fm.readBytes((int) rawDataLengthAtStart));
+      }
+
       // Now decompress the block into the decompressed file
       TaskProgressManager.setMessage(Language.get("Progress_DecompressingArchive")); // progress bar
       TaskProgressManager.setMaximum(blockDecompLength); // progress bar
       TaskProgressManager.setIndeterminate(true);
 
       //exporter.open(fm, blockLength, blockDecompLength);
-      exporter.open(new Resource(sourceFile, "", blockOffset, blockLength, blockDecompLength));
+      exporter.open(new Resource(sourceFile, "", blockOffset + rawDataLengthAtStart, blockLength, blockDecompLength));
 
       while (exporter.available()) {
         decompFM.writeByte(exporter.read());
@@ -168,7 +184,7 @@ public class SubsetExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -216,7 +232,7 @@ public class SubsetExporterWrapper extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
