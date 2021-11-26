@@ -15,16 +15,21 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.ErrorLogger;
+import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_FSB5_MP3;
 import org.watto.ge.plugin.exporter.Exporter_Custom_FSB5_OGG;
 import org.watto.ge.plugin.exporter.Exporter_Custom_FSB_Audio;
 import org.watto.ge.plugin.resource.Resource_FSB_Audio;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
+import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
@@ -78,8 +83,17 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
       }
 
       // 4 - Header (FSB5)
-      if (fm.readString(4).equals("FSB5")) {
+      String header = fm.readString(4);
+      if (header.equals("FSB5")) {
         rating += 50;
+      }
+      else {
+        int headerInt = IntConverter.convertLittle(header.getBytes());
+        if (headerInt == 1626646592) {
+          // might be encrypted with standard password "DFm3t4lFTW"
+          rating += 25;
+          return rating;
+        }
       }
 
       // Version
@@ -190,6 +204,83 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
   }
 
   /**
+   **********************************************************************************************
+   **********************************************************************************************
+   **/
+  int fsbdec(int t) {
+    return ((((((((t & 64) | (t >> 2)) >> 2) | (t & 32)) >> 2) | (t & 16)) >> 1) |
+        (((((((t & 2) | (t << 2)) << 2) | (t & 4)) << 2) | (t & 8)) << 1));
+  }
+
+  /**
+   **********************************************************************************************
+   Decrypts an archive. If the decrypted file already exists, we use that, we don't re-decrypt.
+   **********************************************************************************************
+   **/
+  public FileManipulator decryptArchive(FileManipulator fm, String password) {
+    try {
+      // Build a new "_ge_decompressed" archive file in the current directory
+      File origFile = fm.getFile();
+
+      String pathOnly = FilenameSplitter.getDirectory(origFile);
+      String filenameOnly = FilenameSplitter.getFilename(origFile);
+      String extensionOnly = FilenameSplitter.getExtension(origFile);
+
+      File decompFile = new File(pathOnly + File.separatorChar + filenameOnly + "_ge_decompressed" + "." + extensionOnly);
+      if (decompFile.exists()) {
+        // we've already decompressed this file before - open and return it
+        return new FileManipulator(decompFile, false);
+      }
+
+      FileManipulator decompFM = new FileManipulator(decompFile, true);
+
+      long currentOffset = fm.getOffset();
+      long arcSize = fm.getLength();
+
+      fm.seek(0); // return to the start, ready for decryption
+
+      int compLength = (int) fm.getLength();
+
+      // Now decompress the block into the decompressed file
+      TaskProgressManager.setMessage(Language.get("Progress_DecompressingArchive")); // progress bar
+      TaskProgressManager.setMaximum(arcSize); // progress bar
+      TaskProgressManager.setIndeterminate(true);
+
+      byte[] keyBytes = password.getBytes();
+      int keyLength = keyBytes.length;
+      int[] key = new int[keyLength];
+      for (int i = 0; i < keyLength; i++) {
+        key[i] = ByteConverter.unsign(keyBytes[i]);
+      }
+
+      int keyPos = 0;
+      for (int i = 0; i < compLength; i++) {
+        decompFM.writeByte(fsbdec(ByteConverter.unsign(fm.readByte())) ^ key[keyPos]);
+        keyPos++;
+
+        if (keyPos >= keyLength) {
+          keyPos = 0;
+        }
+      }
+
+      // Force-write out the decompressed file to write it to disk, then change the buffer to read-only.
+      decompFM.close();
+      decompFM = new FileManipulator(decompFile, false);
+
+      TaskProgressManager.setMessage(Language.get("Progress_ReadingArchive")); // progress bar
+      TaskProgressManager.setIndeterminate(false);
+
+      // Return the file pointer to the beginning, and return the decompressed file
+      decompFM.seek(currentOffset);
+      return decompFM;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return null;
+    }
+  }
+
+  /**
   **********************************************************************************************
   
   **********************************************************************************************
@@ -219,6 +310,22 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
 
         // 4 - Header (FSB5)
         String header = fm.readString(4);
+        int headerInt = IntConverter.convertLittle(header.getBytes());
+        if (headerInt == 1626646592) {
+          // might be encrypted with standard password "DFm3t4lFTW"
+          // decrypt the archive
+
+          FileManipulator decompFM = decryptArchive(fm, "DFm3t4lFTW");
+          if (decompFM != null) {
+            fm.close(); // close the original archive
+            fm = decompFM; // now we're going to read from the decrypted file instead
+            fm.seek(0); // go to the same point in the decrypted file as in the compressed file
+
+            path = fm.getFile(); // So the resources are stored against the decrypted file
+            header = fm.readString(4); // read the header, which was already read above in non-encrypted archives
+          }
+        }
+
         while (header.equals("SND ")) {
           // FSB file within
 
@@ -371,6 +478,7 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
         // Get the FSB Audio exporter
         //ExporterPlugin exporter = Exporter_Custom_FSB_Audio.getInstance();
         ExporterPlugin exporterGeneric = Exporter_Custom_FSB_Audio.getInstance();
+        ExporterPlugin exporterMP3 = Exporter_Custom_FSB5_MP3.getInstance();
 
         // Read the names table
         fm.seek(dirOffset);
@@ -401,14 +509,14 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
             long length = 0;
             if (i == numFiles - 1) {
               //length = arcSize - offset;
-              length = (startOffset + dataLength) - offset;
+              length = (startOffset + dataLength);// - offset; // 3.14 dataLength already contains the actual length of the data (github issue #9)
             }
             else {
               length = dataOffsets[i + 1] - offset;
             }
             long endOffset = offset + length;
 
-            int maxChunks = Archive.getMaxFiles();
+            int maxChunks = Archive.getMaxFiles() * 2;
             long[] offsets = new long[maxChunks];
             long[] lengths = new long[maxChunks];
 
@@ -498,6 +606,9 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
             resource.setFrequency(frequencies[i]);
             resource.setSamplesLength(sampleLengths[i]);
 
+            //boolean multiChannel = ((mode & 0x04000000) == 0x04000000);
+            //resource.addProperty("MultiChannel", multiChannel);
+
             offset += length;
 
             if (mode == CODEC_PCM8) {
@@ -526,6 +637,12 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
 
             resource.addExtensionForCodec();
             resource.forceNotAdded(true); // because we can call this from an ASSETS plugin
+
+            if (mode == CODEC_MPEG) {
+              // special exporter for MP3's, fixes the frames etc.
+              resource.setExporter(exporterMP3);
+            }
+
             resources[realNumFiles] = resource;
             realNumFiles++;
 
@@ -543,7 +660,9 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
       return resources;
 
     }
-    catch (Throwable t) {
+    catch (
+
+    Throwable t) {
       logError(t);
       return null;
     }
