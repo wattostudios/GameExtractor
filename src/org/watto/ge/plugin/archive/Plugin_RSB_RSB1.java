@@ -37,7 +37,7 @@ public class Plugin_RSB_RSB1 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_RSB_RSB1() {
@@ -60,7 +60,7 @@ public class Plugin_RSB_RSB1 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -323,7 +323,7 @@ public class Plugin_RSB_RSB1 extends ArchivePlugin {
           if (compressed == 1) {
             // zlib compression
 
-            // if the whole resource group is compressed, we need to decompress the whole resource group first, to a temporary file, so
+            // if the whole resource group is compressed, we need to decompress the whole resource group first, to a temporary file, so 
             // we can point to the actual 'individual' files within it
 
             // 4 - File Data Offset (relative to the start of the File Data for the files in this resource group)

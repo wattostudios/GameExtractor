@@ -37,7 +37,7 @@ public class Viewer_RSB_RSB1_PTX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Viewer_RSB_RSB1_PTX() {
@@ -52,7 +52,7 @@ public class Viewer_RSB_RSB1_PTX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -62,7 +62,7 @@ public class Viewer_RSB_RSB1_PTX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -169,7 +169,7 @@ public class Viewer_RSB_RSB1_PTX extends ViewerPlugin {
         reorderBlocks = true;
         imageResource = ImageFormatReader.readBARG4444(fm, width, height);
       }
-      else { // format = 0
+      else { // format = 0  
         imageResource = ImageFormatReader.readARGB(fm, width, height);
       }
 
@@ -193,7 +193,7 @@ public class Viewer_RSB_RSB1_PTX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
