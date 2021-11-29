@@ -59,6 +59,15 @@ public class Exporter_Custom_FSB5_OGG extends ExporterPlugin {
 
   int oggPageLength = 0;
 
+  /** in case there's multiple pages generated, for some reason **/
+  byte[] nextOggPage = new byte[0];
+
+  /** in case there's multiple pages generated, for some reason **/
+  int nextOggPagePos = 0;
+
+  /** in case there's multiple pages generated, for some reason **/
+  int nextOggPageLength = 0;
+
   // OGG Vorbis-specific CRC lookup table
   static int[] rogg_crc_lookup = new int[] {
       0x00000000, 0x04c11db7, 0x09823b6e, 0x0d4326d9,
@@ -157,6 +166,15 @@ public class Exporter_Custom_FSB5_OGG extends ExporterPlugin {
       // still more to read from the current page
       return true;
     }
+    else if (nextOggPage != null && nextOggPagePos < nextOggPageLength) {
+      // finished the current page, but there's a "next" page (multiple pages were generated), so swap it in and return True
+      oggPage = nextOggPage;
+      oggPagePos = nextOggPagePos;
+      oggPageLength = nextOggPageLength;
+
+      nextOggPage = null;
+      return true;
+    }
 
     // otherwise, we need to build a new oggPage
     buildOggPage();
@@ -252,6 +270,9 @@ public class Exporter_Custom_FSB5_OGG extends ExporterPlugin {
   @Override
   public void open(Resource source) {
     try {
+
+      // reset globals
+      nextOggPage = null;
 
       // reset the Ogg Properties
       oggPageNumber = 0;
@@ -832,6 +853,7 @@ public class Exporter_Custom_FSB5_OGG extends ExporterPlugin {
       Page page = new Page();
       int pageReady = streamState.pageout(page);
       oggPage = null;
+      nextOggPage = null;
       while (pageReady != 0) {
 
         int headerLength = page.header_len;
@@ -848,8 +870,12 @@ public class Exporter_Custom_FSB5_OGG extends ExporterPlugin {
           oggPageLength = oggPage.length;
         }
         else {
-          // multiple pages, for some reason. We don't handle this yet!
-          ErrorLogger.log("[Exporter_Custom_FSB5_OGG] Multiple pages generated, but we don't support this, so pages were lost.");
+          // multiple pages, for some reason. Usually only for a small page at the end of the file? Implemented in 3.14
+          ErrorLogger.log("[Exporter_Custom_FSB5_OGG] Multiple pages - that's OK as long as we only generate 1 extra.");
+
+          nextOggPage = oggData;
+          nextOggPagePos = 0;
+          nextOggPageLength = nextOggPage.length;
         }
 
         // in case there's more than 1 page, although there hopefully isn't
