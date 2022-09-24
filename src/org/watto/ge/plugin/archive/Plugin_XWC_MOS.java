@@ -1,30 +1,27 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.Archive;
+import org.watto.ErrorLogger;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,7 +32,7 @@ public class Plugin_XWC_MOS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_XWC_MOS() {
@@ -49,11 +46,18 @@ public class Plugin_XWC_MOS extends ArchivePlugin {
     setExtensions("xwc", "xtc");
     setPlatforms("PC");
 
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("xtc_tex", "XTC Texture Image", FileType.TYPE_IMAGE));
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -86,77 +90,321 @@ public class Plugin_XWC_MOS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public Resource[] read(File path) {
     try {
 
+      // NOTE - Compressed files MUST know their DECOMPRESSED LENGTH
+      //      - Uncompressed files MUST know their LENGTH
+
       addFileTypes();
+
+      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+
+      // RESETTING GLOBAL VARIABLES
 
       FileManipulator fm = new FileManipulator(path, false);
 
-      // 16 - Header (MOS DATAFILE2.0 + null)
-      // 8 - null
-      // 4 - Unknown
-      // 20 - null
-      fm.skip(48);
+      long arcSize = fm.getLength();
 
-      // Check for padding
-      boolean padding = true;
-      if (fm.readString(16).equals("1234567890123456")) {
-        // has padding
-        fm.seek(2048);
-        padding = true;
+      // 16 - Header ("MOS DATAFILE2.0" + null)
+      // 8 - null
+      fm.skip(24);
+
+      // 4 - Directory Offset
+      int dirOffset = fm.readInt();
+      FieldValidator.checkOffset(dirOffset, arcSize);
+
+      // 20 - null
+      fm.seek(dirOffset);
+
+      // 24 - Directory Type String (VERSION,WAVEDATA,WAVEINFO,WAVEDESC,SFXDESC,LIPSYNC, etc...) (padded with null bytes)
+      String dirType = fm.readNullString(24);
+
+      // 4 - Next Directory Offset
+      dirOffset = fm.readInt();
+      FieldValidator.checkOffset(dirOffset, arcSize);
+
+      // 4 - null
+      // 4 - Offset to Entries for this Directory
+      // 4 - Unknown (maybe table data pointer location)
+      // 4 - Number of entries at that location
+      // 4 - null
+      fm.seek(dirOffset);
+
+      int numFiles = 0;
+
+      long earliestDirOffset = 0;
+
+      if (dirType.equals("TEXTURES")) {
+        // OK
+
+        // 24 - Directory Type String (VERSION,WAVEDATA,WAVEINFO,WAVEDESC,SFXDESC,LIPSYNC, etc...) (padded with null bytes)
+        dirType = fm.readNullString(24);
+
+        // 4 - Next Directory Offset
+        // 4 - null
+        fm.skip(8);
+
+        // 4 - Offset to Entries for this Directory
+        dirOffset = fm.readInt();
+        FieldValidator.checkOffset(dirOffset, arcSize);
+
+        // 4 - Unknown (maybe table data pointer location)
+        fm.skip(4);
+
+        // 4 - Number of entries at that location
+        numFiles = fm.readInt();
+        FieldValidator.checkNumFiles(numFiles);
+
+        // 4 - null
+        fm.seek(dirOffset);
+
+        earliestDirOffset = dirOffset;
+
+      }
+      else if (dirType.equals("SOURCE")) {
+        // 24 - Directory Type String (IMAGELIST)
+        dirType = fm.readNullString(24);
+
+        earliestDirOffset = dirOffset;
+
+        if (dirType.equals("IMAGELIST")) {
+          // 4 - null
+          fm.skip(4);
+
+          // 4 - next Directory Offset
+          dirOffset = fm.readInt();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+          fm.seek(dirOffset);
+
+          // 24 - Directory Type String (DIRECTORYHEADER)
+          dirType = fm.readNullString(24);
+        }
+
+        if (dirType.equals("DIRECTORYHEADER")) {
+          // 4 - next Directory Offset
+          dirOffset = fm.readInt();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+          fm.seek(dirOffset);
+
+          // 24 - Directory Type String (IMAGEDIRECTORY4)
+          dirType = fm.readNullString(24);
+        }
+
+        if (dirType.equals("IMAGEDIRECTORY4")) {
+          // 4 - next Directory Offset
+          // 4 - null
+          fm.skip(8);
+
+          // 4 - Dir Offset
+          dirOffset = fm.readInt();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+
+          // 4 - Dir End Offset
+          fm.skip(4);
+
+          // 4 - Number of Entries
+          numFiles = fm.readInt();
+          FieldValidator.checkNumFiles(numFiles);
+
+          fm.seek(dirOffset);
+        }
+
+      }
+      else if (dirType.equals("VERSION")) {
+        // 24 - Directory Type String (WAVEDATA)
+        dirType = fm.readNullString(24);
+
+        earliestDirOffset = dirOffset;
+
+        if (dirType.equals("WAVEDATA")) {
+          // 4 - Directory Offset
+          dirOffset = fm.readInt();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+          fm.seek(dirOffset);
+
+          // 24 - Directory Type String (WAVEINFO)
+          dirType = fm.readNullString(24);
+        }
+
+        if (dirType.equals("WAVEINFO")) {
+          // 4 - next Directory Offset
+          // 4 - null
+          fm.skip(8);
+
+          // 4 - Dir Offset
+          dirOffset = fm.readInt();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+
+          // 4 - Dir End Offset
+          fm.skip(4);
+
+          // 4 - Number of Entries
+          numFiles = fm.readInt();
+          FieldValidator.checkNumFiles(numFiles);
+
+          fm.seek(dirOffset);
+        }
+
       }
       else {
-        fm.seek(48);
-        padding = false;
+        ErrorLogger.log("[XWC_MOS] Unrecognized primary directory type: " + dirType);
+        return null;
       }
-
-      int numFiles = Archive.getMaxFiles(4);
-
-      long arcSize = fm.getLength();
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // Loop through directory
-      int realNumFiles = 0;
-      while (fm.getOffset() < arcSize) {
+      if (dirType.equals("IMAGEDIRECTORY5")) {
+        // OK
 
-        // 4 - Unknown (768)
-        // 4 - Unknown (36864)
-        fm.skip(8);
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
 
-        // 4 - Length (excluding all header data - ie the length of the file data only)
-        long length = fm.readInt();
-        if (!padding && realNumFiles == 0) {
-          length -= 76;
+          // 4 - Unknown (-1)
+          // 4 - null
+          fm.skip(8);
+
+          // 4 - Filename Length (not including padding)
+          int filenameLength = fm.readInt();
+          FieldValidator.checkFilenameLength(filenameLength);
+
+          // X - Filename
+          String filename = fm.readString(filenameLength) + ".xtc_tex";
+
+          // 0-3 - Padding to a multiple of 4 bytes (padded with (byte)32)
+          fm.skip(calculatePadding(filenameLength, 4));
+
+          // 4 - null
+          fm.skip(4);
+
+          // 4 - Number of Mipmaps
+          int mipmapCount = fm.readInt();
+
+          // 4 - Unknown (768)
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - null
+          fm.skip(28);
+
+          // 4 - File Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - Unknown
+          // 6 - null
+          // 4 - Unknown (1792)
+          // 4 - null
+          fm.skip(18);
+
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, filename, offset);
+          resource.addProperty("MipmapCount", mipmapCount);
+          resources[i] = resource;
+
+          TaskProgressManager.setValue(i);
         }
-        FieldValidator.checkLength(length, arcSize);
-
-        // 4 - Unknown (1)
-        // 4 - Unknown
-        // 4 - Unknown (36864)
-        // 4 - null
-        fm.skip(16);
-
-        // X - File Data
-        long offset = (int) fm.getOffset();
-        fm.skip(length);
-
-        String filename = Resource.generateFilename(realNumFiles);
-
-        //path,id,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
-
-        TaskProgressManager.setValue(offset);
-        realNumFiles++;
       }
+      else if (dirType.equals("IMAGEDIRECTORY4")) {
+        // OK
 
-      resources = resizeResources(resources, realNumFiles);
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+
+          // 4 - Unknown (-1)
+          // 4 - null
+          fm.skip(8);
+
+          // 4 - Filename Length (not including padding)
+          int filenameLength = fm.readInt();
+          FieldValidator.checkFilenameLength(filenameLength);
+
+          // X - Filename
+          String filename = fm.readString(filenameLength) + ".xtc_tex";
+
+          // 0-3 - Padding to a multiple of 4 bytes (padded with (byte)32)
+          fm.skip(calculatePadding(filenameLength, 4));
+
+          // 4 - Number of Mipmaps
+          int mipmapCount = fm.readInt();
+
+          // 4 - Unknown (768)
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - null
+          fm.skip(28);
+
+          // 4 - File Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // for each mipmap
+          //   4 - File Offset
+          fm.skip((mipmapCount - 1) * 4);
+
+          // 4 - Unknown
+          // 6 - null
+          // 4 - Unknown (1792)
+          // 4 - null
+          fm.skip(18);
+
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, filename, offset);
+          resource.addProperty("MipmapCount", mipmapCount);
+          resources[i] = resource;
+
+          TaskProgressManager.setValue(i);
+        }
+
+        calculateFileSizes(resources, earliestDirOffset);
+
+      }
+      else if (dirType.equals("WAVEINFO")) {
+        // OK
+
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+
+          // 4 - File Offset
+          int offset = fm.readInt() + 40; // 40-byte header
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - File Length
+          int length = fm.readInt() - 40; // 40-byte header
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - Filename Length (not including padding)
+          int filenameLength = fm.readInt();
+          FieldValidator.checkFilenameLength(filenameLength);
+
+          // X - Filename
+          String filename = fm.readString(filenameLength) + ".ogg";
+
+          // 0-3 - Padding to a multiple of 4 bytes (padded with (byte)32)
+          fm.skip(calculatePadding(filenameLength, 4));
+
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, filename, offset, length);
+          resources[i] = resource;
+
+          TaskProgressManager.setValue(i);
+        }
+
+      }
+      else {
+        ErrorLogger.log("[XWC_MOS] Unrecognized secondary directory type: " + dirType);
+        return null;
+      }
 
       fm.close();
 
@@ -167,6 +415,26 @@ public class Plugin_XWC_MOS extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    /*
+    if (headerInt1 == 2037149520) {
+      return "js";
+    }
+    */
+
+    return null;
   }
 
 }
