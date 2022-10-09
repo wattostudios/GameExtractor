@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -46,6 +46,10 @@ public class _Plugin_XXX_DirFile extends ArchivePlugin {
     //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -176,6 +180,26 @@ public class _Plugin_XXX_DirFile extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    /*
+    if (headerInt1 == 2037149520) {
+      return "js";
+    }
+    */
+
+    return null;
   }
 
 }

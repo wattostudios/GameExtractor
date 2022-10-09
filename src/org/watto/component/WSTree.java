@@ -4,7 +4,7 @@
 //                             Java Code, Programs, and Software                              //
 //                                    http://www.watto.org                                    //
 //                                                                                            //
-//                           Copyright (C) 2004-2010  WATTO Studios                           //
+//                           Copyright (C) 2004-2022  WATTO Studios                           //
 //                                                                                            //
 // This program is free software; you can redistribute it and/or modify it under the terms of //
 // the GNU General Public License published by the Free Software Foundation; either version 2 //
@@ -20,6 +20,8 @@ package org.watto.component;
 
 import java.awt.AWTEvent;
 import javax.swing.JTree;
+import javax.swing.tree.TreePath;
+import org.watto.component.tree.EditableTreeNode;
 import org.watto.event.WSEventHandler;
 import org.watto.xml.XMLNode;
 
@@ -31,20 +33,28 @@ public class WSTree extends JTree implements WSComponent {
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** The code for the language and settings **/
   String code = null;
+
   /** The position of this <code>WSComponent</code> in its parent <code>Container</code> **/
   String position = null;
+
   /** The width of this <code>WSComponent</code>s <code>Border</code> **/
   int borderWidth = -1;
+
   /** Whether the height of this <code>WSComponent</code> is fixed or not **/
   boolean fixedHeight = false;
+
   /** Whether the width of this <code>WSComponent</code> is fixed or not **/
   boolean fixedWidth = false;
+
   /** Whether the minimum height of this <code>WSComponent</code> is fixed or not **/
   boolean fixedMinimumHeight = false;
+
   /** Whether the minimum width of this <code>WSComponent</code> is fixed or not **/
   boolean fixedMinimumWidth = false;
+
   /** Whether this <code>WSComponent</code> is initialised or not. Used to determine whether to fire events. **/
   boolean initialised = false;
 
@@ -182,6 +192,24 @@ public class WSTree extends JTree implements WSComponent {
   @Override
   public String getText() {
     return WSHelper.getText(this);
+  }
+
+  /***********************************************************************************************
+  
+  ***********************************************************************************************/
+  @Override
+  public boolean isPathEditable(TreePath path) {
+    if (path == null) {
+      return super.isPathEditable(path);
+    }
+
+    Object child = path.getLastPathComponent();
+    if (child != null && child instanceof EditableTreeNode) {
+      return ((EditableTreeNode) child).isEditable();
+    }
+
+    return super.isPathEditable(path);
+
   }
 
   /***********************************************************************************************

@@ -26,6 +26,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.BlockQuickBMSExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_Oodle;
 import org.watto.ge.plugin.exporter.Exporter_QuickBMSWrapper;
 import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
 import org.watto.io.FileManipulator;
@@ -178,7 +179,14 @@ public class FileTypeDetector {
         // We only want to extract the first few bytes, so we want to create a dummy Resource that is a copy of the real Resource
         // but with a small length. That way we can use the exporter plugin and it should, generally, only export a few bytes.
         Resource clonedResource = (Resource) resource.clone();
-        clonedResource.setLength(readSize);
+        if (clonedResource.getExporter() instanceof Exporter_Oodle) {
+          // Oodle decompression only works when you specify the actual decompLength.
+          // (we can't just extract a few bytes, we need to extract the full file)
+        }
+        else {
+          // small quick extract
+          clonedResource.setLength(readSize);
+        }
 
         File exportedPath = clonedResource.getExportedPath();
         if (exportedPath != null && exportedPath.exists()) {
@@ -256,6 +264,9 @@ public class FileTypeDetector {
           }
           else if (headerInt1 == 1178882085) {
             extension = "pdf";
+          }
+          else if (headerInt1 == 1634038339 && headerInt2 ==   1702259060 && headerInt3 ==   1768904224      ) {
+            extension = "voc"; // Creative Voice File
           }
           else {
             // if we didn't find any matches...

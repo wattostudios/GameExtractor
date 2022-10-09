@@ -87,10 +87,19 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
-  
+  Can this plugin write a file from scratch?
   **********************************************************************************************
   **/
   public abstract boolean canWrite(PreviewPanel panel);
+  
+  /**
+  **********************************************************************************************
+  Can this plugin edit an existing file?
+  **********************************************************************************************
+  **/
+  public boolean canEdit(PreviewPanel panel) {
+    return false;
+  }
 
   /**
   **********************************************************************************************
@@ -388,6 +397,15 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
       ErrorLogger.log(t);
       ;
     }
+  }
+  
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void edit(FileManipulator originalFM, PreviewPanel panel, FileManipulator destination) {
+    write(panel,destination);
   }
 
   /**

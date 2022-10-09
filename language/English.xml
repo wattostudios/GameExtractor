@@ -1,6 +1,6 @@
 <languagePack>
 	<name>English</name>
-	<version>3.13</version>
+	<version>3.14</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -1587,6 +1587,17 @@
 		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Tooltip" value="Stripe the color palette (PS2)" />
 		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Text" value="Remove Alpha" />
 		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Tooltip" value="Remove the alpha from the image" />
+		
+<!-- New with 3.14 -->
+
+		<lang code="WSPanel_PreviewPanel_Table_DetailsPanelHolder_Label" value="Selected Details" />
+		<lang code="WSPanel_PreviewPanel_Table_DetailsPanelHolder_Tooltip" value="All the details of the currently-selected row." />
+		
+		<lang code="WSTableColumn_Offset_Text" value="Offset" />
+		<lang code="WSTableColumn_Original_Text" value="Original Value" />
+		<lang code="WSTableColumn_Edited_Text" value="Edited Value" />
+		
+		<lang code="ResourceProperty_RelatedResource" value="Related Resource" />
 		
 		<lang code="" value="" />
 		

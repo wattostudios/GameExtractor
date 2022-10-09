@@ -1,7 +1,7 @@
 <settingsStore>
 	<program>Game Extractor</program>
 	<settings>
-		<setting code="Version" value="3.13" changable="false" />
+		<setting code="Version" value="3.14" changable="false" />
 		<setting code="AboutFile" value="settings/about.xml" />
 		
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
@@ -60,6 +60,8 @@
 		<setting code="Noesis_Path" value="external_bins\noesis" />
 		<setting code="Crunch_Path" value="external_bins\crunch" />
 		<setting code="FileListExporterDirectory" value="lists" />
+		
+		<setting code="HashesDirectory" value="hashes" />
 		<setting code="FileListTreeTable_DividerLocation" value="0.2" />
 		<setting code="FileListView" value="TreeTable" />
 		<setting code="HexEditorDisplayType" value="Byte" />
@@ -296,6 +298,8 @@
 		
 		<setting code="AutoImportModifiedExportFiles" value="false" />
 		<setting code="Popup_ModifiedFilesImported_Show" value="true" />
+		
+		<setting code="UE4AESKeysFile" value="settings/keys_ue4.xml" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

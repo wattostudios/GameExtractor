@@ -19,6 +19,7 @@ import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.SingletonManager;
 import org.watto.datatype.ImageResource;
+import org.watto.datatype.PalettedImageResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.viewer.Viewer_DDS_DDS;
 import org.watto.io.FileManipulator;
@@ -693,6 +694,35 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
   }
+  
+  
+  /**
+   **********************************************************************************************
+   * Reads an uncompressed 4bit image (eg paletted grayscale image with indexed values)
+   **********************************************************************************************
+   **/
+  public static ImageResource read4BitPaletted(FileManipulator fm, int width, int height, boolean usePaletteManager) {
+    if (!usePaletteManager || PaletteManager.getNumPalettes()<=0) {
+      return read4BitPaletted(fm,width,height);
+    }
+    
+    int numPixels = width * height;
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i += 2) {
+      int pixel = ByteConverter.unsign(fm.readByte());
+
+      int pixel2 = (pixel >> 4) & 15;
+      int pixel1 = (pixel & 15);
+
+      pixels[i] = pixel1;
+      pixels[i + 1] = pixel2;
+    }
+
+    return new PalettedImageResource(pixels, width, height,PaletteManager.getCurrentPalette().getPalette());
+  }
+  
+
 
   /**
    **********************************************************************************************
@@ -718,6 +748,28 @@ public class ImageFormatReader {
     }
 
     return new ImageResource(pixels, width, height);
+  }
+  
+  
+  /**
+   **********************************************************************************************
+   * Reads an 8bit paletted image, using the given palette
+   **********************************************************************************************
+   **/
+  public static ImageResource read8BitPaletted(FileManipulator fm, int width, int height, boolean usePaletteManager) {
+    if (!usePaletteManager || PaletteManager.getNumPalettes()<=0) {
+      return read8BitPaletted(fm,width,height);
+    }
+    
+    
+    int numPixels = width * height;
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i++) {
+      pixels[i] = ByteConverter.unsign(fm.readByte());
+    }
+
+    return new PalettedImageResource(pixels, width, height,PaletteManager.getCurrentPalette().getPalette());
   }
 
   /**
@@ -949,6 +1001,15 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
 
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads a BC4 (ATI1) Image
+   **********************************************************************************************
+   **/
+  public static ImageResource readATI1(FileManipulator fm, int width, int height) {
+    return readBC4(fm, width, height);
   }
 
   /**
@@ -1651,6 +1712,136 @@ public class ImageFormatReader {
         }
       }
     }
+
+    return new ImageResource(data, width, height);
+
+  }
+  
+  
+  /**
+   **********************************************************************************************
+   Reads a Wii CMPR Format (similar to DXT1), but in blocks of 4x4 which are themselves within blocks of 8x8
+   // NOT TESTED
+   **********************************************************************************************
+   **/
+  public static ImageResource readCMPR(FileManipulator fm, int width, int height) {
+
+    int originalHeight = height;
+    
+    // ensure width and height are multiples of 8...
+    int heightMod = height % 8;
+    if (heightMod != 0) {
+      height += (8 - heightMod);
+    }
+    int widthMod = width % 8;
+    if (widthMod != 0) {
+      width += (8 - widthMod);
+    }
+
+    // X Bytes - Pixel Data
+    int numPixels = width * height;
+
+    long remainingLength = fm.getRemainingLength();
+    if (remainingLength < ((numPixels / 2) - 256)) { // quick simple check to kill off some bad reads (adds 256 bytes as a little tolerance)
+      return null;
+    }
+
+    int[] data = new int[numPixels];
+
+    for (int y1 = 0; y1 < height; y1 += 8) {
+      // CMPR encodes 8x8 blocks of pixels, which are 4x 4x4 blocks
+      for (int x1 = 0; x1 < width; x1 += 8) {    
+    
+        for (int y = 0; y < 8; y += 4) {
+          // DXT encodes 4x4 blocks of pixels
+          for (int x = 0; x < 8; x += 4) {
+    
+            // decode the DXT1 RGB data
+    
+            // two 16 bit encoded colors (red 5 bits, green 6 bits, blue 5 bits)
+            /*
+            int c1packed16 = ByteConverter.unsign(fm.readByte()) | (ByteConverter.unsign(fm.readByte()) << 8);
+            int c2packed16 = ByteConverter.unsign(fm.readByte()) | (ByteConverter.unsign(fm.readByte()) << 8);
+    
+            // separate the R,G,B values (RRRRRGGGGGGBBBBB)
+            int color1r = (c1packed16 >> 8) & 0xF8;
+            int color1g = (c1packed16 >> 3) & 0xFC;
+            int color1b = (c1packed16 << 3) & 0xF8;
+    
+            int color2r = (c2packed16 >> 8) & 0xF8;
+            int color2g = (c2packed16 >> 3) & 0xFC;
+            int color2b = (c2packed16 << 3) & 0xF8;
+            */
+    
+            // two 16 bit encoded colors (RRRRRGGGGGGBBBBB)
+            int c1packed16 = (ByteConverter.unsign(fm.readByte()) << 8) | ByteConverter.unsign(fm.readByte());
+            int c2packed16 = (ByteConverter.unsign(fm.readByte()) << 8) | ByteConverter.unsign(fm.readByte());
+    
+            // separate the R,G,B values
+            int color1r = ((c1packed16 >> 11) & 31)*8;
+            int color1g = ((c1packed16 >> 5) & 63)*4;
+            int color1b = (c1packed16 & 31)*8;
+    
+            int color2r = ((c2packed16 >> 11) & 31)*8;
+            int color2g = ((c2packed16 >> 5) & 63)*4;
+            int color2b = (c2packed16 & 31)*8;
+            
+            int colors[] = new int[8]; // color table for all possible codes
+            // colors 0 and 1 point to the two 16 bit colors we read in
+            colors[0] = (color1r << 16) | (color1g << 8) | color1b | 0xFF000000;
+            colors[1] = (color2r << 16) | (color2g << 8) | color2b | 0xFF000000;
+            
+            // WII difference
+            if (colors[0] > colors[1]) {
+              // 2x 2/3 colors
+    
+              // 2/3 Color1, 1/3 color2
+              int colorr = (((color1r << 1) + color2r) / 3);// & 0xFF;
+              int colorg = (((color1g << 1) + color2g) / 3);// & 0xFF;
+              int colorb = (((color1b << 1) + color2b) / 3);// & 0xFF;
+              colors[2] = (colorr << 16) | (colorg << 8) | colorb | 0xFF000000;
+      
+              // 2/3 Color2, 1/3 color1
+              colorr = (((color2r << 1) + color1r) / 3);// & 0xFF;
+              colorg = (((color2g << 1) + color1g) / 3);// & 0xFF;
+              colorb = (((color2b << 1) + color1b) / 3);// & 0xFF;
+              colors[3] = (colorr << 16) | (colorg << 8) | colorb | 0xFF000000;
+            
+            }
+            else {
+              // 1x 1/2 color, 1x transparent
+              
+              int colorr = ((color1r + color2r) >> 1);
+              int colorg = ((color1g + color2g) >> 1);
+              int colorb = ((color1b + color2b) >> 1);
+              colors[2] = (colorr << 16) | (colorg << 8) | colorb | 0xFF000000;
+              
+              colors[3] = 0; // transparent
+            }
+    
+            // read in the color code bits, 16 values, each 2 bits long
+            // then look up the color in the color table we built
+            //int bits = ByteConverter.unsign(fm.readByte()) + (ByteConverter.unsign(fm.readByte()) << 8) + (ByteConverter.unsign(fm.readByte()) << 16) + (ByteConverter.unsign(fm.readByte()) << 24);
+            int bits = ByteConverter.unsign(fm.readByte()) | (ByteConverter.unsign(fm.readByte()) << 8) | (ByteConverter.unsign(fm.readByte()) << 16) | (ByteConverter.unsign(fm.readByte()) << 24);
+    
+              for (int by = 0; by < 4; ++by) {
+                for (int bx = 0; bx < 4; ++bx) {
+                  int code = (bits >> (((by << 2) + bx) << 1)) & 0x3;
+                  //data[(y + by) * width + x + bx] = colors[code];
+                  //int writePos = ((y1+y+by)*width) + (x1+x+bx);
+                  int writePos = ((y1+y+by)*width) + (x1+x+(3-bx));
+                  data[writePos] = colors[code];
+                }
+              }
+          }
+        }
+    
+      }
+    }
+    
+    if (originalHeight <= 4) {
+      height = 4;
+  }
 
     return new ImageResource(data, width, height);
 
@@ -2696,6 +2887,61 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
   }
+  
+  /**
+   **********************************************************************************************
+   * Reads ARGB Pixel Data in a 4x4 block format (from Wii)
+   * (ARARARARARARARAR ARARARARARARARAR GBGBGBGBGBGBGBGB GBGBGBGBGBGBGBGB)
+   **********************************************************************************************
+   **/
+  public static ImageResource readRGBA8Wii(FileManipulator fm, int width, int height) {
+
+    // ensure width and height are multiples of 4...
+    int heightMod = height % 4;
+    if (heightMod != 0) {
+      height += (4 - heightMod);
+    }
+    int widthMod = width % 4;
+    if (widthMod != 0) {
+      width += (4 - widthMod);
+    }
+    
+    int numPixels = width * height;
+
+    // X Bytes - Pixel Data
+    int[] pixels = new int[numPixels];
+
+    for (int h=0;h<height;h+=4) {
+      for (int w=0;w<width;w+=4) {
+        
+        
+        byte[] arBlock = fm.readBytes(32);
+        byte[] gbBlock = fm.readBytes(32);
+        
+        int readPos = 0;
+        for (int h2=0;h2<4;h2++) {
+          for (int w2=0;w2<4;w2++) {
+            int writePos = ((h+h2)*width) + (w+w2);
+            
+            // INPUT = RGBA
+            int aPixel = ByteConverter.unsign(arBlock[readPos]);
+            int rPixel = ByteConverter.unsign(arBlock[readPos+1]);
+            int gPixel = ByteConverter.unsign(gbBlock[readPos]);
+            int bPixel = ByteConverter.unsign(gbBlock[readPos+1]);
+            
+            // OUTPUT = ARGB
+            pixels[writePos] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+            
+            readPos += 2;
+          }
+        }
+        
+
+      }
+    }
+
+    return new ImageResource(pixels, width, height);
+  }
 
   /**
    **********************************************************************************************
@@ -2727,6 +2973,78 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
 
+  }
+  
+  
+  /**
+   **********************************************************************************************
+   * Reads RGB5A3 Pixel Data in a 4x4 block format (from Wii)
+   * (either 0AAARRRRGGGGBBBB or 1RRRRRGGGGGBBBBB depending on the top bit)
+   **********************************************************************************************
+   **/
+  public static ImageResource readRGB5A3Wii(FileManipulator fm, int width, int height) {
+
+    // ensure width and height are multiples of 4...
+    int heightMod = height % 4;
+    if (heightMod != 0) {
+      height += (4 - heightMod);
+    }
+    int widthMod = width % 4;
+    if (widthMod != 0) {
+      width += (4 - widthMod);
+    }
+    
+    int numPixels = width * height;
+
+    // X Bytes - Pixel Data
+    int[] pixels = new int[numPixels];
+
+    for (int h=0;h<height;h+=4) {
+      for (int w=0;w<width;w+=4) {
+        
+        for (int h2=0;h2<4;h2++) {
+          for (int w2=0;w2<4;w2++) {
+            int writePos = ((h+h2)*width) + (w+w2);
+
+            int byte1 = ByteConverter.unsign(fm.readByte());
+            int byte2 = ByteConverter.unsign(fm.readByte());
+          
+            int topBit = byte1>>7;
+        
+            if (topBit == 0) {
+              // 0AAARRRRGGGGBBBB
+          
+              int a = ((byte1 >> 4)&7) * 32;
+              int r = (byte1 & 15) * 16;
+              int g = ((byte2 >> 4)&15) * 16;
+              int b = (byte2 & 15) * 16;
+          
+              // OUTPUT = ARGB
+              pixels[writePos] = ((r << 16) | (g << 8) | b | (a << 24));
+              
+            }
+            else { // topBit == 1
+              // 1RRRRRGG GGGBBBBB
+              
+              int a = 255;
+              int r = ((byte1 >> 2) & 31) * 8;
+              int g = (((byte2 >>5) & 7) | ((byte1 &3) <<3)) * 8;
+              int b = (byte2 & 31) * 8;
+              
+        
+              // OUTPUT = ARGB
+              pixels[writePos] = ((r << 16) | (g << 8) | b | (a << 24));
+          
+            }
+          }
+          
+        }
+      }
+
+
+    }
+
+    return new ImageResource(pixels, width, height);
   }
 
   /**
@@ -3261,6 +3579,45 @@ public class ImageFormatReader {
     return bytes;
   }
   */
+  
+  
+  /**
+   **********************************************************************************************
+   * Rotates the image left by 90 degrees
+   **********************************************************************************************
+   **/
+  public static ImageResource rotateLeft(ImageResource imageResource) {
+
+    // X Bytes - Pixel Data
+    int[] pixels = imageResource.getPixels();
+    int numPixels = pixels.length;
+    
+ // after the rotate, the width and height are swapped, so read them differently here
+    int width = imageResource.getHeight();
+    int height = imageResource.getWidth();
+    
+    int[] outPixels = new int[numPixels];
+
+    int inPos = 0;
+    for (int w=0;w<width;w++) {
+    for (int h=height-1;h>=0;h--) {
+        outPixels[(h*width)+w] = pixels[inPos];
+        inPos++;
+      }
+    }
+
+    
+    // we already swapped them at the top, so just set them properly here.
+    imageResource.setWidth(width);
+    imageResource.setHeight(height);
+    
+    imageResource.setPixels(outPixels);
+    
+    
+
+
+    return imageResource;
+  }
 
   /**
    **********************************************************************************************
@@ -3290,6 +3647,37 @@ public class ImageFormatReader {
 
     return imageResource;
   }
+  
+  /**
+   **********************************************************************************************
+   * Swaps the Alpha and Green values in an image. Input should be in (effectively) GBAR format.
+   **********************************************************************************************
+   **/
+  public static ImageResource swapGBARtoARGB(ImageResource imageResource) {
+
+    // X Bytes - Pixel Data
+    int[] pixels = imageResource.getPixels();
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      int pixel = pixels[i];
+
+      // INPUT = GBAR
+      int gPixel = (pixel >> 24);
+      int bPixel = ((pixel >> 16) & 255);
+      int aPixel = ((pixel >> 8) & 255);
+      int rPixel = (pixel & 255);
+      
+
+      // OUTPUT = ARGB
+      pixels[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+    }
+
+    imageResource.setPixels(pixels);
+
+    return imageResource;
+  }
+  
 
   /**
   **********************************************************************************************

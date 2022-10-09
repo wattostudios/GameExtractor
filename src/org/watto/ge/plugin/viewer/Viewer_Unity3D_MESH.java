@@ -545,6 +545,7 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       boolean knownVertexBlockSize = false;
 
       // 4 - Unknown (4)
+      //System.out.println(fm.getOffset());
       int fieldTest4 = fm.readInt();
       if (fieldTest4 == 4) {
 
@@ -626,7 +627,7 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
 
             // now calculate the vertexBlockSize (and check it looks OK)
             vertexBlockSize = vertLength / numVertices;
-            FieldValidator.checkRange(vertexBlockSize, 24, 128);
+            FieldValidator.checkRange(vertexBlockSize, 20, 128);
 
             // 4 - Filename Length of resS file
             int ressFilenameLength = fm.readInt();
@@ -634,6 +635,16 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
 
             // X - Filename of resS file
             String ressFilename = fm.readString(ressFilenameLength);
+
+            if (ressFilename.startsWith("archive:/")) {
+              int slashPos = ressFilename.indexOf('/', 9);
+              if (slashPos > 0) {
+                ressFilename = ressFilename.substring(slashPos + 1);
+              }
+              else {
+                ressFilename = ressFilename.substring(9);
+              }
+            }
 
             // check that the resS file exists
             File ressFile = new File(FilenameSplitter.getDirectory(Archive.getBasePath()) + File.separator + ressFilename);

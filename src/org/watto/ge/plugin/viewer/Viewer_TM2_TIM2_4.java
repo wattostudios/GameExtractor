@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import org.watto.ErrorLogger;
+import org.watto.TemporarySettings;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
@@ -40,7 +41,8 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
     super("TM2_TIM2_4", "Playstation TIM2 Images (version 4) [TM2_TIM2_4]");
     setExtensions("tm2");
 
-    setGames("Rule of Rose");
+    setGames("Rule of Rose",
+        "NHL 2K3");
     setPlatforms("PS2");
     setStandardFileFormat(true);
   }
@@ -76,13 +78,19 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
       }
 
       // 2 - Version (4)
-      if (fm.readShort() == 4) {
+      short version = fm.readShort();
+      if (version == 4 || version == 260) { // 260 = 4.1
         rating += 5;
       }
 
       // 2 - Number of Images
       if (FieldValidator.checkNumFiles(fm.readShort())) {
         rating += 5;
+      }
+
+      if (version == 260) {
+        rating += 10;
+        return rating;
       }
 
       fm.skip(8);
@@ -155,11 +163,24 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
       long arcSize = fm.getLength();
 
       // 4 - Header (TIM2)
-      // 2 - Version (4)
+      // 1 - Version (4)
+      fm.skip(5);
+
+      // 1 - Padding
+      int paddingFlag = fm.readByte();
+
       // 2 - Number of Images
-      // 8 - null
+      fm.skip(2);
+
+      if (paddingFlag == 1) {
+        fm.skip(120);
+      }
+      else {
+        fm.skip(8);
+      }
+
       // 4 - Total Image Length [+16]
-      fm.skip(20);
+      fm.skip(4);
 
       // 4 - Palette Length
       int paletteLength = fm.readInt();
@@ -216,6 +237,9 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
       int colorSize = (bitsPerPixel > 8 ? bitsPerPixel / 8 : (clutFormat & 0x07) + 1);
 
       long imageDataOffset = headerLength;
+      if (paddingFlag == 1) {
+        imageDataOffset += 112;
+      }
 
       int[] palette = new int[0];
 
@@ -247,8 +271,13 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
           palette = ImageFormatReader.readRGBA(fm, numColors, 1).getPixels();
         }
 
+        boolean forceStriped = false;
+        if (TemporarySettings.has("ForcePaletteStriping")) {
+          forceStriped = TemporarySettings.getBoolean("ForcePaletteStriping");
+        }
+
         // Now, if the palette isn't linear, perform the decoding...
-        if (!linearPalette && bitsPerPixel != 8) {
+        if (forceStriped || (!linearPalette && (bitsPerPixel != 8 && bitsPerPixel != 4))) {
 
           int currentPaletteLength = palette.length;
           int[] oldPalette = palette;
@@ -283,11 +312,13 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
         // Indexed
         imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
         imageResource.addProperty("ImageFormat", "8BitPaletted");
+        imageResource = ImageFormatReader.doubleAlpha(imageResource);
       }
       else if (bitsPerPixel == 4) {
         // Indexed
         imageResource = ImageFormatReader.read4BitPaletted(fm, width, height, palette);
         imageResource.addProperty("ImageFormat", "4BitPaletted");
+        imageResource = ImageFormatReader.doubleAlpha(imageResource);
       }
       else if (colorSize == 2) {
         // 16BITLE_ABGR_5551 Format
@@ -311,6 +342,12 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
         return null;
       }
 
+      if (colorSize == 2 && TemporarySettings.has("SwapRedBlue")) {
+        if (TemporarySettings.getBoolean("SwapRedBlue")) {
+          imageResource = ImageFormatReader.swapRedAndBlue(imageResource);
+        }
+      }
+
       fm.close();
 
       //ColorConverter.convertToPaletted(resource);
@@ -328,7 +365,7 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

@@ -22,8 +22,10 @@ import org.watto.SingletonManager;
 import org.watto.TemporarySettings;
 import org.watto.component.ComponentRepository;
 import org.watto.component.PreviewPanel;
+import org.watto.component.PreviewPanel_Image;
 import org.watto.component.WSDirectoryListHolder;
 import org.watto.component.WSPopup;
+import org.watto.datatype.ImageResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.ShellFolderFile;
 import org.watto.ge.plugin.ExporterPlugin;
@@ -308,8 +310,70 @@ public class Task_ExportFiles extends AbstractTask {
                 if (converterPlugin.canWrite(previewPanel)) {
                   // found the converter for this type, so run the conversion
 
+                  /*
+                  // 3.14 Add support for converting all frames of an image (code base off SidePanel_Preview.savePreview())  
                   File destination = new File(path.getAbsolutePath() + "." + converterPlugin.getExtension(0));
                   converterPlugin.write(previewPanel, destination);
+                  */
+                  // If there are multiple frames in the image, and it's a manual transition (not an animation), we want to save each frame [3.13]
+                  boolean previewsWritten = false;
+                  if (previewPanel instanceof PreviewPanel_Image) {
+                    PreviewPanel_Image imagePanel = (PreviewPanel_Image) previewPanel;
+                    ImageResource imageResource = imagePanel.getImageResource();
+                    if (imageResource.getNextFrame() != null) {
+                      // many frames, not an animation, so save each of them
+
+                      File destination = new File(path.getAbsolutePath() + "." + converterPlugin.getExtension(0));
+                      String baseFilePath = destination.getAbsolutePath();
+                      String extension = "";
+                      int dotPos = baseFilePath.lastIndexOf('.');
+                      if (dotPos > 0) {
+                        extension = baseFilePath.substring(dotPos);
+                        baseFilePath = baseFilePath.substring(0, dotPos);
+                      }
+
+                      baseFilePath += "_ge_frame_";
+
+                      // If we've already moved to show a different frame (ie we're not starting on frame #1), move back to frame 0 for export
+                      int currentFrame = Settings.getInt("PreviewPanel_Image_CurrentFrame");
+                      if (currentFrame < 0) {
+                        currentFrame = 0;
+                      }
+                      for (int f = 0; f < currentFrame; f++) {
+                        imageResource = imageResource.getPreviousFrame();
+                      }
+
+                      ImageResource firstResource = imageResource;
+
+                      // now if we're on the first frame, check that it's not an animation
+                      //if (imageResource.isManualFrameTransition()) {
+                      for (int f = 0; f < 1000; f++) { // max 1000 frames to export
+                        imagePanel.setImageResource(imageResource); // set the current frame
+
+                        // prepare the filename
+                        File frameDestination = new File(baseFilePath + f + extension);
+                        converterPlugin.write(previewPanel, frameDestination); // save the frame
+
+                        imageResource = imageResource.getNextFrame();// prepare for the next frame
+
+                        if (imageResource == firstResource) {
+                          // back at the beginning
+                          imagePanel.setImageResource(firstResource); // set the current frame
+                          break;
+                        }
+                      }
+
+                      previewsWritten = true;
+                      //}
+                    }
+                  }
+                  // Otherwise just save the current frame
+                  // ALSO COMES HERE IF IT'S NOT AM IMAGE (eg a model converter)
+                  if (!previewsWritten) {
+                    File destination = new File(path.getAbsolutePath() + "." + converterPlugin.getExtension(0));
+                    converterPlugin.write(previewPanel, destination);
+                    previewsWritten = true;
+                  }
 
                   // skip all the other converters - we've found the right one already
                   c = numConverters;

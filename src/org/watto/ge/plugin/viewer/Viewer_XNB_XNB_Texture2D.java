@@ -168,6 +168,12 @@ public class Viewer_XNB_XNB_Texture2D extends ViewerPlugin {
       else if (format.equals("DXT1")) {
         imageResource = ImageFormatReader.readDXT1(fm, width, height);
       }
+      else if (format.equals("DXT3")) {
+        imageResource = ImageFormatReader.readDXT3(fm, width, height);
+      }
+      else if (format.equals("DXT5")) {
+        imageResource = ImageFormatReader.readDXT5(fm, width, height);
+      }
       else {
         ErrorLogger.log("[Viewer_XNB_XNB_Texture2D] Unknown image format: " + format);
       }

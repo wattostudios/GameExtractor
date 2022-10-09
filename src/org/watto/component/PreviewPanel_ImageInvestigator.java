@@ -268,6 +268,7 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
         "BC5",
         "BC7",
         "ETC2_RGBA8",
+        "CMPR",
         "ARGB",
         "ABGR",
         "RGBA",
@@ -307,6 +308,8 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
         "32F32F32F32F_ABGR",
         "32F32F32F32F_RGBA",
         "32F32F32F32F_BGRA",
+        "RGBA8Wii",
+        "RGB5A3Wii",
         "4BitPaletted",
         "8BitPaletted"
     };
@@ -737,6 +740,9 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       else if (format.equals("ETC2_RGBA8")) {
         imageResource = ImageFormatReader.readETC2_RGBA8(fm, imageWidth, imageHeight);
       }
+      else if (format.equals("CMPR")) {
+        imageResource = ImageFormatReader.readCMPR(fm, imageWidth, imageHeight);
+      }
       else if (format.equals("ARGB")) {
         imageResource = ImageFormatReader.readARGB(fm, imageWidth, imageHeight);
       }
@@ -859,6 +865,12 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       }
       else if (format.equals("32F32F32F32F_BGRA")) {
         imageResource = ImageFormatReader.read32F32F32F32F_BGRA(fm, imageWidth, imageHeight);
+      }
+      else if (format.equals("RGBA8Wii")) {
+        imageResource = ImageFormatReader.readRGBA8Wii(fm, imageWidth, imageHeight);
+      }
+      else if (format.equals("RGB5A3Wii")) {
+        imageResource = ImageFormatReader.readRGB5A3Wii(fm, imageWidth, imageHeight);
       }
       else if (format.equals("4BitPaletted")) {
         if (palette == null) {

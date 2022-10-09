@@ -92,6 +92,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
         "NBA 2003",
         "NBA 2004",
         "NBA 2005",
+        "NHL 2001",
         "NHL 2002",
         "NHL 2003",
         "NHL 2004",
@@ -111,7 +112,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
 
     setExtensions("big", "viv");
 
-    setPlatforms("PC", "PS2");
+    setPlatforms("PC", "PS2", "PS1");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("shd", "Shader", FileType.TYPE_OTHER),
@@ -122,6 +123,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
         new FileType("wnd", "Window Settings", FileType.TYPE_OTHER),
         new FileType("fsh", "FSH Image", FileType.TYPE_IMAGE),
         new FileType("ssh", "SSH Image", FileType.TYPE_IMAGE),
+        new FileType("psh", "PSH Image", FileType.TYPE_IMAGE),
         new FileType("cmb", "CMB Image", FileType.TYPE_IMAGE));
 
     setCanConvertOnReplace(true);
@@ -585,11 +587,11 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
     // Only tested a little bit, on NHL2003 PS2 8-bit paletted images (format 2, palette format 33)
 
     String beingReplacedExtension = resourceBeingReplaced.getExtension();
-    if (beingReplacedExtension.equalsIgnoreCase("ssh") || beingReplacedExtension.equalsIgnoreCase("fsh") || beingReplacedExtension.equalsIgnoreCase("cmb")) {
+    if (beingReplacedExtension.equalsIgnoreCase("ssh") || beingReplacedExtension.equalsIgnoreCase("fsh") || beingReplacedExtension.equalsIgnoreCase("psh") || beingReplacedExtension.equalsIgnoreCase("cmb")) {
       // try to convert
 
       String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
-      if (toReplaceWithExtension.equalsIgnoreCase("ssh") || toReplaceWithExtension.equalsIgnoreCase("fsh") || toReplaceWithExtension.equalsIgnoreCase("cmb")) {
+      if (toReplaceWithExtension.equalsIgnoreCase("ssh") || toReplaceWithExtension.equalsIgnoreCase("fsh") || toReplaceWithExtension.equalsIgnoreCase("psh") || toReplaceWithExtension.equalsIgnoreCase("cmb")) {
         // if the fileToReplace already has a SSH/FSH extension, assume it's already a compatible SSH/FSH file and doesn't need to be converted
         return fileToReplaceWith;
       }

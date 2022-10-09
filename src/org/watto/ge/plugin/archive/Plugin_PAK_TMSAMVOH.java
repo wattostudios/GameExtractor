@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -125,6 +125,8 @@ public class Plugin_PAK_TMSAMVOH extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
+        System.out.println(fm.getOffset());
+
         // 4 - Unknown (164,155,253,255)
         int checkVal = fm.readInt();
         if (checkVal != 2) {

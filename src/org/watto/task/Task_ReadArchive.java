@@ -104,6 +104,14 @@ public class Task_ReadArchive extends AbstractTask {
         return;
       }
 
+      if (Settings.getBoolean("ScanFileIfOpenFailed")) {
+        // Run the FormatScanner
+        if (GameExtractor.isFullVersion()) {
+          scanArchive(path);
+          return;
+        }
+      }
+
       WSPopup.showError("ReadArchive_NoPluginsFound", true);
       TaskProgressManager.stopTask();
       return;

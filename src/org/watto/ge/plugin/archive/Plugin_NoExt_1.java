@@ -1,39 +1,35 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.MultiFileBlockExporterWrapper;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
  **********************************************************************************************
  * THIS PLUGIN READS OVER A BUNCH OF FILES THAT MAKE A SINGLE ARCHIVE. THE FILENAMES ARE NAMED IN
  * HEX - ie 0, 1, ... A, B, etc. IT IS POSSIBLE FOR A FILE TO BE HALF IN 1 SPAN AND HALF IN THE
- * NEXT, BUT THIS PLUGIN DOES NOT TEMPT TO CORRECT THIS - THERE WILL THEREFORE BE A FEW FILES
- * THAT ARE ONLY HALF CORRECT.
- * 
- * IT ALSO HAS A LOT OF BUGS AND STUFF, AS I HAVE NOT BEEN ABLE TO TEST IT PROPERLY (NO
- * ARCHIVES). I HAVE DISABLED THE LENGTH AND OFFSET CHECKS TO GET AROUND THIS.
+ * NEXT - this should be covered by the plugin OK.
  **********************************************************************************************
  **/
 public class Plugin_NoExt_1 extends ArchivePlugin {
@@ -50,9 +46,13 @@ public class Plugin_NoExt_1 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("ESPN NFL 2005");
+    setGames("ESPN NFL 2K5",
+        "ESPN NFL 2K8");
     setExtensions("");
-    setPlatforms("XBox");
+    setPlatforms("XBox",
+        "PS2");
+
+    setCanScanForFileTypes(true);
 
   }
 
@@ -112,6 +112,7 @@ public class Plugin_NoExt_1 extends ArchivePlugin {
       addFileTypes();
 
       // RESETTING THE GLOBAL VARIABLES
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
 
       FileManipulator fm = new FileManipulator(path, false);
 
@@ -148,18 +149,17 @@ public class Plugin_NoExt_1 extends ArchivePlugin {
         //FieldValidator.checkLength(length,arcSize);
 
         // 4 - File Offset [*2048]
-        long offset = (fm.readInt());
-        if (offset < 0) {
-          offset = 4294967296L + offset;
-        }
+        long offset = IntConverter.unsign(fm.readInt());
         offset = (offset * 2048) - relOffset;
 
         if (offset >= arcSize) {
           //break;
           relOffset += arcSize;
+
           path = new File(path.getParent() + File.separator + sourceFilenames[sourceFilenamePos]);
-          //arcSize = path.length();
           sourceFilenamePos++;
+
+          arcSize = path.length();
 
           offset -= arcSize;
         }
@@ -167,8 +167,32 @@ public class Plugin_NoExt_1 extends ArchivePlugin {
 
         String filename = Resource.generateFilename(i);
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        // see if the file spans over multiple archives 
+        long remainingArcLength = arcSize - offset;
+        if (remainingArcLength < length) {
+          // spanned - use a MultiBlockExporter for storing both pieces
+
+          File[] blockFiles = new File[2];
+          blockFiles[0] = path;
+          blockFiles[1] = new File(path.getParent() + File.separator + sourceFilenames[sourceFilenamePos]);
+
+          long[] blockOffsets = new long[] { offset, 0 };
+          long[] blockLengths = new long[] { remainingArcLength, length - remainingArcLength };
+
+          MultiFileBlockExporterWrapper blockExporter = new MultiFileBlockExporterWrapper(exporterDefault, blockFiles, blockOffsets, blockLengths, blockLengths);
+
+          Resource resource = new Resource(path, filename, offset, length, length, blockExporter);
+          resource.forceNotAdded(true);
+          resources[i] = resource;
+        }
+        else {
+          // not spanned
+
+          //path,id,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, filename, offset, length);
+          resource.forceNotAdded(true);
+          resources[i] = resource;
+        }
 
         TaskProgressManager.setValue(i);
         realNumFiles++;
@@ -185,6 +209,80 @@ public class Plugin_NoExt_1 extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 1096040772) {
+      return "data";
+    }
+    else if (headerInt1 == 1112757569) {
+      return "ausb";
+    }
+    else if (headerInt1 == 1162756947) {
+      return "scne";
+    }
+    else if (headerInt1 == 1212371027) {
+      return "spch";
+    }
+    else if (headerInt1 == 1279415379) {
+      return "stbl";
+    }
+    else if (headerInt1 == 1329878337) {
+      return "audo";
+    }
+    else if (headerInt1 == 1380139331) {
+      return "cacr";
+    }
+    else if (headerInt1 == 1381259348) {
+      //resource.setOffset(resource.getOffset() + 48);
+      return "txtr";
+    }
+    else if (headerInt1 == 1397445197) {
+      return "mrks";
+    }
+    else if (headerInt1 == 1413698116) {
+      return "drct";
+    }
+    else if (headerInt1 == 1413829448) {
+      return "hset";
+    }
+    else if (headerInt1 == 1413829460) {
+      return "tset";
+    }
+    else if (headerInt1 == 1414418246) {
+      return "font";
+    }
+    else if (headerInt1 == 1431191885) {
+      return "manu";
+    }
+    else if (headerInt1 == 1481918792) {
+      return "hitx";
+    }
+    else if (headerInt1 == 1749177427) {
+      return "stbh";
+    }
+    else if (headerInt1 == 1750352196) {
+      return "dath";
+    }
+    else if (headerInt1 == 1850960200) {
+      return "hisn";
+    }
+
+    else if (headerInt1 == 1163087433) {
+      return "txt";
+    }
+
+    return null;
   }
 
 }

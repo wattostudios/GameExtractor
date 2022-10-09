@@ -52,6 +52,18 @@ public class XORRepeatingKeyBufferWrapper implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
+  Wraps this class around a <code>buffer</code>, and assigns the <code>xorValue</code>
+  @param buffer the <code>ManipulatorBuffer</code> that reads and writes the data
+  @param xorValue the value to XOR against
+  ***********************************************************************************************/
+  public XORRepeatingKeyBufferWrapper(ManipulatorBuffer buffer, int[] xorKey, int keyPos) {
+    this.buffer = buffer;
+    this.xorKey = xorKey;
+    this.keyLength = xorKey.length;
+    this.currentKeyPos = keyPos;
+  }
+
+  /***********************************************************************************************
   Checks to see whether <code>length</code> bytes can be read from the buffer. If not, the buffer
   is moved forward and re-filled to allow <code>length</code> bytes to be read.
   @param length the length of data to be read from the buffer
@@ -177,11 +189,26 @@ public class XORRepeatingKeyBufferWrapper implements ManipulatorBuffer {
   @return the byte
   ***********************************************************************************************/
   @Override
+  public int peek() {
+    int value = buffer.read();
+
+    int returnByte = (value ^ xorKey[currentKeyPos++]);
+    if (currentKeyPos >= keyLength) {
+      currentKeyPos = 0;
+    }
+    return returnByte;
+  }
+
+  /***********************************************************************************************
+  Reads a single byte from the buffer
+  @return the byte
+  ***********************************************************************************************/
+  @Override
   public int read() {
     int value = buffer.read();
-    if (value == -1) {
-      return value;
-    }
+    //if (value == -1) {
+    //  return value;
+    //}
 
     int returnByte = (value ^ xorKey[currentKeyPos++]);
     if (currentKeyPos >= keyLength) {

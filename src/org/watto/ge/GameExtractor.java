@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -30,7 +30,6 @@ import javax.swing.JFrame;
 - Update the schema.org code at the bottom of the GameExtractor.html page
 - Deploy the Full Version to Google App Engine (run a localhost app engine before changing/replacing files!)
 - Post an update on Facebook and Twitter
-- Update the Plugins Spreadsheet
 - Update GitHub (and remove the Full Version code from it)
 
 // TO DO EVERY TIME...
@@ -51,8 +50,9 @@ import javax.swing.JFrame;
 - Archive with nested directories that we need to read - Plugin_FMF_FMF
 - Archive where multiple files are stored in a single ZLib block, so you need to decompress the ZLib, then find the file within it - Plugin_RSB_1BSR
 - Archive where the user is asked to choose an option (from a ComboBox) in a popup when saving - Plugin_PAK_EYEDENTITY (see start of replace() method)
-- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG)
-- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format (AND where a file contains multiple frames) (Plugin_BIG_BIGF) 
+- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_POD_POD6 (audio and image) and Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG)
+- Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format (AND where a file contains multiple frames) (Plugin_BIG_BIGF)
+- Archive where filenames are read from an external file list, and matched with hashes stored in the archive (RSDK_RSDK)
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
 - Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
@@ -63,6 +63,7 @@ import javax.swing.JFrame;
 - 3D Model Viewer - VPK_VPK_VMESHC or Viewer_Unity3D_MESH or Viewer_POD_BIN or Viewer_BMOD_OMOD_OBST
 - 3D Model Viewer with Textures and multiple Mesh Groups - Viewer_GTC_MD2_MDL3
 - 3D Model Writer - Viewer_OBJ
+- Table Viewer including Editing/Replacing the file (Save button) - Viewer_RES_0TSR_3_VAL_IGM or Viewer_WAD_WADH_3_ENG
 - Scanning unknown files to determine their file type (by adding some custom types to the list of standard ones) - Plugin_PAK_44
 - Scanning unknown files to determine their file type (custom, rather than using the automatic scanner) - Plugin_000_9 (see end of read() method)
 
@@ -71,6 +72,7 @@ import javax.swing.JFrame;
 - ColorCount
 - FrameCount (the number of frames in an animation)
 - FileID
+- PaletteID
 - Hash
 - Filename
 - ImageFormat (eg DXT1, DXT3, DXT5, ARGB, 16F16F16F16F_ABGR, 8BitPaletted, etc.)
@@ -83,6 +85,9 @@ import javax.swing.JFrame;
 - Length
 - DecompressedLength
 - PaletteStripedPS2 = true
+- FaceCount
+- VertexCount
+- NormalCount
 
 // COMMON ARCHIVE PLUGINS (Supported Game Engines, for example)...
 - Unreal Engine 4                 = Plugin_PAK_38
@@ -119,18 +124,26 @@ import javax.swing.JFrame;
 - FMOD (bank)                     = Plugin_BANK_RIFF
 
 // NEW IDEAS...
+- Convert specs into KSY format --> https://kaitai.io/
+- Add Noesis + Granny2.dll file for converting GR2 granny models to something else, which we can then load into GE...
+  - Format info here... https://github.com/arves100/opengr2 ... ie it has a 16-byte header which can be used for accurate file identification
+  - Noesis+Granny2 package here... C:\_WATTOz\____Development_Stuff\noesisv4464\packaged_for_ge_granny2_only
+  - Source = https://forum.xentax.com/viewtopic.php?f=16&t=22277&sid=9f28c20f6ad5c89a06d3e50b431ee168
+  - Sample Game: Space Siege
+- Better way to convert images on replace - ie add the ability to convertOnReplace when doing ReplaceMatchingNames so we can do it in bulk
+- Sometimes when previewing or opening archives that are small, the Popup.close() on the Progress popup is called after the Popup.show() on
+  the Show Error Message popup. As a result, the screen is unclickable and stayes "grey" in color.
+  - Maybe when Popup_ShowError() is triggered, start a 1-second timer to check that the popup is actually visible, and re-paint if not?
+- If running on Java 11 or newer (ie where javafx packages aren't part of the JRE), show a popup alerting the user to download it?
 - YouTube videos showing how to do common tasks
 - Write HTML help pages for Tutorials
   - Also add the tutorial pages to the website
-  - Topics:
-    - How to use the MeshInvestigator
 - gemod files - a special ZIP used for applying a mod to an archive
   - Contains a script for running GE, as well as details of the archive to edit and the files to replace
   - Puts the files that are being replaced (the new files) into an archive
   - When opened by GE, will apply the mod to an archive.
     - will also create an "undo" gemod file - ie one that will convert the archive back to the original, which should basically
       be the same as the original gemod file but with the original "replaced" files in it
-- If running on Java 11 or newer (ie where javafx packages aren't part of the JRE), show a popup alerting the user to download it?
 - Make an FFMPEG Helper class, for all the viewer plugins, for commonality, similar to the QuickBMS class.
   - Will also tell people if trying to use FFMPEG and it isn't installed. Maybe only tell them once each time they open GE?
 - The KeyListeners on the FileListPanels and DirPanel (for selecting next filename with given letter) should allow input of text strings
@@ -171,6 +184,7 @@ import javax.swing.JFrame;
 - Add padding support to the ImplicitFileReplacing classes (for all XBox games mostly)
 
 // GAME THINGS...
+- Implement Excitebots CRC algorithm, so we can modify the archives? https://github.com/TheGameCommunity/ExciteBot/blob/master/src/main/java/com/gamebuster19901/excite/game/crc/CRCTester.java
 - Some Iron Defense TEX images don't show properly
 - Unreal Engine...
   - Plugins for more Unreal Engine 4 games
@@ -401,7 +415,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public static boolean isFullVersion() {
@@ -535,7 +549,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       if (redoMenu != null) {
         taskManager.addMonitor(redoMenu);
       }
-    
+
       WSUndoTaskComboButton undoButton = ((WSUndoTaskComboButton) ComponentRepository.get("UndoTaskComboButton"));
       if (undoButton != null) {
         taskManager.addMonitor(undoButton);
@@ -555,33 +569,33 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
     if (commandLineOnly) {
       return; // stop here - don't want to display the interface
     }
-    
+
     pack();
     setExtendedState(JFrame.MAXIMIZED_BOTH);
-    
+
     fileListPanelHolder.setMinimumSize(new Dimension(0, 0));
     sidePanelHolder.setMinimumSize(new Dimension(0, 0));
-    
+
     WSSplitPane mainSplit = (WSSplitPane) ComponentRepository.get("MainSplit");
     mainSplit.setDividerSize(5);
-    
+
     setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-    
+
     //double splitPos = Settings.getDouble("DividerLocation");
     //if (splitPos < 0 || splitPos > 1){
     //  splitPos = 0.7;
     //  }
-    
+
     //mainSplit.setDividerLocation(splitPos);
     //mainSplit.setResizeWeight(1);
     setVisible(true);
     //pack();
-    
+
     //int location = (int)(mainSplit.getWidth() * splitPos);
     //System.out.println(location);
     //mainSplit.resetToPreferredSizes();
     //mainSplit.setDividerLocation(splitPos);
-    
+
      */
 
     // writes out the list of ArchivePlugins and ViewerPlugins, for the excel spreadsheet
@@ -621,7 +635,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void makeNewArchive() {
@@ -630,7 +644,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void makeNewArchive(boolean runInNewThread) {
@@ -999,7 +1013,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
    **********************************************************************************************
-   Check all the resources that are exported - if they have different Modified timestamps than 
+   Check all the resources that are exported - if they have different Modified timestamps than
    they had when they were exported, they might have been changed by other programs and we might
    want to automatically replace it in the Archive.
    **********************************************************************************************
@@ -1026,7 +1040,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).reloadDirectoryList();
     }
 
-    // Check all the resources that are exported - if they have different Modified timestamps than they had when they were exported, 
+    // Check all the resources that are exported - if they have different Modified timestamps than they had when they were exported,
     // they might have been changed by other programs and we might want to automatically replace it in the Archive
     checkForModifiedExportFiles();
 
@@ -1035,7 +1049,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -1045,7 +1059,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void openSidePanelOnStartup() {
@@ -1057,7 +1071,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void outputPluginExcelList() {
@@ -1151,7 +1165,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean promptToSave() {
@@ -1195,7 +1209,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void promptToDeleteAnalysisDirectory() {
@@ -1260,7 +1274,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setFileListPanel(String name) {
@@ -1270,7 +1284,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setSidePanel(String name) {

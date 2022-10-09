@@ -1,30 +1,26 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -50,6 +46,20 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
     setExtensions("packed");
     setPlatforms("PC");
 
+  }
+
+  /**
+  **********************************************************************************************
+  Gets a blank resource of this type, for use when adding resources.
+  This overrides the normal method, so that files are stored with the correct path separator slash.
+  
+  This is only used when adding files to an existing archive of this type. If this is a new archive,
+  we don't know what plugin is going to be used until we save the archive, so we also have to cater
+  for that in the write() method.
+  **********************************************************************************************
+  **/
+  public Resource getBlankResource(File file, String name) {
+    return new Resource(file, name.replace('\\', '/'));
   }
 
   /**
@@ -91,6 +101,8 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
     }
   }
 
+  String archiveHeader = null;
+
   /**
   **********************************************************************************************
   
@@ -107,8 +119,10 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(path, false);
 
       // 4 - Header (Pozi)
+      archiveHeader = fm.readString(4);
+
       // 4 - null
-      fm.skip(8);
+      fm.skip(4);
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
@@ -129,11 +143,11 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
         String filename = fm.readString(filenameLength);
 
         // 4 - File Length
-        long length = fm.readInt();
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - File Offset
-        long offset = fm.readInt();
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter
@@ -175,26 +189,37 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
 
       // Write Header Data
 
-      /*
-       * // 4 - Header (Pozi) fm.writeString("Pozi");
-       * 
-       * // 4 - null fm.writeInt((int)0);
-       * 
-       * // 4 - Number Of Files fm.writeInt((int)numFiles);
-       * 
-       */
+      // 4 - Header (Pozi)
+      if (archiveHeader == null) {
+        fm.writeString("Pozi");
+      }
+      else {
+        fm.writeString(archiveHeader);
+      }
+
+      // 4 - null 
+      fm.writeInt((int) 0);
+
+      // 4 - Number Of Files 
+      fm.writeInt((int) numFiles);
 
       // Write Directory
       TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
       for (int i = 0; i < numFiles; i++) {
-        String filename = resources[i].getName();
-        long length = resources[i].getDecompressedLength();
+        Resource resource = resources[i];
+
+        if (resource.isAdded()) {
+          resource.setName(resource.getName().replace('\\', '/')); // forces the right file path slashes
+        }
+
+        String filename = resource.getName();
+        long length = resource.getDecompressedLength();
 
         // 4 - Filename Length
         fm.writeInt((int) filename.length());
 
         // X - Filename
-        fm.writeString(resources[i].getName());
+        fm.writeString(filename);
 
         // 4 - File Size
         fm.writeInt((int) length);

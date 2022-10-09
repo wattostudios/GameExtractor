@@ -70,12 +70,12 @@ public class Plugin_ARF_AR extends ArchivePlugin {
 
       // Header
       if (fm.readString(2).equals("AR")) {
-        rating += 50;
+        rating += 25;
       }
 
       // null
       if (fm.readShort() == 0) {
-        rating += 5;
+        rating += 10;
       }
 
       // Number Of Files

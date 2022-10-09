@@ -509,12 +509,20 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
             long length = 0;
             if (i == numFiles - 1) {
               //length = arcSize - offset;
-              length = (startOffset + dataLength);// - offset; // 3.14 dataLength already contains the actual length of the data (github issue #9)
+              length = (startOffset + dataLength);// - offset; // 3.14 dataLength already contains the actual length of the data (github issue #9) (only for files with 1 audio track in it?)
             }
             else {
               length = dataOffsets[i + 1] - offset;
             }
             long endOffset = offset + length;
+
+            if (i == numFiles - 1) {
+              if (endOffset > arcSize) {
+                // 3.14 fix for the above 3.14 change, for archives with more than 1 file in them (from Archive_BANK_RIFF)
+                endOffset = arcSize;
+                length = arcSize - offset;
+              }
+            }
 
             int maxChunks = Archive.getMaxFiles() * 2;
             long[] offsets = new long[maxChunks];

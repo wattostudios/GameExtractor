@@ -487,7 +487,7 @@ public class DirectoryList_DirectoryList extends DirectoryListPanel implements W
 
     if (c == upButton) {
       changeToParent();
-      return true;
+      //return true; // 3.14 want to pass this up to the SidePanel as well, so it can reload filename textfields, etc
     }
     else if (c instanceof WSMenuItem) {
       String code = ((WSMenuItem) c).getCode();

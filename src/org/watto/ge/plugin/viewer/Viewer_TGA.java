@@ -307,6 +307,68 @@ public class Viewer_TGA extends ViewerPlugin {
   
   **********************************************************************************************
   **/
+  public int[] readRLE8(FileManipulator fm, int[] pixels, int numPixels, int width, int height) {
+    try {
+
+      int numRead = 0;
+      while (numRead < numPixels) {
+        // 1 - Header
+        int header = ByteConverter.unsign(fm.readByte());
+
+        boolean compressed = ((header & 128) == 128);
+        int count = (header & 127);
+        if (count < 0) {
+          count = 256 + count;
+        }
+
+        count++;
+
+        if (count == 0) {
+          return null;
+        }
+
+        if (compressed) {
+          // 1 byte - Greyscale color
+          int byte1 = ByteConverter.unsign(fm.readByte());
+
+          for (int i = 0; i < count; i++) {
+            pixels[numRead + i] = ((255 << 24) | (byte1 << 16) | (byte1 << 8) | (byte1));
+          }
+        }
+        else {
+          for (int i = 0; i < count; i++) {
+            // 1 byte - Greyscale color
+            int byte1 = ByteConverter.unsign(fm.readByte());
+
+            pixels[numRead + i] = ((255 << 24) | (byte1 << 16) | (byte1 << 8) | (byte1));
+          }
+        }
+
+        numRead += count;
+      }
+
+      // flip the image
+      int[] tempLine = new int[width];
+      for (int h = 0, j = height - 1; h < j; h++, j--) {
+        System.arraycopy(pixels, h * width, tempLine, 0, width);
+        System.arraycopy(pixels, j * width, pixels, h * width, width);
+        System.arraycopy(tempLine, 0, pixels, j * width, width);
+      }
+
+      return pixels;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      return null;
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public int[] readRLE16(FileManipulator fm, int[] pixels, int numPixels, int width, int height) {
     try {
 
@@ -558,7 +620,7 @@ public class Viewer_TGA extends ViewerPlugin {
           throw new WSPluginException("Only uncompressed Paletted TGA images are supported");
         }
       }
-      else if (imageType != 2) {
+      else if (imageType != 2 && imageType != 3) {
         throw new WSPluginException("Only RGB TGA images are supported");
       }
 
@@ -603,6 +665,9 @@ public class Viewer_TGA extends ViewerPlugin {
         }
         else if (colorDepth == 16) {
           pixels = readRLE16(fm, pixels, numPixels, width, height);
+        }
+        else if (colorDepth == 8) {
+          pixels = readRLE8(fm, pixels, numPixels, width, height);
         }
       }
       else {

@@ -130,7 +130,9 @@ public class Task_LoadThumbnailLater extends AbstractTask {
       fm.setFakeFile(new File(resource.getName()));
     }
 
-    //System.out.println("LoadThumbnailLater: Starting load for " + resource.getName());
+    //if (resource.getName().equalsIgnoreCase("CHARS\\CREATURES\\DUPLO_CHOMPERLEGO\\DUPLO_CHOMPERLEGO_UK.TXT")) {
+    // System.out.println("LoadThumbnailLater: Starting load for " + resource.getName());
+    //}
 
     // now find a previewer for the file
     // preview the first selected file

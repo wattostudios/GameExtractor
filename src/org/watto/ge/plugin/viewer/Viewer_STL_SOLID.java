@@ -28,6 +28,7 @@ import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
 import javafx.collections.ObservableFloatArray;
 import javafx.geometry.Point3D;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
 
@@ -356,10 +357,12 @@ public class Viewer_STL_SOLID extends ViewerPlugin {
   @Override
   public void write(PreviewPanel panel, FileManipulator fm) {
     TriangleMesh mesh = null;
+    MeshView[] meshView = null;
 
     if (panel instanceof PreviewPanel_3DModel) {
       PreviewPanel_3DModel panel3D = (PreviewPanel_3DModel) panel;
       mesh = panel3D.getModel();
+      meshView = panel3D.getMeshView();
     }
     else if (panel instanceof PreviewPanel_MeshInvestigator) {
       PreviewPanel_MeshInvestigator panel3D = (PreviewPanel_MeshInvestigator) panel;
@@ -369,60 +372,71 @@ public class Viewer_STL_SOLID extends ViewerPlugin {
       return;
     }
 
-    if (mesh == null) {
+    if (mesh == null && meshView == null) {
       return;
     }
 
-    // header
-    fm.writeLine("solid model");
-
-    DecimalFormat df = new DecimalFormat("#");
-    df.setMaximumFractionDigits(8);
-
-    // Get the Vertices and Faces
-    ObservableFloatArray verticesObservable = mesh.getPoints();
-    int numVertices = verticesObservable.size();
-    float[] vertices = new float[numVertices];
-    verticesObservable.toArray(vertices);
-
-    ObservableFaceArray facesObservable = mesh.getFaces();
-    int numFaces = facesObservable.size();
-    int[] faces = new int[numFaces];
-    facesObservable.toArray(faces);
-
-    for (int i = 0; i < numFaces; i += 3) {
-      int face1 = faces[i] * 3; // *3 to convert it into a position in the vertices[]
-      int face2 = faces[i + 1] * 3; // *3 to convert it into a position in the vertices[]
-      int face3 = faces[i + 2] * 3; // *3 to convert it into a position in the vertices[]
-
-      float vertex1x = vertices[face1];
-      float vertex1y = vertices[face1 + 1];
-      float vertex1z = vertices[face1 + 2];
-
-      float vertex2x = vertices[face2];
-      float vertex2y = vertices[face2 + 1];
-      float vertex2z = vertices[face2 + 2];
-
-      float vertex3x = vertices[face3];
-      float vertex3y = vertices[face3 + 1];
-      float vertex3z = vertices[face3 + 2];
-
-      fm.writeLine("facet normal 0.0 0.0 0.0");
-      fm.writeLine("  outer loop");
-
-      fm.writeLine("    vertex " + df.format(vertex1x) + ' ' + df.format(vertex1y) + ' ' + df.format(vertex1z));
-      fm.writeLine("    vertex " + df.format(vertex2x) + ' ' + df.format(vertex2y) + ' ' + df.format(vertex2z));
-      fm.writeLine("    vertex " + df.format(vertex3x) + ' ' + df.format(vertex3y) + ' ' + df.format(vertex3z));
-
-      fm.writeLine("  endloop");
-      fm.writeLine("endfacet");
+    int numMeshes = 1;
+    if (meshView != null) {
+      numMeshes = meshView.length;
     }
 
-    faces = null; // free memory
-    vertices = null; // free memory
+    for (int m = 0; m < numMeshes; m++) {
+      if (meshView != null) {
+        mesh = (TriangleMesh) meshView[m].getMesh();
+      }
 
-    // footer
-    fm.writeLine("endsolid model");
+      // header
+      fm.writeLine("solid model" + m);
+
+      DecimalFormat df = new DecimalFormat("#");
+      df.setMaximumFractionDigits(8);
+
+      // Get the Vertices and Faces
+      ObservableFloatArray verticesObservable = mesh.getPoints();
+      int numVertices = verticesObservable.size();
+      float[] vertices = new float[numVertices];
+      verticesObservable.toArray(vertices);
+
+      ObservableFaceArray facesObservable = mesh.getFaces();
+      int numFaces = facesObservable.size();
+      int[] faces = new int[numFaces];
+      facesObservable.toArray(faces);
+
+      for (int i = 0; i < numFaces; i += 3) {
+        int face1 = faces[i] * 3; // *3 to convert it into a position in the vertices[]
+        int face2 = faces[i + 1] * 3; // *3 to convert it into a position in the vertices[]
+        int face3 = faces[i + 2] * 3; // *3 to convert it into a position in the vertices[]
+
+        float vertex1x = vertices[face1];
+        float vertex1y = vertices[face1 + 1];
+        float vertex1z = vertices[face1 + 2];
+
+        float vertex2x = vertices[face2];
+        float vertex2y = vertices[face2 + 1];
+        float vertex2z = vertices[face2 + 2];
+
+        float vertex3x = vertices[face3];
+        float vertex3y = vertices[face3 + 1];
+        float vertex3z = vertices[face3 + 2];
+
+        fm.writeLine("facet normal 0.0 0.0 0.0");
+        fm.writeLine("  outer loop");
+
+        fm.writeLine("    vertex " + df.format(vertex1x) + ' ' + df.format(vertex1y) + ' ' + df.format(vertex1z));
+        fm.writeLine("    vertex " + df.format(vertex2x) + ' ' + df.format(vertex2y) + ' ' + df.format(vertex2z));
+        fm.writeLine("    vertex " + df.format(vertex3x) + ' ' + df.format(vertex3y) + ' ' + df.format(vertex3z));
+
+        fm.writeLine("  endloop");
+        fm.writeLine("endfacet");
+      }
+
+      faces = null; // free memory
+      vertices = null; // free memory
+
+      // footer
+      fm.writeLine("endsolid model" + m);
+    }
 
   }
 

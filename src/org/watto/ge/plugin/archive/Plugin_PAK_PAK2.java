@@ -40,7 +40,8 @@ public class Plugin_PAK_PAK2 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Viking: Battle for Asgard");
+    setGames("Alien: Isolation",
+        "Viking: Battle for Asgard");
     setExtensions("pak"); // MUST BE LOWER CASE
     setPlatforms("PC");
 

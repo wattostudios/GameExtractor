@@ -134,18 +134,30 @@ public class Viewer_UE3_StaticMesh extends ViewerPlugin {
       minZ = 20000f;
       maxZ = -20000f;
 
-      // for 14 entries
-      // 4 - Unknown Float
-      fm.skip(56);
-
       // UNKNOWN DIRECTORY
-      // 4 - Number of Entries (6)
-      int numUnknown1 = fm.readInt();
-      FieldValidator.checkNumFiles(numUnknown1);
+      // for 8 or 14 entries
+      //   4 - Unknown Float
+      fm.skip(32);
+
+      int numUnknown1 = 0;
 
       // 4 - Entry Size (64/128/512)
       int unknown1Size = fm.readInt();
-      FieldValidator.checkRange(unknown1Size, 0, 2048); // guess
+      if (unknown1Size == 32) {
+        numUnknown1 = fm.readInt();
+        FieldValidator.checkNumFiles(numUnknown1);
+      }
+      else {
+        fm.skip(20);
+
+        // 4 - Number of Entries (6)
+        numUnknown1 = fm.readInt();
+        FieldValidator.checkNumFiles(numUnknown1);
+
+        // 4 - Entry Size (64/128/512)
+        unknown1Size = fm.readInt();
+        FieldValidator.checkRange(unknown1Size, 0, 2048); // guess
+      }
 
       // for each entry
       // 64/128/512 - Unknown
@@ -194,11 +206,21 @@ public class Viewer_UE3_StaticMesh extends ViewerPlugin {
       }
 
       // 4 - Size? (20) (including this field)
-      // 16 - null
-      // 4 - Unknown (1)
-      // 12 - null
+      int blockSize = fm.readInt();
+      if (blockSize == 18) {
+        // 4 - Unknown (1)
+        // 12 - null
+        fm.skip(16);
+      }
+      else {
+        // 16 - null
+        // 4 - Unknown (1)
+        // 12 - null
+        fm.skip(32);
+      }
+
       // 4 - Unknown
-      fm.skip(40);
+      fm.skip(4);
 
       // 4 - Number of Blocks (1/2)
       int numBlocks = fm.readInt();

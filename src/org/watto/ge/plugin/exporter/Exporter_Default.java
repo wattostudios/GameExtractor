@@ -96,6 +96,24 @@ public class Exporter_Default extends ExporterPlugin {
 
   /**
   **********************************************************************************************
+  So we can easily call this from within a Viewer plugin
+  **********************************************************************************************
+  **/
+  public void open(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
+    readLength = compLengthIn;
+
+    // try to get the whole file in a single go, if it isn't too large (set to 200KB otherwise)
+    int bufferSize = (int) readLength;
+    if (bufferSize > 204800) {
+      bufferSize = 204800;
+    }
+
+    readSource = fmIn;
+
+  }
+
+  /**
+  **********************************************************************************************
   
   **********************************************************************************************
   **/

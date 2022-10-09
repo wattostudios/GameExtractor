@@ -21,6 +21,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
 import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundNodeWave_648;
+import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_StaticMesh_Generic;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -39,12 +40,13 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
   **********************************************************************************************
   **/
   public Plugin_UE3_507() {
-    super("UE3_507", "Unreal Engine 3 [507,832]");
+    super("UE3_507", "Unreal Engine 3 [507,765,832]");
 
     setExtensions("upk");
     setGames("Borderlands: The Pre-Sequel",
         "Borderlands 2",
         "Grimm",
+        "Rising Storm 2: Vietnam",
         "Styx: Master of Shadows",
         "The Last Remnant",
         "Thief");
@@ -59,7 +61,7 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 507, 832);
+    return super.getMatchRating(fm, 507, 765, 832);
   }
 
   /**
@@ -72,6 +74,7 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
     try {
 
       Exporter_Custom_UE3_SoundNodeWave_648 audioExporter = Exporter_Custom_UE3_SoundNodeWave_648.getInstance();
+      Exporter_Custom_UE3_StaticMesh_Generic staticMeshExporter = Exporter_Custom_UE3_StaticMesh_Generic.getInstance();
 
       addFileTypes();
 
@@ -333,6 +336,9 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
 
         if (type.equals("SoundNodeWave")) {
           resources[i].setExporter(audioExporter);
+        }
+        else if (type.equals("StaticMesh")) {
+          resources[i].setExporter(staticMeshExporter);
         }
 
         TaskProgressManager.setValue(i);

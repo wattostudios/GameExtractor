@@ -155,8 +155,9 @@ public class Viewer_P_DFPF_TEXTURE extends ViewerPlugin {
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
+      /*
       fm.skip(32);
-
+      
       if (fm.readString(4).equals("rtxT")) {
         // version 5
         fm.skip(4);
@@ -170,6 +171,31 @@ public class Viewer_P_DFPF_TEXTURE extends ViewerPlugin {
         else {
           // version 2
           fm.skip(24);
+        }
+      }
+      */
+
+      fm.skip(28);
+
+      if (fm.readString(4).equals("rtxT")) {
+        // version 5
+        fm.skip(4);
+      }
+      else {
+        if (fm.readString(4).equals("rtxT")) {
+          // version 5
+          fm.skip(4);
+        }
+        else {
+          fm.skip(4);
+          if (fm.readString(4).equals("rtxT")) {
+            // version 6
+            fm.skip(4);
+          }
+          else {
+            // version 2
+            fm.skip(24);
+          }
         }
       }
 

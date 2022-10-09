@@ -31,6 +31,7 @@
 
 <ul>
 <li>Java</li>
+<li>AirCompressor</li>
 <li>Apache Commons Compress</li>
 <li>aquarria (XNB Reader and Decoder)</li>
 <li>bc7enc</li>
@@ -41,6 +42,7 @@
 <li>hyperspy</li>
 <li>java-compress (MiniLZO)</li>
 <li>java-dds</li>
+<li>java FNV1 Hash</li>
 <li>Java Image Management Interface</li>
 <li>Java Imaging Utilities</li>
 <li>Java LZF Library (ning-compress)</li>
@@ -49,10 +51,12 @@
 <li>jbzip2</li>
 <li>JLayer</li>
 <li>JMPQ3</li>
+<li>JNA (Java Native Access)</li>
 <li>JOrbis</li>
 <li>jsquish</li>
 <li>junrar</li>
 <li>LHA Decompressor for Java</li>
+<li>lz4-java</li>
 <li>LZSS Compression Routines for Java</li>
 <li>puyotools</li>
 <li>python-fsb5</li>
@@ -63,6 +67,7 @@
 <li>tinf</li>
 <li>UNGTC</li>
 <li>UnRAR</li>
+<li>unxwb</li>
 <li>vgmstream</li>
 <li>XZ for Java</li>
 </ul>

@@ -46,9 +46,17 @@ public class Resource implements Comparable<Resource> {
     if (exportedPath == null || exportedPathTimestamp == -1 || !exportedPath.exists()) {
       return false;
     }
-    if (exportedPathTimestamp == exportedPath.lastModified()) {
+    
+    long exportedPathModified = exportedPath.lastModified();
+    long difference = exportedPathModified - exportedPathTimestamp;
+    if (difference < 0) {
+      difference = 0-difference;
+    }
+    
+    if (difference < 1000) { // a tolerance of 1-second - it's highly unlikely that the file would be exported and modified within 1 second
       return false;
     }
+    
     return true;
   }
 
@@ -685,7 +693,7 @@ public class Resource implements Comparable<Resource> {
 
     File path = Archive.getBasePath();
     if (path == null) {
-      return false;
+      return true; // 3.14 this should be true, as all files for a New Archive have been Added
     }
 
     return (!(sourcePath.getAbsolutePath().equals(path.getAbsolutePath())));

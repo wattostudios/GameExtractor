@@ -1,31 +1,27 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
-import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Custom_CAR;
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -112,7 +108,7 @@ public class Plugin_CAR extends ArchivePlugin {
   public Resource[] read(File path) {
     try {
 
-      ExporterPlugin exporter = Exporter_Custom_CAR.getInstance();
+      //ExporterPlugin exporter = Exporter_Custom_CAR.getInstance();
       addFileTypes();
 
       FileManipulator fm = new FileManipulator(path, false);
@@ -147,6 +143,22 @@ public class Plugin_CAR extends ArchivePlugin {
 
       int realNumFiles = 0;
 
+      long meshOffset = fm.getOffset();
+      int meshLength = numTriangles * 64 + numPoints * 16;
+      fm.skip(meshLength);
+
+      String meshFilename = FilenameSplitter.getFilename(fm.getFile()) + ".msh";
+
+      // need to include the numPoints/numFaces/etc in the header, so add another 12 bytes
+      meshOffset -= 12;
+      meshLength += 12;
+      
+      //path,id,name,offset,length,decompLength,exporter
+      resources[realNumFiles] = new Resource(path, meshFilename, meshOffset, meshLength);
+
+      TaskProgressManager.setValue(realNumFiles);
+      realNumFiles++;
+      /*
       // Loop through triangle directory
       for (int i = 0; i < numTriangles; i++) {
         // 4 - Point 1
@@ -168,16 +180,16 @@ public class Plugin_CAR extends ArchivePlugin {
         long offset = (int) fm.getOffset();
         long length = 64;
         fm.skip(64);
-
+      
         String filename = Resource.generateFilename(i) + ".tri";
-
+      
         //path,id,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);
-
+      
         TaskProgressManager.setValue(realNumFiles);
         realNumFiles++;
       }
-
+      
       // Loop through point directory
       for (int i = 0; i < numPoints; i++) {
         // 4 - X Coordinate
@@ -187,19 +199,20 @@ public class Plugin_CAR extends ArchivePlugin {
         long offset = (int) fm.getOffset();
         long length = 16;
         fm.skip(16);
-
+      
         String filename = Resource.generateFilename(i) + ".pnt";
-
+      
         //path,id,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);
-
+      
         TaskProgressManager.setValue(realNumFiles);
         realNumFiles++;
       }
+      */
 
       // texture image
       int textureOffset = (int) fm.getOffset();
-      String textureFilename = "Texture.tga";
+      String textureFilename = FilenameSplitter.getFilename(fm.getFile()) + ".tex";
       fm.skip(textureLength);
 
       resources[realNumFiles] = new Resource(path, textureFilename, textureOffset, textureLength);
@@ -249,11 +262,15 @@ public class Plugin_CAR extends ArchivePlugin {
         fm.skip(length);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length, length + 16, exporter);
+        Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+        resource.setAudioProperties(22050, 16, 1);
+        resources[realNumFiles] = resource;
 
         TaskProgressManager.setValue(realNumFiles);
         realNumFiles++;
       }
+
+      resources = resizeResources(resources, realNumFiles);
 
       fm.close();
 

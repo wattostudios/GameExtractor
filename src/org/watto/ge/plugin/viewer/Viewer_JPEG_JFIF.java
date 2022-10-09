@@ -93,9 +93,6 @@ public class Viewer_JPEG_JFIF extends ViewerPlugin {
       else if (header.equals("Exif")) {
         rating += 25;
       }
-      else {
-        rating = 0;
-      }
 
       return rating;
 
@@ -133,7 +130,19 @@ public class Viewer_JPEG_JFIF extends ViewerPlugin {
   **/
   @Override
   public PreviewPanel read(FileManipulator fm) {
-    return read(fm.getFile());
+    //return read(fm.getFile());
+    try {
+
+      ImageIcon icon = new ImageIcon(fm.readBytes((int) fm.getLength()));
+      PreviewPanel_Image preview = new PreviewPanel_Image(icon.getImage(), icon.getIconWidth(), icon.getIconHeight());
+
+      return preview;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      return read(fm.getFile());
+    }
   }
 
   /**

@@ -615,6 +615,14 @@ public class ReplacableResource extends Resource {
     exporter = Exporter_Default.getInstance();
 
     replaced = true;
+    
+    
+
+    //this.exportedPath = file; // so previews get updated
+    setExportedPath(file);
+
+    setImageResource(null); // so thumbnails get updated
+    
   }
 
   /**

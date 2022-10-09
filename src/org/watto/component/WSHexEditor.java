@@ -103,7 +103,10 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
   **********************************************************************************************
   **/
   public void buildByteTable(String[][] tableData) {
-    for (int i = 0, row = 0, cell = 0; i < bytes.length; i++) {
+    int row = 0;
+    int cell = 0;
+
+    for (int i = 0; i < bytes.length; i++) {
       if (cell == 0) {
         tableData[row][cell] = buildRowHeading(i);
         cell++;
@@ -128,6 +131,13 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         row++;
       }
     }
+
+    // fill the last row to the right size
+    while (cell > 0 && cell < 9) {
+      tableData[row][cell] = "<null>";
+      cell++;
+    }
+
   }
 
   /**
@@ -161,7 +171,10 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
   **********************************************************************************************
   **/
   public void buildCharTable(String[][] tableData) {
-    for (int i = 0, row = 0, cell = 0; i < bytes.length; i++) {
+    int row = 0;
+    int cell = 0;
+
+    for (int i = 0; i < bytes.length; i++) {
       if (cell == 0) {
         tableData[row][cell] = buildRowHeading(i);
         cell++;
@@ -186,6 +199,13 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         row++;
       }
     }
+
+    // fill the last row to the right size
+    while (cell > 0 && cell < 9) {
+      tableData[row][cell] = "<null>";
+      cell++;
+    }
+
   }
 
   /**
@@ -194,7 +214,10 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
   **********************************************************************************************
   **/
   public void buildHexTable(String[][] tableData) {
-    for (int i = 0, row = 0, cell = 0; i < bytes.length; i++) {
+    int row = 0;
+    int cell = 0;
+
+    for (int i = 0; i < bytes.length; i++) {
       if (cell == 0) {
         tableData[row][cell] = buildRowHeading(i);
         cell++;
@@ -222,6 +245,12 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
         cell = 0;
         row++;
       }
+    }
+
+    // fill the last row to the right size
+    while (cell > 0 && cell < 9) {
+      tableData[row][cell] = "<null>";
+      cell++;
     }
   }
 
@@ -450,19 +479,30 @@ public class WSHexEditor extends WSPanel implements WSKeyableInterface,
       buildHexTable(tableData);
     }
 
-    preview.setModel(new UneditableTableModel(tableData, new String[] { "", "", "", "", "", "", "", "", "" }));
+    UneditableTableModel tableModel = new UneditableTableModel(tableData, new String[] { "", "", "", "", "", "", "", "", "" });
+    preview.setModel(tableModel);
 
-    TableColumnModel model = preview.getColumnModel();
+    // v3.14 There's a race condition here somewhere, between loading the table with data and rendering the table in the view.
+    // Specifically, you can sometimes get an ArrayIndexOutOfBoundsException when previewing files, because DefaultTableColumnModel
+    // getColumn() has less than 9 columns in it when it tries to render. Mostly just causes a white border around the HexTable,
+    // so annoying more than anything. More evident when increasing the Hex data load size to a larger number.
 
-    for (int i = 0; i < preview.getColumnCount(); i++) {
-      //model.getColumn(i).sizeWidthToFit();
-      TableColumn column = model.getColumn(i);
+    try {
+      TableColumnModel model = preview.getColumnModel();
 
-      if (i > 0) {
-        column.setMinWidth(0);
-        column.setPreferredWidth(25);
+      for (int i = 0; i < preview.getColumnCount(); i++) {
+        //model.getColumn(i).sizeWidthToFit();
+        TableColumn column = model.getColumn(i);
+
+        if (i > 0) {
+          column.setMinWidth(0);
+          column.setPreferredWidth(25);
+        }
+
       }
-
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
     }
 
     try {

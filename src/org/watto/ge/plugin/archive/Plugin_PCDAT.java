@@ -153,6 +153,10 @@ public class Plugin_PCDAT extends ArchivePlugin {
         TaskProgressManager.setValue(offset);
       }
 
+      if (realNumFiles == 1) { // not a valid archive
+        return null;
+      }
+
       resources = resizeResources(resources, realNumFiles);
 
       fm.close();

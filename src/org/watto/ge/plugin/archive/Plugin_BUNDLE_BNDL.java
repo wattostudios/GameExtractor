@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -49,7 +49,8 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
 
     setGames("Ghost Recon Advanced Warfighter",
         "Ghost Recon Advanced Warfighter 2",
-        "Wanted: Weapons Of Fate");
+        "Wanted: Weapons Of Fate",
+        "Lead and Gold: Gangs of the Wild West");
     setExtensions("bundle");
     setPlatforms("PC");
 
@@ -142,6 +143,7 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
 
       int realNumFiles = 0;
       for (int i = 0; i < numFiles; i++) {
+
         // 1 - Entry Type
         int entryType = ByteConverter.unsign(fm.readByte());
 
@@ -175,7 +177,6 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
           int offsetPointerLength = 8;
 
           long offset = fm.readLong();
-          FieldValidator.checkOffset(offset, arcSize);
 
           // 4 - File Length
           long lengthPointerLocation = fm.getOffset();
@@ -184,8 +185,13 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
           long length = fm.readInt();
           FieldValidator.checkLength(length, arcSize);
 
+          if (length != 0) {
+            FieldValidator.checkOffset(offset, arcSize);
+          }
+
           // 1 - Unknown (1)
           fm.skip(1);
+          //System.out.println(fm.readByte());
 
           // X - Filename
           // 1 - null Filename Terminator
@@ -227,6 +233,8 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
         if (fm.readString(1).equals("x")) {
           resource.setExporter(exporter);
         }
+
+        TaskProgressManager.setValue(i);
       }
 
       fm.close();

@@ -30,6 +30,7 @@ public class Exporter_Deflate extends ExporterPlugin {
   static Exporter_Deflate instance = new Exporter_Deflate();
 
   static InflaterInputStream readSource;
+
   static long readLength = 0;
 
   /**
@@ -49,7 +50,7 @@ public class Exporter_Deflate extends ExporterPlugin {
   **********************************************************************************************
   **/
   public Exporter_Deflate() {
-    setName("ZLib Compression");
+    setName("Deflate Compression");
   }
 
   /**

@@ -292,7 +292,7 @@ public class Viewer_UE4_SoundWave_6 extends ViewerPlugin {
         UnrealImportEntry entry = imports[i];
 
         if (entry.getType().equals("Class") && entry.getName().equals("SoundWave")) {
-          // found a Class, and its a Texture2D, so we're happy
+          // found a Class, and its a SoundWave, so we're happy
           foundSoundWaveClass = true;
           break;
         }
@@ -309,7 +309,7 @@ public class Viewer_UE4_SoundWave_6 extends ViewerPlugin {
 
       // First up, see if the uassets file has the Exports in it, or if it's been put in a separate *.uexp file
       boolean inUExp = false;
-      if (filesDirOffset == arcSize || filesDirOffset + 8 == arcSize || filesDirOffset + 12 == arcSize) {
+      if (filesDirOffset == arcSize || filesDirOffset + 8 == arcSize || filesDirOffset + 12 == arcSize || filesDirOffset + 16 == arcSize) {
         // probably in a separate *.uexp file - see if we can find one
         FileManipulator extractedFM = extractRelatedResource(fm, "uexp", true);
         //FileManipulator extractedFM = extractRelatedResource(fm, "uexp", false);

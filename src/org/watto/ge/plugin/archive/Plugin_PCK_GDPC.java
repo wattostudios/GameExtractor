@@ -42,7 +42,8 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Rogue Rocks");
+    setGames("Rogue Rocks",
+        "Lumencraft");
     setExtensions("pck"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -157,8 +158,8 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
 
         String extension = FilenameSplitter.getExtension(filename);
         if (extension.equals("stex")) {
-          offset += 32;
-          length -= 32;
+          //offset += 32;
+          //length -= 32;
         }
 
         //path,name,offset,length,decompLength,exporter
@@ -168,7 +169,7 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
       }
 
       fm.getBuffer().setBufferSize(512);
-      // move oggstr along a little bit, to the OGG file
+      // move oggstr along a little bit, to the OGG file.
       for (int i = 0; i < numFiles; i++) {
         Resource resource = resources[i];
         if (resource.getExtension().equals("oggstr")) {
@@ -254,6 +255,46 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
           resource.setOffset(offset);
           resource.setLength(length);
 
+        }
+        else if (resource.getExtension().equals("stex")) {
+          long offset = resource.getOffset();
+
+          fm.seek(offset);
+
+          fm.skip(28);
+
+          if (fm.readString(4).equals("WEBP")) {
+            offset += 32;
+            int length = (int) resource.getLength() - 32;
+
+            resource.setOffset(offset);
+            resource.setLength(length);
+            resource.setDecompressedLength(length);
+
+            String newName = resource.getName() + ".webp";
+            resource.setName(newName);
+            resource.setOriginalName(newName);
+
+            resource.forceNotAdded(true);
+          }
+          else {
+            fm.skip(1);
+
+            if (fm.readString(3).equals("PNG")) {
+              offset += 32;
+              int length = (int) resource.getLength() - 32;
+
+              resource.setOffset(offset);
+              resource.setLength(length);
+              resource.setDecompressedLength(length);
+
+              String newName = resource.getName() + ".png";
+              resource.setName(newName);
+              resource.setOriginalName(newName);
+
+              resource.forceNotAdded(true);
+            }
+          }
         }
       }
 

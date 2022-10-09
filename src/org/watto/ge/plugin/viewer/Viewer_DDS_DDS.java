@@ -18,12 +18,15 @@ import org.watto.ErrorLogger;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
+import org.watto.datatype.PalettedImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
 import org.watto.ge.helper.ImageFormatWriter;
 import org.watto.ge.helper.ImageManipulator;
+import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
 
 /**
@@ -700,8 +703,8 @@ public class Viewer_DDS_DDS extends ViewerPlugin {
         }
         else if (dxgiFormat == 98) {
           // DXGI_FORMAT_BC7_UNORM
-          ErrorLogger.log("[Viewer_DDS]: Unsupported Format: DX10: DXGI_FORMAT_BC7_UNORM");
-          throw new Exception();
+          imageResource = ImageFormatReader.readBC7(fm, width, height);
+          imageResource.addProperty("ImageFormat", "BC7");
         }
         else if (dxgiFormat == 99) {
           // DXGI_FORMAT_BC7_UNORM_SRGB
@@ -826,6 +829,10 @@ public class Viewer_DDS_DDS extends ViewerPlugin {
         imageResource = ImageFormatReader.readDXT5(fm, width, height);
         imageResource.addProperty("ImageFormat", "DXT5");
       }
+      else if (fourCC.equals("ATI1")) {
+        imageResource = ImageFormatReader.readBC4(fm, width, height);
+        imageResource.addProperty("ImageFormat", "BC4");
+      }
       else if (fourCC.equals("ATI2")) {
         imageResource = ImageFormatReader.readBC5(fm, width, height);
         imageResource.addProperty("ImageFormat", "BC5");
@@ -848,7 +855,22 @@ public class Viewer_DDS_DDS extends ViewerPlugin {
       else {
         if (/*flags2 == 32 &&*/ rgbBitCount == 8) {
           // Indexed pixel data (eg grayscale paletted)
-          imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
+
+          if (PaletteManager.hasPalettes()) {
+            //imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, PaletteManager.getCurrentPalette().getPalette());
+            int numPixels = width * height;
+            int[] pixels = new int[numPixels];
+
+            for (int i = 0; i < numPixels; i++) {
+              pixels[i] = ByteConverter.unsign(fm.readByte());
+            }
+
+            imageResource = new PalettedImageResource(pixels, width, height, PaletteManager.getCurrentPalette().getPalette());
+          }
+          else {
+            imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
+          }
+
           imageResource.addProperty("ImageFormat", "8BitPaletted");
         }
         else if (rgbBitCount == 16 && rBitMask == 31744 && gBitMask == 992 && bBitMask == 31 && rgbAlphaBitMask == 32768) {

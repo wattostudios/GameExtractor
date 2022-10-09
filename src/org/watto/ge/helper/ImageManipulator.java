@@ -135,6 +135,126 @@ public class ImageManipulator {
 
   /**
   **********************************************************************************************
+  This changes the order of the colors in the color palette. Basically, palette[] and newPaletteOrder[]
+  should have the same values in it, but in a different order, so this method will work out the
+  mapping and change the pixel values to match this new order
+  **********************************************************************************************
+  **/
+  public void swapPaletteOrder(int[] newPaletteOrder) {
+    // Just in case
+    if (palette == null || palette.getNumColors() <= 0) {
+      convertToPaletted();
+    }
+
+    // work out the new mappings
+    int numColors = newPaletteOrder.length;
+    int[] mapping = new int[numColors];
+
+    int[] oldPalette = palette.getPalette();
+    int oldNumColors = oldPalette.length;
+
+    for (int i = 0; i < numColors; i++) {
+      // assume colors are mostly unchanged in the palettes (also works as a fallback if the color can't be found)
+      mapping[i] = i;
+
+      int currentColor = newPaletteOrder[i];
+      try {
+        if (oldPalette[i] == currentColor) {
+          // matches
+          continue;
+        }
+      }
+      catch (Throwable t) {
+        continue; // also helps in case oldPalette is too small, even though they should match in length if people are nice 
+      }
+
+      // find the matching color
+      for (int o = 0; o < oldNumColors; o++) {
+        if (currentColor == oldPalette[o]) {
+          // match
+          mapping[i] = o;
+          break;
+        }
+      }
+    }
+
+    // change the pixels to match the new palette order
+    int numPixels = pixels.length;
+    for (int i = 0; i < numPixels; i++) {
+      pixels[i] = mapping[pixels[i]];
+    }
+
+    // finally, set the new palette
+    palette = new Palette(newPaletteOrder);
+  }
+
+  /**
+  **********************************************************************************************
+  You have an image with a palette. You're applying a completely different palette, and you need
+  to map all the colors from the existing palette into the new one, by best match. This is what
+  this method does. Used, for example, if you have a global color palette and you need to force
+  this image to conform to that palette, by closest color match.
+  **********************************************************************************************
+  **/
+  public void swapAndConvertPalette(int[] newPalette) {
+    // Just in case
+    if (palette == null || palette.getNumColors() <= 0) {
+      convertToPaletted();
+    }
+
+    /*
+    
+    // work out the new mappings
+    int[] oldPalette = palette.getPalette();
+    int oldNumColors = oldPalette.length;
+    int[] mapping = new int[oldNumColors];
+    
+    int newNumColors = newPalette.length;
+    
+    // Convert both palettes into colors, for quick comparison
+    ColorSplitAlpha[] oldColorPalette = new ColorSplitAlpha[oldNumColors];
+    ColorSplitAlpha[] newColorPalette = new ColorSplitAlpha[newNumColors];
+    
+    for (int i=0;i<oldNumColors;i++) {
+      oldColorPalette[i] = new ColorSplitAlpha(oldPalette[i]);
+    }
+    for (int j=0;j<newNumColors;j++) {
+      newColorPalette[j] = new ColorSplitAlpha(newPalette[j]);
+    }
+    
+    // for every color in the old palette, find the closest match in the new palette
+    for (int i = 0; i < oldNumColors; i++) {
+      ColorSplitAlpha oldColor = oldColorPalette[i];
+      
+      // Build an array
+      for (int j=0;j<newNumColors;j++) {
+        ColorSplitAlpha newColor = newColorPalette[i];
+        
+        // DO SOMETHING HERE - NOT FINISHED
+      }
+      
+      // sort the array
+      
+      // choose the best match
+    }
+    
+    
+    
+    // change the pixels to match the new palette
+    int numPixels = pixels.length;
+    for (int i = 0; i < numPixels; i++) {
+      pixels[i] = mapping[pixels[i]];
+    }
+    
+    // finally, set the new palette
+    palette = new Palette(newPalette);
+    */
+
+    ColorConverter.changePaletteMatch(this, new Palette(newPalette));
+  }
+
+  /**
+  **********************************************************************************************
   
   **********************************************************************************************
   **/
@@ -163,7 +283,6 @@ public class ImageManipulator {
   **/
   public ImageResource[] generateMipmaps() {
 
-    int[] mipmapPixels = getImagePixels();
     int mipmapWidth = getWidth();
     int mipmapHeight = getHeight();
 
@@ -176,9 +295,19 @@ public class ImageManipulator {
       mipmapHeight /= 2;
     }
 
-    // reset the width and height
-    mipmapWidth = getWidth();
-    mipmapHeight = getHeight();
+    return generateMipmaps(mipmapCount);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public ImageResource[] generateMipmaps(int mipmapCount) {
+
+    int[] mipmapPixels = getImagePixels();
+    int mipmapWidth = getWidth();
+    int mipmapHeight = getHeight();
 
     ImageResource[] imageResources = new ImageResource[mipmapCount];
     for (int i = 0; i < mipmapCount; i++) {
@@ -213,7 +342,6 @@ public class ImageManipulator {
     }
 
     return imageResources;
-
   }
 
   /**
@@ -373,6 +501,23 @@ public class ImageManipulator {
   **/
   public int[] getPixels() {
     return pixels;
+  }
+
+  /**
+  **********************************************************************************************
+  get the pixel indexes, but instead of returning int[], it returns byte[]
+  **********************************************************************************************
+  **/
+  public byte[] getPixelBytes() {
+
+    int numPixels = pixels.length;
+    byte[] pixelBytes = new byte[numPixels];
+
+    for (int i = 0; i < numPixels; i++) {
+      pixelBytes[i] = (byte) pixels[i];
+    }
+
+    return pixelBytes;
   }
 
   /**

@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -38,12 +39,13 @@ public class Plugin_PAK_PAKV11 extends ArchivePlugin {
     super("PAK_PAKV11", "PAK_PAKV11");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, true);
 
     setGames("Crimsonland",
-        "JYDGE");
+        "JYDGE",
+        "King Oddball");
     setExtensions("pak"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "Android");
 
     // MUST BE LOWER CASE !!!
     //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
@@ -159,6 +161,7 @@ public class Plugin_PAK_PAKV11 extends ArchivePlugin {
         // 4 - Unknown (1356998399)
         // 4 - Unknown (32)
         fm.skip(8);
+        //System.out.println(fm.readInt() + "\t" + fm.readInt());
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);
@@ -174,6 +177,93 @@ public class Plugin_PAK_PAKV11 extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
+  @Override
+  public void write(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      long archiveSize = 16;
+      long directorySize = 4;
+      long filesSize = 0;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        filesSize += resource.getDecompressedLength();
+        directorySize += 16 + resource.getNameLength() + 1;
+      }
+      archiveSize += filesSize + directorySize;
+
+      long directoryOffset = 16 + filesSize;
+
+      // Write Header Data
+
+      // 4 - Header ("PAK" + null)
+      fm.writeString("PAK");
+      fm.writeByte(0);
+
+      // 4 - Version ("V11" + null)
+      fm.writeString("V11");
+      fm.writeByte(0);
+
+      // 4 - Directory Offset
+      fm.writeInt((int) directoryOffset);
+
+      // 4 - Archive Length
+      fm.writeInt((int) archiveSize);
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      write(resources, fm);
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      // 4 - Number of Files
+      fm.writeInt(numFiles);
+
+      long offset = 16;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long decompLength = resource.getDecompressedLength();
+
+        // X - Filename
+        // 1 - null Filename Terminator
+        fm.writeString(resource.getName());
+        fm.writeByte(0);
+
+        // 4 - File Offset
+        fm.writeInt((int) offset);
+
+        // 4 - File Length
+        fm.writeInt((int) decompLength);
+
+        // 4 - Unknown (1356998399)
+        fm.writeInt(1356998399);
+
+        // 4 - Unknown (32)
+        fm.writeInt(32);
+
+        offset += decompLength;
+      }
+
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

@@ -14,27 +14,24 @@
 
 package org.watto.ge.plugin.exporter;
 
-import java.io.IOException;
-import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorInputStream;
-import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorOutputStream;
 import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.FileBuffer;
 import org.watto.io.buffer.XORRepeatingKeyBufferWrapper;
-import org.watto.io.stream.ManipulatorInputStream;
-import org.watto.io.stream.ManipulatorOutputStream;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
 
 public class Exporter_Custom_RPKG_GKPR_Multi extends ExporterPlugin {
 
   static Exporter_Custom_RPKG_GKPR_Multi instance = new Exporter_Custom_RPKG_GKPR_Multi();
 
-  static BlockLZ4CompressorInputStream readSource;
+  byte[] buffer = null;
 
-  static long readLength = 0;
+  int bufferPos = 0;
 
-  static int currentByte = 0;
+  int bufferLength = 0;
 
   /**
   **********************************************************************************************
@@ -44,8 +41,6 @@ public class Exporter_Custom_RPKG_GKPR_Multi extends ExporterPlugin {
   public static Exporter_Custom_RPKG_GKPR_Multi getInstance() {
     return instance;
   }
-
-  FileManipulator fm;
 
   /**
   **********************************************************************************************
@@ -65,20 +60,12 @@ public class Exporter_Custom_RPKG_GKPR_Multi extends ExporterPlugin {
   public boolean available() {
     try {
 
-      if (readLength > 0) {
-        currentByte = readSource.read();
-        readLength--;
-        if (currentByte >= 0) {
-          return true;
-        }
-      }
+      return (bufferPos < bufferLength);
 
-      return false;
     }
     catch (Throwable t) {
       ErrorLogger.log(t);
       return false;
-      //return true;
     }
   }
 
@@ -89,14 +76,7 @@ public class Exporter_Custom_RPKG_GKPR_Multi extends ExporterPlugin {
   **/
   @Override
   public void close() {
-    try {
-      fm.close();
-      readSource.close();
-      readSource = null;
-    }
-    catch (Throwable t) {
-      readSource = null;
-    }
+    buffer = null;
   }
 
   /**
@@ -107,57 +87,41 @@ public class Exporter_Custom_RPKG_GKPR_Multi extends ExporterPlugin {
   @Override
   public void open(Resource source) {
     try {
+      // reset now, so if there's any errors, it'll return nothing
+      bufferPos = 0;
+      bufferLength = 0;
 
-      //fm = new FileManipulator(source.getSource(), false);
-      //fm.setBuffer(new XORRepeatingKeyBufferWrapper(fm.getBuffer(), new int[] { 220, 69, 166, 156, 211, 114, 76, 171 }));
+      int compLength = (int) source.getLength();
+      int decompLength = (int) source.getDecompressedLength();
 
-      fm = new FileManipulator(new XORRepeatingKeyBufferWrapper(new FileBuffer(source.getSource(), false), new int[] { 220, 69, 166, 156, 211, 114, 76, 171 }));
-
+      // Read in the bytes (and decrypt it)
+      FileManipulator fm = new FileManipulator(new XORRepeatingKeyBufferWrapper(new FileBuffer(source.getSource(), false), new int[] { 220, 69, 166, 156, 211, 114, 76, 171 }));
       fm.seek(source.getOffset());
+      byte[] compBytes = fm.readBytes(compLength);
+      fm.close();
 
-      readSource = new BlockLZ4CompressorInputStream(new ManipulatorInputStream(fm));
-      readLength = source.getDecompressedLength();
+      // Pass it into the LZ4 Decompressor
+      LZ4Factory factory = LZ4Factory.fastestInstance();
+      LZ4FastDecompressor decompressor = factory.fastDecompressor();
+      buffer = new byte[decompLength];
+      decompressor.decompress(compBytes, 0, buffer, 0, decompLength);
+
+      // ready to read from the buffer
+      bufferPos = 0;
+      bufferLength = decompLength;
     }
     catch (Throwable t) {
+      ErrorLogger.log(t);
     }
   }
 
   /**
   **********************************************************************************************
-  
+  NOT IMPLEMENTED
   **********************************************************************************************
   **/
   @Override
   public void pack(Resource source, FileManipulator destination) {
-    BlockLZ4CompressorOutputStream outputStream = null;
-    try {
-
-      destination.setBuffer(new XORRepeatingKeyBufferWrapper(destination.getBuffer(), new int[] { 220, 69, 166, 156, 211, 114, 76, 171 }));
-
-      outputStream = new BlockLZ4CompressorOutputStream(new ManipulatorOutputStream(destination));
-
-      ExporterPlugin exporter = source.getExporter();
-      exporter.open(source);
-
-      while (exporter.available()) {
-        outputStream.write(exporter.read());
-      }
-
-      exporter.close();
-
-      outputStream.finish();
-
-    }
-    catch (Throwable t) {
-      logError(t);
-      if (outputStream != null) {
-        try {
-          outputStream.finish();
-        }
-        catch (IOException e) {
-        }
-      }
-    }
   }
 
   /**
@@ -168,12 +132,13 @@ public class Exporter_Custom_RPKG_GKPR_Multi extends ExporterPlugin {
   @Override
   public int read() {
     try {
-      // NOTE: The actual reading of the byte is done in available()
+      int currentByte = buffer[bufferPos];
+      bufferPos++;
       return currentByte;
     }
     catch (Throwable t) {
       t.printStackTrace();
-      readLength = 0;
+      bufferPos = bufferLength;
       return 0;
     }
   }

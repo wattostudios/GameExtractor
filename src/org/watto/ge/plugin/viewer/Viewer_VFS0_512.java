@@ -24,6 +24,7 @@ import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_VFS0;
+import org.watto.ge.plugin.archive.Plugin_VFS0_2;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
 
@@ -70,7 +71,7 @@ public class Viewer_VFS0_512 extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (plugin instanceof Plugin_VFS0) {
+      if (plugin instanceof Plugin_VFS0 || plugin instanceof Plugin_VFS0_2) {
         rating += 50;
       }
       else if (!(plugin instanceof AllFilesPlugin)) {

@@ -40,7 +40,7 @@ public class Viewer_VPK_VPK_VTEXC extends ViewerPlugin {
   **********************************************************************************************
   **/
   public Viewer_VPK_VPK_VTEXC() {
-    super("VPK_VPK_VTEXC", "Value VTEX_C Image");
+    super("VPK_VPK_VTEXC", "Valve VTEX_C Image");
     setExtensions("vtex_c");
 
     setGames("Valve Engine");

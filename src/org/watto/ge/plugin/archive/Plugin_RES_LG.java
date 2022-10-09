@@ -193,6 +193,8 @@ public class Plugin_RES_LG extends ArchivePlugin {
 
         String filename = Resource.generateFilename(i) + extension;
 
+        FieldValidator.checkOffset(offset, arcSize);
+
         if (compressionType == 1 || compressionType == 3) {
           // compressed
           //path,name,offset,length,decompLength,exporter

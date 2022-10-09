@@ -189,7 +189,10 @@ public class TemporarySettings {
     try {
       String result = settings.get(code);
 
-      if (result.equals("true")) {
+      if (result == null) {
+        return false;
+      }
+      else if (result.equals("true")) {
         return true;
       }
       else {

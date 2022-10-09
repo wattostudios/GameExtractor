@@ -18,6 +18,7 @@ import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Custom_RGSSAD_RGSSAD;
+import org.watto.io.converter.ByteConverter;
 
 /***********************************************************************************************
 Reading and Buffering data that comes from an <i>ExporterPlugin</i> data source. Used for thumbnail
@@ -246,6 +247,26 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
   }
 
   /***********************************************************************************************
+  
+  ***********************************************************************************************/
+  @Override
+  public int peek() {
+    try {
+
+      checkFill(1);
+
+      int readData = ByteConverter.unsign(buffer[bufferLevel]);
+
+      return readData;
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return -1;
+    }
+  }
+
+  /***********************************************************************************************
   Reads a single byte from the buffer
   @return the byte
   ***********************************************************************************************/
@@ -389,8 +410,9 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
     }
     else if (offset == 0) {
       // take the exporter right back to the beginning of the file
-      exporter.close();
-      exporter.open(resource);
+      //exporter.close();
+      //exporter.open(resource);
+      exporter.closeAndReopen(resource); // 3.14 implemented this so exporters that decompress the full file might retain it between reloads.
       fill(); // does a flush() as part of this.
     }
     else if (offset > getPointer()) {

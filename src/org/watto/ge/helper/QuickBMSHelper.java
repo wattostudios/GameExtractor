@@ -171,6 +171,13 @@ public class QuickBMSHelper {
     script += "      comtype RFPK\n";
     script += "    elif INCOMTYPE = RNC\n";
     script += "      comtype RNC\n";
+    script += "    elif INCOMTYPE = ZIPX\n";
+    script += "      comtype deflate\n";
+    //script += "      encryption rc4 TMP \"\" 0 4\n"; // LEGO Compression of TXT files
+    script += "    elif INCOMTYPE = LZMA\n";
+    script += "      comtype LZMA\n";
+    script += "    elif INCOMTYPE = ZLIB\n";
+    script += "      comtype ZLIB\n";
     //script += "    elif INCOMTYPE = LZ77EA_970\n";
     //script += "      comtype LZ77EA_970\n";
     script += "    endif\n";

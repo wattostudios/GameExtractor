@@ -448,6 +448,7 @@ public class Plugin_ASSETS_20 extends ArchivePlugin {
           byte[] dirBytes = new byte[decompDataHeaderSize];
           int decompWritePos = 0;
           Exporter_LZ4 exporter = Exporter_LZ4.getInstance();
+
           exporter.open(fm, compDataHeaderSize, decompDataHeaderSize);
 
           for (int b = 0; b < decompDataHeaderSize; b++) {
@@ -804,10 +805,12 @@ public class Plugin_ASSETS_20 extends ArchivePlugin {
               }
             }
             else {
-              if (unityFS) {
-                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
-              }
-              else {
+              // 3.14
+              //if (unityFS) {
+              //  fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              //}
+              //else {
+              try {
                 int mapping = fileTypeMapping[fileTypeCode];
                 if (mapping < 0) {
                   fileType = Unity3DHelper.getFileExtension(fileTypeCode);
@@ -816,6 +819,10 @@ public class Plugin_ASSETS_20 extends ArchivePlugin {
                   fileType = Unity3DHelper.getFileExtension(mapping);
                 }
               }
+              catch (Throwable t) {
+                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              }
+              //}
             }
 
             /*

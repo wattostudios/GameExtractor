@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2021 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ public class Plugin_OPK_QN extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_OPK_QN() {
@@ -55,7 +55,7 @@ public class Plugin_OPK_QN extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -149,8 +149,18 @@ public class Plugin_OPK_QN extends ArchivePlugin {
         int decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+        if (length == decompLength) {
+          // not compressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else {
+          // compressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+        }
 
         TaskProgressManager.setValue(i);
       }

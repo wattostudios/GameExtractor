@@ -379,9 +379,15 @@ public class ByteArrayConverter implements Converter {
     byte[] bArray = new byte[in.length() / 2];
 
     String text = in.toString();
+    int textLength = text.length();
+    if (textLength%2 == 1) {
+      // odd length for some reason - fix it by adding "0" to the start of the last value
+      text = text.substring(0,textLength-1) + "0" + text.substring(textLength-1);
+      textLength = text.length();
+    }
 
     int bPos = 0;
-    for (int i = 0;i < text.length();i += 2) {
+    for (int i = 0;i < textLength;i += 2) {
       byte b = 0;
 
       char high = text.charAt(i);

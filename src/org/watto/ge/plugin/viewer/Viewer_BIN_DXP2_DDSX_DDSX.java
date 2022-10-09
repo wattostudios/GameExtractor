@@ -29,6 +29,7 @@ import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_BIN_DXP2;
+import org.watto.ge.plugin.archive.Plugin_BIN_DXP2_2;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
@@ -78,7 +79,7 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (plugin instanceof Plugin_BIN_DXP2) {
+      if (plugin instanceof Plugin_BIN_DXP2 || plugin instanceof Plugin_BIN_DXP2_2) {
         rating += 50;
       }
       else if (!(plugin instanceof AllFilesPlugin)) {
@@ -187,7 +188,7 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
         // 4 - DDS Format (DXT1/DXT3/DXT5/(byte)21/(byte)50)
         byte[] imageFormatBytes = fm.readBytes(4);
         imageFormat = StringConverter.convertLittle(imageFormatBytes);
-        if (imageFormat.equals("DXT1") || imageFormat.equals("DXT3") || imageFormat.equals("DXT5")) {
+        if (imageFormat.equals("DXT1") || imageFormat.equals("DXT3") || imageFormat.equals("DXT5") || imageFormat.equals("BC7 ") || imageFormat.equals("ATI2") || imageFormat.equals("ATI1")) {
           //
         }
         else {
@@ -239,6 +240,28 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
         fm = new FileManipulator(new ByteBuffer(decompBytes));
       }
 
+      if (Archive.getReadPlugin() instanceof Plugin_BIN_DXP2_2) {
+        // the biggest mipmap is at the end of the file,  not the beginning, so need to skip to it.
+
+        int decompLength = 0;
+        if (imageFormat.equals("DXT1")) {
+          decompLength = width * height / 2;
+        }
+        else if (imageFormat.equals("DXT3") || imageFormat.equals("DXT5") || imageFormat.equals("ATI1") || imageFormat.equals("ATI2") || imageFormat.equals("BC7 ") || imageFormat.equals("50")) {
+          decompLength = width * height;
+        }
+        else if (imageFormat.equals("21")) {
+          decompLength = width * height * 4;
+        }
+
+        if (decompLength != 0) {
+          int skipSize = (int) (fm.getLength() - decompLength - fm.getOffset());
+          if (skipSize > 0) {
+            fm.skip(skipSize);
+          }
+        }
+      }
+
       // X - Pixel Data
       ImageResource imageResource = null;
 
@@ -250,6 +273,15 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
       }
       else if (imageFormat.equals("DXT5")) {
         imageResource = ImageFormatReader.readDXT5(fm, width, height);
+      }
+      else if (imageFormat.equals("BC7 ")) {
+        imageResource = ImageFormatReader.readBC7(fm, width, height);
+      }
+      else if (imageFormat.equals("ATI1")) {
+        imageResource = ImageFormatReader.readATI1(fm, width, height);
+      }
+      else if (imageFormat.equals("ATI2")) {
+        imageResource = ImageFormatReader.readATI2(fm, width, height);
       }
       else if (imageFormat.equals("21")) {
         imageResource = ImageFormatReader.readRGBA(fm, width, height);

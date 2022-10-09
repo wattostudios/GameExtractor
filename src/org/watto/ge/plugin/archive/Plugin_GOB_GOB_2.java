@@ -3,7 +3,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -25,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -46,9 +47,14 @@ public class Plugin_GOB_GOB_2 extends ArchivePlugin {
     setProperties(true, true, true, true);
 
     setExtensions("gob");
-    setGames("Indiana Jones And The Infernal Machine",
+    setGames("Droidworks",
+        "Indiana Jones And The Infernal Machine",
         "Jedi Knight: Mysteries Of The Sith");
     setPlatforms("PC");
+
+    setFileTypes(new FileType("rle", "Bitmap Image", FileType.TYPE_IMAGE));
+
+    setTextPreviewExtensions("3do", "ai", "bbl", "brf", "cog", "ifc", "inv", "jkl", "key", "mis", "pup", "snd", "spr", "sub", "tpc", "pls", "rec"); // LOWER CASE
 
   }
 

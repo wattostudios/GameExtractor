@@ -21,6 +21,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
 import org.watto.io.converter.ByteConverter;
 import org.watto.task.TaskProgressManager;
 
@@ -33,7 +34,7 @@ public class Plugin_SB extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_SB() {
@@ -55,7 +56,7 @@ public class Plugin_SB extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -70,6 +71,11 @@ public class Plugin_SB extends ArchivePlugin {
 
       getDirectoryFile(fm.getFile(), "toc");
       rating += 25;
+
+      if (FilenameSplitter.getExtension(fm.getFile()).equalsIgnoreCase("toc")) {
+        // double-clicked the TOC file, don't match here (causes issues for other plugins)
+        rating = 0;
+      }
 
       return rating;
 

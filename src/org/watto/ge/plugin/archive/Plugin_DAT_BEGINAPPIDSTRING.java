@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.Arrays;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -32,6 +33,8 @@ import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.LongConverter;
+import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -53,17 +56,36 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, true, false);
 
-    setGames("LEGO Batman 2",
-        "LEGO Batman 3",
-        "LEGO Indiana Jones",
+    setGames("LEGO Batman",
+        "LEGO Batman 2: DC Super Heroes",
+        "LEGO Batman 3: Beyond Gotham",
+        "LEGO City Undercover",
+        "LEGO DC Super-Villains",
+        "LEGO Harry Potter: Years 1-4",
+        "LEGO Harry Potter: Years 5-7",
+        "LEGO Indiana Jones: The Original Adventures",
+        "LEGO Indiana Jones 2: The Adventure Continues",
+        "LEGO Jurassic Park",
         "LEGO Lord of the Rings",
+        "LEGO Marvel Super Heroes",
+        "LEGO Marvel Super Heroes 2",
+        "LEGO Marvel's Avengers",
         "LEGO Pirates of the Caribbean",
-        "LEGO The Hobbit");
+        "LEGO Star Wars: The Complete Saga",
+        "LEGO Star Wars: The Force Awakens",
+        "LEGO Star Wars III: The Clone Wars",
+        "LEGO The Hobbit",
+        "LEGO The Incredibles",
+        "LEGO Worlds",
+        "The LEGO Movie Videogame",
+        "The LEGO Movie 2 Videogame",
+        "The LEGO Ninjago Movie Video Game");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("ai2", "AI Level Path", FileType.TYPE_OTHER),
+        new FileType("adp", "WAV Audio", FileType.TYPE_AUDIO),
         new FileType("an3", "Animation", FileType.TYPE_OTHER),
         new FileType("ani", "Animation", FileType.TYPE_OTHER),
         new FileType("anm", "Animation", FileType.TYPE_OTHER),
@@ -296,6 +318,7 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
    * Reads an [archive] File into the Resources
    **********************************************************************************************
    **/
+  @SuppressWarnings("unused")
   @Override
   public Resource[] read(File path) {
     try {
@@ -352,229 +375,489 @@ public class Plugin_DAT_BEGINAPPIDSTRING extends ArchivePlugin {
       }
       */
 
+      Resource[] resources = null;
+
       // 4 - Unknown (-5)
       fm.skip(4);
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
 
-      Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles);
+      if (numFiles == 876823342) {
+        // newer format
 
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        // 4 - File Offset [*256] [+FileOffsetAdditionalValue]
-        int offset = (fm.readInt() << 8);
-        FieldValidator.checkOffset(offset, arcSize);
+        // 4 - Header (.CC4) (already read)
 
-        // 4 - Compressed Length
-        int length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
+        // 4 - Header (0TAD)
+        // 4 - Unknown (-12)
+        fm.skip(8);
 
-        // 4 - Decompressed Length
-        int decompLength = fm.readInt();
-        FieldValidator.checkLength(decompLength);
+        // 4 - Version (2)
+        int version = IntConverter.changeFormat(fm.readInt());
 
-        // 3 - Unknown
-        fm.skip(3);
+        // 4 - Number of Files
+        numFiles = IntConverter.changeFormat(fm.readInt());
+        FieldValidator.checkNumFiles(numFiles);
 
-        // 1 - File Offset Additional Value
-        int additionalOffset = ByteConverter.unsign(fm.readByte());
-        offset += additionalOffset;
+        resources = new Resource[numFiles];
+        TaskProgressManager.setMaximum(numFiles);
 
-        String filename = Resource.generateFilename(i);
-
-        //path,name,offset,length,decompLength,exporter
-        if (length == decompLength) {
-          // no compression
-          resources[i] = new Resource(path, filename, offset, length);
-        }
-        else {
-          // lots of compressed blocks
-          resources[i] = new Resource(path, filename, offset, length, decompLength);
-        }
-
-        TaskProgressManager.setValue(i);
-      }
-
-      // 4 - Number of Names
-      int numNames = fm.readInt();
-      FieldValidator.checkNumFiles(numNames);
-
-      // skip over the name directory to get the actual names first
-      long nameDirOffset = fm.getOffset();
-      fm.skip(numNames * 12);
-
-      // 4 - Names Directory Length
-      int nameDirLength = fm.readInt();
-
-      nameEntrySize = 12;
-      try {
-        FieldValidator.checkLength(nameDirLength, arcSize);
-      }
-      catch (Throwable t) {
-        // this was for name entries of length 12 (newer games - eg Hobbit, LotR).
-        // try again for name entries of length 8 (older games - eg Indiana Jones).
-
-        nameEntrySize = 8;
-
-        fm.seek(nameDirOffset + (numNames * 8));
+        // 4 - Number of Names
+        int numNames = IntConverter.changeFormat(fm.readInt());
+        FieldValidator.checkNumFiles(numNames);
 
         // 4 - Names Directory Length
-        nameDirLength = fm.readInt();
+        int nameDirLength = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkLength(nameDirLength, arcSize);
+
+        // read the names into memory
+        byte[] nameBytes = fm.readBytes(nameDirLength);
+        FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+
+        // 4 - Unknown
+        fm.skip(4);
+
+        // skip over the name directory to get the actual names first
+        long nameDirOffset = fm.getOffset();
+
+        int nameBlockSize = 10; // 10 for Avengers, 12 for all others in the new format
+        if (version >= 2) {
+          nameBlockSize += 2;
+        }
+        fm.skip(numNames * nameBlockSize);
+
+        // 4 - Unknown
+        int bohVersion = IntConverter.changeFormat(fm.readInt());
+
+        // 4 - Number of Files
+        fm.skip(4);
+
+        for (int i = 0; i < numFiles; i++) {
+          long offset = 0;
+          if (bohVersion <= -11) {
+            // 8 - Offset
+            byte[] offsetBytes = fm.readBytes(8);
+            offset = LongConverter.convertBig(offsetBytes);
+          }
+          else {
+            // 4 - Offset
+            offset = IntConverter.changeFormat(fm.readInt());
+          }
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - Compressed Length
+          int length = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - Decompressed Length
+          int decompLength = IntConverter.changeFormat(fm.readInt());
+
+          String filename = Resource.generateFilename(i);
+
+          // 4 - Extra Info
+          if (bohVersion <= -10) {
+            int packed = decompLength;
+            decompLength &= 0x7fffffff;
+            packed >>= 31;
+            if (packed != 0) {
+              packed = 2;
+            }
+
+          }
+          else {
+            int packed = fm.readByte();
+            fm.skip(2);
+            int offset2 = ByteConverter.unsign(fm.readByte());
+            offset <<= 8;
+            offset |= offset2;
+          }
+
+          //path,name,offset,length,decompLength,exporter
+          if (length == decompLength) {
+            // no compression
+            resources[i] = new Resource(path, filename, offset, length);
+          }
+          else {
+            // lots of compressed blocks
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
+
+          TaskProgressManager.setValue(i);
+        }
+
+        // Now read the name CRC directory
+        long crcDirOffset = fm.getOffset();
+
+        // read as 64-bits
+        long[] crcs64 = new long[numFiles];
+        for (int i = 0; i < numFiles; i++) {
+          // 8 - Filename CRC
+          byte[] crcBytes = fm.readBytes(8);
+          crcs64[i] = LongConverter.convertBig(crcBytes);
+        }
+
+        fm.relativeSeek(crcDirOffset);
+
+        // read as 32-bits
+        int[] crcs32 = new int[numFiles];
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - Filename CRC
+          byte[] crcBytes = fm.readBytes(4);
+          crcs32[i] = IntConverter.convertBig(crcBytes);
+        }
+
+        // go back and process the filenames, now that we have the CRC's
+        fm.seek(nameDirOffset);
+
+        int currentID = 0;
+        String[] folderNames = new String[numNames];
+
+        String emptyString = "";
+        Arrays.fill(folderNames, emptyString);
+
+        String[] filenames = new String[numNames];
+        for (int i = 0; i < numNames; i++) {
+          TaskProgressManager.setValue(i);
+
+          // 4 - Name Offset
+          long filenameOffset = IntConverter.changeFormat(fm.readInt());
+          if (filenameOffset == -1) {
+            // leave it
+          }
+          else {
+            filenameOffset = IntConverter.unsign((int) filenameOffset);
+            FieldValidator.checkOffset(filenameOffset, nameDirLength);
+          }
+
+          // 2 - Folder ID
+          int folderID = ShortConverter.changeFormat(fm.readShort());
+          if (folderID != -1) {
+            folderID = ShortConverter.unsign((short) folderID);
+          }
+
+          if (version >= 2) {
+            // 2 - Unknown ID
+            fm.skip(2);
+          }
+
+          // 2 - Unknown ID
+          fm.skip(2);
+
+          // 2 - File ID
+          int fileID = ShortConverter.unsign(ShortConverter.changeFormat(fm.readShort()));
+
+          if (i == numNames - 1) {
+            fileID = currentID;
+          }
+
+          String filename = "";
+          if (filenameOffset != -1) {
+            nameFM.relativeSeek(filenameOffset);
+            filename = nameFM.readNullString();
+          }
+
+          if (folderID != -1) {
+            String folderName = folderNames[folderID];
+            if (folderName.equals(emptyString)) {
+              // no folder
+            }
+            else {
+              filename = folderNames[folderID] + "\\" + filename;
+            }
+          }
+
+          if (fileID != 0) {
+            filenames[currentID] = filename;
+            currentID++;
+          }
+          else {
+            folderNames[i] = filename;
+          }
+
+          // now work out the CRC of the name, so we know which file this name belongs to
+          String actualName = filename.toUpperCase();
+          //if (actualName.charAt(0) == '\\') { // should be handled in the branch above
+          //  actualName = actualName.substring(1);
+          //}
+          int nameLength = actualName.length();
+
+          // first try as 64-bit
+          long crc = 0xcbf29ce484222325l;
+          for (int j = 0; j < nameLength; j++) {
+            byte character = (byte) actualName.charAt(j);
+            crc ^= character;
+            crc *= 1099511628211l;
+          }
+
+          // now see if we can find the matching CRC
+          int nameIndex = -1;
+          for (int j = 0; j < numFiles; j++) {
+            if (crc == crcs64[j]) {
+              // found it
+              nameIndex = j;
+              break;
+            }
+          }
+
+          if (nameIndex == -1) {
+            // not found as 64-bit, so try 32-bit
+
+            int crc32 = 0x811c9dc5;
+            for (int j = 0; j < nameLength; j++) {
+              byte character = (byte) actualName.charAt(j);
+              crc32 ^= character;
+              crc32 *= 0x199933;
+            }
+
+            // now see if we can find the matching CRC
+            nameIndex = -1;
+            for (int j = 0; j < numFiles; j++) {
+              if (crc32 == crcs32[j]) {
+                // found it
+                nameIndex = j;
+                break;
+              }
+            }
+          }
+
+          if (nameIndex == -1) {
+            // not found
+            ErrorLogger.log("[DAT_BEGINAPPIDSTRING]: Name CRC not found: " + crc); // usually just for directories, which is ok
+          }
+          else {
+            Resource resource = resources[nameIndex];
+            resource.setName(actualName);
+            resource.setOriginalName(actualName);
+          }
+
+        }
+
+        nameFM.close();
+
       }
+      else {
+        // older format
 
-      // read the names into memory
-      byte[] nameBytes = fm.readBytes(nameDirLength);
-      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+        FieldValidator.checkNumFiles(numFiles);
 
-      // Now read the name CRC directory
-      int[] crcs = new int[numFiles];
-      for (int i = 0; i < numFiles; i++) {
-        // 4 - Filename CRC
-        crcs[i] = fm.readInt();
-      }
+        resources = new Resource[numFiles];
+        TaskProgressManager.setMaximum(numFiles);
 
-      // go back and process the names directory (and build the actual filenames)
-      fm.seek(nameDirOffset);
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - File Offset [*256] [+FileOffsetAdditionalValue]
+          int offset = (fm.readInt() << 8);
+          FieldValidator.checkOffset(offset, arcSize);
 
-      /*
-      String[] names = new String[numNames];
-      for (int i = 0; i < numNames; i++) {
+          // 4 - Compressed Length
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - Decompressed Length
+          int decompLength = fm.readInt();
+          FieldValidator.checkLength(decompLength);
+
+          // 3 - Unknown
+          fm.skip(3);
+
+          // 1 - File Offset Additional Value
+          int additionalOffset = ByteConverter.unsign(fm.readByte());
+          offset += additionalOffset;
+
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          if (length == decompLength) {
+            // no compression
+            resources[i] = new Resource(path, filename, offset, length);
+          }
+          else {
+            // lots of compressed blocks
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
+
+          TaskProgressManager.setValue(i);
+        }
+
+        // 4 - Number of Names
+        int numNames = fm.readInt();
+        FieldValidator.checkNumFiles(numNames);
+
+        // skip over the name directory to get the actual names first
+        long nameDirOffset = fm.getOffset();
+        fm.skip(numNames * 12);
+
+        // 4 - Names Directory Length
+        int nameDirLength = fm.readInt();
+
+        nameEntrySize = 12;
+        try {
+          //FieldValidator.checkLength(nameDirLength, arcSize);
+          FieldValidator.checkOffset(nameDirOffset + nameDirLength, arcSize);
+        }
+        catch (Throwable t) {
+          // this was for name entries of length 12 (newer games - eg Hobbit, LotR).
+          // try again for name entries of length 8 (older games - eg Indiana Jones).
+
+          nameEntrySize = 8;
+
+          fm.seek(nameDirOffset + (numNames * 8));
+
+          // 4 - Names Directory Length
+          nameDirLength = fm.readInt();
+          FieldValidator.checkLength(nameDirLength, arcSize);
+        }
+
+        // read the names into memory
+        byte[] nameBytes = fm.readBytes(nameDirLength);
+        FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+
+        // Now read the name CRC directory
+        int[] crcs = new int[numFiles];
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - Filename CRC
+          crcs[i] = fm.readInt();
+        }
+
+        // go back and process the names directory (and build the actual filenames)
+        fm.seek(nameDirOffset);
+
+        /*
+        String[] names = new String[numNames];
+        for (int i = 0; i < numNames; i++) {
         // 2 - Next Name ID
         short nextID = fm.readShort();
-      
+        
         // 2 - Parent Name ID
         short parentID = fm.readShort();
-      
+        
         // 4 - Name Offset (relative to the start of the Names Directory)
         int nameOffset = fm.readInt();
         FieldValidator.checkOffset(nameOffset, nameDirLength);
-      
+        
         // 4 - Unknown
         fm.skip(4);
-      
+        
         // get the actual name
         nameFM.relativeSeek(nameOffset);
         String name = nameFM.readNullString();
-      
+        
         // work out the parents, set the directory name for this file
         String parentName = null;
         if (parentID != 0) {
           parentName = names[parentID];
           name = parentName + name;
         }
-      
+        
         if (nextID > 0) {
           // a folder
           name += "\\";
         }
-      
+        
         names[i] = name;
         System.out.println(name);
-      }
-      */
+        }
+        */
 
-      // process the names directory, noting that the outer loop is for the number of FILES, and there's an inner loop as well. Complicated logic.
-      String[] names = new String[numNames];
-      int currentName = 0;
-      for (int i = 0; i < numFiles; i++) {
-        TaskProgressManager.setValue(i);
+        // process the names directory, noting that the outer loop is for the number of FILES, and there's an inner loop as well. Complicated logic.
+        String[] names = new String[numNames];
+        int currentName = 0;
+        for (int i = 0; i < numFiles; i++) {
+          TaskProgressManager.setValue(i);
 
-        short nextID = 999; // dummy to start the loop
-        String fullPath = "";
-        String name = "";
+          short nextID = 999; // dummy to start the loop
+          String fullPath = "";
+          String name = "";
 
-        while (nextID > 0) {
-          // 2 - Next Name ID
-          nextID = fm.readShort();
+          while (nextID > 0) {
+            // 2 - Next Name ID
+            nextID = fm.readShort();
 
-          // 2 - Previous Name ID
-          short previousID = fm.readShort();
+            // 2 - Previous Name ID
+            short previousID = fm.readShort();
 
-          // 4 - Name Offset (relative to the start of the Names Directory)
-          int nameOffset = fm.readInt();
-          if (nameOffset >= 0) { // want to allow negatives, just set their names to "". Want to still fail if the offset is too long
-            FieldValidator.checkOffset(nameOffset, nameDirLength);
+            // 4 - Name Offset (relative to the start of the Names Directory)
+            int nameOffset = fm.readInt();
+            if (nameOffset >= 0) { // want to allow negatives, just set their names to "". Want to still fail if the offset is too long
+              FieldValidator.checkOffset(nameOffset, nameDirLength);
+            }
+
+            if (nameEntrySize == 12) {
+              // 4 - Unknown
+              fm.skip(4);
+            }
+
+            // get the actual name
+            if (nameOffset >= 0) {
+              nameFM.relativeSeek(nameOffset);
+              name = nameFM.readNullString();
+            }
+            else {
+              name = "";
+            }
+
+            // now do some processing for the parents
+            //String fullPath = "";
+            if (previousID != 0) {
+              fullPath = names[previousID];
+            }
+
+            names[currentName] = fullPath;
+
+            if (nextID > 0) { // a folder
+              String tempParentName = names[previousID];
+              if (tempParentName != null && !tempParentName.equals("")) {
+                String oldName = "\\" + tempParentName + "\\";
+                int oldNamePos = fullPath.lastIndexOf(oldName);
+                if (oldNamePos >= 0) {
+                  fullPath = fullPath.substring(0, oldNamePos);
+                }
+              }
+              if (!name.equals("")) {
+                fullPath += name + "\\";
+              }
+
+            }
+            currentName++;
           }
 
-          if (nameEntrySize == 12) {
-            // 4 - Unknown
-            fm.skip(4);
+          String actualName = fullPath + name;
+
+          // now work out the CRC of the name, so we know which file this name belongs to
+          actualName = actualName.toUpperCase();
+          int nameLength = actualName.length();
+
+          int crc = 0x811c9dc5;
+          for (int j = 0; j < nameLength; j++) {
+            byte character = (byte) actualName.charAt(j);
+            crc ^= character;
+            crc *= 0x199933;
           }
 
-          // get the actual name
-          if (nameOffset >= 0) {
-            nameFM.relativeSeek(nameOffset);
-            name = nameFM.readNullString();
+          // now see if we can find the matching CRC
+          int nameIndex = -1;
+          for (int j = 0; j < numFiles; j++) {
+            if (crc == crcs[j]) {
+              // found it
+              nameIndex = j;
+              break;
+            }
+          }
+
+          if (nameIndex == -1) {
+            // not found
+            ErrorLogger.log("[DAT_BEGINAPPIDSTRING]: Name CRC not found: " + crc);
           }
           else {
-            name = "";
+            Resource resource = resources[nameIndex];
+            resource.setName(actualName);
+            resource.setOriginalName(actualName);
           }
 
-          // now do some processing for the parents
-          //String fullPath = "";
-          if (previousID != 0) {
-            fullPath = names[previousID];
-          }
-
-          names[currentName] = fullPath;
-
-          if (nextID > 0) { // a folder
-            String tempParentName = names[previousID];
-            if (!tempParentName.equals("")) {
-              String oldName = "\\" + tempParentName + "\\";
-              int oldNamePos = fullPath.lastIndexOf(oldName);
-              if (oldNamePos >= 0) {
-                fullPath = fullPath.substring(0, oldNamePos);
-              }
-            }
-            if (!name.equals("")) {
-              fullPath += name + "\\";
-            }
-
-          }
-          currentName++;
         }
 
-        String actualName = fullPath + name;
-
-        // now work out the CRC of the name, so we know which file this name belongs to
-        actualName = actualName.toUpperCase();
-        int nameLength = actualName.length();
-
-        int crc = 0x811c9dc5;
-        for (int j = 0; j < nameLength; j++) {
-          byte character = (byte) actualName.charAt(j);
-          crc ^= character;
-          crc *= 0x199933;
-        }
-
-        // now see if we can find the matching CRC
-        int nameIndex = -1;
-        for (int j = 0; j < numFiles; j++) {
-          if (crc == crcs[j]) {
-            // found it
-            nameIndex = j;
-            break;
-          }
-        }
-
-        if (nameIndex == -1) {
-          // not found
-          ErrorLogger.log("[DAT_BEGINAPPIDSTRING]: Name CRC not found: " + crc);
-        }
-        else {
-          Resource resource = resources[nameIndex];
-          resource.setName(actualName);
-          resource.setOriginalName(actualName);
-        }
-
+        nameFM.close();
       }
-
-      nameFM.close();
 
       // now for each compressed file, we need to find the compressed blocks
       for (int i = 0; i < numFiles; i++) {

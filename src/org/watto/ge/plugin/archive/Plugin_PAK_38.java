@@ -16,8 +16,10 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.component.WSPluginException;
+import org.watto.datatype.Archive;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -26,6 +28,8 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
 import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_Encryption_AES;
 import org.watto.ge.plugin.exporter.Exporter_GZip;
 import org.watto.ge.plugin.exporter.Exporter_Snappy;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
@@ -600,6 +604,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
       ExporterPlugin exporterGZip = Exporter_GZip.getInstance();
       ExporterPlugin exporterSnappy = Exporter_Snappy.getInstance();
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -652,27 +657,114 @@ public class Plugin_PAK_38 extends ArchivePlugin {
 
       fm.seek(dirOffset);
 
-      // 4 - Relative Directory Name Length (including null terminator) (10)
-      fm.skip(4);
+      long originalDirOffset = dirOffset;
 
-      // 9 - Relative Directory Name (../../../)
-      // 1 - null Relative Directory Name Terminator
-      fm.readNullString();
-
-      // 4 - Number of Files
-      int numFiles = fm.readInt();
+      int numFiles = 0;
       try {
-        FieldValidator.checkNumFiles(numFiles / 4);
+        // 4 - Relative Directory Name Length (including null terminator) (10)
+        fm.skip(4);
+
+        // 9 - Relative Directory Name (../../../)
+        // 1 - null Relative Directory Name Terminator
+        fm.readNullString();
+
+        // 4 - Number of Files
+        numFiles = fm.readInt();
+        try {
+          if (numFiles < 100) {
+            FieldValidator.checkNumFiles(numFiles);
+          }
+          else {
+            FieldValidator.checkNumFiles(numFiles / 4);
+          }
+        }
+        catch (Throwable t) {
+          // second try
+
+          fm.seek(arcSize - 197); // 1 byte earlier than the previous try
+
+          dirOffset = fm.readLong();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+
+          fm.seek(dirOffset);
+
+          // 4 - Relative Directory Name Length (including null terminator) (10)
+          fm.skip(4);
+
+          // 9 - Relative Directory Name (../../../)
+          // 1 - null Relative Directory Name Terminator
+          fm.readNullString();
+
+          // 4 - Number of Files
+          numFiles = fm.readInt();
+          FieldValidator.checkNumFiles(numFiles / 4);
+
+          shortCompressionFlags = false;
+        }
+
       }
       catch (Throwable t) {
-        // second try
-
-        fm.seek(arcSize - 197); // 1 byte earlier than the previous try
-
-        dirOffset = fm.readLong();
-        FieldValidator.checkOffset(dirOffset, arcSize);
+        // If we get here, perhaps it's encrypted with AES
+        dirOffset = originalDirOffset;
 
         fm.seek(dirOffset);
+
+        long dirLength = (int) (arcSize - dirOffset);
+
+        // Try all the keys we know about, see if we can find one that works
+        byte[][] keys = UE4Helper.getAESKeys();
+        int numKeys = keys.length;
+
+        byte[] key = null;
+
+        int testLength = 64;
+        for (int k = 0; k < numKeys; k++) {
+          try {
+            key = keys[k];
+            Exporter_Encryption_AES decryptor = new Exporter_Encryption_AES(key);
+
+            Resource dirResource = new Resource(path, "", dirOffset, testLength, testLength, decryptor);
+            ExporterByteBuffer exporterBuffer = new ExporterByteBuffer(dirResource);
+
+            FileManipulator testFM = new FileManipulator(exporterBuffer);
+
+            // 4 - Relative Directory Name Length (including null terminator) (10)
+            int nameLength = testFM.readInt();
+            FieldValidator.checkRange(nameLength, 0, 64);
+
+            // 9 - Relative Directory Name (../../../)
+            // 1 - null Relative Directory Name Terminator
+            testFM.readNullString();
+
+            // 4 - Number of Files
+            numFiles = testFM.readInt();
+            FieldValidator.checkNumFiles(numFiles / 4);
+
+            // found one
+            break;
+          }
+          catch (Throwable t2) {
+            numFiles = 0;
+            key = null;
+          }
+        }
+
+        //byte[] key = ByteArrayConverter.convertLittle(new Hex("D0BAAAE538F6B96FBE77F4A1EF75DDEB62AAE6A54790B37F46AE055D2E787821"));
+        if (key == null) {
+          throw new WSPluginException("[PAK_38] No matching AES key found.");
+        }
+
+        Exporter_Encryption_AES decryptor = new Exporter_Encryption_AES(key);
+
+        Resource dirResource = new Resource(path, "", dirOffset, dirLength, dirLength, decryptor);
+        ExporterByteBuffer exporterBuffer = new ExporterByteBuffer(dirResource);
+
+        fm.close();
+        fm = new FileManipulator(exporterBuffer);
+
+        //FileManipulator temp = new FileManipulator(new File("c:\\test.txt"), true);
+        //temp.writeBytes(fm.readBytes(100000));
+        //temp.close();
 
         // 4 - Relative Directory Name Length (including null terminator) (10)
         fm.skip(4);
@@ -685,7 +777,10 @@ public class Plugin_PAK_38 extends ArchivePlugin {
         numFiles = fm.readInt();
         FieldValidator.checkNumFiles(numFiles / 4);
 
-        shortCompressionFlags = false;
+      }
+
+      if (numFiles <= 0) {
+        return null;
       }
 
       Resource_PAK_38[] resources = new Resource_PAK_38[numFiles];
@@ -747,7 +842,10 @@ public class Plugin_PAK_38 extends ArchivePlugin {
           // 4 - Compression Type (0=uncompressed, 1=ZLib, 2=GZip, 4=Snappy, others=Oodle?)
           compressionType = fm.readInt();
         }
-        FieldValidator.checkRange(compressionType, 0, 4);
+
+        if (compressionType != 16400) { // Edith Finch game
+          FieldValidator.checkRange(compressionType, 0, 4);
+        }
 
         // 20 - Unknown
         fm.skip(20);
@@ -823,6 +921,9 @@ public class Plugin_PAK_38 extends ArchivePlugin {
           }
           else if (compressionType == 4) {
             exporter = exporterSnappy;
+          }
+          else if (compressionType == 16400) {
+            exporter = exporterDefault;
           }
           else {
             throw new WSPluginException("Unknown Compression type: " + compressionType);
@@ -937,9 +1038,258 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       return resources;
 
     }
-    catch (
+    catch (Throwable t) {
+      //logError(t);
+      //return null;
+      ErrorLogger.log("[PAK_38] Couldn't read via the directory, trying to read manually instead.");
+      return readManually(path);
+    }
+  }
 
-    Throwable t) {
+  /**
+   **********************************************************************************************
+   Reads the archive by starting at the beginning and reading each file 1 at a time, rather than
+   using a directory. 
+   **********************************************************************************************
+   **/
+  public Resource[] readManually(File path) {
+    try {
+
+      ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
+      ExporterPlugin exporterGZip = Exporter_GZip.getInstance();
+      ExporterPlugin exporterSnappy = Exporter_Snappy.getInstance();
+
+      // RESETTING GLOBAL VARIABLES
+
+      FileManipulator fm = new FileManipulator(path, false);
+
+      long arcSize = fm.getLength();
+
+      fm.seek(0);
+
+      int numFiles = Archive.getMaxFiles();
+      int realNumFiles = 0;
+
+      Resource_PAK_38[] resources = new Resource_PAK_38[numFiles];
+      TaskProgressManager.setMaximum(arcSize);
+
+      // Loop through the archive
+      while (fm.getOffset() < arcSize) {
+        long offset = fm.getOffset();
+
+        // 8 - File Offset (null)
+        fm.skip(8);
+
+        // 8 - Compressed Length (not including the file header fields or padding)
+        long length = fm.readLong();
+
+        if (length == 0) {
+          // might just be padding
+
+          // X - null Padding to a multiple of 2048 bytes (sometimes)
+          int paddingSize = calculatePadding(offset, 2048);
+          if (paddingSize == 0) {
+            paddingSize = 2048;
+          }
+          offset += paddingSize;
+          fm.relativeSeek(offset);
+          continue;
+        }
+
+        try {
+          FieldValidator.checkLength(length, arcSize);
+        }
+        catch (Throwable t) {
+          // might just be padding
+
+          // X - null Padding to a multiple of 2048 bytes (sometimes)
+          int paddingSize = calculatePadding(offset, 2048);
+          if (paddingSize == 0) {
+            paddingSize = 2048;
+          }
+          offset += paddingSize;
+          fm.relativeSeek(offset);
+          continue;
+        }
+
+        // 8 - Decompressed Length
+        long decompLength = fm.readLong();
+
+        if (decompLength == 0) {
+          // might just be padding
+
+          // X - null Padding to a multiple of 2048 bytes (sometimes)
+          int paddingSize = calculatePadding(offset, 2048);
+          if (paddingSize == 0) {
+            paddingSize = 2048;
+          }
+          offset += paddingSize;
+          fm.relativeSeek(offset);
+          continue;
+        }
+
+        try {
+          FieldValidator.checkLength(decompLength);
+        }
+        catch (Throwable t) {
+          // might just be padding
+
+          // X - null Padding to a multiple of 2048 bytes (sometimes)
+          int paddingSize = calculatePadding(offset, 2048);
+          if (paddingSize == 0) {
+            paddingSize = 2048;
+          }
+          offset += paddingSize;
+          fm.relativeSeek(offset);
+          continue;
+        }
+
+        // 4 - Compression Type (0=uncompressed, 1=ZLib, 2=GZip, 4=Snappy, others=Oodle?)
+        int compressionType = fm.readInt();
+
+        try {
+          FieldValidator.checkRange(compressionType, 1, 4); // don't allow uncompressed files - have only really seen ZLib tbh
+        }
+        catch (Throwable t) {
+          // might just be padding
+
+          // X - null Padding to a multiple of 2048 bytes (sometimes)
+          int paddingSize = calculatePadding(offset, 2048);
+          if (paddingSize == 0) {
+            paddingSize = 2048;
+          }
+          offset += paddingSize;
+          fm.relativeSeek(offset);
+          continue;
+        }
+
+        // 20 - Unknown
+        fm.skip(20);
+
+        if (compressionType == 0) {
+          // 5 - null
+          fm.skip(5);
+
+          // skip all the header fields for this file
+          offset = fm.getOffset();
+          fm.skip(length);
+
+          String filename = Resource.generateFilename(realNumFiles);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource_PAK_38(path, filename, offset, length);
+          realNumFiles++;
+        }
+        else {
+          // 4 - Number of Compressed Blocks
+          int numBlocks = fm.readInt();
+          FieldValidator.checkNumFiles(numBlocks);
+
+          long[] blockOffsets = new long[numBlocks];
+          long[] blockLengths = new long[numBlocks];
+          for (int b = 0; b < numBlocks; b++) {
+            // 8 - Offset to the start of the compressed data block (relative to the start of the file)
+            long blockStartOffset = fm.readLong() + offset;
+            FieldValidator.checkOffset(blockStartOffset, arcSize);
+
+            // 8 - Offset to the end of the compressed data block (relative to the start of the file)
+            long blockEndOffset = fm.readLong() + offset;
+            FieldValidator.checkOffset(blockEndOffset, arcSize);
+
+            long blockLength = blockEndOffset - blockStartOffset;
+            FieldValidator.checkLength(blockLength);
+
+            blockOffsets[b] = blockStartOffset;
+            blockLengths[b] = blockLength;
+          }
+
+          // 1 - null
+          fm.skip(1);
+
+          // 4 - Decompressed Block Size (65536 if multiple blocks, otherwise the same as the decompressed length)
+          int blockSize = fm.readInt();
+          FieldValidator.checkLength(blockSize);
+
+          ExporterPlugin exporter = null;
+          if (compressionType == 1) {
+            exporter = exporterZLib;
+          }
+          else if (compressionType == 2) {
+            exporter = exporterGZip;
+          }
+          else if (compressionType == 4) {
+            exporter = exporterSnappy;
+          }
+          else {
+            throw new WSPluginException("Unknown Compression type: " + compressionType);
+          }
+
+          // Put the wrapper around the exporter
+          if (numBlocks == 1) {
+            // don't need a wrapper (as it's only 1 block) - just set the offset/length as appropriate
+            offset = blockOffsets[0];
+            length = blockLengths[0];
+            decompLength = blockSize;
+          }
+          else {
+            // put a wrapper around the exporter, giving the blocks details
+
+            // work out the decompLengths
+            long[] decompLengths = new long[numBlocks];
+            for (int b = 0; b < numBlocks - 1; b++) {
+              decompLengths[b] = blockSize;
+            }
+            long remainingSize = decompLength - (blockSize * (numBlocks - 1));
+            decompLengths[numBlocks - 1] = remainingSize;
+
+            exporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, decompLengths);
+          }
+
+          fm.skip(length);
+
+          String filename = Resource.generateFilename(realNumFiles);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource_PAK_38(path, filename, offset, length, decompLength, exporter);
+          realNumFiles++;
+        }
+
+        TaskProgressManager.setValue(offset);
+      }
+
+      numFiles = realNumFiles;
+
+      Resource_PAK_38[] oldResources = resources;
+      resources = new Resource_PAK_38[numFiles];
+      System.arraycopy(oldResources, 0, resources, 0, numFiles);
+
+      // HERE WE DO...
+      // 1. For all uasset files, read a little bit of the file data, work out what the Class is, and therefore what the file type is. 
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource_PAK_38 resource = resources[i];
+
+        // Need to check all files - the readUAssetClass will reject them if they don't have the unreal header anyway
+        // (ie if they're a uexp/ubulk or some other file like PNG)
+
+        // now read a bit of the uasset file to determine the Class
+        String className = readUAssetClass(resource);
+        if (className != null) {
+          String name = resource.getName() + "." + className;
+          resource.setName(name);
+          resource.setOriginalName(name);
+        }
+
+        TaskProgressManager.setValue(i);
+
+      }
+
+      fm.close();
+
+      return resources;
+
+    }
+    catch (Throwable t) {
       logError(t);
       return null;
     }
@@ -999,6 +1349,14 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(byteBuffer);
 
       // 4 - Unreal Header (193,131,42,158)
+      if (fm.readInt() == -1641380927) {
+        // ok
+      }
+      else {
+        // not a uasset
+        return null;
+      }
+
       // 4 - Version (6) (XOR with 255)
       // 16 - null
       // 4 - File Directory Offset?
@@ -1006,7 +1364,7 @@ public class Plugin_PAK_38 extends ArchivePlugin {
       // 4 - Package Name (None)
       // 4 - null
       // 1 - Unknown (128)
-      fm.skip(41);
+      fm.skip(37);
 
       // 4 - Number of Names
       int nameCount = fm.readInt();

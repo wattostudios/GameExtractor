@@ -74,7 +74,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706, 742, 870);
+    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706, 742, 870, 845);
   }
 
   /**
@@ -124,7 +124,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
 
       // 4 - Number Of Names
       int numNames = fm.readInt();
-      FieldValidator.checkNumFiles(numNames);
+      FieldValidator.checkNumFiles(numNames / 2);
 
       // 4 - Name Directory Offset
       long nameOffset = fm.readInt();
@@ -132,7 +132,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      FieldValidator.checkNumFiles(numFiles / 4);
 
       // 4 - File Directory Offset
       long dirOffset = fm.readInt();

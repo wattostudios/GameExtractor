@@ -43,7 +43,7 @@ public class Plugin_ARC_9 extends ArchivePlugin {
 
     setGames("Just Cause");
     setExtensions("arc"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "XBox 360");
 
     //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
@@ -140,7 +140,13 @@ public class Plugin_ARC_9 extends ArchivePlugin {
       fm.skip(4);
 
       // 4 - Block Size (2048)
+      boolean changeEndian = false;
       int blockSize = fm.readInt();
+      if (blockSize == 524288) {
+        // XBox360 - BIG ENDIAN
+        changeEndian = true;
+        blockSize = IntConverter.changeFormat(blockSize);
+      }
       FieldValidator.checkRange(blockSize, 32, 4096);
 
       // 4 - Unknown
@@ -157,12 +163,25 @@ public class Plugin_ARC_9 extends ArchivePlugin {
 
         // 4 - Unknown
         fm.skip(4);
+        //System.out.println(HexConverter.convertLittle(fm.readInt()));
 
         // 4 - File Offset [*BlockSize]
-        long offset = IntConverter.unsign(fm.readInt()) * blockSize;
+        //long offset = IntConverter.unsign(fm.readInt()) * blockSize;
+        long offset = 0;
+        if (!changeEndian) {
+          // little
+          offset = IntConverter.unsign(fm.readInt()) * blockSize;
+        }
+        else {
+          // big
+          offset = IntConverter.unsign(IntConverter.changeFormat(fm.readInt())) * blockSize;
+        }
 
         // 4 - File Length
-        long length = fm.readInt();
+        int length = fm.readInt();
+        if (changeEndian) {
+          length = IntConverter.changeFormat(length);
+        }
 
         // work out which archive it's in
         int archiveNumber = -1;

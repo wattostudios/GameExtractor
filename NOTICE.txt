@@ -17,6 +17,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 =====================================================================================
 
+AirCompressor (https://github.com/airlift/aircompressor)
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+
+=====================================================================================
+
 Apache Commons Compress (https://commons.apache.org/proper/commons-compress/)
 Copyright 2002-2018 The Apache Software Foundation
 
@@ -183,6 +197,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 =====================================================================================
 
+Java FNV1 Hash (http://www.getopt.org/)
+
+Copyright 2004, Andrzej Bialecki <ab@getopt.org>
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+
+=====================================================================================
+
 Java Imaging Utilities (https://sourceforge.net/projects/jiu/)
 
 This program is free software; you can redistribute it and/or
@@ -258,23 +288,7 @@ THE SOFTWARE.
 
 =====================================================================================
 
-JMPQ3 (https://github.com/inwc3/JMPQ3)
-
-Copyright 2018-2021 inwarcraft collective
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not
-use this file except in compliance with the License. You may obtain a copy of
-the License at http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-License for the specific language governing permissions and limitations under
-the License.
-
-=====================================================================================
-
-JOrbis (http://www.jcraft.com/jorbis/)
+JLayer (http://www.javazoom.net/javalayer/javalayer.html)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -292,7 +306,37 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 =====================================================================================
 
-JLayer (http://www.javazoom.net/javalayer/javalayer.html)
+JMPQ3 (https://github.com/inwc3/JMPQ3)
+
+Copyright 2018-2021 inwarcraft collective
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+
+=====================================================================================
+
+JNA (Java Native Access) (https://github.com/java-native-access/jna)
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+
+=====================================================================================
+
+JOrbis (http://www.jcraft.com/jorbis/)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -356,6 +400,20 @@ You should have received a copy of the GNU Library General Public
 License along with this library; if not, write to the
 Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
 Boston, MA  02110-1301, USA.
+
+=====================================================================================
+
+LZ4-Java (https://github.com/lz4/lz4-java)
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
 
 =====================================================================================
 
@@ -555,6 +613,25 @@ UnRAR (https://www.rarlab.com/rar_add.htm)
 
 UnRAR is freeware released under its own license terms. Refer to the file
 UNRAR-LICENSE.txt for full license information
+
+=====================================================================================
+
+unxwb (http://aluigi.altervista.org/papers.htm#unxwb)
+Copyright 2005-2016 Luigi Auriemma
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 =====================================================================================
 

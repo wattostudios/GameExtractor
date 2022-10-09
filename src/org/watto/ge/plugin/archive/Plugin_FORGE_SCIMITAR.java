@@ -181,34 +181,49 @@ public class Plugin_FORGE_SCIMITAR extends ArchivePlugin {
 
       fm.seek(filenameDirOffset);
 
-      // Loop through filename directory
-      for (int i = 0; i < numFiles; i++) {
-        // 4 - File Length
-        // 8 - Hash?
-        // 16 - null
-        // 4 - File ID (Incremental from 1)
-        // 4 - File ID (Incremental from -1)
-        // 4 - null
-        // 2 - File Type ID?
-        // 2 - Unknown
-        fm.skip(44);
+      try {
+        // Loop through filename directory
+        String[] names = new String[numFiles];
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - File Length
+          // 8 - Hash?
+          // 16 - null
+          // 4 - File ID (Incremental from 1)
+          // 4 - File ID (Incremental from -1)
+          // 4 - null
+          // 2 - File Type ID?
+          // 2 - Unknown
+          fm.skip(44);
 
-        // 128 - Filename (null terminated, filled with nulls)
-        String filename = fm.readNullString(128);
-        FieldValidator.checkFilename(filename);
+          // 128 - Filename (null terminated, filled with nulls)
+          String filename = fm.readNullString(128);
+          FieldValidator.checkFilename(filename);
+          names[i] = filename;
 
-        // 4 - Unknown (4)
-        // 8 - null
-        // 4 - Unknown (4)
-        // 4 - null
-        fm.skip(20);
+          // 4 - Unknown (4)
+          // 8 - null
+          // 4 - Unknown (4)
+          // 4 - null
+          fm.skip(20);
 
-        //path,name,offset,length,decompLength,exporter
-        Resource resource = resources[i];
-        resource.setName(filename);
-        resource.setOriginalName(filename);
+          TaskProgressManager.setValue(i);
+        }
 
-        TaskProgressManager.setValue(i);
+        // Loop through filename directory
+        for (int i = 0; i < numFiles; i++) {
+          String filename = names[i];
+
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = resources[i];
+          resource.setName(filename);
+          resource.setOriginalName(filename);
+
+          TaskProgressManager.setValue(i);
+        }
+      }
+      catch (Throwable t) {
+        // Newer archives have 320 bytes per entry, not 192. Also, the 320-byte ones are encrypted.
+        // So, if this happens, just leave as default filenames.
       }
 
       // go to each file and check for compression
@@ -232,7 +247,8 @@ public class Plugin_FORGE_SCIMITAR extends ArchivePlugin {
         // there can be multiple compressed blocks in each file, and each compressed block is made up of smaller compressed chunks
         while (fm.getOffset() < endOffset) {
           // 8 - Compression Header
-          if (fm.readLong() != 1154322941026740787l) {
+          long compressionHeader = fm.readLong();
+          if (compressionHeader != 1154322941026740787l) {
             // not compressed
             continue;
           }

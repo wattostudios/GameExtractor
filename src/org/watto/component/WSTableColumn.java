@@ -28,17 +28,23 @@ public class WSTableColumn implements Comparable<WSTableColumn> {
 
   /** A character value representing this column, for faster sorting purposes **/
   char charCode; // for quicker sorting
+
   /** The code for the language and settings **/
   String code = "";
+
   /** The <code>Class</code> of <code>Object</code> in this table column **/
   @SuppressWarnings("rawtypes")
   Class type = String.class;
+
   /** Is the data in this column editable? **/
   boolean editable = false;
+
   /** Is the data in this column sortable? **/
   boolean sortable = true;
+
   /** The minimum width of this column **/
   int minWidth = 0;
+
   /** The maximum width of this column **/
   int maxWidth = -1;
 
@@ -245,6 +251,20 @@ public class WSTableColumn implements Comparable<WSTableColumn> {
   ***********************************************************************************************/
   public void setMaxWidth(int maxWidth) {
     this.maxWidth = maxWidth;
+  }
+
+  /***********************************************************************************************
+  Hides/Shows the column
+  ***********************************************************************************************/
+  public void setVisible(boolean visible) {
+    if (visible) {
+      setMinWidth(0);
+      setMaxWidth(-1);
+    }
+    else {
+      setMinWidth(0);
+      setMaxWidth(0);
+    }
   }
 
   /***********************************************************************************************

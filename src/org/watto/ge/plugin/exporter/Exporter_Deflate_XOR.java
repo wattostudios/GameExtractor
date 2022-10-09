@@ -32,6 +32,7 @@ public class Exporter_Deflate_XOR extends ExporterPlugin {
   static Exporter_Deflate_XOR instance = new Exporter_Deflate_XOR();
 
   static InflaterInputStream readSource;
+
   static long readLength = 0;
 
   /**
@@ -49,26 +50,26 @@ public class Exporter_Deflate_XOR extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_Deflate_XOR() {
-    setName("ZLib Compression operating on XOR'd data");
+    setName("Deflate Compression operating on XOR'd data");
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_Deflate_XOR(int xorValue) {
-    setName("ZLib Compression operating on XOR'd data");
+    setName("Deflate Compression operating on XOR'd data");
     this.xorValue = xorValue;
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -86,7 +87,7 @@ public class Exporter_Deflate_XOR extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -118,7 +119,7 @@ public class Exporter_Deflate_XOR extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -139,7 +140,7 @@ public class Exporter_Deflate_XOR extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -180,7 +181,7 @@ public class Exporter_Deflate_XOR extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

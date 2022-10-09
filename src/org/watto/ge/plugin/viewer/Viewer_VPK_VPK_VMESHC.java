@@ -43,7 +43,7 @@ public class Viewer_VPK_VPK_VMESHC extends ViewerPlugin {
   **********************************************************************************************
   **/
   public Viewer_VPK_VPK_VMESHC() {
-    super("VPK_VPK_VMESHC", "Value VMESH_C Model");
+    super("VPK_VPK_VMESHC", "Valve VMESH_C Model");
     setExtensions("vmesh_c");
 
     setGames("Valve Engine");

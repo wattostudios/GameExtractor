@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,8 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -38,7 +40,7 @@ public class Plugin_DAT_76 extends ArchivePlugin {
     super("DAT_76", "DAT_76");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Legacy of Kain: Soul Reaver");
     setExtensions("dat"); // MUST BE LOWER CASE
@@ -51,7 +53,7 @@ public class Plugin_DAT_76 extends ArchivePlugin {
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
-    //setCanScanForFileTypes(true);
+    setCanScanForFileTypes(true);
 
   }
 
@@ -149,7 +151,7 @@ public class Plugin_DAT_76 extends ArchivePlugin {
         // 4 - File Type
         String fileType = fm.readString(4);
 
-        String filename = Resource.generateFilename(i) + "." + fileType;
+        String filename = fileType + "_" + i;
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);
@@ -179,13 +181,105 @@ public class Plugin_DAT_76 extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
-    /*
-    if (headerInt1 == 2037149520) {
-      return "js";
+    if (headerInt1 == 16 && (headerInt2 != 12 && headerInt2 != 0)) {
+      return "dat_tex"; // Image RGB556
     }
-    */
+    else if (headerInt1 == 1632652614) {
+      return "fmp";
+    }
+    else if (headerInt1 == 1632652870) {
+      return "fnp";
+    }
+
+    else if (headerInt2 == 12) {
+      return "12";
+    }
+    else if (headerInt2 == 0) {
+      return "0";
+    }
 
     return null;
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 4 - Number Of Files
+      fm.writeInt(numFiles);
+      src.skip(4);
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = 4 + (16 * numFiles);
+      int dirPaddingSize = calculatePadding(offset, 2048);
+      offset += dirPaddingSize;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        // 4 - Hash?
+        fm.writeBytes(src.readBytes(4));
+
+        // 4 - File Length
+        fm.writeInt(length);
+        src.skip(4);
+
+        // 4 - File Offset
+        fm.writeInt(offset);
+        src.skip(4);
+
+        // 4 - File Type
+        fm.writeBytes(src.readBytes(4));
+
+        offset += length;
+        offset += calculatePadding(offset, 2048);
+      }
+
+      // X - null Padding to a multiple of 2048 bytes
+      for (int p = 0; p < dirPaddingSize; p++) {
+        fm.writeByte(0);
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+
+        // X - File Data
+        write(resource, fm);
+        TaskProgressManager.setValue(i);
+
+        long length = resource.getDecompressedLength();
+        // X - null Padding to a multiple of 2048 bytes
+
+        int paddingSize = calculatePadding(length, 2048);
+        for (int p = 0; p < paddingSize; p++) {
+          fm.writeByte(0);
+        }
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

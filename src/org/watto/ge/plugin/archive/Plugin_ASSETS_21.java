@@ -453,6 +453,9 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
             if (exporter.available()) { // make sure we read the next bit of data, if required
               dirBytes[decompWritePos++] = (byte) exporter.read();
             }
+            else {
+              break;
+            }
           }
 
           if (decompWritePos == 0) {
@@ -826,16 +829,22 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
               }
             }
             else {
+              // 3.14
               //if (unityFS) {
               //  fileType = Unity3DHelper.getFileExtension(fileTypeCode);
               //}
               //else {
-              int mapping = fileTypeMapping[fileTypeCode];
-              if (mapping < 0) {
-                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              try {
+                int mapping = fileTypeMapping[fileTypeCode];
+                if (mapping < 0) {
+                  fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+                }
+                else {
+                  fileType = Unity3DHelper.getFileExtension(mapping);
+                }
               }
-              else {
-                fileType = Unity3DHelper.getFileExtension(mapping);
+              catch (Throwable t) {
+                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
               }
               //}
             }
@@ -1141,6 +1150,10 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
               String externalFilename = fm.readString(externalFilenameLength);
               FieldValidator.checkFilename(externalFilename);
 
+              if (externalFilename.startsWith("archive:/")) {
+                externalFilename = externalFilename.substring(9);
+              }
+
               // 0-3 - null Padding to 4 bytes
               int externalPaddingSize = calculatePadding(externalFilenameLength, 4);
               fm.skip(externalPaddingSize);
@@ -1154,13 +1167,25 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
                 if (forcedUnityFS) {
                   // see if we can find the archive name locally
                   externalFilename = FilenameSplitter.getFilenameAndExtension(externalFilename);
+
+                  if (externalFilename.startsWith("archive:/")) {
+                    externalFilename = externalFilename.substring(9);
+                  }
+
                   externalArchive = new File(resource.getSource().getParent() + File.separatorChar + externalFilename);
                   if (!externalArchive.exists()) {
                     throw new FileNotFoundException("External resource " + externalFilename + " could not be found");
                   }
                 }
                 else {
-                  throw new FileNotFoundException("External resource " + externalFilename + " could not be found");
+
+                  // might be something like CAB-3ed1af83449b558641dbf84466fbe48b/CAB-3ed1af83449b558641dbf84466fbe48b.resS , remove the dir name
+                  externalFilename = FilenameSplitter.getFilenameAndExtension(externalFilename);
+                  externalArchive = new File(resource.getSource().getParent() + File.separatorChar + externalFilename);
+
+                  if (!externalArchive.exists()) {
+                    throw new FileNotFoundException("External resource " + externalFilename + " could not be found");
+                  }
                 }
               }
               else if (unityFS) {
@@ -1293,8 +1318,12 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
 
             // 4 - File ID of Referenced File
             int refFileID = fm.readInt() - 1; // -1 because fileID numbers start at 1, not 0
-            FieldValidator.checkRange(refFileID, 0, numFiles);
-            refResources[i] = resources[refFileID];
+            try {
+              FieldValidator.checkRange(refFileID, 0, numFiles);
+              refResources[i] = resources[refFileID];
+            }
+            catch (Throwable t) {
+            }
 
             // 4 - null
             fm.skip(4);
@@ -1314,6 +1343,9 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
           // Set the folder name for each referenced file
           for (int i = 0; i < numRefFiles; i++) {
             Resource refResource = refResources[i];
+            if (refResource == null) {
+              continue;
+            }
 
             // Otherwise for other refType files (and for the ref files as well), set the folder name on the file itself.
             //System.out.println("Setting folder name " + folderName + " on Resource " + refResource.getName());

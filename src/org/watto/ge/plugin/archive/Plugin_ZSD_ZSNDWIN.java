@@ -18,6 +18,8 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_VAG_Audio;
 import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
@@ -41,9 +43,10 @@ public class Plugin_ZSD_ZSNDWIN extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Dave Mirra Freestyle BMX");
+    setGames("Dave Mirra Freestyle BMX",
+        "Space Invaders");
     setExtensions("zsd");
-    setPlatforms("PC");
+    setPlatforms("PC", "PSX");
 
   }
 
@@ -107,6 +110,8 @@ public class Plugin_ZSD_ZSNDWIN extends ArchivePlugin {
 
       // NOTE - Compressed file MUST know their DECOMPRESSED LENGTH
       //      - Uncompressed files MUST know their LENGTH
+
+      ExporterPlugin vagExporter = Exporter_Custom_VAG_Audio.getInstance();
 
       addFileTypes();
 
@@ -192,13 +197,27 @@ public class Plugin_ZSD_ZSNDWIN extends ArchivePlugin {
 
           //path,id,name,offset,length,decompLength,exporter
           Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
-          resource.setAudioProperties(soundQuality[i], (short) 16, (short) 1);
+
+          int frequency = soundQuality[i];
+          if (frequency >= 0 && frequency < 4000) {
+            // VAG audio
+            resource.setExporter(vagExporter);
+          }
+          else {
+            // WAV audio (maybe)
+            resource.setAudioProperties(soundQuality[i], (short) 16, (short) 1);
+          }
+
           resources[i] = resource;
         }
         else {
           // anything else
+
+          filename += ".wav";
+
           //path,id,name,offset,length,decompLength,exporter
-          resources[i] = new Resource(path, filename, offset, length);
+          //resources[i] = new Resource(path, filename, offset, length);
+          resources[i] = new Resource(path, filename, offset, length, length, vagExporter);
         }
 
         TaskProgressManager.setValue(i);

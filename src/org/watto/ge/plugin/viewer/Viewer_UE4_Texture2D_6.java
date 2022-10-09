@@ -553,7 +553,7 @@ public class Viewer_UE4_Texture2D_6 extends ViewerPlugin {
 
         return imageResource;
       }
-      else if (type.equals("PF_BC5")) {
+      else if (type.equals("PF_BC7") || type.equals("PF_BC5") || type.equals("PF_BC4")) {
         // 4 - Offset to Largest Mipmap [+8]
         long largestMipmapOffset = IntConverter.unsign(fm.readInt()) + 8;
         FieldValidator.checkOffset(largestMipmapOffset, arcSize);
@@ -578,11 +578,23 @@ public class Viewer_UE4_Texture2D_6 extends ViewerPlugin {
         int mipmapCount = fm.readInt();
 
         // 4 - Entry Indicator (1)
+        fm.skip(4);
+
         // 4 - Flags (1025)
+        int flags = fm.readInt();
+
         // 4 - Length of Mipmap Data
+        int dataLength = fm.readInt();
+
         // 4 - Length of Mipmap Data
         // 8 - Relative Offset to this mipmap (relative to the start of the largest mipmap data)
-        fm.skip(24);
+        fm.skip(12);
+
+        if (flags == 72) {
+          // want to skip over the mipmap data temporarily, so we can grab the width and height
+          largestMipmapOffset = fm.getOffset();
+          fm.skip(dataLength);
+        }
 
         // 4 - This Mipmap Width/Height
         int width = fm.readInt();
@@ -607,8 +619,19 @@ public class Viewer_UE4_Texture2D_6 extends ViewerPlugin {
 
         fm.seek(largestMipmapOffset);
 
-        ImageResource imageResource = ImageFormatReader.readBC5(fm, width, height);
-        imageResource.setProperty("ImageFormat", "BC5");
+        ImageResource imageResource = null;
+        if (type.equals("PF_BC4")) {
+          imageResource = ImageFormatReader.readBC4(fm, width, height);
+          imageResource.setProperty("ImageFormat", "BC4");
+        }
+        else if (type.equals("PF_BC5")) {
+          imageResource = ImageFormatReader.readBC5(fm, width, height);
+          imageResource.setProperty("ImageFormat", "BC5");
+        }
+        else {
+          imageResource = ImageFormatReader.readBC7(fm, width, height);
+          imageResource.setProperty("ImageFormat", "BC7");
+        }
         imageResource.setProperty("MipmapCount", "" + mipmapCount);
 
         fm.close();

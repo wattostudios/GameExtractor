@@ -15,10 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.HashMap;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
+import org.watto.io.converter.HexConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -40,13 +44,14 @@ public class Plugin_ARC_10 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Just Cause 3");
+    setGames("Just Cause 3",
+        "theHunter: Call Of The Wild");
     setExtensions("arc"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("fsb", "FSB Audio File", FileType.TYPE_AUDIO),
+        new FileType("bmpc", "Bitmap Image", FileType.TYPE_IMAGE),
+        new FileType("ddsc", "DDS Image", FileType.TYPE_IMAGE));
 
     setCanScanForFileTypes(true);
 
@@ -98,6 +103,50 @@ public class Plugin_ARC_10 extends ArchivePlugin {
 
       long arcSize = (int) path.length();
 
+      // first, see if there's a filename file we can parse
+      setCanScanForFileTypes(true);
+      String archiveNumber = FilenameSplitter.getFilename(path);
+      if (archiveNumber.length() > 4) {
+        archiveNumber = archiveNumber.substring(4);
+      }
+
+      HashMap<String, String> filenameMap = null;
+      File filenameDirFile = new File(FilenameSplitter.getDirectory(path) + File.separatorChar + "game_hash_names" + archiveNumber + ".txt");
+      if (filenameDirFile.exists()) {
+        // found a filename file, open it and read it
+        filenameMap = new HashMap<String, String>();
+
+        FileManipulator nameFM = new FileManipulator(filenameDirFile, false);
+
+        // skip the first 2 lines, which are the headers
+        nameFM.readLine();
+        nameFM.readLine();
+
+        String line = nameFM.readLine();
+        while (line != null && line.length() > 0) {
+          // line has this format (example):
+          // 
+          // HASH       BYTEOFFSET SIZE       DCOMP SIZE CONTENT DIGEST (SHA1)                     NAME      
+          // 0xBE3743E7 0x00000000 0x05555680 0x05555680 d7855925e42542444dcd6b4dde1c5563300d887f  climate/hp_patagonia/common/tree_diffuse_atlas_0.ddsc
+
+          if (line.length() < 86) {
+            // not long enough
+            continue;
+          }
+
+          String hash = line.substring(2, 10);
+          String filename = line.substring(86);
+
+          filenameMap.put(hash, filename);
+
+          // read the next line
+          line = nameFM.readLine();
+        }
+
+        nameFM.close();
+        setCanScanForFileTypes(false); // don't scan for filenames if we already have the filenames from a mapping file
+      }
+
       File sourcePath = getDirectoryFile(path, "tab");
       FileManipulator fm = new FileManipulator(sourcePath, false);
 
@@ -118,7 +167,9 @@ public class Plugin_ARC_10 extends ArchivePlugin {
       for (int i = 0; i < numFiles; i++) {
 
         // 4 - Hash?
-        fm.skip(4);
+        byte[] hexBytes = fm.readBytes(4);
+        hexBytes = new byte[] { hexBytes[3], hexBytes[2], hexBytes[1], hexBytes[0] }; // swap the order
+        String hash = HexConverter.convertLittle(hexBytes).toString();
 
         // 4 - File Offset
         long offset = fm.readInt();
@@ -129,6 +180,18 @@ public class Plugin_ARC_10 extends ArchivePlugin {
         FieldValidator.checkLength(length, arcSize);
 
         String filename = Resource.generateFilename(i);
+        if (filenameMap != null) {
+          String mappedFilename = filenameMap.get(hash);
+          if (mappedFilename != null) {
+            filename = mappedFilename;
+          }
+        }
+
+        if (filename.endsWith("wavc")) { // FSB5 with a 16-byte header
+          offset += 16;
+          length -= 16;
+          filename += ".fsb";
+        }
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

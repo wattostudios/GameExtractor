@@ -216,6 +216,10 @@ public class Resource_WAV_RawAudio extends Resource {
     this.audioLength = (int) getLength();
   }
 
+  public void setAudioProperties(int frequency, int bitrate, int channels) {
+    setAudioProperties(frequency, (short) bitrate, (short) channels);
+  }
+
   public void setAudioProperties(int frequency, short bitrate, short channels, boolean signed) {
     this.frequency = frequency;
     this.bitrate = bitrate;

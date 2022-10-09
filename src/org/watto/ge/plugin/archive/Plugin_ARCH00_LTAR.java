@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -53,20 +54,21 @@ public class Plugin_ARCH00_LTAR extends ArchivePlugin {
     setExtensions("arch00", "arch01");
     setPlatforms("PC");
 
-    setFileTypes("anmtree00p", "Animation Tree",
-        "mat00", "Surface Material",
-        "gamdb00p", "Game Database",
-        "strdb00p", "Skeleton Database",
-        "fx00p", "Effects",
-        "fx", "Effects Definition",
-        "fxi", "Effects Definition",
-        "fxd", "Effects Program",
-        "fxo", "Effects Object",
-        "txanm00", "Texture Animation",
-        "crc", "CRC Check",
-        "lip", "Animation Lip Sync",
-        "matlib00p", "Material Library",
-        "model00p", "3D Model");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("anmtree00p", "Animation Tree", FileType.TYPE_OTHER),
+        new FileType("mat00", "Surface Material", FileType.TYPE_OTHER),
+        new FileType("gamdb00p", "Game Database", FileType.TYPE_OTHER),
+        new FileType("strdb00p", "Skeleton Database", FileType.TYPE_OTHER),
+        new FileType("fx00p", "Effects", FileType.TYPE_OTHER),
+        new FileType("fx", "Effects Definition", FileType.TYPE_OTHER),
+        new FileType("fxi", "Effects Definition", FileType.TYPE_OTHER),
+        new FileType("fxd", "Effects Program", FileType.TYPE_OTHER),
+        new FileType("fxo", "Effects Object", FileType.TYPE_OTHER),
+        new FileType("txanm00", "Texture Animation", FileType.TYPE_OTHER),
+        new FileType("crc", "CRC Check", FileType.TYPE_OTHER),
+        new FileType("lip", "Animation Lip Sync", FileType.TYPE_OTHER),
+        new FileType("matlib00p", "Material Library", FileType.TYPE_OTHER),
+        new FileType("model00p", "3D Model", FileType.TYPE_MODEL));
 
   }
 

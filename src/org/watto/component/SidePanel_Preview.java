@@ -29,10 +29,12 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.SingletonManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
 import org.watto.datatype.Resource;
 import org.watto.event.WSSelectableInterface;
+import org.watto.ge.GameExtractor;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.PluginFinder;
@@ -193,6 +195,10 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
   **********************************************************************************************
   **/
   public void loadPreview(WSPanel panel) {
+    if (panel instanceof PreviewPanel) {
+      ((PreviewPanel) panel).onOpenRequest(); // eg checks for editing capabilities, shows the "Save" button if editing can occur, etc.
+    }
+
     WSPreviewPanelHolder previewHolder = (WSPreviewPanelHolder) ComponentRepository.get("SidePanel_Preview_PreviewPanelHolder");
     previewHolder.loadPanel(panel);
     previewHolder.revalidate();
@@ -341,7 +347,12 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
       String code = ((WSComponent) c).getCode();
 
       if (code.equals("FileList")) {
-        loadBasicVersionPreview();
+        if (!GameExtractor.isFullVersion()) {
+          loadBasicVersionPreview();
+        }
+        else {
+          previewFile();
+        }
         return true;
       }
 
@@ -394,7 +405,12 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
    **/
   @Override
   public void onOpenRequest() {
-    loadBasicVersionPreview();
+    if (!GameExtractor.isFullVersion()) {
+      loadBasicVersionPreview();
+    }
+    else {
+      previewFile();
+    }
   }
 
   /**
@@ -551,7 +567,11 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
       PreviewPanel panel = plugin.read(path);
 
       if (panel != null) {
+        // Remember the current Viewer plugin. This is used when Writing changes out to the filesystem in an "editor" PreviewPanel
+        SingletonManager.set("CurrentViewer", plugin);
+
         loadPreview(panel);
+
         return true;
       }
 

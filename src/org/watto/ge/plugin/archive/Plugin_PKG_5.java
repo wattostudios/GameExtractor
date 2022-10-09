@@ -121,6 +121,9 @@ public class Plugin_PKG_5 extends ArchivePlugin {
       // 4 - Number Of Files
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
+      if (numFiles <= 1) {
+        return null; // not a real archive
+      }
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);

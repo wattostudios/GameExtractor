@@ -180,6 +180,11 @@ public class FilenameSplitter {
     if (slashPos < 0) {
       slashPos = 0;
     }
+    
+    if (slashPos > dotPos) {
+      // dot before the slash, so the dot is not part of the filename. Generally occurs when the filename doesn't have an extension
+      return file.substring(slashPos); 
+    }
 
     return file.substring(slashPos,dotPos);
 

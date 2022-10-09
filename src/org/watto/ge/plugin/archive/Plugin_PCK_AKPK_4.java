@@ -82,7 +82,7 @@ public class Plugin_PCK_AKPK_4 extends ArchivePlugin {
 
       // Directory Length
       if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
-        rating += 6; // 6, because we want this to be slightly more popular than the other ones, as hopefully we understand this format better now
+        rating += 7; // 7, because we want this to be slightly more popular than the other ones, as hopefully we understand this format better now
       }
 
       return rating;

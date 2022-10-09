@@ -49,7 +49,8 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Hitman (2016)",
-        "Hitman 2");
+        "Hitman 2",
+        "Hitman 3 (2021)");
     setExtensions("rpkg"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -76,32 +77,60 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(4).equals("GKPR")) {
+      String header = fm.readString(4);
+      if (header.equals("GKPR")) {
         rating += 50;
-      }
 
-      // Number Of Files
-      long arcSize = fm.getLength();
-      if (arcSize > 4000000000l) {
-        // the largest archive has an excessive number of files in it!
-        if (FieldValidator.checkNumFiles(fm.readInt() / 3)) {
+        // Number Of Files
+        long arcSize = fm.getLength();
+        if (arcSize > 4000000000l) {
+          // the largest archive has an excessive number of files in it!
+          if (FieldValidator.checkNumFiles(fm.readInt() / 3)) {
+            rating += 5;
+          }
+        }
+        else {
+          if (FieldValidator.checkNumFiles(fm.readInt())) {
+            rating += 5;
+          }
+        }
+
+        // Details Directory Length
+        if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
           rating += 5;
         }
-      }
-      else {
-        if (FieldValidator.checkNumFiles(fm.readInt())) {
+
+        // Types Directory Length
+        if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
           rating += 5;
         }
-      }
 
-      // Details Directory Length
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
-        rating += 5;
       }
+      else if (header.equals("2KPR")) {
+        rating += 50;
 
-      // Types Directory Length
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
-        rating += 5;
+        // 1 - Unknown (1)
+        // 4 - null
+        // 4 - Unknown
+        fm.skip(9);
+
+        // Number Of Files
+        if (FieldValidator.checkNumFiles(fm.readInt() / 5)) {
+          rating += 5;
+        }
+
+        long arcSize = fm.getLength();
+
+        // Details Directory Length
+        if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+          rating += 5;
+        }
+
+        // Types Directory Length
+        if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+          rating += 5;
+        }
+
       }
 
       return rating;
@@ -128,6 +157,7 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
 
       ExporterPlugin lz4Exporter = Exporter_LZ4.getInstance();
       ExporterPlugin encryptedExporter = new Exporter_XOR_RepeatingKey(new int[] { 220, 69, 166, 156, 211, 114, 76, 171 });
+      //ExporterPlugin multiExporter = new Exporter_Custom_RPKG_GKPR_Multi();
       ExporterPlugin multiExporter = new Exporter_Custom_RPKG_GKPR_Multi();
       //ExporterPlugin multiExporter = new ChainedExporterWrapper(encryptedExporter, lz4Exporter);
 
@@ -138,18 +168,17 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // 4 - Header (GKPR)
-      fm.skip(4);
+      String header = fm.readString(4);
+      if (header.equals("2KPR")) {
+        // 1 - Unknown (1)
+        // 4 - null
+        // 4 - Unknown
+        fm.skip(9);
+      }
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
-
-      if (arcSize > 4000000000l) {
-        // the largest archive has an excessive number of files in it!
-        FieldValidator.checkNumFiles(numFiles / 3);
-      }
-      else {
-        FieldValidator.checkNumFiles(numFiles);
-      }
+      FieldValidator.checkNumFiles(numFiles / 5);
 
       // 4 - Details Directory Length
       // 4 - Types Directory Length
@@ -159,6 +188,7 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // See if there's an "unknown" directory in this archive
+      long startPos = fm.getOffset();
       int unknownCount = fm.readInt();
       if (unknownCount >= 0 && unknownCount <= numFiles) {
         // yes, so skip it
@@ -166,36 +196,70 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
       }
       else {
         // No, so go back to offset 16
-        fm.seek(16);
+        fm.seek(startPos);
       }
 
       // Loop through directory
       boolean[] encrypted = new boolean[numFiles];
-      for (int i = 0; i < numFiles; i++) {
-        // 8 - Hash?
-        fm.skip(8);
 
-        // 8 - File Offset
-        long offset = fm.readLong();
-        FieldValidator.checkOffset(offset, arcSize);
+      try {
+        for (int i = 0; i < numFiles; i++) {
+          // 8 - Hash?
+          fm.skip(8);
 
-        // 3 - Compressed File Length (or null)
-        // 1 - Encryption Flag? (128 = encryption)
-        byte[] lengthBytes = fm.readBytes(4);
-        encrypted[i] = false;
-        if ((lengthBytes[3] & 128) == 128) {
-          encrypted[i] = true;
-          lengthBytes[3] &= 127;
+          // 8 - File Offset
+          long offset = fm.readLong();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 3 - Compressed File Length (or null)
+          // 1 - Encryption Flag? (128 = encryption)
+          byte[] lengthBytes = fm.readBytes(4);
+          encrypted[i] = false;
+          if ((lengthBytes[3] & 128) == 128) {
+            encrypted[i] = true;
+            lengthBytes[3] &= 127;
+          }
+          int length = IntConverter.convertLittle(lengthBytes);
+          FieldValidator.checkLength(length, arcSize);
+
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length);
+
+          TaskProgressManager.setValue(i);
         }
-        int length = IntConverter.convertLittle(lengthBytes);
-        FieldValidator.checkLength(length, arcSize);
+      }
+      catch (Throwable t) {
+        // Perhaps it does have an unknown directory at the beginning? Try again.
+        fm.seek(startPos + 4 + (unknownCount * 8));
 
-        String filename = Resource.generateFilename(i);
+        for (int i = 0; i < numFiles; i++) {
+          // 8 - Hash?
+          fm.skip(8);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+          // 8 - File Offset
+          long offset = fm.readLong();
+          FieldValidator.checkOffset(offset, arcSize);
 
-        TaskProgressManager.setValue(i);
+          // 3 - Compressed File Length (or null)
+          // 1 - Encryption Flag? (128 = encryption)
+          byte[] lengthBytes = fm.readBytes(4);
+          encrypted[i] = false;
+          if ((lengthBytes[3] & 128) == 128) {
+            encrypted[i] = true;
+            lengthBytes[3] &= 127;
+          }
+          int length = IntConverter.convertLittle(lengthBytes);
+          FieldValidator.checkLength(length, arcSize);
+
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length);
+
+          TaskProgressManager.setValue(i);
+        }
       }
 
       // Loop through directory
@@ -223,7 +287,15 @@ public class Plugin_RPKG_GKPR extends ArchivePlugin {
         resource.setExtension(fileType);
         resource.setOriginalName(resource.getName()); // so it doesn't think that it's been added
 
-        if (decompLength != resource.getLength()) {
+        long length = resource.getLength();
+        if (length == 0) {
+          resource.setLength(decompLength);
+          resource.setDecompressedLength(decompLength);
+          if (encrypted[i]) {
+            resource.setExporter(encryptedExporter);
+          }
+        }
+        else if (decompLength != length) {
           resource.setDecompressedLength(decompLength);
           if (encrypted[i]) {
             resource.setExporter(multiExporter);

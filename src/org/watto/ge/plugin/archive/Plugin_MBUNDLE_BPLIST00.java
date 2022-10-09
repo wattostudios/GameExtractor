@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -44,16 +45,16 @@ public class Plugin_MBUNDLE_BPLIST00 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Samurai Shodown NeoGeo Collection");
+    setGames("Rune Factory 4 Special",
+        "Samurai Shodown NeoGeo Collection");
     setExtensions("mbundle"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("webm", "WEBM Video", FileType.TYPE_VIDEO),
+        new FileType("texture", "Texture Image", FileType.TYPE_IMAGE));
 
-    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+    setTextPreviewExtensions("bat", "h", "mfi", "strings"); // LOWER CASE
 
     //setCanScanForFileTypes(true);
 
@@ -109,7 +110,8 @@ public class Plugin_MBUNDLE_BPLIST00 extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      fm.seek(arcSize - 24);
+      long footerPos = arcSize - 24;
+      fm.seek(footerPos);
 
       // 8 - Number of Files
       int numFiles = (int) LongConverter.convertBig(fm.readBytes(8));
@@ -122,6 +124,8 @@ public class Plugin_MBUNDLE_BPLIST00 extends ArchivePlugin {
       // 8 - Offsets Directory Offset
       long dirOffset = LongConverter.convertBig(fm.readBytes(8));
       FieldValidator.checkOffset(dirOffset, arcSize);
+
+      footerPos -= 2; // this is the correct position - we use this later for calculating the size of the offset entries
 
       fm.seek(endOfData);
 
@@ -146,12 +150,41 @@ public class Plugin_MBUNDLE_BPLIST00 extends ArchivePlugin {
       else {
         FieldValidator.checkNumFiles(numEntries);
       }
+
       int[] ids = new int[numEntries];
-      for (int i = 0; i < numEntries; i++) {
-        // 4 - File ID
-        int id = IntConverter.changeFormat(fm.readInt());
-        ids[i] = id;
-        //System.out.println(id);
+
+      // check the first ID - if it's larger than numEntries, this archive might have a larger header
+      if (numEntries >= 1) {
+
+        int startPos = 0;
+
+        int firstID = IntConverter.changeFormat(fm.readInt());
+        if (firstID > numEntries) {
+          // yep, has a larger header
+
+          // 4 - Number of Filenames
+          numFilenames = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkNumFiles(numFilenames);
+
+          numEntries = (int) (dirOffset - endOfData - 14) / 4;
+          FieldValidator.checkNumFiles(numEntries);
+
+          ids = new int[numEntries];
+
+          startPos = 0;
+        }
+        else {
+          ids[0] = firstID;
+          startPos = 1;
+        }
+
+        for (int i = startPos; i < numEntries; i++) {
+          // 4 - File ID
+          int id = IntConverter.changeFormat(fm.readInt());
+          ids[i] = id;
+          //System.out.println(id);
+        }
+
       }
 
       fm.seek(dirOffset);
@@ -159,19 +192,44 @@ public class Plugin_MBUNDLE_BPLIST00 extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
+      // work out if the offset entries are 4-byte or 8-byte
+      long offsetSize = (footerPos - dirOffset) / numFiles;
 
-        // 4 - File Offset
-        long offset = IntConverter.unsign(IntConverter.changeFormat(fm.readInt()));
-        FieldValidator.checkOffset(offset, arcSize);
+      if (offsetSize == 8) {
+        // 8-bytes per entry
 
-        String filename = Resource.generateFilename(i);
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
 
-        //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
+          // 8 - File Offset
+          long offset = LongConverter.convertBig(fm.readBytes(8));
+          FieldValidator.checkOffset(offset, arcSize);
 
-        TaskProgressManager.setValue(i);
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset);
+
+          TaskProgressManager.setValue(i);
+        }
+      }
+      else {
+        // 4-bytes per entry
+
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+
+          // 4 - File Offset
+          long offset = IntConverter.unsign(IntConverter.changeFormat(fm.readInt()));
+          FieldValidator.checkOffset(offset, arcSize);
+
+          String filename = Resource.generateFilename(i);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset);
+
+          TaskProgressManager.setValue(i);
+        }
       }
 
       calculateFileSizes(resources, endOfData);

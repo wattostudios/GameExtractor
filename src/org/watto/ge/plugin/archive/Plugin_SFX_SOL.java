@@ -85,7 +85,8 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // File Data Length
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
+      int length = fm.readInt();
+      if (length < arcSize && length > 0) {
         rating += 5;
       }
 
@@ -197,6 +198,7 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
           }
         }
 
+        long solOffset = fm.getOffset();
         // 2 - Unknown (3213)
         if (!noIDs) {
           fm.skip(2);
@@ -222,6 +224,11 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
         // X - File Data
         long offset = fm.getOffset();
         fm.skip(length);
+
+        if (fileType.equals("SOL")) {
+          offset = solOffset;
+          length += 14;
+        }
 
         String filename = Resource.generateFilename(realNumFiles) + "." + fileType;
 

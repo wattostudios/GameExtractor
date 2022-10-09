@@ -34,7 +34,7 @@ public class Exporter_QuickBMS_Decompression extends Exporter_Default {
   **********************************************************************************************
   **/
   public Exporter_QuickBMS_Decompression(String compressionType) {
-    setName("QuickBMS Decompression");
+    setName(compressionType + " Decompression using QuickBMS");
     this.compressionType = compressionType;
   }
 

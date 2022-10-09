@@ -674,6 +674,126 @@ public class ImageFormatWriter {
 
   /**
    **********************************************************************************************
+   * Writes an BGR555 image
+   **********************************************************************************************
+   **/
+  public static void writeBGR555(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = 1;
+
+      // OUTPUT = BGR555
+      int shortValue = (a << 15) | (b << 10) | (g << 5) | (r);
+      fm.writeShort(shortValue);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an RGBA5551 image
+   **********************************************************************************************
+   **/
+  public static void writeRGBA5551(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      // 1bit  - Alpha
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = color.getAlpha() / 255;
+
+      // OUTPUT = RGBA5551
+      int shortValue = (r << 11) | (g << 6) | (b << 1) | a;
+      fm.writeShort(shortValue);
+    }
+  }
+  
+  
+  /**
+   **********************************************************************************************
+   * Writes an BGRA5551 image
+   **********************************************************************************************
+   **/
+  public static void writeBGRA5551(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      // 1bit  - Alpha
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = color.getAlpha() / 255;
+
+      // OUTPUT = BGRA5551
+      int shortValue = (b << 11) | (g << 6) | (r << 1) | a;
+      fm.writeShort(shortValue);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an ABGR1555 image
+   **********************************************************************************************
+   **/
+  public static void writeABGR1555(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 1bit  - Alpha
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = color.getAlpha() / 255;
+
+      // OUTPUT = ABGR1555
+      int shortValue = (a << 15) | (b << 10) | (g << 5) | (r);
+      fm.writeShort(shortValue);
+    }
+  }
+
+  /**
+   **********************************************************************************************
    * Writes an RGBA image
    **********************************************************************************************
    **/
@@ -703,6 +823,32 @@ public class ImageFormatWriter {
       fm.writeByte(gPixel);
       fm.writeByte(bPixel);
       fm.writeByte(aPixel);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   Writes RG Pixel Data
+   **********************************************************************************************
+   **/
+  public static void writeRG(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+
+      // 1 - Red
+      int rPixel = (pixel >> 16) & 255;
+
+      // 1 - Green
+      int gPixel = (pixel >> 8) & 255;
+
+      // OUTPUT = RG
+      fm.writeByte(rPixel);
+      fm.writeByte(gPixel);
     }
   }
 

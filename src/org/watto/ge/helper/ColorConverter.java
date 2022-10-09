@@ -60,7 +60,7 @@ public class ColorConverter {
     // loop through and merge the closest match while-ever there is > newNumColors unique colors
     int numUnique = numColors;
 
-    for (int closestMatch = 1; closestMatch < numColors && numUnique > newNumColors; closestMatch++) {
+    for (int closestMatch = 1; /*closestMatch < numColors &&*/ numUnique > newNumColors; closestMatch++) {
       for (int i = 0; i < numColors; i++) {
         ColorSplitAlpha color1 = colors[i];
 

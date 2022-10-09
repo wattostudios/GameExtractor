@@ -24,6 +24,7 @@ import java.io.RandomAccessFile;
 import org.watto.ErrorLogger;
 import org.watto.io.DirectoryBuilder;
 import org.watto.io.FilenameChecker;
+import org.watto.io.converter.ByteConverter;
 
 /***********************************************************************************************
  * A class that sits between the file system and a <code>Manipulator</code> class. Performs read,
@@ -327,6 +328,22 @@ public class FileBuffer implements ManipulatorBuffer {
         return raf.length();
       }
 
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return -1;
+    }
+  }
+
+  /***********************************************************************************************
+   * Reads a single byte from the buffer, but doesn't increment any file pointers
+   * @return the byte at the current point in the buffer
+   ***********************************************************************************************/
+  public int peek() {
+    try {
+      checkFill(1);
+      int readData = ByteConverter.unsign(buffer[bufferLevel]);
+      return readData;
     }
     catch (Throwable t) {
       ErrorLogger.log(t);

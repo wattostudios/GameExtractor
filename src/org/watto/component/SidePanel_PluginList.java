@@ -25,6 +25,7 @@ import javax.swing.JComponent;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.event.WSSelectableInterface;
+import org.watto.ge.GameExtractor;
 import org.watto.ge.plugin.exporter.*;
 import org.watto.ge.script.ScriptArchivePlugin_MexCom3;
 import org.watto.ge.script.ScriptArchivePlugin_QuickBMS;
@@ -144,6 +145,17 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
     }
     else if (type.equals(Language.get("Plugin_Viewer_Name"))) {
 
+      if (GameExtractor.isFullVersion()) {
+        // The Viewer plugins exist in the Basic Version for showing Thumbnails, but we need to pretend they don't exist
+        // (they can't be used for real previews anyway, due to other functionality being removed)
+        WSPluginGroup group = WSPluginManager.getGroup("Viewer");
+        if (group != null) {
+          plugins = group.getPlugins();
+        }
+        else {
+          plugins = new WSPlugin[0];
+        }
+      }
     }
 
     if (Settings.getBoolean("SortPluginLists")) {

@@ -780,9 +780,17 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
       String extension = FilenameSplitter.getExtension(path);
       if (extension.equals("resource")) {
         // clicked on a referenced archive - check to see if the real ASSETS file exists
-        File dirFile = getDirectoryFile(path, "assets");
-        if (dirFile != null && dirFile.exists()) {
-          path = dirFile;
+        try {
+          File dirFile = getDirectoryFile(path, "assets");
+          if (dirFile != null && dirFile.exists()) {
+            path = dirFile;
+          }
+        }
+        catch (Throwable t) {
+          File dirFile = getDirectoryFile(path, "");
+          if (dirFile != null && dirFile.exists()) {
+            path = dirFile;
+          }
         }
       }
       else if (extension.equals("resS")) {
@@ -867,6 +875,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
           byte[] dirBytes = new byte[decompDataHeaderSize];
           int decompWritePos = 0;
           Exporter_LZ4 exporter = Exporter_LZ4.getInstance();
+
           exporter.open(fm, compDataHeaderSize, decompDataHeaderSize);
 
           for (int b = 0; b < decompDataHeaderSize; b++) {
@@ -929,7 +938,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
             // 8 - Decomp Length
             //long entryLength = LongConverter.changeFormat(fmDir.readLong());
             fmDir.skip(4);
-            long entryLength = IntConverter.changeFormat(fmDir.readInt());
+            long entryLength = IntConverter.unsign(IntConverter.changeFormat(fmDir.readInt()));
             //FieldValidator.checkLength(entryLength, arcSize);
 
             // 4 - Flags
@@ -960,7 +969,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
               FileManipulator fmSplit = new FileManipulator(splitFile, true);
 
               decompFM.seek(entryOffset);
-              for (int b = 0; b < entryLength; b++) {
+              for (long b = 0; b < entryLength; b++) {
                 fmSplit.writeByte(decompFM.readByte());
               }
 
@@ -1373,7 +1382,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
             int null1 = fm.readInt();
 
             // 4 - File Offset (relative to the start of the Filename Directory) - points to the FilenameLength field
-            int offset = fm.readInt() + dirOffset;
+            long offset = IntConverter.unsign(fm.readInt()) + dirOffset;
 
             // 4 - File Size
             int length = fm.readInt();
@@ -1412,10 +1421,12 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
               }
             }
             else {
-              if (unityFS) {
-                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
-              }
-              else {
+              // 3.14
+              //if (unityFS) {
+              //  fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              //}
+              //else {
+              try {
                 int mapping = fileTypeMapping[fileTypeCode];
                 if (mapping < 0) {
                   fileType = Unity3DHelper.getFileExtension(fileTypeCode);
@@ -1424,6 +1435,10 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
                   fileType = Unity3DHelper.getFileExtension(mapping);
                 }
               }
+              catch (Throwable t) {
+                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              }
+              //}
             }
 
             /*

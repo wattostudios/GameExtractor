@@ -146,7 +146,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void addFiles() {
@@ -156,7 +156,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void addFiles(File selectedFile) {
@@ -165,7 +165,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void addFiles(File[] selectedFiles) {
@@ -198,13 +198,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
    **/
   public void changeControls(String controlName, boolean fullVersionOnly) {
 
-    boolean fullVersion = true;
-    if (fullVersionOnly) {
-      if (!checkFullVersion(false)) {
-        //return;
-        fullVersion = false;
-      }
-    }
+    boolean fullVersion = false;
 
     WSPanel newControl = currentControl;
 
@@ -277,7 +271,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -312,28 +306,27 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean checkFullVersion() {
-    return checkFullVersion(true);
-  }
-
-  /**
-  **********************************************************************************************
-  
-  **********************************************************************************************
-  **/
-  public boolean checkFullVersion(boolean showPopup) {
-    if (showPopup) {
-      WSPopup.showErrorInNewThread("FullVersionOnly", true);
-    }
     return false;
   }
 
   /**
   **********************************************************************************************
-  
+
+  **********************************************************************************************
+  **/
+  public boolean checkFullVersion(boolean showPopup) {
+      if (showPopup) {
+        WSPopup.showErrorInNewThread("FullVersionOnly", true);
+      }
+  }
+
+  /**
+  **********************************************************************************************
+
   **********************************************************************************************
   **/
   public void checkInvalidControls() {
@@ -370,7 +363,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void convertArchive() {
@@ -434,7 +427,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void convertArchive(File outputPath, ArchivePlugin plugin) {
@@ -446,7 +439,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void cutArchive() {
@@ -514,7 +507,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void cutArchive(File inputPath, File outputPath, int length) {
@@ -525,7 +518,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void analyzeDirectory() {
@@ -556,7 +549,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void analyzeDirectory(File inputPath, String reportFile) {
@@ -571,7 +564,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void exportAllFiles() {
@@ -588,6 +581,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       String exportFilename = exportField.getText();
       if (exportFilename == null || exportFilename.length() <= 0) {
         // we haven't loaded the export panel, so show it, and then try exporting to the location again
+        ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder")).loadPanel("SidePanel_DirectoryList");
         changeControls("ExportPanel", false);
 
         // [3.13] show a popup asking the user to check the extract directory, instead of just extracting to the current directory
@@ -600,7 +594,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       directory = new File(exportFilename);
 
       if (!directory.exists()) {
-        directory = ShellFolderFile.getFileForPath(directory); // check if this is a special folder 
+        directory = ShellFolderFile.getFileForPath(directory); // check if this is a special folder
       }
     }
     catch (Throwable t) {
@@ -612,7 +606,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void exportFiles(Resource[] files, File directory) {
@@ -637,7 +631,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void exportSelectedFiles() {
@@ -647,6 +641,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       String exportFilename = exportField.getText();
       if (exportFilename == null || exportFilename.length() <= 0) {
         // we haven't loaded the export panel, so show it, and then try exporting to the location again
+        ((WSSidePanelHolder) ComponentRepository.get("SidePanelHolder")).loadPanel("SidePanel_DirectoryList");
         changeControls("ExportPanel", false);
 
         // [3.13] show a popup asking the user to check the extract directory, instead of just extracting to the current directory
@@ -659,10 +654,10 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       directory = new File(exportFilename);
 
       if (!directory.exists()) {
-        directory = ShellFolderFile.getFileForPath(directory); // check if this is a special folder 
+        directory = ShellFolderFile.getFileForPath(directory); // check if this is a special folder
       }
       // FIXED 3.10, was removing custom directories added to the field - if it doesn't exist, we actually want to create it
-      //if (directory == null || !directory.exists()) { 
+      //if (directory == null || !directory.exists()) {
       //  directory = dirHolder.getCurrentDirectory();
       //}
     }
@@ -677,7 +672,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public ViewerPlugin[] getChosenExportConverters() {
@@ -705,7 +700,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public ViewerPlugin[] getChosenAnalysisConverters() {
@@ -801,7 +796,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadControlPanels() {
@@ -832,7 +827,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -845,7 +840,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadDirList() {
@@ -858,7 +853,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadExportConverters() {
@@ -879,7 +874,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadAnalysisConverters() {
@@ -965,7 +960,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -985,7 +980,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -1020,7 +1015,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -1065,6 +1060,13 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
       if (code == null) {
         return false;
+      }
+
+      if (code.equals("ParentDirectory") && currentControl == exportControls) {
+        File selected = dirHolder.getSelectedFile();
+        if (selected.isDirectory()) {
+          setExportFilename(selected);
+        }
       }
 
       // Control Panels
@@ -1250,6 +1252,12 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
         // it is here so that it is checked AFTER the script, thus allowing
         // double-clicks to be handled by the script panel if it is open
         else if (Settings.getBoolean("OpenArchiveOnDoubleClick")) {
+          if (currentControl == exportControls) {
+            if (selected.isDirectory()) {
+              setExportFilename(selected);
+            }
+          }
+
           if (!selected.isDirectory()) {
             readArchive(selected);
           }
@@ -1262,6 +1270,11 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
             addFiles();
           }
           return true;
+        }
+        else if (currentControl == exportControls) {
+          if (selected.isDirectory()) {
+            setExportFilename(selected);
+          }
         }
 
       }
@@ -1428,7 +1441,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void readArchive() {
@@ -1438,7 +1451,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void readArchive(File selectedFile) {
@@ -1469,7 +1482,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void readScriptArchive() {
@@ -1478,7 +1491,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void readScriptArchive(File selectedFile) {
@@ -1494,7 +1507,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void readScriptArchive(File selectedFile, ArchivePlugin scriptPlugin) {
@@ -1515,7 +1528,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void reloadDirectoryList() {
@@ -1524,7 +1537,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void removeFiles() {
@@ -1534,7 +1547,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void removeFiles(Resource[] selectedFiles) {
@@ -1554,7 +1567,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void replaceMatchingFiles() {
@@ -1575,7 +1588,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void replaceMatchingFiles(Resource[] selectedFiles, File baseDir) {
@@ -1595,7 +1608,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void replaceSelectedFiles() {
@@ -1606,7 +1619,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void replaceSelectedFiles(Resource[] selectedFiles, File newFile) {
@@ -1626,7 +1639,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -1636,7 +1649,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void scanArchive() {
@@ -1646,7 +1659,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void scanArchive(File selectedFile) {
@@ -1657,7 +1670,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setCutFilename(File file) {
@@ -1682,7 +1695,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setAnalyzeFilename(File file) {
@@ -1718,7 +1731,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setExportFilename() {
@@ -1735,7 +1748,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setExportFilename(File file) {
@@ -1747,7 +1760,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setExportFilename(String filename) {
@@ -1769,7 +1782,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setFileFilter(FileFilter filter) {
@@ -1812,7 +1825,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setWriteFilename() {
@@ -1829,7 +1842,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setWriteFilename(File file) {
@@ -1847,7 +1860,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setWriteFilename(String filename) {
@@ -1954,7 +1967,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void writeArchive() {
@@ -2018,7 +2031,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void writeArchive(File outputPath, ArchivePlugin plugin) {

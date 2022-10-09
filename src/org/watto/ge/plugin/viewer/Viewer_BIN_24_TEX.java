@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import org.watto.ErrorLogger;
+import org.watto.SingletonManager;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
@@ -23,6 +24,7 @@ import org.watto.datatype.Palette;
 import org.watto.datatype.PalettedImageResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.helper.ImageFormatReader;
 import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -166,10 +168,10 @@ public class Viewer_BIN_24_TEX extends ViewerPlugin {
 
       if (paletteLength == 768) {
         for (int i = 0; i < numColors; i++) {
-          // 3 - RGB
-          int rPixel = ByteConverter.unsign(fm.readByte());
-          int gPixel = ByteConverter.unsign(fm.readByte());
+          // 256*3 - RGB
           int bPixel = ByteConverter.unsign(fm.readByte());
+          int gPixel = ByteConverter.unsign(fm.readByte());
+          int rPixel = ByteConverter.unsign(fm.readByte());
           int aPixel = 255;
 
           palette[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
@@ -177,10 +179,34 @@ public class Viewer_BIN_24_TEX extends ViewerPlugin {
       }
       else if (paletteLength == 1024) {
         for (int i = 0; i < numColors; i++) {
-          // 4 - RGBA
-          int rPixel = ByteConverter.unsign(fm.readByte());
-          int gPixel = ByteConverter.unsign(fm.readByte());
+          // 256*4 - RGBA
           int bPixel = ByteConverter.unsign(fm.readByte());
+          int gPixel = ByteConverter.unsign(fm.readByte());
+          int rPixel = ByteConverter.unsign(fm.readByte());
+          int aPixel = ByteConverter.unsign(fm.readByte());
+
+          palette[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+        }
+      }
+      if (paletteLength == 48) {
+        numColors = 16;
+        for (int i = 0; i < numColors; i++) {
+          // 16*3 - RGB
+          int bPixel = ByteConverter.unsign(fm.readByte());
+          int gPixel = ByteConverter.unsign(fm.readByte());
+          int rPixel = ByteConverter.unsign(fm.readByte());
+          int aPixel = 255;
+
+          palette[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+        }
+      }
+      else if (paletteLength == 64) {
+        numColors = 16;
+        for (int i = 0; i < numColors; i++) {
+          // 16*4 - RGBA
+          int bPixel = ByteConverter.unsign(fm.readByte());
+          int gPixel = ByteConverter.unsign(fm.readByte());
+          int rPixel = ByteConverter.unsign(fm.readByte());
           int aPixel = ByteConverter.unsign(fm.readByte());
 
           palette[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
@@ -208,6 +234,8 @@ public class Viewer_BIN_24_TEX extends ViewerPlugin {
   @Override
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
+
+      long length = fm.getLength();
 
       // 4 - Header (-1)
       // 2 - Unknown (2)
@@ -246,6 +274,26 @@ public class Viewer_BIN_24_TEX extends ViewerPlugin {
         }
       }
 
+      int paletteID = -1;
+
+      // get the paletteID from the properties of the image resource, which were read by the ArchivePlugin
+      Object resourceObject = SingletonManager.get("CurrentResource");
+      if (resourceObject == null || !(resourceObject instanceof Resource)) {
+        return null;
+      }
+      Resource resource = (Resource) resourceObject;
+
+      try {
+        paletteID = Integer.parseInt(resource.getProperty("PaletteID"));
+      }
+      catch (Throwable t) {
+        //
+      }
+
+      if (paletteID != -1) {
+        PaletteManager.setCurrentPalette(paletteID);
+      }
+
       int[] palette = PaletteManager.getCurrentPalette().getPalette();
 
       int numColors = palette.length;
@@ -258,9 +306,29 @@ public class Viewer_BIN_24_TEX extends ViewerPlugin {
       int numPixels = width * height;
       int[] indexes = new int[numPixels];
 
-      for (int i = 0; i < numPixels; i++) {
-        indexes[i] = ByteConverter.unsign(fm.readByte());
+      if (numPixels > length) {
+        // 4bit
+        for (int i = 0; i < numPixels; i += 2) {
+          int byteValue = ByteConverter.unsign(fm.readByte());
+
+          int byte1 = byteValue >> 4;
+          int byte2 = byteValue & 15;
+
+          indexes[i] = byte1;
+          indexes[i + 1] = byte2;
+        }
       }
+      else {
+        // 8bit
+        for (int i = 0; i < numPixels; i++) {
+          indexes[i] = ByteConverter.unsign(fm.readByte());
+        }
+      }
+
+      // image needs to be flipped vertically
+      ImageResource flipResource = new ImageResource(indexes, width, height);
+      flipResource = ImageFormatReader.flipVertically(flipResource);
+      indexes = flipResource.getPixels();
 
       PalettedImageResource imageResource = new PalettedImageResource(indexes, width, height, palette);
 

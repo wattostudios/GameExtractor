@@ -15,16 +15,19 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.HashMap;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Archive;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.exporter.Exporter_LZO_SingleBlock;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
+import org.watto.io.converter.ByteConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -52,11 +55,12 @@ public class Plugin_BIN_24 extends ArchivePlugin {
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("tex", "Texture Image", FileType.TYPE_IMAGE),
-        new FileType("pal", "Color Palette", FileType.TYPE_OTHER));
+        new FileType("pal", "Color Palette", FileType.TYPE_OTHER),
+        new FileType("mdl", "Model Mesh", FileType.TYPE_MODEL));
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
-    setCanScanForFileTypes(true);
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -186,6 +190,7 @@ public class Plugin_BIN_24 extends ArchivePlugin {
       //ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
+      PaletteManager.clear(); // clear the color palettes before we load new ones into it.
 
       FileManipulator fm = new FileManipulator(path, false);
 
@@ -207,7 +212,15 @@ public class Plugin_BIN_24 extends ArchivePlugin {
 
       // Loop through directory
       int realNumFiles = 0;
+
+      HashMap<Long, Long> paletteLookup = new HashMap<Long, Long>();
+      long currentPalette = 0;
+      int currentMeta = 0;
+      int currentTexture = 0;
+      int[] paletteMapping = new int[numFiles];
+
       while (fm.getOffset() < arcSize) {
+        boolean textureFile = false;
 
         // 4 - File Length
         int length = fm.readInt();
@@ -221,17 +234,136 @@ public class Plugin_BIN_24 extends ArchivePlugin {
 
         // X - File Data
         long offset = fm.getOffset();
-        fm.skip(length);
-
-        //System.out.println(offset - 4 + "\t" + length);
 
         String filename = Resource.generateFilename(realNumFiles);
+
+        if (length < 20) {
+          fm.skip(length);
+        }
+        else {
+
+          // 4 - File Header (looking for images)
+          int fileHeader1 = fm.readInt();
+
+          // 1 - File Header 2 (looking for images)
+          int fileHeader2 = fm.readByte();
+
+          // 3 - Unknown
+          int fileHeader2a = fm.readByte();
+          int fileHeader3 = fm.readByte();
+          int fileHeader3a = fm.readByte();
+
+          // 2 - Image Width
+          int width = fm.readShort();
+
+          // 2 - Image Height
+          int height = fm.readShort();
+
+          // 4 - Unknown
+          int fileHeader4 = fm.readInt();
+
+          // 4 - null
+          int nullCheck = fm.readInt();
+
+          if (fileHeader1 == 1868654382) {
+            filename += ".gao";
+          }
+          else if (fileHeader1 == 2003793710) {
+            filename += ".wow";
+          }
+          else if (fileHeader1 == 1414418246) {
+            filename += ".font";
+          }
+          else {
+            if (length == 48 || (length == 64 && nullCheck != 0) || length == 768 || length == 1024) {
+              filename += ".pal";
+            }
+            else if (fileHeader1 == 1 && (width >= 0 && width < 10000) && height == 0 && fileHeader4 > 0 && fileHeader4 < 10000) { // 10000 guess
+              filename += ".mdl"; // Model (Type 2)
+            }
+            else if (fileHeader1 == 1895872846) {
+              if (length > 40) {
+                filename += ".mdl"; // Model (Type 1)
+              }
+            }
+            else if (fileHeader1 == -1) {
+              //System.out.println(fileHeader3);
+              if (fileHeader3 == 7) {
+                filename += ".tex_meta"; // metadata
+
+                long backOff = fm.getOffset();
+                fm.skip(16);
+                //System.out.println(fm.readShort());
+
+                long palettePos = fm.readShort();
+
+                if (paletteLookup.containsKey(palettePos)) {
+                  //System.out.println("Palette Number already exists --> Mapping " + palettePos + " to " + paletteLookup.get(palettePos));
+                  paletteMapping[currentMeta] = paletteLookup.get(palettePos).intValue();
+                }
+                else {
+                  //System.out.println("New --> " + palettePos);
+                  paletteMapping[currentMeta] = (int) currentPalette;
+
+                  paletteLookup.put(palettePos, currentPalette);
+                  currentPalette++;
+                }
+                currentMeta++;
+
+                fm.relativeSeek(backOff);
+              }
+              else if (fileHeader2 == 5 && ByteConverter.unsign((byte) fileHeader2a) == 128) {
+                filename += ".mdl"; // Model (Type 1)
+              }
+              else if (length == 32) {
+                filename += ".tex_header"; // Paletted Image (Header Only)
+              }
+              else if (length >= 64 && (width != 0 && height != 0) && ((fileHeader3 != 1 && fileHeader3a != 16))) { // 4097 are images in RGBA color or something, not paletted
+                filename += ".tex"; // Paletted Image
+                textureFile = true;
+                //System.out.println(fileHeader3 + "\ttex");
+
+                //if (fileHeader2 == previous2 && fileHeader2a == previous2a && fileHeader3 == previous3 && fileHeader4 == previous4 && prevWidth == width && prevHeight == height && prevNull == nullCheck) {
+                //  System.out.println("Repeat");
+                //}
+                //else {
+                //System.out.println(fileHeader4);
+                //}
+                /*
+                if (width * height + 32 == length) {
+                  System.out.println("8bit" + "\t" + fileHeader3);
+                }
+                else if ((width * height / 2) + 32 == length) {
+                  System.out.println("4bit" + "\t" + fileHeader3);
+                }
+                else {
+                  System.out.println("unknown" + "\t" + fileHeader3);
+                }
+                */
+
+              }
+              else {
+                //filename += ".tex_other"; // something else, like a mesh or something?
+              }
+
+            }
+          }
+
+          fm.skip(length - 20);
+        }
+
+        //System.out.println(offset - 4 + "\t" + length);
 
         //path,name,offset,length,decompLength,exporter
         Resource resource = new Resource(path, filename, offset, length);
         resource.forceNotAdded(true);
         resources[realNumFiles] = resource;
         realNumFiles++;
+
+        if (textureFile) {
+          resource.addProperty("PaletteID", paletteMapping[currentTexture]);
+          currentTexture++;
+        }
 
         TaskProgressManager.setValue(offset);
       }
@@ -260,17 +392,31 @@ public class Plugin_BIN_24 extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
+    /*
     long length = resource.getLength();
-    if (length == 768 || length == 1024) {
-      return "pal"; // Color Palette
-    }
-
-    if (headerInt1 == -1 && headerShort5 != 0 && headerShort6 != 0 && length > 100) {
-      return "tex"; // Paletted Image
+    
+    if (headerInt1 == -1) {
+      if (length == 32) {
+        return "tex_header"; // Paletted Image (Header Only)
+      }
+      else if (length < 100) {
+        return "tex_small"; // Paletted Image
+      }
+      else {
+        return "tex"; // Paletted Image
+      }
     }
     else if (headerInt1 == 1868654382) {
       return "gao";
     }
+    else if (headerInt1 == 1414418246) {
+      return "font";
+    }
+    
+    if (length == 48 || length == 64 || length == 768 || length == 1024) {
+      return "pal"; // Color Palette
+    }
+    */
 
     return null;
   }

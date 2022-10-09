@@ -77,7 +77,7 @@
 				<WSButton code="NewArchive" opaque="false" repository="false" showText="false" />
 				<WSComboButton code="ReadArchive_Normal" opaque="false" repository="false">
 					<WSButton code="ReadArchive_Normal" opaque="false" repository="false" showText="false" />
-					<WSPopupMenu visible="false">
+					<WSPopupMenu opaque="false" visible="false">
 						<WSMenuItem code="ReadArchive_Normal" opaque="false" repository="false" />
 						<WSMenuItem code="ReadArchive_OpenWith" opaque="false" />
 						<WSMenuItem code="ReadArchive_Script" opaque="false" />

@@ -20,6 +20,7 @@ package org.watto.io.buffer;
 
 import org.watto.ErrorLogger;
 import org.watto.array.ArrayResizer;
+import org.watto.io.converter.ByteConverter;
 
 /***********************************************************************************************
 A class that reads, writes, and buffers data from a <code>byte[]</code> data source.
@@ -196,6 +197,21 @@ public class ByteBuffer implements ManipulatorBuffer {
   @Override
   public long length() {
     return bufferSize;
+  }
+
+  /***********************************************************************************************
+  
+  ***********************************************************************************************/
+  @Override
+  public int peek() {
+    try {
+      int readData = ByteConverter.unsign(buffer[bufferLevel]);
+      return readData;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return -1;
+    }
   }
 
   /***********************************************************************************************

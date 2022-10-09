@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.component.WSPluginException;
 import org.watto.datatype.FileType;
@@ -26,12 +27,15 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
 import org.watto.ge.plugin.exporter.BlockExporterWrapper;
-import org.watto.ge.plugin.exporter.Exporter_GZip;
-import org.watto.ge.plugin.exporter.Exporter_Snappy;
+import org.watto.ge.plugin.exporter.Exporter_AES_ZLib;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_Encryption_AES;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.ge.plugin.resource.Resource_PAK_38;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ExporterByteBuffer;
+import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
@@ -54,7 +58,11 @@ public class Plugin_PAK_65 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("System Shock (2021)");
+    setGames("Scavengers",
+        "Splitgate",
+        "Super Squad",
+        "System Shock (2021)",
+        "Train Sim World 2");
     setExtensions("pak"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -497,8 +505,15 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       addFileTypes();
 
       ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
-      ExporterPlugin exporterGZip = Exporter_GZip.getInstance();
-      ExporterPlugin exporterSnappy = Exporter_Snappy.getInstance();
+      //ExporterPlugin exporterGZip = Exporter_GZip.getInstance();
+      //ExporterPlugin exporterSnappy = Exporter_Snappy.getInstance();
+      ExporterPlugin exporterZLibWithEncryption = Exporter_Default.getInstance();
+      ExporterPlugin exporterDefaultWithEncryption = Exporter_Default.getInstance();
+
+      // NOTE: Not real OODLE compression, but we want to tell people that it is, in case they look in the file info sidepanel
+      //ExporterPlugin exporterOodle = new Exporter_Default();
+      //exporterOodle.setName("Oodle Compression");
+      ExporterPlugin exporterOodle = new Exporter_QuickBMS_Decompression("oodle");
 
       // RESETTING GLOBAL VARIABLES
 
@@ -547,29 +562,121 @@ public class Plugin_PAK_65 extends ArchivePlugin {
 
       }
 
+      // 8 - Directory Length
+      // 20 - Unknown
+      fm.skip(28);
+
+      // 32 - Compression Type 1
+      String compression1 = fm.readNullString(32);
+      // 32 - Compression Type 2
+      String compression2 = fm.readNullString(32);
+
       fm.seek(dirOffset);
 
-      // 4 - Relative Directory Name Length (including null terminator) (10)
-      fm.skip(4);
+      long originalDirOffset = dirOffset;
+      boolean decrypted = false;
+      FileManipulator originalFM = fm;
 
-      // 9 - Relative Directory Name (../../../)
-      // 1 - null Relative Directory Name Terminator
-      fm.readNullString();
-
-      // 4 - Number of Files
-      int numFiles = fm.readInt();
+      int numFiles = 0;
       try {
-        FieldValidator.checkNumFiles(numFiles / 4);
+
+        // 4 - Relative Directory Name Length (including null terminator) (10)
+        fm.skip(4);
+
+        // 9 - Relative Directory Name (../../../)
+        // 1 - null Relative Directory Name Terminator
+        fm.readNullString();
+
+        // 4 - Number of Files
+        numFiles = fm.readInt();
+        try {
+          FieldValidator.checkNumFiles(numFiles / 4);
+        }
+        catch (Throwable t) {
+          // second try
+
+          fm.seek(arcSize - 197); // 1 byte earlier than the previous try
+
+          dirOffset = fm.readLong();
+          FieldValidator.checkOffset(dirOffset, arcSize);
+
+          fm.seek(dirOffset);
+
+          // 4 - Relative Directory Name Length (including null terminator) (10)
+          fm.skip(4);
+
+          // 9 - Relative Directory Name (../../../)
+          // 1 - null Relative Directory Name Terminator
+          fm.readNullString();
+
+          // 4 - Number of Files
+          numFiles = fm.readInt();
+          FieldValidator.checkNumFiles(numFiles / 4);
+
+        }
       }
       catch (Throwable t) {
-        // second try
-
-        fm.seek(arcSize - 197); // 1 byte earlier than the previous try
-
-        dirOffset = fm.readLong();
-        FieldValidator.checkOffset(dirOffset, arcSize);
+        // If we get here, perhaps it's encrypted with AES
+        dirOffset = originalDirOffset;
 
         fm.seek(dirOffset);
+
+        long dirLength = (int) (arcSize - dirOffset);
+
+        // Try all the keys we know about, see if we can find one that works
+        byte[][] keys = UE4Helper.getAESKeys();
+        int numKeys = keys.length;
+
+        byte[] key = null;
+
+        int testLength = 64;
+        for (int k = 0; k < numKeys; k++) {
+          try {
+            key = keys[k];
+            Exporter_Encryption_AES decryptor = new Exporter_Encryption_AES(key);
+
+            Resource dirResource = new Resource(path, "", dirOffset, testLength, testLength, decryptor);
+            ExporterByteBuffer exporterBuffer = new ExporterByteBuffer(dirResource);
+
+            FileManipulator testFM = new FileManipulator(exporterBuffer);
+
+            // 4 - Relative Directory Name Length (including null terminator) (10)
+            int nameLength = testFM.readInt();
+            FieldValidator.checkRange(nameLength, 0, 64);
+
+            // 9 - Relative Directory Name (../../../)
+            // 1 - null Relative Directory Name Terminator
+            testFM.readNullString();
+
+            // 4 - Number of Files
+            numFiles = testFM.readInt();
+            FieldValidator.checkNumFiles(numFiles / 4);
+
+            // found one
+            break;
+          }
+          catch (Throwable t2) {
+            numFiles = 0;
+            key = null;
+          }
+        }
+
+        //byte[] key = ByteArrayConverter.convertLittle(new Hex("D0BAAAE538F6B96FBE77F4A1EF75DDEB62AAE6A54790B37F46AE055D2E787821"));
+        if (key == null) {
+          throw new WSPluginException("[PAK_65] No matching AES key found.");
+        }
+
+        Exporter_Encryption_AES decryptor = new Exporter_Encryption_AES(key);
+
+        Resource dirResource = new Resource(path, "", dirOffset, dirLength, dirLength, decryptor);
+        ExporterByteBuffer exporterBuffer = new ExporterByteBuffer(dirResource);
+
+        //fm.close();
+        fm = new FileManipulator(exporterBuffer);
+
+        //FileManipulator temp = new FileManipulator(new File("c:\\test.txt"), true);
+        //temp.writeBytes(fm.readBytes((int) dirLength));
+        //temp.close();
 
         // 4 - Relative Directory Name Length (including null terminator) (10)
         fm.skip(4);
@@ -582,6 +689,45 @@ public class Plugin_PAK_65 extends ArchivePlugin {
         numFiles = fm.readInt();
         FieldValidator.checkNumFiles(numFiles / 4);
 
+        decrypted = true;
+
+        // Set up the Exporters for files that are encrypted
+        exporterZLibWithEncryption = new Exporter_AES_ZLib(key);
+        exporterDefaultWithEncryption = new Exporter_Encryption_AES(key);
+      }
+
+      if (numFiles <= 0) {
+        return null;
+      }
+
+      // Set the exporters based on the Compression types in the Footer
+      ExporterPlugin exporter1 = null;
+      ExporterPlugin exporter1WithEncryption = null;
+      ExporterPlugin exporter2 = null;
+      ExporterPlugin exporter2WithEncryption = null;
+
+      if (compression1 != null && !compression1.equals("")) {
+        if (compression1.equalsIgnoreCase("Zlib")) {
+          exporter1 = exporterZLib;
+          exporter1WithEncryption = exporterZLibWithEncryption;
+        }
+        else if (compression1.equalsIgnoreCase("Oodle")) {
+          // Oodle compression not implemented
+          exporter1 = exporterOodle;
+          exporter1WithEncryption = exporterDefaultWithEncryption;
+        }
+      }
+
+      if (compression2 != null && !compression2.equals("")) {
+        if (compression2.equalsIgnoreCase("Zlib")) {
+          exporter2 = exporterZLib;
+          exporter2WithEncryption = exporterZLibWithEncryption;
+        }
+        else if (compression2.equalsIgnoreCase("Oodle")) {
+          // Oodle compression not implemented
+          exporter2 = exporterOodle;
+          exporter2WithEncryption = exporterDefaultWithEncryption;
+        }
       }
 
       // 8 - Unknown
@@ -596,6 +742,11 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       long dir3Offset = fm.readLong();
       FieldValidator.checkOffset(dir3Offset, arcSize);
 
+      if (decrypted) {
+        // we've decrypted the directory, need to change the dir3offset to be relative to the decrypted content
+        dir3Offset -= originalDirOffset;
+      }
+
       // 8 - Directory 3 Length
       // 20 - Unknown
       // 4 - Directory 1 Length
@@ -605,26 +756,274 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
+      int[] entryOffsets = new int[numFiles]; // for matching the filenames to the entries
+      long dirStart = fm.getOffset();
       for (int i = 0; i < numFiles; i++) {
         TaskProgressManager.setValue(i);
 
+        int entryOffset = (int) (fm.getOffset() - dirStart);
+        entryOffsets[i] = entryOffset;
+
         // 4 - Unknown ((bytes)0,0,0,224)
-        fm.skip(4);
+        byte[] entryType = fm.readBytes(4);
 
-        // 4 - File Offset
-        long offset = IntConverter.unsign(fm.readInt());
-        FieldValidator.checkOffset(offset, arcSize);
+        /*
+        System.out.println((fm.getOffset() - 4) + "\t" + entryType[0] + "\t" + entryType[1] + "\t" + entryType[2] + "\t" + entryType[3]);
+        if (entryType[3] != -32) {
+          System.out.println("HERE");
+        }
+        */
 
-        // 4 - File Length (not including the file header or the padding)
-        long length = IntConverter.unsign(fm.readInt());
-        FieldValidator.checkLength(length, arcSize);
+        if (entryType[0] == 0 && entryType[1] == 0 && entryType[2] == 0 && entryType[3] == 0) {
+          // A Table of Paper
+          // Absolute Tactics: Daughters of Mercy
+          // Faraday Protocol
+          ErrorLogger.log("[PAK_65] Early Directory Exit at offset " + fm.getOffset());
+
+          numFiles = i;
+
+          Resource_PAK_38[] oldResources = resources;
+          resources = new Resource_PAK_38[numFiles];
+          System.arraycopy(oldResources, 0, resources, 0, numFiles);
+
+          break;
+        }
+
+        while (entryType[3] == 0) {
+          // probably didn't read far enough in the previous entry, skip it
+          entryType = fm.readBytes(4); // (Kid A Mnesia Exhibition)
+        }
+
+        long offset = 0;
+        long length = 0;
+        boolean swapped = false;
+
+        if (entryType[3] == 97) {
+          if (entryType[0] >= 64 && entryType[0] < 127) {
+            // 8 - File Offset
+            offset = fm.readLong();
+            FieldValidator.checkOffset(offset, arcSize);
+
+            // 4 - File Length (not including the file header or the padding)
+            length = IntConverter.unsign(fm.readInt());
+            FieldValidator.checkLength(length, arcSize);
+          }
+          else {
+            // 4 - File Length (not including the file header or the padding)
+            length = IntConverter.unsign(fm.readInt());
+            FieldValidator.checkLength(length, arcSize);
+
+            // 8 - File Offset
+            offset = fm.readLong();
+            FieldValidator.checkOffset(offset, arcSize);
+          }
+
+          swapped = true;
+        }
+        else if (entryType[3] == 96) {
+          // 8 - File Offset
+          offset = fm.readLong();
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - File Length (not including the file header or the padding)
+          length = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+
+          swapped = true;
+        }
+        else if (entryType[2] == -64 && entryType[0] >= 64) { // Faraday Protocol
+          // 4 - File Offset
+          offset = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - Decomp Length?
+          fm.skip(4);
+
+          // 4 - File Length (not including the file header or the padding)
+          length = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+
+          swapped = true;
+        }
+        else {
+          // 4 - File Offset
+          offset = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - File Length (not including the file header or the padding)
+          length = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+        }
+
+        if (entryType[0] >= 64 && entryType[0] < 127) {
+          // 4 - Unknown
+          fm.skip(4);
+        }
+
+        if (entryType[0] == -1) {
+          if (!swapped) {
+            long oldOffset = offset;
+            offset = length;
+            length = oldOffset;
+          }
+
+          // 0 = 20 bytes
+          // 1 = ? bytes
+          // 2 = 52 bytes
+
+          // 20 - Unknown
+          fm.skip(20);
+
+          // count*16 - Unknown
+          int count = entryType[1];
+          fm.skip(count * 16);
+        }
+        else if (entryType[0] == 63) {
+          if (!swapped) {
+            long oldOffset = offset;
+            offset = length;
+            length = oldOffset;
+          }
+
+          // 4 - Unknown
+          // 4 - Unknown
+          fm.skip(8);
+
+          // count*16 - Unknown
+          int count = entryType[1];
+          fm.skip(count * 16);
+        }
+        else if (entryType[0] == -65) { // 191
+          if (!swapped) {
+            long oldOffset = offset;
+            offset = length;
+            length = oldOffset;
+          }
+
+          // count*16 - Unknown
+          int count = entryType[1];
+          fm.skip((count + 1) * 16);
+        }
+        else if (entryType[0] == 127) {
+          // 0 = 8 bytes
+          // 1 = 28 bytes   
+          // 9 = 156 bytes
+
+          // 4 - File Offset
+          // 4 - File Length (not including the file header or the padding)
+
+          if (!swapped) {
+            offset = length;
+          }
+          length = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+
+          fm.skip(4);
+
+          // count*20 - Unknown
+          int count = entryType[1];
+          fm.skip(count * 16);
+
+          if (count >= 1) {
+            // additional 4
+            fm.skip(4);
+          }
+          if (entryType[2] == -64) {
+            // additional 4
+            fm.skip(4);
+          }
+
+        }
+        else if (entryType[0] == -96) { // 160 (Train Sim World 2)
+          // 12 - Unknown
+          fm.skip(12);
+
+          // count*16 - Unknown
+          int count = ByteConverter.unsign(entryType[1]);
+          if (entryType[2] == -127) {
+            count += 256;
+          }
+          else if (entryType[2] == -126) {
+            count += 512;
+          }
+          else if (entryType[2] == -125) {
+            count += 768;
+          }
+          fm.skip((count) * 16);
+        }
+        else if (entryType[0] == -32) { // 224 (Train Sim World 2)
+          // count*16 - Unknown
+          int count = ByteConverter.unsign(entryType[1]);
+          if (entryType[2] == -127) {
+            count += 256;
+          }
+          else if (entryType[2] == -126) {
+            count += 512;
+          }
+          else if (entryType[2] == -125) {
+            count += 768;
+          }
+          fm.skip((count + 1) * 16);
+        }
+        else if (entryType[0] == 32) { // (Train Sim World 2)
+          // 4 - Unknown
+          fm.skip(4);
+
+          // count*16 - Unknown
+          int count = ByteConverter.unsign(entryType[1]);
+          if (entryType[2] == -127) {
+            count += 256;
+          }
+          else if (entryType[2] == -126) {
+            count += 512;
+          }
+          else if (entryType[2] == -125) {
+            count += 768;
+          }
+          fm.skip((count) * 16);
+        }
+        else if (entryType[0] == 96) { // (Train Sim World 2)
+          // 4 - Unknown
+          fm.skip(4);
+
+          // count*16 - Unknown
+          int count = ByteConverter.unsign(entryType[1]);
+          if (entryType[2] == -127) {
+            count += 256;
+          }
+          else if (entryType[2] == -126) {
+            count += 512;
+          }
+          else if (entryType[2] == -125) {
+            count += 768;
+          }
+          fm.skip((count) * 16);
+
+          if (count == 0) { // Faraday Protocol
+            // 12 - Unknown
+            // technically, this should be incorporated into the above if/else somehow.
+            // ie. we only do 12 here because we've already skipped 4 of Unknown before the if-else
+            fm.skip(12);
+          }
+        }
+
+        String filename = Resource.generateFilename(i); // need a default name here, so the sort() later on works
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource_PAK_38(path, null, offset, length);
+        resources[i] = new Resource_PAK_38(path, filename, offset, length);
+
+        //System.out.println((entryOffset + dirStart) + "\t" + offset + "\t" + length + "\t" + entryType[0] + "\t" + entryType[3]);
       }
 
       // Now read the filename directory
-      fm.seek(dir3Offset);
+      if (decrypted) {
+        //int lengthRead = (int) (fm.getOffset() - originalDirOffset);
+        dir3Offset -= fm.getOffset(); // noting that fm.getOffset() is reading from the decrypted content
+        fm.skip(dir3Offset);
+      }
+      else {
+        fm.seek(dir3Offset);
+      }
 
       // 4 - Number of Directories
       int numDirs = fm.readInt();
@@ -685,13 +1084,27 @@ public class Plugin_PAK_65 extends ArchivePlugin {
           filename = dirName + filename;
 
           // 4 - Offset to corresponding entry in Directory 1 (relative to the start of Directory 1)
-          int fileID = (fm.readInt() / 12);
-          FieldValidator.checkRange(fileID, 0, numFiles);
+          //int fileID = (fm.readInt() / 12);
+          int entryOffset = fm.readInt();
+          int fileID = Arrays.binarySearch(entryOffsets, entryOffset);
 
-          Resource resource = resources[fileID];
-          resource.setName(filename);
-          resource.setOriginalName(filename);
+          if (fileID < 0) {
+            // not found - skip this one
+          }
+          else {
+            FieldValidator.checkRange(fileID, 0, numFiles);
+
+            Resource resource = resources[fileID];
+            resource.setName(filename);
+            resource.setOriginalName(filename);
+          }
         }
+      }
+
+      // if we've decrypted the directory, need to go back to the original archive now.
+      if (fm != originalFM) {
+        fm.close(); // close the decrypted file
+        fm = originalFM;// swap back to the original archive
       }
 
       // Now go in to each file and work out if it's compressed or not
@@ -700,121 +1113,179 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       for (int i = 0; i < numFiles; i++) {
         TaskProgressManager.setValue(i);
 
-        Resource resource = resources[i];
+        try {
+          // Try - if we have trouble reading any of this, the offset is probably wrong, but still allow it for now (TrainSimWorld2 has a funny item in 1 file)
 
-        long offset = resource.getOffset();
-        fm.seek(offset);
+          Resource resource = resources[i];
 
-        // 8 - null
-        fm.skip(8);
+          long offset = resource.getOffset();
+          //System.out.println("-->" + offset);
+          fm.seek(offset);
 
-        // 8 - Compressed Length (not including the file header fields or padding)
-        long length = fm.readLong();
-        FieldValidator.checkLength(length, arcSize);
+          // 8 - null
+          fm.skip(8);
 
-        // 8 - Decompressed Length
-        long decompLength = fm.readLong();
-        FieldValidator.checkLength(decompLength);
+          // 8 - Compressed Length (not including the file header fields or padding)
+          long length = fm.readLong();
+          FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Compression Type (0=uncompressed, 1=ZLib, 2=GZip, 4=Snappy)
-        int compressionType = fm.readInt();
-        FieldValidator.checkRange(compressionType, 0, 4);
+          // 8 - Decompressed Length
+          long decompLength = fm.readLong();
+          FieldValidator.checkLength(decompLength);
 
-        if (compressionType == 0) {
-          // uncompressed, just skip the 53-byte header
-          offset += 53;
-          resource.setOffset(offset);
-        }
-        else {
-          // 20 - Unknown
-          fm.skip(20);
+          // 4 - Compression Type (0=uncompressed, 1=ZLib, 2=Oodle)
+          int compressionType = fm.readInt();
+          FieldValidator.checkRange(compressionType, 0, 4);
 
-          // 4 - Number of Compressed Blocks
-          int numBlocks = fm.readInt();
-          FieldValidator.checkNumFiles(numBlocks);
+          if (compressionType == 0) {
+            // uncompressed
 
-          long[] blockOffsets = new long[numBlocks];
-          long[] blockLengths = new long[numBlocks];
-          boolean addOffset = true;
-          for (int b = 0; b < numBlocks; b++) {
-            // 8 - Offset to the start of the compressed data block (relative to the start of the archive)
-            long blockStartOffset = fm.readLong();
-            FieldValidator.checkOffset(blockStartOffset, arcSize);
+            // 20 - Unknown
+            fm.skip(20);
 
-            // 8 - Offset to the end of the compressed data block (relative to the start of the archive)
-            long blockEndOffset = fm.readLong();
-            FieldValidator.checkOffset(blockEndOffset, arcSize);
+            // 1 - Encryption (0=unencrypted, 1=encrypted)
+            int encryptionFlag = fm.readByte();
 
-            long blockLength = blockEndOffset - blockStartOffset;
-            FieldValidator.checkLength(blockLength);
+            // 4 - null
+            fm.skip(4);
 
+            offset = fm.getOffset();
+            resource.setOffset(offset);
+
+            if (encryptionFlag == 1) {
+              // encrypted
+              resource.setExporter(exporterDefaultWithEncryption);
+            }
+          }
+          else {
+
+            //System.out.println(offset + "\t" + compressionType);
+
+            // 20 - Unknown
+            fm.skip(20);
+
+            // 4 - Number of Compressed Blocks
+            int numBlocks = fm.readInt();
+            FieldValidator.checkNumFiles(numBlocks);
+
+            long[] blockOffsets = new long[numBlocks];
+            long[] blockLengths = new long[numBlocks];
+            boolean addOffset = true;
+            for (int b = 0; b < numBlocks; b++) {
+              // 8 - Offset to the start of the compressed data block (relative to the start of the archive)
+              long blockStartOffset = fm.readLong();
+              FieldValidator.checkOffset(blockStartOffset, arcSize);
+
+              // 8 - Offset to the end of the compressed data block (relative to the start of the archive)
+              long blockEndOffset = fm.readLong();
+              FieldValidator.checkOffset(blockEndOffset, arcSize);
+
+              long blockLength = blockEndOffset - blockStartOffset;
+              FieldValidator.checkLength(blockLength);
+
+              if (compressionType == 1) {
+                if (b == 0) {
+                  // IN SOME ONLY, ZLib compression uses an offset relative to the start of the Data for *this* File
+                  long difference = blockStartOffset - offset - (numBlocks * 16);
+                  if (difference >= 0 && difference < 250) {
+                    addOffset = false;
+                  }
+                  else {
+                    addOffset = true;
+                  }
+                }
+
+                if (addOffset) {
+                  blockStartOffset += offset;
+                }
+              }
+
+              blockOffsets[b] = blockStartOffset;
+              blockLengths[b] = blockLength;
+            }
+
+            // 1 - Encryption (0=unencrypted, 1=encrypted)
+            int encryptionFlag = fm.readByte();
+
+            // 4 - Decompressed Block Size (65536 if multiple blocks, otherwise the same as the decompressed length)
+            int blockSize = fm.readInt();
+            FieldValidator.checkLength(blockSize);
+
+            ExporterPlugin exporter = null;
             if (compressionType == 1) {
-              if (b == 0) {
-                // IN SOME ONLY, ZLib compression uses an offset relative to the start of the Data for *this* File
-                long difference = blockStartOffset - offset - (numBlocks * 16);
-                if (difference >= 0 && difference < 250) {
-                  addOffset = false;
+              if (encryptionFlag == 1) {
+                // encrypted and compressed
+                if (exporter1WithEncryption != null) {
+                  exporter = exporter1WithEncryption;
                 }
                 else {
-                  addOffset = true;
+                  exporter = exporterZLibWithEncryption;
                 }
               }
-
-              if (addOffset) {
-                blockStartOffset += offset;
+              else {
+                // not encrypted, just compressed
+                if (exporter1 != null) {
+                  exporter = exporter1;
+                }
+                else {
+                  exporter = exporterZLib;
+                }
               }
             }
-
-            blockOffsets[b] = blockStartOffset;
-            blockLengths[b] = blockLength;
-          }
-
-          // 1 - null
-          fm.skip(1);
-
-          // 4 - Decompressed Block Size (65536 if multiple blocks, otherwise the same as the decompressed length)
-          int blockSize = fm.readInt();
-          FieldValidator.checkLength(blockSize);
-
-          ExporterPlugin exporter = null;
-          if (compressionType == 1) {
-            exporter = exporterZLib;
-          }
-          else if (compressionType == 2) {
-            exporter = exporterGZip;
-          }
-          else if (compressionType == 4) {
-            exporter = exporterSnappy;
-          }
-          else {
-            throw new WSPluginException("Unknown Compression type: " + compressionType);
-          }
-
-          // Put the wrapper around the exporter
-          if (numBlocks == 1) {
-            // don't need a wrapper (as it's only 1 block) - just set the offset/length as appropriate
-            offset = blockOffsets[0];
-            length = blockLengths[0];
-            decompLength = blockSize;
-          }
-          else {
-            // put a wrapper around the exporter, giving the blocks details
-
-            // work out the decompLengths
-            long[] decompLengths = new long[numBlocks];
-            for (int b = 0; b < numBlocks - 1; b++) {
-              decompLengths[b] = blockSize;
+            else if (compressionType == 2) {
+              if (encryptionFlag == 1) {
+                // encrypted and compressed
+                if (exporter2WithEncryption != null) {
+                  exporter = exporter2WithEncryption;
+                }
+                else {
+                  exporter = exporterDefaultWithEncryption;
+                }
+              }
+              else {
+                // not encrypted, just compressed
+                if (exporter2 != null) {
+                  exporter = exporter2;
+                }
+                else {
+                  exporter = exporterOodle;
+                }
+              }
             }
-            long remainingSize = decompLength - (blockSize * (numBlocks - 1));
-            decompLengths[numBlocks - 1] = remainingSize;
+            else {
+              throw new WSPluginException("Unknown Compression type: " + compressionType);
+            }
 
-            exporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, decompLengths);
+            // Put the wrapper around the exporter
+            if (numBlocks == 1) {
+              // don't need a wrapper (as it's only 1 block) - just set the offset/length as appropriate
+              offset = blockOffsets[0];
+              length = blockLengths[0];
+              decompLength = blockSize;
+            }
+            else {
+              // put a wrapper around the exporter, giving the blocks details
+
+              // work out the decompLengths
+              long[] decompLengths = new long[numBlocks];
+              for (int b = 0; b < numBlocks - 1; b++) {
+                decompLengths[b] = blockSize;
+              }
+              long remainingSize = decompLength - (blockSize * (numBlocks - 1));
+              decompLengths[numBlocks - 1] = remainingSize;
+
+              exporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, decompLengths);
+            }
+
+            resource.setLength(length);
+            resource.setDecompressedLength(decompLength);
+            resource.setOffset(fm.getOffset());
+            resource.setExporter(exporter);
           }
 
-          resource.setLength(length);
-          resource.setDecompressedLength(decompLength);
-          resource.setOffset(fm.getOffset());
-          resource.setExporter(exporter);
+        }
+        catch (Throwable t) {
+          ErrorLogger.log(t);
         }
       }
 
@@ -913,6 +1384,9 @@ public class Plugin_PAK_65 extends ArchivePlugin {
    **********************************************************************************************
    **/
   public String readUAssetClass(Resource resource) {
+    // If this file is a uAsset, it really shouldn't use OODLE compression, but just in case we want to disable it for now (as it uses QuickBMS)
+    ExporterPlugin originalExporter = resource.getExporter();
+
     try {
       long arcSize = resource.getDecompressedLength();
 
@@ -1055,6 +1529,10 @@ public class Plugin_PAK_65 extends ArchivePlugin {
 
         if (entry.getType().equals("Class")) {
           fm.close();
+
+          // put the original exporter back
+          resource.setExporter(originalExporter);
+
           return entry.getName();
         }
 
@@ -1064,6 +1542,9 @@ public class Plugin_PAK_65 extends ArchivePlugin {
     }
     catch (Throwable t) {
     }
+
+    // put the original exporter back
+    resource.setExporter(originalExporter);
     return null;
 
   }

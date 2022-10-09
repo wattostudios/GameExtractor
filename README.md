@@ -67,6 +67,15 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.14
+  * [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
+  * [+] Added support for encrypted UE4 files when a valid encryption key is supplied
+  * [+] When exporting images with multiple frames, and converting them, all the frames are now
+        converted and saved as separate images, rather than just the first frame.
+  * [+] New Preview Panels to display and edit files as Tables or Trees
+  * [A] Exporting meshes with multiple objects in them into OBJ/STL format now works correctly
+  * [B] Splitting Unity3D archives where an individual file is over 2GB now works correctly
+
 * Version 3.13
   * [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
   * [+] Added previews for Unity3D v20 Meshes that are stored in a separate resS file

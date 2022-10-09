@@ -22,7 +22,6 @@ import java.util.zip.DeflaterOutputStream;
 import org.watto.ErrorLogger;
 import org.watto.io.stream.ManipulatorBufferOutputStream;
 
-
 /***********************************************************************************************
 A class that sits between a <code>ManipulatorBuffer</code> and a <code>Manipulator</code> class.
 When writing to the <code>ManipulatorBuffer</code>, the data is decompressed with ZLib
@@ -36,41 +35,37 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   /** the stream used for decompression **/
   DeflaterOutputStream compressionStream;
 
-
   /***********************************************************************************************
   Wraps this class around a <code>buffer</code>, and assigns the <code>xorValue</code>
   @param buffer the <code>ManipulatorBuffer</code> that reads and writes the data
   ***********************************************************************************************/
-  public ZLibCompressionBufferWrapper(ManipulatorBuffer buffer){
+  public ZLibCompressionBufferWrapper(ManipulatorBuffer buffer) {
     this.buffer = buffer;
     this.compressionStream = new DeflaterOutputStream(new ManipulatorBufferOutputStream(buffer));
   }
-
 
   /***********************************************************************************************
   Checks to see whether <code>length</code> bytes can be read from the buffer. If not, the buffer
   is moved forward and re-filled to allow <code>length</code> bytes to be read.
   @param length the length of data to be read from the buffer
   ***********************************************************************************************/
-  public void checkFill(int length){
+  public void checkFill(int length) {
     //buffer.checkFill(length);
   }
-
 
   /***********************************************************************************************
   Checks to see whether <code>length</code> bytes can be written to the buffer. If not, the buffer
   is written to disk and cleared out, to allow <code>length</code> bytes to be written.
   @param length the length of data to be written to the buffer
   ***********************************************************************************************/
-  public void checkWrite(int length){
+  public void checkWrite(int length) {
     //buffer.checkWrite(length);
   }
-
 
   /***********************************************************************************************
   Closes the file. If the file is writable, it performs a forceWrite() to flush the buffer to disk.
   ***********************************************************************************************/
-  public void close(){
+  public void close() {
     try {
       compressionStream.finish();
       //buffer.close();
@@ -80,45 +75,41 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
     }
   }
 
-
   /***********************************************************************************************
   Flushes out the buffer and refills it by reading from the file
   ***********************************************************************************************/
-  public void fill(){
+  public void fill() {
     //buffer.fill();
   }
-
 
   /***********************************************************************************************
   Empties the buffer, discarding all data in it.
   ***********************************************************************************************/
-  public void flush(){
+  public void flush() {
     //buffer.flush();
     try {
       buffer.forceWrite();
       compressionStream.finish();
-      
+
     }
     catch (Throwable t) {
       ErrorLogger.log(t);
     }
   }
-
 
   /***********************************************************************************************
   Writes all the buffered data to disk, and flushes the buffer.
   ***********************************************************************************************/
-  public void forceWrite(){
+  public void forceWrite() {
     //buffer.forceWrite();
     try {
-        compressionStream.finish();
-        buffer.forceWrite();
+      compressionStream.finish();
+      buffer.forceWrite();
     }
     catch (Throwable t) {
       ErrorLogger.log(t);
     }
   }
-
 
   /***********************************************************************************************
   Copies <code>length</code> bytes of data from the buffer, and returns it. This does not move
@@ -126,7 +117,7 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   @param length the length of data to copy
   @return the data from the buffer
   ***********************************************************************************************/
-  public byte[] getBuffer(int length){
+  public byte[] getBuffer(int length) {
     /*
     try {
       byte[] bytes = buffer.getBuffer(length);
@@ -143,70 +134,69 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
     return null;
   }
 
-
   /***********************************************************************************************
   Gets the position of the pointer in the buffer
   @return the pointer position in the buffer
   ***********************************************************************************************/
-  public int getBufferLevel(){
+  public int getBufferLevel() {
     return buffer.getBufferLevel();
   }
-
 
   /***********************************************************************************************
   Gets the size of the buffer
   @return the size of the buffer
   ***********************************************************************************************/
-  public int getBufferSize(){
+  public int getBufferSize() {
     return buffer.getBufferSize();
   }
-
 
   /***********************************************************************************************
   Gets the current position in this file. Data will be read or written from this point.
   @return the current position in the file
   ***********************************************************************************************/
-  public long getPointer(){
+  public long getPointer() {
     return buffer.getPointer();
   }
-
 
   /***********************************************************************************************
   Is this buffer open for reading or writing?
   @return true if the buffer is open, false otherwise
   ***********************************************************************************************/
-  public boolean isOpen(){
+  public boolean isOpen() {
     return buffer.isOpen();
   }
-
 
   /***********************************************************************************************
   Gets the length of the file
   @return the length of the file
   ***********************************************************************************************/
-  public long length(){
+  public long length() {
     return buffer.length();
   }
-
 
   /***********************************************************************************************
   Reads a single byte from the buffer
   @return the byte
   ***********************************************************************************************/
-  public int read(){
+  public int read() {
     return -1;
   }
 
+  /***********************************************************************************************
+  
+  ***********************************************************************************************/
+  public int peek() {
+    return -1;
+  }
 
   /***********************************************************************************************
   Reads a number of bytes from the buffer into the <code>destination</code> array
   @param destination the array that data is read in to
   @return the number of bytes that were read into the array
   ***********************************************************************************************/
-  public int read(byte[] destination){
+  public int read(byte[] destination) {
     return -1;
   }
-
 
   /***********************************************************************************************
   Reads <code>length</code> bytes of data from the buffer into the <code>offset</code> position
@@ -215,10 +205,9 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   @param offset the offset in the <code>destination</code> array where the data is read in to
   @param length the number of bytes to read into the array
   ***********************************************************************************************/
-  public int read(byte[] destination,int offset,int length){
+  public int read(byte[] destination, int offset, int length) {
     return -1;
   }
-
 
   /***********************************************************************************************
   Seeks to the <code>offset</code> in the file. If the <code>offset</code> is in the buffer, it
@@ -226,20 +215,18 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   @param offset the offset to seek to in the file
   @see seek(long)
   ***********************************************************************************************/
-  public void relativeSeek(long offset){
+  public void relativeSeek(long offset) {
     //buffer.relativeSeek(offset);
   }
-
 
   /***********************************************************************************************
   Gets the number of bytes left to read in the file. In other words, the length between the
   current pointer and the end of the file
   @return the number of bytes remaining
   ***********************************************************************************************/
-  public long remainingLength(){
+  public long remainingLength() {
     return buffer.remainingLength();
   }
-
 
   /***********************************************************************************************
   Seeks to the <code>offset</code> in the file. The whole buffer is flushed and re-read from the
@@ -247,10 +234,9 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   @param offset the offset to seek to in the file
   @see relativeSeek(long)
   ***********************************************************************************************/
-  public void seek(long offset){
+  public void seek(long offset) {
     //buffer.seek(offset);
   }
-
 
   /***********************************************************************************************
   Sets the size of the buffer.
@@ -260,10 +246,9 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
    you <code>flush()</code> before running this method.
    @param length the new length of the buffer
   ***********************************************************************************************/
-  public void setBufferSize(int length){
+  public void setBufferSize(int length) {
     //buffer.setBufferSize(length);
   }
-
 
   /***********************************************************************************************
   Sets the length of the file. If the file is smaller than this length, the file size is increased.
@@ -274,26 +259,24 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   longer.
   @param length the new length of the file 
   ***********************************************************************************************/
-  public void setLength(long length){
+  public void setLength(long length) {
     //buffer.setLength(length);
   }
-
 
   /***********************************************************************************************
   Skips over <code>length</code> bytes in the buffer
   @param length the number of bytes to skip
   @return the number of skipped bytes
   ***********************************************************************************************/
-  public int skip(int length){
+  public int skip(int length) {
     return -1;
   }
-
 
   /***********************************************************************************************
   Writes an array of data into the buffer
   @param source the data to write to the buffer
   ***********************************************************************************************/
-  public void write(byte[] source){
+  public void write(byte[] source) {
     try {
       compressionStream.write(source);
     }
@@ -302,7 +285,6 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
     }
   }
 
-
   /***********************************************************************************************
   Writes <code>length</code> bytes of data from the <code>offset</code> in the <code>source</code>
   array into the buffer
@@ -310,21 +292,20 @@ public class ZLibCompressionBufferWrapper implements ManipulatorBuffer {
   @param offset the offset in the <code>source</code> to start reading from
   @param length the length of data to write
   ***********************************************************************************************/
-  public void write(byte[] source,int offset,int length){
+  public void write(byte[] source, int offset, int length) {
     try {
-      compressionStream.write(source,offset,length);
+      compressionStream.write(source, offset, length);
     }
     catch (Throwable t) {
       ErrorLogger.log(t);
     }
   }
 
-
   /***********************************************************************************************
   Writes a single byte of data to the buffer
   @param source the byte to write
   ***********************************************************************************************/
-  public void write(int source){
+  public void write(int source) {
     try {
       compressionStream.write(source);
     }

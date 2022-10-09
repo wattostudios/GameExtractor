@@ -15,10 +15,18 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_Oodle;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
+import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -40,7 +48,8 @@ public class Plugin_CACHE_3 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("The Darkness 2");
+    setGames("The Darkness 2",
+        "Warframe");
     setExtensions("cache"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -104,7 +113,7 @@ public class Plugin_CACHE_3 extends ArchivePlugin {
       fm.skip(8);
 
       int numFiles = (int) ((sourcePath.length() - 8) / 96);
-      FieldValidator.checkNumFiles(numFiles);
+      FieldValidator.checkNumFiles(numFiles / 2); // some have a lot of files
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
@@ -177,6 +186,114 @@ public class Plugin_CACHE_3 extends ArchivePlugin {
       }
 
       resources = resizeResources(resources, realNumFiles);
+      numFiles = realNumFiles;
+
+      fm.close();
+
+      // now open the real archive to read the chunks of each file
+      fm = new FileManipulator(path, false, 8);
+
+      int maxBlocks = 10000; // guess
+
+      ExporterPlugin exporterEvolution = Exporter_Default.getInstance(); // NOT IMPLEMENTED
+      ExporterPlugin exporterOodle = Exporter_Oodle.getInstance();
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        long offset = resource.getOffset();
+        long length = resource.getLength();
+        long decompLength = resource.getDecompressedLength();
+
+        if (length == decompLength) {
+          // uncompressed
+          continue;
+        }
+
+        long endOffset = offset + length;
+
+        long[] blockOffsets = new long[maxBlocks];
+        long[] blockLengths = new long[maxBlocks];
+        long[] blockDecompLengths = new long[maxBlocks];
+        ExporterPlugin[] blockExporters = new ExporterPlugin[maxBlocks];
+
+        int realNumBlocks = 0;
+
+        while (offset < endOffset) {
+
+          fm.seek(offset);
+
+          int checkByte = ByteConverter.unsign(fm.readByte());
+          fm.relativeSeek(offset);
+
+          if (checkByte <= 127) {
+            // Evolution Compression
+
+            short blockLength = ShortConverter.changeFormat(fm.readShort());
+            FieldValidator.checkLength(blockLength, arcSize);
+
+            short blockDecompLength = ShortConverter.changeFormat(fm.readShort());
+            FieldValidator.checkLength(blockDecompLength);
+
+            offset += 4;
+
+            blockOffsets[realNumBlocks] = offset;
+            blockLengths[realNumBlocks] = blockLength;
+            blockDecompLengths[realNumBlocks] = blockDecompLength;
+            blockExporters[realNumBlocks] = exporterEvolution;
+            realNumBlocks++;
+
+            offset += blockLength;
+
+            ErrorLogger.log("[CACHE_3] Evolution Compression Not Implemented");
+          }
+          else {
+            // Oodle Compression
+
+            int blockLength = IntConverter.changeFormat(fm.readInt());
+            blockLength >>= 2;
+            blockLength &= 0x1FFFFFFF;
+            FieldValidator.checkLength(blockLength, arcSize);
+
+            int blockDecompLength = IntConverter.changeFormat(fm.readInt());
+            blockDecompLength >>= 5;
+            FieldValidator.checkLength(blockDecompLength);
+
+            offset += 8;
+
+            blockOffsets[realNumBlocks] = offset;
+            blockLengths[realNumBlocks] = blockLength;
+            blockDecompLengths[realNumBlocks] = blockDecompLength;
+            blockExporters[realNumBlocks] = exporterOodle;
+            realNumBlocks++;
+
+            offset += blockLength;
+          }
+
+        }
+
+        if (realNumBlocks < maxBlocks) {
+          long[] oldBlockOffsets = blockOffsets;
+          long[] oldBlockLengths = blockLengths;
+          long[] oldBlockDecompLengths = blockDecompLengths;
+          ExporterPlugin[] oldBlockExporters = blockExporters;
+
+          blockOffsets = new long[realNumBlocks];
+          blockLengths = new long[realNumBlocks];
+          blockDecompLengths = new long[realNumBlocks];
+          blockExporters = new ExporterPlugin[realNumBlocks];
+
+          System.arraycopy(oldBlockOffsets, 0, blockOffsets, 0, realNumBlocks);
+          System.arraycopy(oldBlockLengths, 0, blockLengths, 0, realNumBlocks);
+          System.arraycopy(oldBlockDecompLengths, 0, blockDecompLengths, 0, realNumBlocks);
+          System.arraycopy(oldBlockExporters, 0, blockExporters, 0, realNumBlocks);
+        }
+
+        BlockVariableExporterWrapper blockWrapper = new BlockVariableExporterWrapper(blockExporters, blockOffsets, blockLengths, blockDecompLengths);
+        resource.setExporter(blockWrapper);
+
+        TaskProgressManager.setValue(i);
+      }
 
       fm.close();
 

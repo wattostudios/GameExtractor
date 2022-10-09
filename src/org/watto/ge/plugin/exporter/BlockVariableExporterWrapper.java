@@ -79,16 +79,20 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
     // the current block is finished, move on to the next block
     currentBlock++;
     if (currentBlock < blockOffsets.length) {
+      //System.out.println("multivariable extracting " + blockLengths[currentBlock] + " from offset " + blockOffsets[currentBlock]);
+
       // open the next block...
       currentExporter.close();
 
       // change to the next exporter
       currentExporter = exporters[currentBlock];
       // open the block
+
       currentExporter.open(new Resource(sourceFile, "", blockOffsets[currentBlock], blockLengths[currentBlock], decompLengths[currentBlock]));
       return currentExporter.available();
     }
     else {
+      //System.out.println("multivariable finished");
       // finished reading the last block
       currentExporter.close();
       return false;
@@ -103,11 +107,16 @@ public class BlockVariableExporterWrapper extends ExporterPlugin {
   **/
   @Override
   public void close() {
+    //System.out.println("multivariable closing");
     currentExporter.close();
   }
 
   public long[] getBlockLengths() {
     return blockLengths;
+  }
+
+  public ExporterPlugin[] getBlockExporters() {
+    return exporters;
   }
 
   public long[] getBlockOffsets() {

@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.List;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.SingletonManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -27,7 +28,7 @@ public class Plugin_RAR_RAR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_RAR_RAR() {
@@ -47,7 +48,7 @@ public class Plugin_RAR_RAR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -78,7 +79,7 @@ public class Plugin_RAR_RAR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -88,36 +89,36 @@ public class Plugin_RAR_RAR extends ArchivePlugin {
       addFileTypes();
 
       /*
-
+      
       ExporterPlugin exporter = Exporter_RAR_RAR.getInstance();
-
+      
       RARFile rarArchive = new RARFile(path);
       RARArchivedFile[] files = rarArchive.getArchivedFiles();
-
+      
       int numFiles = files.length;
-
+      
       Resource[] resources = new Resource[numFiles];
-
+      
       TaskProgressManager.setMaximum(numFiles);
-
+      
       // Loop through directory
       int realNumFiles = 0;
       for (int i = 0; i < numFiles; i++) {
         RARArchivedFile rarEntry = files[i];
         if (!rarEntry.isDirectory()) {
-
+      
           String filename = rarEntry.getName();
           long length = rarEntry.getPackedSize();
           long decompLength = rarEntry.getUnpackedSize();
-
+      
           //path,id,name,offset,length,decompLength,exporter
           resources[realNumFiles] = new Resource(path, filename, 0, length, decompLength, exporter);
-
+      
           TaskProgressManager.setValue(realNumFiles);
           realNumFiles++;
         }
       }
-
+      
       resources = resizeResources(resources, realNumFiles);
       
       return resources;
@@ -178,6 +179,9 @@ public class Plugin_RAR_RAR extends ArchivePlugin {
           for (int i = 0; i < realNumFiles; i++) {
             resources[i].setExporter(defaultExporter);
           }
+
+          // We've exported all the files to TEMP - if we don't set this, they will be deleted after the archive is opened
+          SingletonManager.add("BulkExport_KeepTempFiles", true);
         }
       }
 

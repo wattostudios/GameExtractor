@@ -50,7 +50,8 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
 
     setGames("Football Manager 2009",
         "Football Manager 2010",
-        "Football Manager 2011");
+        "Football Manager 2011",
+        "Football Manager 2020");
     setExtensions("fmf", "qfm"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -58,6 +59,8 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
     //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
+
+    setTextPreviewExtensions("svg"); // LOWER CASE
 
   }
 
@@ -87,7 +90,8 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(3).equals("fmf")) {
+      String header = fm.readString(3);
+      if (header.equals("fmf") || header.equals("tad")) {
         rating += 50;
       }
 
@@ -98,6 +102,8 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
       return 0;
     }
   }
+
+  int additionalOffset = 0; // to allow for TAD files that have an additional 9-byte header at the start of the archive
 
   /**
    **********************************************************************************************
@@ -123,12 +129,19 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
 
       // 1 - Version Major? (2)
       // 1 - Version Minor? (1)
+      fm.skip(2);
+
       // 3 - Header ("fmf")
+      additionalOffset = 0;
+      if (fm.readString(3).equals("tad")) {
+        fm.skip(9);
+        additionalOffset = 9;
+      }
       // 4 - Unknown (814)
-      fm.skip(9);
+      fm.skip(4);
 
       // 4 - Directory Offset [+9]
-      int dirOffset = fm.readInt() + 9;
+      int dirOffset = fm.readInt() + 9 + additionalOffset;
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       fm.seek(dirOffset);
@@ -161,6 +174,11 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
 
       // open the decompressed data for processing
       fm.close();
+
+      //FileManipulator temp = new FileManipulator(new File("C:\\temp.txt"), true);
+      //temp.writeBytes(dirBytes);
+      //temp.close();
+
       fm = new FileManipulator(new ByteBuffer(dirBytes));
 
       int numFiles = Archive.getMaxFiles();
@@ -170,7 +188,18 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
 
       realNumFiles = 0;
 
+      // Try to read 2010/2011 format
       readDirectory(fm, resources, path, "", arcSize);
+
+      if (realNumFiles < 5) {
+        // try 2020 format
+
+        // go back to the beginning of the decompressed directory
+        realNumFiles = 0;
+        fm.seek(0);
+
+        readDirectory2020(fm, resources, path, "", arcSize);
+      }
 
       resources = resizeResources(resources, realNumFiles);
 
@@ -235,7 +264,7 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
         fm.skip(2);
 
         // 4 - File Offset (relative to the start of the FILE DATA)
-        int offset = fm.readInt() + 18; // FILE DATA starts at offset 18
+        int offset = fm.readInt() + 18 + additionalOffset; // FILE DATA starts at offset 18
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - Compressed File Length
@@ -267,10 +296,101 @@ public class Plugin_FMF_FMF extends ArchivePlugin {
 
       // 2 - Number of Sub-Directories in this Directory
       int numDirectories = fm.readShort();
-      FieldValidator.checkNumFiles(numDirectories);
+      //FieldValidator.checkNumFiles(numDirectories);
+      FieldValidator.checkRange(numDirectories, 0, 1000);
 
       for (int i = 0; i < numDirectories; i++) {
         readDirectory(fm, resources, path, dirName, arcSize);
+      }
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   *
+   **********************************************************************************************
+   **/
+  public void readDirectory2020(FileManipulator fm, Resource[] resources, File path, String parentDirName, long arcSize) {
+    try {
+
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
+
+      // 4 - Directory Name Length
+      int dirNameLength = fm.readInt();
+
+      String dirName = parentDirName;
+      if (dirNameLength != 0) {
+        FieldValidator.checkFilenameLength(dirNameLength);
+
+        // X - Directory Name 
+        dirName = parentDirName + fm.readString(dirNameLength) + "\\";
+      }
+
+      // 4 - Number of Files in this Directory
+      int numFiles = fm.readInt();
+
+      // for each file in this directory
+      for (int i = 0; i < numFiles; i++) {
+        // 4 - Filename Length
+        int filenameLength = fm.readInt();
+        FieldValidator.checkFilenameLength(filenameLength);
+
+        // X - Filename (without extension)
+        String filename = dirName + fm.readString(filenameLength);
+
+        // 4 - File Extension Length
+        int fileExtensionLength = fm.readInt();
+        FieldValidator.checkFilenameLength(fileExtensionLength);
+
+        // X - File Extension (including the ".")
+        filename += fm.readString(fileExtensionLength);
+
+        // 8 - File Offset (relative to the start of the FILE DATA)
+        long offset = fm.readLong() + 26 + additionalOffset; // FILE DATA starts at offset 26
+        FieldValidator.checkOffset(offset, arcSize);
+
+        // 8 - Compressed File Length
+        long length = fm.readLong();
+        FieldValidator.checkLength(length, arcSize);
+
+        // 8 - Decompressed File Length
+        long decompLength = fm.readLong();
+        FieldValidator.checkLength(decompLength);
+
+        // 8 - Timestamp?
+        // 8 - Timestamp?
+        fm.skip(16);
+
+        if (decompLength != 0 && decompLength != length) {
+          // compressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+          realNumFiles++;
+
+        }
+        else {
+          // uncompressed
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
+          realNumFiles++;
+        }
+
+        TaskProgressManager.setValue(offset);
+      }
+
+      // 4 - Number of Sub-Directories in this Directory
+      int numDirectories = fm.readInt();
+      //FieldValidator.checkNumFiles(numDirectories);
+      FieldValidator.checkRange(numDirectories, 0, 1000);
+
+      for (int i = 0; i < numDirectories; i++) {
+        readDirectory2020(fm, resources, path, dirName, arcSize);
       }
 
     }

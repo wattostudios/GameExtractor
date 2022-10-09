@@ -15,13 +15,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -32,17 +32,18 @@ public class Plugin_ARC_ARC_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_ARC_ARC_2() {
 
-    super("ARC_ARC_2", "Lost Planet ARC Archive");
+    super("ARC_ARC_2", "Capcom ARC Archive");
 
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Lost Planet");
+    setGames("Lost Planet",
+        "Mega Man X Legacy Collection");
     setExtensions("arc");
     setPlatforms("PC");
 
@@ -54,7 +55,7 @@ public class Plugin_ARC_ARC_2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -229,6 +230,60 @@ public class Plugin_ARC_ARC_2 extends ArchivePlugin {
         }
         else if (fileType == 1332739548) {
           filename += ".fcp";
+        }
+        else if (fileType == 1917712505) { // MEGAMAN
+          filename += ".wav";
+        }
+        else if (fileType == 516048707) { // MEGAMAN
+          filename += ".ctex";
+        }
+        else if (fileType == 638138255) { // MEGAMAN
+          filename += ".cof";
+        }
+        else if (fileType == 606035435) { // MEGAMAN
+          filename += ".tex";
+        }
+        else if (fileType == 96840727) { // MEGAMAN
+          filename += ".pat";
+        }
+        else if (fileType == 1061689397) { // MEGAMAN
+          filename += ".rlst";
+        }
+        else if (fileType == 466372966) { // MEGAMAN
+          filename += ".srqr";
+        }
+        else if (fileType == 366445307) { // MEGAMAN
+          filename += ".sbkr";
+        }
+        else if (fileType == 1637677031) { // MEGAMAN
+          filename += ".col";
+        }
+        else if (fileType == 1242424190) { // MEGAMAN
+          filename += ".dat4";
+        }
+        else if (fileType == 288493190) { // MEGAMAN
+          filename += ".omp";
+        }
+        else if (fileType == 1807858375) { // MEGAMAN
+          filename += ".ocl";
+        }
+        else if (fileType == 590226060) { // MEGAMAN
+          filename += ".revr";
+        }
+        else if (fileType == 1126422586) { // MEGAMAN
+          filename += ".xfs";
+        }
+        else if (fileType == 2013850128) { // MEGAMAN
+          filename += ".rtx";
+        }
+        else if (fileType == 408118762) { // MEGAMAN
+          filename += ".emp";
+        }
+        else if (fileType == 105528024) { // MEGAMAN
+          filename += ".xml";
+        }
+        else if (fileType == 377338879) { // MEGAMAN
+          filename += ".stqr";
         }
         else {
           // Unknown file type

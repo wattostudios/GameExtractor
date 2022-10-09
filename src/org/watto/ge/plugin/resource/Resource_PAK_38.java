@@ -128,12 +128,44 @@ public class Resource_PAK_38 extends Resource {
     }
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public Resource[] getRelatedResources() {
     return relatedResources;
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public void setRelatedResources(Resource[] relatedResources) {
     this.relatedResources = relatedResources;
+  }
+  
+  
+  /**
+  **********************************************************************************************
+  So we can show the extra properties in SidePanel_Information
+  **********************************************************************************************
+  **/
+  public Resource_Property[] getProperties() {
+    
+    if (relatedResources == null) {
+      return new Resource_Property[0];
+    }
+    
+    int numProperties = relatedResources.length;
+    Resource_Property[] properties = new Resource_Property[numProperties];
+    for (int i=0;i<numProperties;i++) {
+      properties[i] = new Resource_Property("RelatedResource",relatedResources[i].getName());
+    }
+    
+    
+    return properties;
   }
 
 }

@@ -27,6 +27,7 @@ import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
 import javafx.collections.ObservableFloatArray;
 import javafx.geometry.Point3D;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
 
@@ -278,11 +279,14 @@ public class Viewer_STL extends ViewerPlugin {
   **/
   @Override
   public void write(PreviewPanel panel, FileManipulator fm) {
+
     TriangleMesh mesh = null;
+    MeshView[] meshView = null;
 
     if (panel instanceof PreviewPanel_3DModel) {
       PreviewPanel_3DModel panel3D = (PreviewPanel_3DModel) panel;
       mesh = panel3D.getModel();
+      meshView = panel3D.getMeshView();
     }
     else if (panel instanceof PreviewPanel_MeshInvestigator) {
       PreviewPanel_MeshInvestigator panel3D = (PreviewPanel_MeshInvestigator) panel;
@@ -292,82 +296,105 @@ public class Viewer_STL extends ViewerPlugin {
       return;
     }
 
-    if (mesh == null) {
+    if (mesh == null && meshView == null) {
       return;
     }
 
-    // Get the Vertices and Faces
-    ObservableFloatArray verticesObservable = mesh.getPoints();
-    int numVertices = verticesObservable.size();
-    float[] vertices = new float[numVertices];
-    verticesObservable.toArray(vertices);
+    int numMeshes = 1;
+    if (meshView != null) {
+      numMeshes = meshView.length;
+    }
 
-    ObservableFaceArray facesObservable = mesh.getFaces();
-    int numFaces = facesObservable.size();
-    int[] faces = new int[numFaces];
-    facesObservable.toArray(faces);
+    int totalNumFaces = 0;
+    if (mesh != null) {
+      totalNumFaces = mesh.getFaces().size() * 3;
+    }
+    else if (meshView != null) {
+      for (int m = 0; m < numMeshes; m++) {
+        totalNumFaces += ((TriangleMesh) meshView[m].getMesh()).getFaces().size();
+      }
+    }
 
     // 80 - Header
     fm.writeString("Exported by Game Extractor http://www.watto.org/extract                         ");
 
     // 4 - Number of Faces
-    fm.writeInt(numFaces);
+    //fm.writeInt(numFaces);
+    fm.writeInt(totalNumFaces);
 
     DecimalFormat df = new DecimalFormat("#");
     df.setMaximumFractionDigits(8);
 
-    for (int i = 0; i < numFaces; i += 3) {
-      int face1 = faces[i] * 3; // *3 to convert it into a position in the vertices[]
-      int face2 = faces[i + 1] * 3; // *3 to convert it into a position in the vertices[]
-      int face3 = faces[i + 2] * 3; // *3 to convert it into a position in the vertices[]
+    for (int m = 0; m < numMeshes; m++) {
+      if (meshView != null) {
+        mesh = (TriangleMesh) meshView[m].getMesh();
+      }
 
-      float vertex1x = vertices[face1];
-      float vertex1y = vertices[face1 + 1];
-      float vertex1z = vertices[face1 + 2];
+      // Get the Vertices and Faces
+      ObservableFloatArray verticesObservable = mesh.getPoints();
+      int numVertices = verticesObservable.size();
+      float[] vertices = new float[numVertices];
+      verticesObservable.toArray(vertices);
 
-      float vertex2x = vertices[face2];
-      float vertex2y = vertices[face2 + 1];
-      float vertex2z = vertices[face2 + 2];
+      ObservableFaceArray facesObservable = mesh.getFaces();
+      int numFaces = facesObservable.size();
+      int[] faces = new int[numFaces];
+      facesObservable.toArray(faces);
 
-      float vertex3x = vertices[face3];
-      float vertex3y = vertices[face3 + 1];
-      float vertex3z = vertices[face3 + 2];
+      for (int i = 0; i < numFaces; i += 3) {
+        int face1 = faces[i] * 3; // *3 to convert it into a position in the vertices[]
+        int face2 = faces[i + 1] * 3; // *3 to convert it into a position in the vertices[]
+        int face3 = faces[i + 2] * 3; // *3 to convert it into a position in the vertices[]
 
-      // 4 - Face Normal X
-      // 4 - Face Normal Y
-      // 4 - Face Normal Z
-      fm.writeFloat(0);
-      fm.writeFloat(0);
-      fm.writeFloat(0);
+        float vertex1x = vertices[face1];
+        float vertex1y = vertices[face1 + 1];
+        float vertex1z = vertices[face1 + 2];
 
-      // 4 - Vertex 1 X
-      // 4 - Vertex 1 Y
-      // 4 - Vertex 1 Z
-      fm.writeFloat(vertex1x);
-      fm.writeFloat(vertex1y);
-      fm.writeFloat(vertex1z);
+        float vertex2x = vertices[face2];
+        float vertex2y = vertices[face2 + 1];
+        float vertex2z = vertices[face2 + 2];
 
-      // 4 - Vertex 2 X
-      // 4 - Vertex 2 Y
-      // 4 - Vertex 2 Z
-      fm.writeFloat(vertex2x);
-      fm.writeFloat(vertex2y);
-      fm.writeFloat(vertex2z);
+        float vertex3x = vertices[face3];
+        float vertex3y = vertices[face3 + 1];
+        float vertex3z = vertices[face3 + 2];
 
-      // 4 - Vertex 3 X
-      // 4 - Vertex 3 Y
-      // 4 - Vertex 3 Z
-      fm.writeFloat(vertex3x);
-      fm.writeFloat(vertex3y);
-      fm.writeFloat(vertex3z);
+        // 4 - Face Normal X
+        // 4 - Face Normal Y
+        // 4 - Face Normal Z
+        fm.writeFloat(0);
+        fm.writeFloat(0);
+        fm.writeFloat(0);
 
-      // 2 - Attributes Byte Count
-      fm.writeShort(0);
+        // 4 - Vertex 1 X
+        // 4 - Vertex 1 Y
+        // 4 - Vertex 1 Z
+        fm.writeFloat(vertex1x);
+        fm.writeFloat(vertex1y);
+        fm.writeFloat(vertex1z);
+
+        // 4 - Vertex 2 X
+        // 4 - Vertex 2 Y
+        // 4 - Vertex 2 Z
+        fm.writeFloat(vertex2x);
+        fm.writeFloat(vertex2y);
+        fm.writeFloat(vertex2z);
+
+        // 4 - Vertex 3 X
+        // 4 - Vertex 3 Y
+        // 4 - Vertex 3 Z
+        fm.writeFloat(vertex3x);
+        fm.writeFloat(vertex3y);
+        fm.writeFloat(vertex3z);
+
+        // 2 - Attributes Byte Count
+        fm.writeShort(0);
+
+      }
+
+      faces = null; // free memory
+      vertices = null; // free memory
 
     }
-
-    faces = null; // free memory
-    vertices = null; // free memory
 
   }
 

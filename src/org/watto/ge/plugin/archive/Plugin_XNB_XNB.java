@@ -298,6 +298,9 @@ public class Plugin_XNB_XNB extends ArchivePlugin {
           else if (imageFormat == 28) {
             resource.addProperty("ImageFormat", "DXT1");
           }
+          else if (imageFormat == 6) { // Salt and Sanctuary
+            resource.addProperty("ImageFormat", "DXT5");
+          }
           else {
             resource.addProperty("ImageFormat", imageFormat);
           }

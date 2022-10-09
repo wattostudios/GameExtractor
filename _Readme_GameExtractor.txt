@@ -4,7 +4,7 @@
 //                                  Extensible Archive Editor                                 //
 //                                https://www.watto.org/extract                               //
 //                                                                                            //
-//                            Copyright (C) 2002-2021 wattostudios                            //
+//                            Copyright (C) 2002-2022 wattostudios                            //
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,6 +115,15 @@ website as well.
 //                                      Version History                                       //
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+Version 3.14
+[I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
+[+] Added support for encrypted UE4 files when a valid encryption key is supplied
+[+] When exporting images with multiple frames, and converting them, all the frames are now
+    converted and saved as separate images, rather than just the first frame.
+[+] New Preview Panels to display and edit files as Tables or Trees
+[A] Exporting meshes with multiple objects in them into OBJ/STL format now works correctly
+[B] Splitting Unity3D archives where an individual file is over 2GB now works correctly
 
 Version 3.13
 [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails

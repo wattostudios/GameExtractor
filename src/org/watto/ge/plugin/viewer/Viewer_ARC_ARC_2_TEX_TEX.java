@@ -27,6 +27,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_ARC_ARC_2;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.IntConverter;
 
 /**
 **********************************************************************************************
@@ -37,21 +38,22 @@ public class Viewer_ARC_ARC_2_TEX_TEX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Viewer_ARC_ARC_2_TEX_TEX() {
     super("ARC_ARC_2_TEX_TEX", "Lost Planet TEX Image");
     setExtensions("tex");
 
-    setGames("Lost Planet");
+    setGames("Lost Planet",
+        "Capcom Fighting Collection");
     setPlatforms("PC");
     setStandardFileFormat(false);
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -64,7 +66,7 @@ public class Viewer_ARC_ARC_2_TEX_TEX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -162,58 +164,83 @@ public class Viewer_ARC_ARC_2_TEX_TEX extends ViewerPlugin {
       // 4 - Unknown (257)
       fm.skip(4);
 
-      // 2 - Width
-      int width = fm.readShort();
-      FieldValidator.checkWidth(width);
-
-      // 2 - Height
-      int height = fm.readShort();
-      FieldValidator.checkHeight(height);
-
-      // 4 - null
-      fm.skip(4);
-
-      // 4 - Direct X Format Header (DXT5)
-      String fourCC = fm.readString(4);
-
-      // 4 - Unknown (1065353216)
-      // 4 - Unknown (1065353216)
-      // 4 - Unknown (1065353216)
-      // 4 - Unknown (1065353216)
-      fm.skip(16);
-
-      // 4 - Header Length (44/80)
-      int headerLength = fm.readInt();
-      FieldValidator.checkLength(headerLength, fm.getLength());
-
-      int skipSize = (int) (headerLength - fm.getOffset());
-      if (skipSize < 0) {
-        return null;
-      }
-      fm.skip(skipSize);
-      //fm.seek(headerLength);
-
-      // X - Image Data
       ImageResource imageResource = null;
-      if (fourCC.equals("DXT3")) {
-        imageResource = ImageFormatReader.readDXT3(fm, width, height);
-        imageResource.addProperty("ImageFormat", "DXT3");
+
+      try {
+        // 2 - Width
+        int width = fm.readShort();
+        FieldValidator.checkWidth(width);
+
+        // 2 - Height
+        int height = fm.readShort();
+        FieldValidator.checkHeight(height);
+
+        // 4 - null
+        fm.skip(4);
+
+        // 4 - Direct X Format Header (DXT5)
+        String fourCC = fm.readString(4);
+
+        // 4 - Unknown (1065353216)
+        // 4 - Unknown (1065353216)
+        // 4 - Unknown (1065353216)
+        // 4 - Unknown (1065353216)
+        fm.skip(16);
+
+        // 4 - Header Length (44/80)
+        int headerLength = fm.readInt();
+        FieldValidator.checkLength(headerLength, fm.getLength());
+
+        int skipSize = (int) (headerLength - fm.getOffset());
+        if (skipSize < 0) {
+          return null;
+        }
+        fm.skip(skipSize);
+        //fm.seek(headerLength);
+
+        // X - Image Data
+        if (fourCC.equals("DXT3")) {
+          imageResource = ImageFormatReader.readDXT3(fm, width, height);
+          imageResource.addProperty("ImageFormat", "DXT3");
+        }
+        else if (fourCC.equals("DXT5")) {
+          imageResource = ImageFormatReader.readDXT5(fm, width, height);
+          imageResource.addProperty("ImageFormat", "DXT5");
+        }
+        else if (fourCC.equals("DXT1")) {
+          imageResource = ImageFormatReader.readDXT1(fm, width, height);
+          imageResource.addProperty("ImageFormat", "DXT1");
+        }
+        else if (dataFormat == 2) {
+          imageResource = ImageFormatReader.readBGRA(fm, width, height);
+          imageResource.setProperty("ImageFormat", "BGRA");
+        }
+        else {
+          fm.close();
+          return null;
+        }
       }
-      else if (fourCC.equals("DXT5")) {
-        imageResource = ImageFormatReader.readDXT5(fm, width, height);
-        imageResource.addProperty("ImageFormat", "DXT5");
-      }
-      else if (fourCC.equals("DXT1")) {
-        imageResource = ImageFormatReader.readDXT1(fm, width, height);
-        imageResource.addProperty("ImageFormat", "DXT1");
-      }
-      else if (dataFormat == 2) {
-        imageResource = ImageFormatReader.readBGRA(fm, width, height);
-        imageResource.setProperty("ImageFormat", "BGRA");
-      }
-      else {
-        fm.close();
-        return null;
+      catch (Throwable t) {
+        // try for the BC7 from Capcom Fighting Collection
+
+        fm.relativeSeek(8);
+
+        // 4 - Image Width and Height (HHHHHHHH,HHHHXWWW,WWWWWWWW,WWXXXXXX)
+        long widthHeight = IntConverter.unsign(fm.readInt());
+        int height = (int) (widthHeight >> 20);
+        int width = (int) ((widthHeight >> 6) & 8191);
+
+        FieldValidator.checkHeight(height);
+        FieldValidator.checkWidth(width);
+
+        // 4 - Unknown
+        // 4 - Image Data Offset (24)
+        // 4 - null
+        fm.skip(12);
+
+        imageResource = ImageFormatReader.readBC7(fm, width, height);
+        imageResource.setProperty("ImageFormat", "BC7");
+        imageResource = ImageFormatReader.swapGBARtoARGB(imageResource);
       }
 
       fm.close();

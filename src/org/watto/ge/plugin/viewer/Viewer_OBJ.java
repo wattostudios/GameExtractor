@@ -28,6 +28,7 @@ import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
 import javafx.collections.ObservableFloatArray;
 import javafx.geometry.Point3D;
+import javafx.scene.shape.MeshView;
 import javafx.scene.shape.ObservableFaceArray;
 import javafx.scene.shape.TriangleMesh;
 
@@ -435,10 +436,12 @@ public class Viewer_OBJ extends ViewerPlugin {
   public void write(PreviewPanel panel, FileManipulator fm) {
 
     TriangleMesh mesh = null;
+    MeshView[] meshView = null;
 
     if (panel instanceof PreviewPanel_3DModel) {
       PreviewPanel_3DModel panel3D = (PreviewPanel_3DModel) panel;
       mesh = panel3D.getModel();
+      meshView = panel3D.getMeshView();
     }
     else if (panel instanceof PreviewPanel_MeshInvestigator) {
       PreviewPanel_MeshInvestigator panel3D = (PreviewPanel_MeshInvestigator) panel;
@@ -448,8 +451,13 @@ public class Viewer_OBJ extends ViewerPlugin {
       return;
     }
 
-    if (mesh == null) {
+    if (mesh == null && meshView == null) {
       return;
+    }
+
+    int numMeshes = 1;
+    if (meshView != null) {
+      numMeshes = meshView.length;
     }
 
     fm.writeLine("# Exported by Game Extractor http://www.watto.org/extract");
@@ -457,62 +465,73 @@ public class Viewer_OBJ extends ViewerPlugin {
     DecimalFormat df = new DecimalFormat("#");
     df.setMaximumFractionDigits(8);
 
-    // Vertices
-    ObservableFloatArray verticesObservable = mesh.getPoints();
-    int numVertices = verticesObservable.size();
-    float[] vertices = new float[numVertices];
-    verticesObservable.toArray(vertices);
-
-    for (int i = 0; i < numVertices; i += 3) {
-      fm.writeLine("v " + df.format(vertices[i]) + ' ' + df.format(vertices[i + 1]) + ' ' + df.format(vertices[i + 2]));
-    }
-    vertices = null; // free memory
-
-    // Normals
-    ObservableFloatArray normalsObservable = mesh.getNormals();
-    int numNormals = normalsObservable.size();
-    float[] normals = new float[numNormals];
-    normalsObservable.toArray(normals);
-
-    for (int i = 0; i < numNormals; i += 3) {
-      float normal1 = normals[i];
-      float normal2 = normals[i + 1];
-      float normal3 = normals[i + 2];
-      if (normal1 != 0 && normal2 != 0 && normal3 != 0) {
-        fm.writeLine("vn " + df.format(normal1) + ' ' + df.format(normal2) + ' ' + df.format(normal3));
+    int verticesProcessed = 0;
+    for (int m = 0; m < numMeshes; m++) {
+      if (meshView != null) {
+        mesh = (TriangleMesh) meshView[m].getMesh();
       }
-    }
-    normals = null; // free memory
 
-    // Texture Co-ordinates
-    ObservableFloatArray texCoordsObservable = mesh.getTexCoords();
-    int numTexCoords = texCoordsObservable.size();
-    float[] texCoords = new float[numTexCoords];
-    texCoordsObservable.toArray(texCoords);
+      fm.writeLine("o Object" + m); // allow multiple meshes in the same object
 
-    for (int i = 0; i < numTexCoords; i += 2) {
-      float texCoord1 = texCoords[i];
-      float texCoord2 = texCoords[i + 1];
-      if (texCoord1 != 0 && texCoord2 != 0) {
-        fm.writeLine("vt " + df.format(texCoord1) + ' ' + df.format(texCoord2));
+      // Vertices
+      ObservableFloatArray verticesObservable = mesh.getPoints();
+      int numVertices = verticesObservable.size();
+      float[] vertices = new float[numVertices];
+      verticesObservable.toArray(vertices);
+
+      for (int i = 0; i < numVertices; i += 3) {
+        fm.writeLine("v " + df.format(vertices[i]) + ' ' + df.format(vertices[i + 1]) + ' ' + df.format(vertices[i + 2]));
       }
-    }
-    texCoords = null; // free memory
+      vertices = null; // free memory
 
-    // Faces
-    ObservableFaceArray facesObservable = mesh.getFaces();
-    int numFaces = facesObservable.size();
-    int[] faces = new int[numFaces];
-    facesObservable.toArray(faces);
+      // Normals
+      ObservableFloatArray normalsObservable = mesh.getNormals();
+      int numNormals = normalsObservable.size();
+      float[] normals = new float[numNormals];
+      normalsObservable.toArray(normals);
 
-    for (int i = 0; i < numFaces; i += 3) {
-      // Faces in Java start at 0. Need to convert to OBJ faces which start at 1
-      int face1 = faces[i] + 1;
-      int face2 = faces[i + 1] + 1;
-      int face3 = faces[i + 2] + 1;
-      fm.writeLine("f " + face1 + ' ' + face2 + ' ' + face3);
+      for (int i = 0; i < numNormals; i += 3) {
+        float normal1 = normals[i];
+        float normal2 = normals[i + 1];
+        float normal3 = normals[i + 2];
+        if (normal1 != 0 && normal2 != 0 && normal3 != 0) {
+          fm.writeLine("vn " + df.format(normal1) + ' ' + df.format(normal2) + ' ' + df.format(normal3));
+        }
+      }
+      normals = null; // free memory
+
+      // Texture Co-ordinates
+      ObservableFloatArray texCoordsObservable = mesh.getTexCoords();
+      int numTexCoords = texCoordsObservable.size();
+      float[] texCoords = new float[numTexCoords];
+      texCoordsObservable.toArray(texCoords);
+
+      for (int i = 0; i < numTexCoords; i += 2) {
+        float texCoord1 = texCoords[i];
+        float texCoord2 = texCoords[i + 1];
+        if (texCoord1 != 0 && texCoord2 != 0) {
+          fm.writeLine("vt " + df.format(texCoord1) + ' ' + df.format(texCoord2));
+        }
+      }
+      texCoords = null; // free memory
+
+      // Faces
+      ObservableFaceArray facesObservable = mesh.getFaces();
+      int numFaces = facesObservable.size();
+      int[] faces = new int[numFaces];
+      facesObservable.toArray(faces);
+
+      for (int i = 0; i < numFaces; i += 3) {
+        // Faces in Java start at 0. Need to convert to OBJ faces which start at 1
+        int face1 = faces[i] + 1 + verticesProcessed;
+        int face2 = faces[i + 1] + 1 + verticesProcessed;
+        int face3 = faces[i + 2] + 1 + verticesProcessed;
+        fm.writeLine("f " + face1 + ' ' + face2 + ' ' + face3);
+      }
+      faces = null; // free memory
+
+      verticesProcessed += (numVertices / 3);
     }
-    faces = null; // free memory
 
   }
 

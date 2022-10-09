@@ -19,6 +19,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -117,8 +118,10 @@ public class Plugin_TIGER_TAFS extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(path, false);
 
       // 4 - Header (TAFS)
-      // 4 - Version? (4)
-      fm.skip(8);
+      fm.skip(4);
+
+      // 4 - Version? (3/4)
+      int version = fm.readInt();
 
       // 4 - Number of Split Archives (eg 8 = archives 000-007)
       int numSplit = fm.readInt();
@@ -167,43 +170,89 @@ public class Plugin_TIGER_TAFS extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        // 4 - Hash
-        // 4 - Unknown (-1)
-        fm.skip(8);
+      if (version == 3) {
+        // VERSION 3
 
-        // 4 - File Length
-        int length = fm.readInt();
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - Hash
+          // 4 - Unknown (-1)
+          fm.skip(8);
 
-        // 4 - null
-        fm.skip(4);
+          // 4 - File Length
+          int length = fm.readInt();
 
-        // 2 - Archive Number
-        int arcNumber = fm.readShort();
-        FieldValidator.checkRange(arcNumber, 0, numSplit);
+          // 4 - File Offset
+          long offset = IntConverter.unsign(fm.readInt());
 
-        // 2 - Unknown (1)
-        fm.skip(2);
+          int arcNumber = 0;
+          /*
+          if (numSplit > 1) {
+            arcNumber = (int) (offset >> 30);
+            FieldValidator.checkRange(arcNumber, 0, numSplit);
+          
+            offset &= 1073741823;
+          }
+          */
 
-        // 4 - File Offset
-        int offset = fm.readInt();
+          String filename = Resource.generateFilename(i);
 
-        String filename = Resource.generateFilename(i);
+          File thisArcFile = archiveFiles[arcNumber];
+          long thisArcSize = archiveLengths[arcNumber];
 
-        File thisArcFile = archiveFiles[arcNumber];
-        long thisArcSize = archiveLengths[arcNumber];
+          FieldValidator.checkOffset(offset, thisArcSize);
+          FieldValidator.checkLength(length, thisArcSize);
 
-        FieldValidator.checkOffset(offset, thisArcSize);
-        FieldValidator.checkLength(length, thisArcSize);
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(thisArcFile, filename, offset, length);
+          resource.forceNotAdded(true);
 
-        //path,name,offset,length,decompLength,exporter
-        Resource resource = new Resource(thisArcFile, filename, offset, length);
-        resource.forceNotAdded(true);
+          resources[i] = resource;
 
-        resources[i] = resource;
+          TaskProgressManager.setValue(i);
+        }
+      }
+      else {
+        // VERSION 4
 
-        TaskProgressManager.setValue(i);
+        // Loop through directory
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - Hash
+          // 4 - Unknown (-1)
+          fm.skip(8);
+
+          // 4 - File Length
+          int length = fm.readInt();
+
+          // 4 - null
+          fm.skip(4);
+
+          // 2 - Archive Number
+          int arcNumber = fm.readShort();
+          FieldValidator.checkRange(arcNumber, 0, numSplit);
+
+          // 2 - Unknown (1)
+          fm.skip(2);
+
+          // 4 - File Offset
+          int offset = fm.readInt();
+
+          String filename = Resource.generateFilename(i);
+
+          File thisArcFile = archiveFiles[arcNumber];
+          long thisArcSize = archiveLengths[arcNumber];
+
+          FieldValidator.checkOffset(offset, thisArcSize);
+          FieldValidator.checkLength(length, thisArcSize);
+
+          //path,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(thisArcFile, filename, offset, length);
+          resource.forceNotAdded(true);
+
+          resources[i] = resource;
+
+          TaskProgressManager.setValue(i);
+        }
       }
 
       fm.close();

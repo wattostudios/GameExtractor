@@ -44,7 +44,7 @@ public class Viewer_RSB_1BSR_PTX extends ViewerPlugin {
     super("RSB_1BSR_PTX", "Zuma's Revenge PTX Image");
     setExtensions("ptx");
 
-    setGames("Hitman: Codename 47");
+    setGames("Zuma's Revenge");
     setPlatforms("iOS");
     setStandardFileFormat(false);
   }
@@ -160,7 +160,7 @@ public class Viewer_RSB_1BSR_PTX extends ViewerPlugin {
       if (imageFormat.equals("RGB565")) {
         imageResource = ImageFormatReader.readRGB565(fm, width, height);
       }
-      else { // format = 0
+      else { // format = 0  
         imageResource = ImageFormatReader.readBARG4444(fm, width, height);
       }
       if (imageResource != null) {

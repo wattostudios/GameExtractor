@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -232,11 +232,11 @@ public class _Plugin_XXX_Replace extends ArchivePlugin {
       TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
       long offset = 16 + (64 * numFiles);
       for (int i = 0; i < numFiles; i++) {
-        Resource fd = resources[i];
-        long length = fd.getDecompressedLength();
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
 
         // X - Filename (null)
-        fm.writeNullString(resources[i].getName());
+        fm.writeNullString(resource.getName());
 
         // 4 - File Offset
         fm.writeInt(offset);

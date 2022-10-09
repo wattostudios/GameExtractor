@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,8 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -38,10 +40,11 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
     super("NFS_NEFS", "NFS_NEFS");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("F1 2015",
         "F1 2018",
+        "F1 22",
         "GRID Autosport");
     setExtensions("nfs"); // MUST BE LOWER CASE
     setPlatforms("PC");
@@ -157,7 +160,7 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
       //Read the filenames
       String[] names = new String[numFiles];
 
-      //Loop through directory
+      // Loop through directory
       for (int i = 0; i < numFiles; i++) {
         // X - Filename (null)
         String filename = fm.readNullString();
@@ -169,18 +172,18 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
 
       fm.seek(dir1Offset);
 
-      //Read the offsets
+      // Read the offsets
       long[] offsets = new long[numFiles];
 
-      //Loop through directory
+      // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-        //8 - File Offset
+        // 8 - File Offset
         long offset = fm.readLong();
         FieldValidator.checkOffset(offset, arcSize);
         offsets[i] = offset;
 
-        //4 - Unknown ID
-        //4 - Unknown ID
+        // 4 - Unknown ID
+        // 4 - Unknown ID
         // 4 - File ID (incremental from 0)
         fm.skip(12);
 
@@ -222,6 +225,134 @@ public class Plugin_NFS_NEFS extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 4 - Header (NeFS)
+      // 32 - Unknown
+      // 64 - Unknown Hex Value
+      // 4 - Unknown
+      // 4 - Unknown
+      // 4 - Number of Files
+      // 4 - null
+      // 12 - Unknown
+      // 4 - Unknown (1)
+      // 4 - Unknown (4)
+      fm.writeBytes(src.readBytes(136));
+
+      // 4 - Directory 1 Offset (256)
+      int dir1Offset = src.readInt();
+      fm.writeInt(dir1Offset);
+
+      // 4 - Unknown
+      fm.writeBytes(src.readBytes(4));
+
+      // 4 - Directory 2 Offset
+      int dir2Offset = src.readInt();
+      fm.writeInt(dir2Offset);
+
+      // 4 - Unknown
+      fm.writeBytes(src.readBytes(4));
+
+      // 4 - Filename Directory Offset
+      int nameDirOffset = src.readInt();
+      fm.writeInt(nameDirOffset);
+
+      // 4 - Directory 3 Offset
+      int dir3Offset = src.readInt();
+      fm.writeInt(dir3Offset);
+
+      // 4 - Unknown
+      // 4 - null
+      fm.writeBytes(src.readBytes(8));
+
+      // 88 - Unknown
+      fm.writeBytes(src.readBytes(dir1Offset - 168));
+
+      // go to directory 1 and find the first file data offset
+      src.relativeSeek(dir1Offset);
+
+      // 8 - File Offset
+      long dataOffset = src.readLong();
+
+      src.relativeSeek(dir1Offset);
+
+      // Write Directory 1
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      long offset = dataOffset;
+      for (int i = 0; i < numFiles; i++) {
+        Resource fd = resources[i];
+        long length = fd.getDecompressedLength();
+
+        // 8 - File Offset
+        src.skip(8);
+        fm.writeLong(offset);
+
+        // 4 - Unknown ID
+        // 4 - Unknown ID
+        // 4 - File ID (incremental from 0)
+        fm.writeBytes(src.readBytes(12));
+
+        offset += length;
+      }
+
+      src.relativeSeek(dir2Offset);
+
+      // Write Directory 2
+      for (int i = 0; i < numFiles; i++) {
+        Resource fd = resources[i];
+        long length = fd.getDecompressedLength();
+
+        // 4 - Grouping ID
+        // 4 - Unknown ID
+        // 4 - Unknown ID
+        fm.writeBytes(src.readBytes(12));
+
+        // 4 - File Length
+        fm.writeInt(length);
+        src.skip(4);
+
+        // 4 - File ID (incremental from 0)
+        fm.writeBytes(src.readBytes(4));
+      }
+
+      // Write Filename Directory + Directory 3 + NULL PADDING TO FIRST FILE OFFSET
+      src.relativeSeek(nameDirOffset);
+
+      int dir3LengthAndPadding = (int) (dataOffset - nameDirOffset);
+      FieldValidator.checkLength(dir3LengthAndPadding);
+
+      fm.writeBytes(src.readBytes(dir3LengthAndPadding));
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      write(resources, fm);
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,11 +15,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -30,7 +32,7 @@ public class Plugin_000_SFDX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_000_SFDX() {
@@ -44,11 +46,20 @@ public class Plugin_000_SFDX extends ArchivePlugin {
     setExtensions("000");
     setPlatforms("PC");
 
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("xbmp", "XBMP Image", FileType.TYPE_IMAGE),
+        new FileType("audiopkg", "Audio Package", FileType.TYPE_OTHER),
+        new FileType("bin", "Binary File", FileType.TYPE_OTHER),
+        new FileType("anim", "Animation", FileType.TYPE_OTHER),
+        new FileType("charanim", "Character Animation", FileType.TYPE_OTHER));
+
+    setTextPreviewExtensions("exportres", "info", "h", "matx"); // LOWER CASE
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -107,8 +118,11 @@ public class Plugin_000_SFDX extends ArchivePlugin {
       // 4 - Folder Name Offset [-1] (relative to the start of the name directory)
       // 4 - Unknown (512)
       // 4 - Unknown (40)
+      fm.skip(12);
+
       // 4 - Directory Offset (44)
-      fm.skip(16);
+      int dirOffset = fm.readInt();
+      FieldValidator.checkOffset(dirOffset, arcSize);
 
       // 4 - Filename Directory Offset
       int filenameDirOffset = fm.readInt();
@@ -117,27 +131,34 @@ public class Plugin_000_SFDX extends ArchivePlugin {
       // 4 - Unknown
       fm.skip(4);
 
+      int filenameDirLength = (int) (arcSize - filenameDirOffset);
+      fm.seek(filenameDirOffset);
+      byte[] filenameBytes = fm.readBytes(filenameDirLength);
+      fm.seek(dirOffset);
+
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(filenameBytes));
+
       Resource[] resources = new Resource[numFiles];
 
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      int[] name1offsets = new int[numFiles];
-      int[] name2offsets = new int[numFiles];
       for (int i = 0; i < numFiles; i++) {
         // 4 - Filename Part 1 Offset (relative to the start of the name directory)
-        int name1 = fm.readInt() + filenameDirOffset;
-        FieldValidator.checkOffset(name1, arcSize);
-        name1offsets[i] = name1;
+        int name1Offset = fm.readInt();
+        FieldValidator.checkOffset(name1Offset, arcSize);
 
         // 4 - Filename Part 2 Offset (relative to the start of the name directory)
-        int name2 = fm.readInt() + filenameDirOffset;
-        FieldValidator.checkOffset(name2, arcSize);
-        name2offsets[i] = name2;
+        int name2Offset = fm.readInt();
+        FieldValidator.checkOffset(name2Offset, arcSize);
 
-        // 4 - null
-        // 4 - Unknown (37)
-        fm.skip(8);
+        // 4 - Directory Name Offset (relative to the start of the name directory)
+        int dirNameOffset = fm.readInt();
+        FieldValidator.checkOffset(dirNameOffset, arcSize);
+
+        // 4 - File Extension Offset (relative to the start of the name directory)
+        int extensionOffset = fm.readInt();
+        FieldValidator.checkOffset(extensionOffset, arcSize);
 
         // 4 - File Offset
         long offset = fm.readInt();
@@ -147,27 +168,23 @@ public class Plugin_000_SFDX extends ArchivePlugin {
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
+        String filename = "";
+        nameFM.seek(dirNameOffset);
+        filename += nameFM.readNullString();
+        nameFM.seek(name1Offset);
+        filename += nameFM.readNullString();
+        nameFM.seek(name2Offset);
+        filename += nameFM.readNullString();
+        nameFM.seek(extensionOffset);
+        filename += nameFM.readNullString();
+
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, "", offset, length);
+        resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
       }
 
-      // Filenames
-      fm.seek(filenameDirOffset);
-      String dirName = fm.readNullString();
-
-      for (int i = 0; i < numFiles; i++) {
-        String filename = dirName;
-
-        fm.seek(name1offsets[i]);
-        filename += fm.readNullString();
-
-        fm.seek(name2offsets[i]);
-        filename += fm.readNullString();
-
-        resources[i].setName(filename);
-      }
+      nameFM.close();
 
       fm.close();
 

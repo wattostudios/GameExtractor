@@ -81,15 +81,35 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
     String pathName = source.getPath();
     int dotPos = pathName.lastIndexOf(".");
     if (dotPos < 0) {
-      throw new WSPluginException("Missing Directory File");
+      if (extension.equals("")) {
+        throw new WSPluginException("Missing Directory File");
+      }
+      else {
+        // the starting file has no extension, so just append an extension to it.
+        dotPos = pathName.length();
+      }
     }
 
-    File path = new File(pathName.substring(0, dotPos) + "." + extension);
-    if (checkExists && !path.exists()) {
-      throw new WSPluginException("Missing Directory File");
+    if (extension.equals("")) {
+      // look for the file with no extension
+
+      File path = new File(pathName.substring(0, dotPos));
+      if (checkExists && !path.exists()) {
+        throw new WSPluginException("Missing Directory File");
+      }
+
+      return path;
+    }
+    else {
+      // look for a file with a different extension
+      File path = new File(pathName.substring(0, dotPos) + "." + extension);
+      if (checkExists && !path.exists()) {
+        throw new WSPluginException("Missing Directory File");
+      }
+
+      return path;
     }
 
-    return path;
   }
 
   /**

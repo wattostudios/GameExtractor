@@ -48,5 +48,24 @@ public abstract class PreviewPanel extends WSPanel {
   **********************************************************************************************
   **/
   public abstract void onCloseRequest();
+  
+  
+  /**
+  **********************************************************************************************
+
+  **********************************************************************************************
+  **/
+  public void onOpenRequest() {
+  }
+  
+  
+  /**
+  **********************************************************************************************
+  Called when the Previewer allows editing, and the value has been changed (true) or saved (false),
+  so as to enable/disable the save button, for example.
+  **********************************************************************************************
+  **/
+  public void setObjectChanged(boolean changed) {
+  }
 
 }

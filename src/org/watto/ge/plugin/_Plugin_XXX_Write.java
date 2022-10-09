@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@ package org.watto.ge.plugin;
 
 import java.io.File;
 import org.watto.Language;
+import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.io.FileManipulator;
@@ -139,6 +140,8 @@ public class _Plugin_XXX_Write extends ArchivePlugin {
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
+      numFiles = Archive.getMaxFiles();
+
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
@@ -146,11 +149,11 @@ public class _Plugin_XXX_Write extends ArchivePlugin {
       for (int i = 0; i < numFiles; i++) {
 
         // 4 - File Offset
-        long offset = fm.readInt();
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
-        long length = fm.readInt();
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // X - Filename (null)

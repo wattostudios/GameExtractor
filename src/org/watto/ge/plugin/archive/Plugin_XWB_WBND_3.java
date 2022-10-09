@@ -18,9 +18,9 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio;
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -110,7 +110,7 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
       addFileTypes();
 
       // RESETTING THE GLOBAL VARIABLES
-      ExporterPlugin exporter = Exporter_Custom_WAV_RawAudio.getInstance();
+      //ExporterPlugin exporter = Exporter_Custom_WAV_RawAudio.getInstance();
 
       FileManipulator fm = new FileManipulator(path, false);
 
@@ -139,7 +139,13 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
       FieldValidator.checkLength(filenameDirLength, arcSize);
 
       // 8 - null
-      fm.skip(8);
+      int nextField1 = fm.readInt();
+      int nextField2 = fm.readInt();
+
+      if (filenameDirLength == 0 && filenameDirOffset == nextField1) {
+        filenameDirLength = nextField2;
+        FieldValidator.checkLength(filenameDirLength, arcSize);
+      }
 
       // 4 - First File Offset
       int firstFileOffset = fm.readInt();
@@ -179,7 +185,7 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
       }
       else {
         for (int i = 0; i < numFiles; i++) {
-          names[i] = Resource.generateFilename(i) + ".wav";
+          names[i] = Resource.generateFilename(i);
         }
       }
 
@@ -187,10 +193,25 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-        // 2 - Number of Channels
-        // 2 - Audio Codec (0=Normal PCM, 1=XBox ADPCM)
-        // 4 - Hash?
-        fm.skip(8);
+        // 4 - Flags
+        fm.skip(4);
+
+        // 4 - Audio Details
+        long audioDetails = IntConverter.unsign(fm.readInt());
+
+        // 0 00000000 000111110100000000 010 01
+        // | |        |                  |   |
+        // | |        |                  |   wFormatTag
+        // | |        |                  nChannels
+        // | |        nSamplesPerSec
+        // | wBlockAlign
+        // wBitsPerSample
+
+        int codec = (int) ((audioDetails) & ((1 << 2) - 1));
+        int channels = (int) ((audioDetails >> (2)) & ((1 << 3) - 1));
+        int frequency = (int) ((audioDetails >> (2 + 3)) & ((1 << 18) - 1));
+        int align = (int) ((audioDetails >> (2 + 3 + 18)) & ((1 << 8) - 1));
+        //int bits = (int) ((audioDetails >> (2 + 3 + 18 + 8)) & ((1 << 1) - 1));
 
         // 4 - File Offset (relative to the start of the file data)
         long offset = fm.readInt() + firstFileOffset;
@@ -207,11 +228,42 @@ public class Plugin_XWB_WBND_3 extends ArchivePlugin {
         String filename = names[i];
 
         //path,id,name,offset,length,decompLength,exporter
-        //resources[i] = new Resource(path, filename, offset, length);
-        //Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length, length, exporter);
-        //resource.setAudioProperties(11025, (short) 8, (short) 1, true);
-        Resource resource = new Resource(path, filename, offset, length, length, exporter);
-        resources[i] = resource;
+
+        short bitrate = 8;
+
+        String extension = ".wav";
+        if (codec == 0) { // WAVEBANKMINIFORMAT_TAG_PCM      0x0     // PCM data
+          codec = 0x0001;
+          bitrate = 8;
+          align = (bitrate / 8) * channels;
+        }
+        else if (codec == 1) { // WAVEBANKMINIFORMAT_TAG_XMA      0x1     // XMA data
+          extension = ".xma";
+        }
+        else if (codec == 2) { // WAVEBANKMINIFORMAT_TAG_ADPCM    0x2     // ADPCM data
+          codec = 0x0002;
+          bitrate = 4;
+          align = (align + 22) * channels;
+        }
+        else if (codec == 3) { // WAVEBANKMINIFORMAT_TAG_WMA      0x3     // WMA data
+          extension = ".wma";
+        }
+
+        filename += extension;
+
+        if (extension.equals(".wav")) {
+          // WAV format
+          Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+          resource.setAudioProperties(frequency, bitrate, (short) channels, true);
+          resource.setCodec((short) codec);
+          resource.setBlockAlign((short) align);
+          resources[i] = resource;
+        }
+        else {
+          // something else
+          Resource resource = new Resource(path, filename, offset, length);
+          resources[i] = resource;
+        }
 
         TaskProgressManager.setValue(i);
       }

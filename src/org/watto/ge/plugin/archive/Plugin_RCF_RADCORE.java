@@ -1,29 +1,27 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import java.util.Arrays;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.helper.ResourceSorter_Offset;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,9 +42,12 @@ public class Plugin_RCF_RADCORE extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("James Cameron's Dark Angel");
+    setGames("James Cameron's Dark Angel",
+        "The Incredible Hulk: Ultimate Destruction");
     setExtensions("rcf");
-    setPlatforms("XBox");
+    setPlatforms("XBox", "PS2");
+
+    setTextPreviewExtensions("cho", "rdl"); // LOWER CASE
 
   }
 
@@ -151,6 +152,8 @@ public class Plugin_RCF_RADCORE extends ArchivePlugin {
 
       TaskProgressManager.setMaximum(numFiles);
 
+      ResourceSorter_Offset[] sorter = new ResourceSorter_Offset[numFiles];
+
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
         // 4 - Hash?
@@ -165,10 +168,14 @@ public class Plugin_RCF_RADCORE extends ArchivePlugin {
         FieldValidator.checkLength(length, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, "", offset, length);
+        Resource resource = new Resource(path, "", offset, length);
+        resources[i] = resource;
+        sorter[i] = new ResourceSorter_Offset(resource);
 
         TaskProgressManager.setValue(i);
       }
+
+      Arrays.sort(sorter);
 
       fm.seek(filenameDirOffset + 8);
 
@@ -185,7 +192,9 @@ public class Plugin_RCF_RADCORE extends ArchivePlugin {
         // 4 - Unknown
         fm.skip(5);
 
-        resources[i].setName(filename);
+        Resource resource = sorter[i].getResource();
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       fm.close();

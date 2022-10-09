@@ -38,6 +38,18 @@ public abstract class ExporterPlugin extends WSObjectPlugin {
    **********************************************************************************************
    **/
   public abstract void close();
+  
+  /**
+  **********************************************************************************************
+  Closes and Re-opens the resource from the beginning. Here in case we want to keep decompressed
+  buffers for the next run instead of deleting them and re-decompressing every time, for example.
+  Used mainly in ExporterByteBuffer to roll back to the beginning of the file.
+  **********************************************************************************************
+  **/
+  public void closeAndReopen(Resource source) {
+    close();
+    open(source);
+  }
 
   /**
   **********************************************************************************************

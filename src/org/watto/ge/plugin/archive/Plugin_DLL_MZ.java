@@ -57,7 +57,8 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("DLL/EXE Program Resources");
+    setGames("DLL/EXE Program Resources",
+        "Petz 5");
     setExtensions("dll", "exe", "msstyles");
     setPlatforms("PC");
 
@@ -240,7 +241,7 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
         long currentOffset = fm.getOffset();
 
         if (currentOffset > furthestOffset) { // for calculating the real offsets later on
-          furthestOffset = currentOffset + 6;
+          furthestOffset = currentOffset;// + 6;
         }
 
         fm.seek(curPos);
@@ -514,7 +515,12 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           // The EarliestOffset is the offset of the first file in the EXE, as reported in the offset tables
           // The EarliestOffset reported in the offset tables is HIGHER than the FurthestOffset as calculated by reading the directories
           // The difference needs to be subtracted from all offsets in all resources
-          furthestOffset += 2; // there's a 2-null byte between directory and file data
+          //
+          //furthestOffset += 2; // there's a 2-null byte between directory and file data
+
+          // the furthest offset needs to be padded to a multiple of 16 bytes
+          furthestOffset += calculatePadding(furthestOffset, 16);
+
           long difference = earliestOffset - furthestOffset; // yeah i know, the naming makes it seem the wrong way around, but this is right!
 
           for (int i = 0; i < realNumFiles; i++) {

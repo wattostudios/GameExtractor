@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -150,14 +150,14 @@ public class _Plugin_XXX_Implicit extends ArchivePlugin {
         long offsetPointerLocation = fm.getOffset();
         int offsetPointerLength = 4;
 
-        long offset = fm.readInt();
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
         long lengthPointerLocation = fm.getOffset();
         int lengthPointerLength = 4;
 
-        long length = fm.readInt();
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // X - Filename (null)

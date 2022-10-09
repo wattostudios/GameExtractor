@@ -68,6 +68,20 @@ public class Exporter_XOR_RepeatingKey extends ExporterPlugin {
     this.currentKeyPos = 0;
   }
 
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public Exporter_XOR_RepeatingKey(int[] xorKey, int keyPos) {
+    super();
+    setName("XOR Encrypted File (Repeating Key)");
+    this.xorKey = xorKey;
+    this.keyLength = xorKey.length;
+    this.currentKeyPos = keyPos;
+    openAtCurrentKeyPos = true;
+  }
+
   public int getCurrentKeyPos() {
     return currentKeyPos;
   }
@@ -136,6 +150,29 @@ public class Exporter_XOR_RepeatingKey extends ExporterPlugin {
     }
     catch (Throwable t) {
     }
+  }
+
+  /**
+  **********************************************************************************************
+  So we can easily call this from within a Viewer plugin
+  **********************************************************************************************
+  **/
+  public void open(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
+
+    if (!openAtCurrentKeyPos) {
+      currentKeyPos = 0;
+    }
+
+    readLength = compLengthIn;
+
+    // try to get the whole file in a single go, if it isn't too large (set to 200KB otherwise)
+    int bufferSize = (int) readLength;
+    if (bufferSize > 204800) {
+      bufferSize = 204800;
+    }
+
+    readSource = fmIn;
+
   }
 
   /**

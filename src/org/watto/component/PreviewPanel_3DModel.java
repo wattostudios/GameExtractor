@@ -105,6 +105,24 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
   
   **********************************************************************************************
   **/
+  public MeshView[] getMeshView() {
+    return meshView;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void setMeshView(MeshView[] meshView) {
+    this.meshView = meshView;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public void setModel(TriangleMesh triangleMesh) {
     this.triangleMesh = triangleMesh;
   }

@@ -514,7 +514,7 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
             // 8 - Decomp Length
             //long entryLength = LongConverter.changeFormat(fmDir.readLong());
             fmDir.skip(4);
-            long entryLength = IntConverter.changeFormat(fmDir.readInt());
+            long entryLength = IntConverter.unsign(IntConverter.changeFormat(fmDir.readInt()));
             //FieldValidator.checkLength(entryLength, arcSize);
 
             // 4 - Flags
@@ -545,7 +545,7 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
               FileManipulator fmSplit = new FileManipulator(splitFile, true);
 
               decompFM.seek(entryOffset);
-              for (int b = 0; b < entryLength; b++) {
+              for (long b = 0; b < entryLength; b++) {
                 fmSplit.writeByte(decompFM.readByte());
               }
 
@@ -589,7 +589,7 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
         }
         else if ((flags & 3) == 1) {
           // LZMA Compression
-          ErrorLogger.log("[Plugin_ASSETS_17] LZMA Compression Not Implemented");
+          ErrorLogger.log("[Plugin_ASSETS_22] LZMA Compression Not Implemented");
           return null;
         }
         else {
@@ -727,6 +727,9 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
               int filenameDirLength = fm.readInt();
               FieldValidator.checkLength(filenameDirLength, arcSize);
 
+              // Some of the newer ones have size 32 (followed by a null) instead of size 24. Check that here...
+              long preFilenameBlockOffset = fm.getOffset();
+
               //for (int e = 0; e < numEntries; e++) {
               // 2 - Unknown
               // 2 - Unknown
@@ -738,10 +741,19 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
               // 4 - ID (incremental from 0)
               // 4 - Unknown
               //}
-              fm.skip(numEntries * 24);
-
               // X - Filename Directory
+
+              fm.skip(numEntries * 32);
               fm.skip(filenameDirLength);
+
+              // 4 - null (check for a 32-byte directory)
+              if (fm.readInt() != 0) {
+                // wasn't 32-byte, try 24-byte (the old standard)
+                fm.relativeSeek(preFilenameBlockOffset);
+
+                fm.skip(numEntries * 24);
+                fm.skip(filenameDirLength);
+              }
 
             }
 
@@ -752,7 +764,12 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
 
           // 4 - Number of Files
           numFiles = fm.readInt();
-          FieldValidator.checkNumFiles(numFiles / 8);
+          if (numFiles < 8) {
+            FieldValidator.checkNumFiles(numFiles);
+          }
+          else {
+            FieldValidator.checkNumFiles(numFiles / 8);
+          }
 
           // 0-3 - null to a multiple of 4 bytes
           fm.skip(calculatePadding(fm.getOffset() - relativeOffset, 4));
@@ -809,10 +826,12 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
               }
             }
             else {
-              if (unityFS) {
-                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
-              }
-              else {
+              // 3.14
+              //if (unityFS) {
+              //  fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              //}
+              //else {
+              try {
                 int mapping = fileTypeMapping[fileTypeCode];
                 if (mapping < 0) {
                   fileType = Unity3DHelper.getFileExtension(fileTypeCode);
@@ -821,6 +840,10 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
                   fileType = Unity3DHelper.getFileExtension(mapping);
                 }
               }
+              catch (Throwable t) {
+                fileType = Unity3DHelper.getFileExtension(fileTypeCode);
+              }
+              //}
             }
 
             /*
@@ -1003,8 +1026,9 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
             // 4 - Width/Height? (1024/512)
             int imageHeight = fm.readInt();
 
-            if (imageWidth == 4 && imageHeight == 0) {
+            if (imageWidth == 4 && (imageHeight == 0 || imageHeight == 256)) {
               // these 2 fields were an 8-byte header, so need to read the real width/height next (GWENT game)
+              // 4+256 = some newer v22 games like While True Learn
 
               // 4 - Width/Height? (1024)
               imageWidth = fm.readInt();
@@ -1027,6 +1051,8 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
 
             if (resource.getLength() - imageFileSize > 0) {
               // This file is in the existing archive, not a separate archive file
+
+              //System.out.println("INT" + fm.getOffset());
 
               // 4 - Unknown
               // 4 - Unknown
@@ -1068,7 +1094,7 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
             }
             else {
               // This file is in an external archive, not the current one
-
+              //System.out.println("EXT" + fm.getOffset());
               // 4 - Unknown (1)
               // 4 - null
               // 4 - Unknown (1)
@@ -1291,6 +1317,9 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
 
           // 4 - Folder Name Length
           int folderNameLength = fm.readInt();
+          if (folderNameLength == 0) {
+            continue;
+          }
           FieldValidator.checkFilenameLength(folderNameLength);
 
           // X - Folder Name

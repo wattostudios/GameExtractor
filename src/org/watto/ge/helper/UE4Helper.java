@@ -15,12 +15,17 @@
 package org.watto.ge.helper;
 
 import java.awt.Point;
+import java.io.File;
 import org.watto.ErrorLogger;
+import org.watto.Settings;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
 import org.watto.io.FileManipulator;
+import org.watto.io.Hex;
+import org.watto.io.converter.ByteArrayConverter;
 import org.watto.io.converter.IntConverter;
-import com.sun.scenario.Settings;
+import org.watto.xml.XMLNode;
+import org.watto.xml.XMLReader;
 
 /**
 **********************************************************************************************
@@ -31,7 +36,70 @@ public class UE4Helper {
 
   protected static String[] names;
 
+  protected static byte[][] aesKeys = null;
+
   static int version = 0;
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static byte[][] getAESKeys() {
+    if (aesKeys == null || aesKeys.length <= 0) {
+      loadAESKeys();
+    }
+    return aesKeys;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static void loadAESKeys() {
+    try {
+      String keysFileString = Settings.get("UE4AESKeysFile");
+
+      if (keysFileString == null || keysFileString.equals("")) {
+        return;
+      }
+
+      File keysFile = new File(keysFileString);
+      if (!keysFile.exists()) {
+        return;
+      }
+
+      // Parse the XML
+      XMLNode root = XMLReader.read(keysFile);
+
+      int numKeys = root.getChildCount();
+      aesKeys = new byte[numKeys][0];
+
+      for (int i = 0; i < numKeys; i++) {
+        XMLNode keyNode = root.getChild(i);
+        if (keyNode != null) {
+          XMLNode hexNode = keyNode.getChild("hex");
+          if (hexNode != null) {
+            String hexString = hexNode.getContent();
+            if (hexString.startsWith("0x")) {
+              hexString = hexString.substring(2);
+            }
+            aesKeys[i] = ByteArrayConverter.convertLittle(new Hex(hexString));
+          }
+        }
+
+      }
+
+      //aesKeys = new byte[3][0];
+      //aesKeys[0] = ByteArrayConverter.convertLittle(new Hex("90BAAAE538F6B96FBE77F4A1EF75DDEB62AAE6A54790B37F46AE055D2E787821"));
+      //aesKeys[1] = ByteArrayConverter.convertLittle(new Hex("80BAAAE538F6B96FBE77F4A1EF75DDEB62AAE6A54790B37F46AE055D2E787821"));
+      //aesKeys[2] = ByteArrayConverter.convertLittle(new Hex("D0BAAAE538F6B96FBE77F4A1EF75DDEB62AAE6A54790B37F46AE055D2E787821"));
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+    }
+  }
 
   /**
   **********************************************************************************************

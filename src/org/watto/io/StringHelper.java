@@ -70,13 +70,13 @@ public class StringHelper {
           // carriage return character '\r'
 
           // check for the \r\n combination
-          buffer.checkFill(1);
-          byte[] returnCheck = buffer.getBuffer(1); // looks at the next byte, but doesn't move the pointers
-          if (returnCheck == null || returnCheck.length != 1) {
+          //buffer.checkFill(1);
+          int returnCheck = buffer.peek(); // looks at the next byte, but doesn't move the pointers
+          if (returnCheck == -1) {
             // Error or End Of File
             return line;
           }
-          else if (returnCheck[0] == n) {
+          else if (returnCheck == n) {
             // the next byte is the /n, so skip the next byte
             buffer.skip(1);
           }

@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -38,7 +39,7 @@ public class Plugin_BIG_BIGF_2 extends ArchivePlugin {
     super("BIG_BIGF_2", "BIG_BIGF_2");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, true);
 
     setGames("Toca Race Driver 3: Honda Civic 2006",
         "Colin McRae Rally 04",
@@ -48,6 +49,7 @@ public class Plugin_BIG_BIGF_2 extends ArchivePlugin {
         "Race Driver 3: V8 Supercars 3",
         "Toca Race Driver",
         "Toca Race Driver 2",
+        "Toca Race Driver 3",
         "Sensible Soccer 2006");
     setExtensions("big", "b2k", "b64");
     setPlatforms("PC");
@@ -174,6 +176,104 @@ public class Plugin_BIG_BIGF_2 extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
+  @Override
+  public void write(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      long directorySize = 36 + (numFiles * 24);
+      directorySize += calculatePadding(directorySize, 2048);
+
+      // Write Header Data
+
+      // 4 - Header (BIGF)
+      fm.writeString("BIGF");
+
+      // 4 - Number Of Files
+      fm.writeInt(numFiles);
+
+      // 4 - First File Offset
+      fm.writeInt((int) directorySize);
+
+      // 4 - Padding Multiple (2048)
+      fm.writeInt(2048);
+
+      // 20 - Description? Directory Name? (null)
+      for (int i = 0; i < 20; i++) {
+        fm.writeByte(0);
+      }
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = 0;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long decompLength = resource.getDecompressedLength();
+
+        // 16 - Filename (null)
+        fm.writeNullString(resource.getName(), 16);
+
+        // 4 - File Length
+        fm.writeInt((int) decompLength);
+
+        // 4 - File Offset (relative to the start of the file data)
+        fm.writeInt((int) offset);
+
+        offset += decompLength;
+        offset += calculatePadding(offset, 2048);
+      }
+
+      // 0-2047 - null Padding to a multiple of 2048 bytes
+      int dirPaddingSize = calculatePadding(fm.getOffset(), 2048);
+      for (int p = 0; p < dirPaddingSize; p++) {
+        fm.writeByte(0);
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long decompLength = resource.getDecompressedLength();
+
+        if (decompLength == 0) {
+          continue;
+        }
+
+        // X - File Data
+        write(resource, fm);
+
+        // 0-2047 - Padding (with byte 63) to a multiple of 2048 bytes
+        int paddingSize = calculatePadding(fm.getOffset(), 2048);
+        for (int p = 0; p < paddingSize; p++) {
+          fm.writeByte(63);
+        }
+
+        TaskProgressManager.setValue(i);
+
+      }
+
+      //ExporterPlugin exporter = new Exporter_ZLib();
+      //long[] compressedLengths = write(exporter,resources,fm);
+
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

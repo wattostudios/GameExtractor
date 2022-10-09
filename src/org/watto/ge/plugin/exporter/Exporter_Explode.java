@@ -24,6 +24,7 @@ public class Exporter_Explode extends ExporterPlugin {
   static Exporter_Explode instance = new Exporter_Explode();
 
   static int decompLength = 0;
+
   static int currentByte = 0;
 
   /**
@@ -104,6 +105,25 @@ public class Exporter_Explode extends ExporterPlugin {
 
       byte[] compData = fm.readBytes(compLength);
       buffer = new byte[decompLength];
+      bufferPos = 0;
+
+      Exploder.pkexplode(compData, buffer);
+
+    }
+    catch (Throwable t) {
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  So we can easily call this from within a Viewer plugin
+  **********************************************************************************************
+  **/
+  public void open(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
+    try {
+
+      byte[] compData = fmIn.readBytes(compLengthIn);
+      buffer = new byte[decompLengthIn];
       bufferPos = 0;
 
       Exploder.pkexplode(compData, buffer);

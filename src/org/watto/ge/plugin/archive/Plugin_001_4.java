@@ -20,7 +20,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_Custom_SCUMMVM16;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -43,8 +43,9 @@ public class Plugin_001_4 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Police Quest: SWAT");
-    setExtensions("001"); // MUST BE LOWER CASE
+    setGames("Police Quest: SWAT",
+        "Betrayal in Antara");
+    setExtensions("001", "002", "003"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
@@ -116,7 +117,8 @@ public class Plugin_001_4 extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("SCUMMVM16");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("SCUMMVM16");
+      ExporterPlugin exporter = new Exporter_Custom_SCUMMVM16();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -133,26 +135,28 @@ public class Plugin_001_4 extends ArchivePlugin {
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
 
-        // 1 - Unknown (1)
-        // 2 - ID?
-        fm.skip(3);
+        // 1 - File Type?
+        // 2 - File ID?
+        //fm.skip(3);
+        int fileType = fm.readByte();
+        //System.out.println(realNumFiles + "\t" + fileType + "\t" + fm.readByte() + "\t" + fm.readByte());
 
-        // 4 - File Length
+        // 4 - Compressed File Length
         int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Unknown (Decompressed Length?)
+        // 4 - Decompressed File Length
         int decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
 
-        // 2 - Unknown (32)
+        // 2 - Compression Type? (32=SCUMMVM16/LZS)
         fm.skip(2);
 
         // X - File Data
         long offset = fm.getOffset();
         fm.skip(length);
 
-        String filename = Resource.generateFilename(realNumFiles);
+        String filename = Resource.generateFilename(realNumFiles) + "." + fileType;
 
         //path,name,offset,length,decompLength,exporter
         Resource resource = new Resource(path, filename, offset, length, decompLength);

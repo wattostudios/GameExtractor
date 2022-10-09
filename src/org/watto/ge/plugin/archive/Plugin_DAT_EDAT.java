@@ -30,11 +30,12 @@ import org.watto.task.TaskProgressManager;
 public class Plugin_DAT_EDAT extends ArchivePlugin {
 
   int realNumFiles = 0;
+
   long maxEndPos = 0;
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_DAT_EDAT() {
@@ -54,7 +55,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @SuppressWarnings("unused")
@@ -64,7 +65,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
     boolean hasMoreFiles = true;
     //while (hasMoreFiles){
     while (fm.getOffset() < endPos) {
-      System.out.println(fm.getOffset() + "\t" + endPos);
+      //System.out.println(fm.getOffset() + "\t" + endPos);
       // 4 - Group/File Indicator (0=file, #=length of this group entry)
       int fileGroupID = fm.readInt();
 
@@ -96,7 +97,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
         }
 
         filename = dirName + filename;
-        System.out.println(filename);
+        //System.out.println(filename);
 
         //path,id,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);
@@ -176,7 +177,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -224,7 +225,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

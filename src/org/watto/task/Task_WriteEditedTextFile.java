@@ -26,6 +26,7 @@ import org.watto.component.FileListPanel_TreeTable;
 import org.watto.component.PreviewPanel_Text;
 import org.watto.component.WSFileListPanelHolder;
 import org.watto.component.WSPopup;
+import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.io.FileManipulator;
 
@@ -143,6 +144,10 @@ public class Task_WriteEditedTextFile extends AbstractTask {
       }
 
       boolean reloadRequired = !resource.isReplaced();
+
+      if (resource instanceof ReplacableResource) {
+        resource.replace(exportedPath); // so it updates the offsets/lengths properly
+      }
 
       // Set the Resource as being changed
       resource.setReplaced(true);

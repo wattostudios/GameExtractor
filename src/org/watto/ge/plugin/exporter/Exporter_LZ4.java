@@ -74,6 +74,7 @@ public class Exporter_LZ4 extends ExporterPlugin {
       return false;
     }
     catch (Throwable t) {
+      ErrorLogger.log(t);
       return false;
     }
   }
@@ -86,8 +87,8 @@ public class Exporter_LZ4 extends ExporterPlugin {
   @Override
   public void close() {
     try {
-      fm.close();
       readSource.close();
+      fm.close();
       readSource = null;
     }
     catch (Throwable t) {

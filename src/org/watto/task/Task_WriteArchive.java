@@ -62,7 +62,8 @@ public class Task_WriteArchive extends AbstractTask {
     }
 
     boolean replacingCurrentArchive = false;
-    if (Archive.getBasePath().equals(path)) {
+    File basePath = Archive.getBasePath();
+    if (basePath != null && basePath.equals(path)) {
       String confirmReplace = WSPopup.showConfirm("WriteArchive_OverwriteCurrentArchiveFile", false);
 
       if (confirmReplace.equals(WSPopup.BUTTON_YES)) {

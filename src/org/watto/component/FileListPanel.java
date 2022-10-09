@@ -25,6 +25,7 @@ import org.watto.TypecastSingletonManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.GameExtractor;
+import org.watto.ge.helper.FullVersionVerifier;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.task.Task;
 import org.watto.task.Task_AddFiles;
@@ -171,7 +172,23 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
   **********************************************************************************************
   **/
   public WSPopupMenu getDropFilesMenu() {
-    return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /></WSPopupMenu>"));
+
+    try {
+      new FullVersionVerifier();
+    }
+    catch (Throwable t3) {
+      // don't allow drag-drop for the Basic version - Only "Read Archive"
+      return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /></WSPopupMenu>"));
+    }
+
+    ArchivePlugin plugin = Archive.getReadPlugin();
+    if (plugin != null) {
+      if (!plugin.canWrite()) {
+        // archive can do replacing, but not adding files
+        return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /><WSMenuItem code=\"FileListDrop_ReplaceCurrent\" /><WSMenuItem code=\"FileListDrop_ReplaceMatching\" /></WSPopupMenu>"));
+      }
+    }
+    return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /><WSMenuItem code=\"FileListDrop_Add\" /><WSMenuItem code=\"FileListDrop_ReplaceCurrent\" /><WSMenuItem code=\"FileListDrop_ReplaceMatching\" /></WSPopupMenu>"));
   }
 
   /**

@@ -27,6 +27,7 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.event.WSEnterableInterface;
 import org.watto.event.WSSelectableInterface;
+import org.watto.ge.GameExtractor;
 import org.watto.ge.plugin.RenamerPlugin;
 import org.watto.task.Task;
 import org.watto.task.Task_RenameFiles;
@@ -43,11 +44,8 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
-
   WSPanel renameControls;
-
   WSPanel invalidControls;
-
   WSPanel basicVersionControls;
 
   /**
@@ -79,7 +77,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void changeControls(WSPanel panel) {
@@ -126,7 +124,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -222,7 +220,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
     /*
     if (c instanceof WSComponent) {
       String code = ((WSComponent) c).getCode();
-    
+
       if (code.equals("SidePanel_RenameFile_ReplaceValue")) {
         renameFiles();
         return true;
@@ -278,7 +276,16 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
    **/
   @Override
   public void onOpenRequest() {
-    changeControls(basicVersionControls);
+    if (!GameExtractor.isFullVersion()) {
+      changeControls(basicVersionControls);
+    }
+    else if (!Archive.getReadPlugin().canRename()) {
+      changeControls(invalidControls);
+    }
+    else {
+      changeControls(renameControls);
+      loadRenamerPlugins();
+    }
   }
 
   /**
@@ -333,7 +340,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void renameAllFiles() {
@@ -347,7 +354,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void renameFiles(Resource[] selectedFiles) {
@@ -387,7 +394,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void renameSelectedFiles() {
@@ -403,7 +410,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override

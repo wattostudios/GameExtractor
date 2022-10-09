@@ -126,6 +126,9 @@ public class Plugin_PAK_54 extends ArchivePlugin {
 
         // 1 - Filename Length
         int filenameLength = ByteConverter.unsign(fm.readByte());
+        if (filenameLength == 0) {
+          return null;
+        }
 
         // X - Filename
         String filename = fm.readString(filenameLength);
