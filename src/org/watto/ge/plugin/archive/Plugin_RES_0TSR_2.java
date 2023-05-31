@@ -111,7 +111,7 @@ public class Plugin_RES_0TSR_2 extends ArchivePlugin {
       // 4 - Header (!IGM)
       // 4 - Version? (3)
       // 4 - Unknown (32)
-      // 4 - Unknown (same as in RES file)
+      // 4 - Unix Timestamp (Creation date, Little Endian, same as in RES file)
       fm.skip(32);
 
       // 4 - Number Of Files
