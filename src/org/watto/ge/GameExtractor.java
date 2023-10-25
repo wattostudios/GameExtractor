@@ -184,7 +184,7 @@ import javax.swing.JFrame;
 - Add padding support to the ImplicitFileReplacing classes (for all XBox games mostly)
 
 // GAME THINGS...
-- Implement Excitebots CRC algorithm, so we can modify the archives? https://github.com/TheGameCommunity/ExciteBot/blob/c95225da3bfc854055bb7172c73b7a2b2b569547/src/main/java/com/gamebuster19901/excite/game/propritary/crc/CRCTester.java#L1-L118
+- Implement Excitebots CRC algorithm, so we can modify the archives? https://github.com/TheGameCommunity/Excite/blob/2f944d4e1f6ea2cb4fe91f406c00889c36198697/src/main/java/com/thegamecommunity/excite/modding/game/propritary/crc/CRCTester.java
 - Some Iron Defense TEX images don't show properly
 - Unreal Engine...
   - Plugins for more Unreal Engine 4 games
