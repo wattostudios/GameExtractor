@@ -80,7 +80,7 @@ public class Plugin_DAT_95 extends ArchivePlugin {
       }
 
       byte[] headerBytes = fm.readBytes(4);
-      if (ByteConverter.unsign(headerBytes[1]) == 246 || ByteConverter.unsign(headerBytes[1]) == 9) {// detecting the tab
+      if (ByteConverter.unsign(headerBytes[1]) == 246 || ByteConverter.unsign(headerBytes[1]) == 9 || ByteConverter.unsign(headerBytes[2]) == 246 || ByteConverter.unsign(headerBytes[2]) == 9) {// detecting the tab
         rating += 5;
       }
 
@@ -123,7 +123,7 @@ public class Plugin_DAT_95 extends ArchivePlugin {
 
       // THIS JUST CONVERTS THE ENTIRE FILE BETWEEN XOR(255) OR PLAIN
       byte[] headerBytes = fm.readBytes(4);
-      if (arcName.contains(".encrypted.dat") || (ByteConverter.unsign(headerBytes[1]) == 246)) {
+      if (arcName.contains(".encrypted.dat") || (ByteConverter.unsign(headerBytes[1]) == 246) || (ByteConverter.unsign(headerBytes[2]) == 246)) {
         // XOR encrypted - needs to be decrypted
 
         int dotPos = arcName.indexOf(".encrypted.dat");
@@ -140,7 +140,7 @@ public class Plugin_DAT_95 extends ArchivePlugin {
 
         TaskProgressManager.setValue(0);
       }
-      else if (arcName.contains(".unencrypted.dat") || (headerBytes[1] == 9)) {
+      else if (arcName.contains(".unencrypted.dat") || (headerBytes[1] == 9) || (headerBytes[2] == 9)) {
         // unencrypted - needs to be XOR encrypted
 
         int dotPos = arcName.indexOf(".unencrypted.dat");
