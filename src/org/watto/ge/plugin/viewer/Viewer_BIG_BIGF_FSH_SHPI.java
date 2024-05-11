@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.awt.Image;
+
 import org.watto.ErrorLogger;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
@@ -55,7 +56,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
   **/
   public Viewer_BIG_BIGF_FSH_SHPI() {
     super("BIG_BIGF_FSH_SHPI", "Electronic Arts FSH Image [BIG_BIGF_FSH_SHPI]");
-    setExtensions("fsh", "shpi", "ssh", "psh");
+    setExtensions("fsh", "shpi", "ssh", "psh", "qfs");
 
     setGames("FIFA 06",
         "FIFA 08",
@@ -101,6 +102,19 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
   public int getMatchRating(FileManipulator fm) {
     try {
 
@@ -136,7 +150,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       }
 
       // 4 - File Length
-      if (FieldValidator.checkEquals(fm.readInt(), fm.getLength())) {
+      if (fm.readInt() == fm.getLength()) {
         rating += 5;
       }
 
@@ -185,6 +199,12 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
   int[] globalPalette = null;
 
+  int[][] globalPalettes34 = new int[20][0]; // palettes of type 34 can have multiple globals, where there's a 1-to-1 mapping to the images under them
+  int current34Palette = 0;
+  int globalPalettes34Count = 0;
+
+  int globalPaletteFormat = 0;
+
   /**
   **********************************************************************************************
   Reads a resource from the FileManipulator, and generates a Thumbnail for it (generally, only
@@ -199,6 +219,9 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       // reset global value to the default
       changeEndian = false;
       globalPalette = null;
+      current34Palette = 0;
+      globalPalettes34Count = 0;
+      globalPaletteFormat = 0;
 
       // 4 - Header (SHPI)
       String header = fm.readString(4);
@@ -367,13 +390,30 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         }
 
         ImageResource[] images = new ImageResource[numImages];
+        boolean[] nullImages = new boolean[numImages];
         for (int i = 0; i < numImages; i++) {
           ImageResource imageResource = readSingleImage(fm, offsets[i], header);
           if (imageResource == null) {
             // make it a blank dummy instead, as we probably just couldn't render this image or something.
             imageResource = new ImageResource(new int[0], 0, 0);
+            nullImages[i] = true;
+          }
+          else {
+            nullImages[i] = false;
           }
           images[i] = imageResource;
+        }
+
+        // Now that we've gone through and read all the images and palettes, if there are any null ones (eg because the global palette is at the end), reprocess them
+        for (int i = 0; i < numImages; i++) {
+          if (nullImages[i]) {
+            ImageResource imageResource = readSingleImage(fm, offsets[i], header);
+            if (imageResource == null) {
+              // make it a blank dummy instead, as we probably just couldn't render this image or something.
+              imageResource = new ImageResource(new int[0], 0, 0);
+            }
+            images[i] = imageResource;
+          }
         }
 
         // set the next/previous images
@@ -450,6 +490,13 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       else if (imageType == 123) {
         imageFormat = "8BitPaletted";
       }
+      else if (imageType == 251) { // 251 = RefPack-compressed 8-bit paletted (128 + 123 (above))
+        imageFormat = "8BitPaletted";
+        if (globalPalette == null) {
+          ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Don't have a global palette for image type: " + imageType + " at offset " + offset);
+          return null; // don't have a palette yet
+        }
+      }
       else if (imageType == 125) {
         imageFormat = "BGRA";
       }
@@ -469,9 +516,16 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       else if (imageType == 65) {
         imageFormat = "8BitPaletted"; // PS1
       }
+      else if (imageType == 13) {
+        // PS2 - FIFA 11 (paletted, 256 colors, pixel data is 4bpp but not normal 4bpp paletted)
+        ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Unknown Image Format: " + imageType + " at offset " + offset);
+
+        //imageFormat = "4BitPaletted"; 
+        //ps2Striped = true;
+      }
       else if (imageType == 14) {
         // Paletted with 256 colors in the palette, however the pixel data is only 3bpp in size
-        ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Unknown Image Format: " + imageType + " at offset " + offset);
+        ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Unknown Image Format: " + imageType + " at offset " + offset);
 
         //imageFormat = "3BitPaletted";
         //ps2Striped = true;
@@ -479,6 +533,10 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       else if (imageType == 1) {
         imageFormat = "4BitPaletted";
         ps2Striped = true;
+      }
+      else if (imageType == 34) {
+        // Color palette (???)
+        imageFormat = "PAL34";
       }
       else if (imageType == 35) {
         // Color palette (BGRA5551)
@@ -489,7 +547,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         imageFormat = "PAL36";
       }
       else {
-        ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Unknown Image Format: " + imageType + " at offset " + offset);
+        ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Unknown Image Format: " + imageType + " at offset " + offset);
         return null;
       }
 
@@ -533,6 +591,48 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         // 4 - Image Height
         height = fm.readInt();
         FieldValidator.checkHeight(height);
+      }
+
+      FileManipulator originalFM = fm; // so we can go back to this after using the Refpack-decompressed data
+
+      if (imageType == 251) {
+        // REFPACK-compressed image data, remove 128 from the image type to get the actual image type?
+
+        // work out the decomp length
+        long decompOffset = fm.getOffset();
+
+        // 2 bytes - Signature
+        short signature = fm.readShort();
+        int compLength = (int) fm.getRemainingLength();
+        if (signature > 0) { // top bit is 0
+          // 3 bytes - Compressed Size
+          byte[] compBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+          compLength = IntConverter.convertBig(compBytes);
+        }
+
+        // 3 bytes - Decompressed Size
+        byte[] decompBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+        int decompLength = IntConverter.convertBig(decompBytes);
+
+        // go back to the start, ready for decompression
+        fm.seek(decompOffset);
+
+        Exporter_REFPACK exporter = Exporter_REFPACK.getInstance();
+        exporter.open(fm, compLength, decompLength);
+
+        byte[] fileData = new byte[decompLength];
+
+        int decompWritePos = 0;
+        while (exporter.available()) { // make sure we read the next bit of data, if required
+          fileData[decompWritePos++] = (byte) exporter.read();
+        }
+
+        //FileManipulator tempFM = new FileManipulator(new File("C:\\output.tmp"), true);
+        //tempFM.writeBytes(fileData);
+        //tempFM.close();
+
+        //fm.close(); // don't want to close the original FM, as we'll need it for the next image
+        fm = new FileManipulator(new ByteBuffer(fileData));
       }
 
       // X - Image Data
@@ -632,6 +732,50 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
           return null;
         }
       }
+      else if (imageFormat.equals("PAL34")) {
+        // width = numColors
+        // height = bytes per color
+
+        if (height == 256 || height == 3 || height == 1) {
+          // 3 bytes per color (RGB), and values need to be doubled
+          //imageResource = ImageFormatReader.readRGB(fm, width, height);
+
+          // 24bit RGB (confirmed RGB for NHL 96)
+          int numColors = width;
+          int[] palette = new int[numColors];
+          for (int i = 0; i < numColors; i++) {
+            int r = ByteConverter.unsign(fm.readByte()) * 2;
+            int g = ByteConverter.unsign(fm.readByte()) * 2;
+            int b = ByteConverter.unsign(fm.readByte()) * 2;
+
+            if (r > 255) {
+              r = 255;
+            }
+            if (g > 255) {
+              g = 255;
+            }
+            if (b > 255) {
+              b = 255;
+            }
+
+            palette[i] = ((255 << 24) | (r << 16) | (g << 8) | b);
+          }
+
+          // store the global palette for use with other images
+          globalPalette = palette;
+
+          // we can have multiple global34 palettes...
+          globalPalettes34[globalPalettes34Count] = palette;
+          globalPalettes34Count++;
+
+          // also store it as an image
+          imageResource = new ImageResource(palette, width, 1);
+        }
+        else {
+          ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Unknown PAL34 Byte Size: " + height + " at offset " + offset);
+          return null;
+        }
+      }
       else if (imageFormat.equals("ARGB4444")) {
         imageResource = ImageFormatReader.readARGB4444(fm, width, height);
       }
@@ -697,8 +841,12 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         //  pixels[i] = ByteConverter.unsign(fm.readByte());
         //}
 
+        if (imageType == 251) {
+          fm = originalFM;// put it back again, ready for processing the palette
+        }
+
         // Now seek past all the image data (in case there's multiple mipmaps) to find the palette
-        if (header.equals("ShpS")) {
+        if (header.equals("ShpS") || imageDataLength == 0) {
           // the imageDataLength isn't right in this format - it's only correct as if it's 8-bit, not 4-bit or 3-bit.
 
           /*
@@ -718,13 +866,19 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
         int[] palette = new int[256]; // force to 256 colors, so striping works later on
 
+        long arcSize = fm.getLength();
+
         if (globalPalette != null && (imageDataLengthBytes[2] == -1 || imageDataLength == 0)) {
+          // no palette or anything in this image, just had the pixel data and that's it
+          palette = globalPalette;
+        }
+        else if (globalPalette != null && (offset >= arcSize)) {
           // no palette or anything in this image, just had the pixel data and that's it
           palette = globalPalette;
         }
         else {
 
-          FieldValidator.checkOffset(offset, fm.getLength());
+          FieldValidator.checkOffset(offset, arcSize);
           fm.seek(offset);
 
           // 4 - Palette Format
@@ -738,9 +892,15 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
             // uses a global color palette
             palette = globalPalette;
           }
-          else if (paletteFormat == 124 && globalPalette != null) {
+          else if ((paletteFormat == 124 || paletteFormat == 123) && globalPalette != null) { // the 123 here is to help NHL 95 display some of them, for those where an image is missing for a player. Works a little bit
+            if (current34Palette < globalPalettes34Count) {
+              globalPalette = globalPalettes34[current34Palette];
+              current34Palette++;
+            }
+
             // uses a global color palette
             palette = globalPalette;
+
           }
           else {
 
@@ -840,6 +1000,27 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
                 palette[i] = ((r << 16) | (g << 8) | b | (a << 24));
               }
             }
+            else if (paletteFormat == 34) {
+              // 3 bytes per color (RGB) , values need to be doubled
+              for (int i = 0; i < numColors; i++) {
+                int r = ByteConverter.unsign(fm.readByte()) * 2;
+                int g = ByteConverter.unsign(fm.readByte()) * 2;
+                int b = ByteConverter.unsign(fm.readByte()) * 2;
+
+                if (r > 255) {
+                  r = 255;
+                }
+                if (g > 255) {
+                  g = 255;
+                }
+                if (b > 255) {
+                  b = 255;
+                }
+
+                palette[i] = ((255 << 24) | (r << 16) | (g << 8) | b);
+              }
+
+            }
             else {
               ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Unknown Palette Format: " + paletteFormat + " for image at offset " + offset);
               return null;
@@ -852,6 +1033,10 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
         }
 
         imageResource = new ImageResource(pixels, width, height);
+
+        if (imageType == 251) {
+          fm.close(); // close the decompressed FM
+        }
       }
 
       if (imageResource == null) {
@@ -912,8 +1097,67 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
       // Build the new file using the src[] and adding in the new image content
 
-      // 4 - Header
       String header = src.readString(4);
+      // See if the image is compressed, and if so, we need to decompress it first
+      if (header.equals("SHPI") || header.equals("ShpF") || header.equals("SHPS") || header.equals("ShpS") || header.equals("SHPP")) {
+        // not compressed
+
+        if (header.equals("ShpS")) {
+          // SHPS, but BIG ENDIAN on some fields
+          changeEndian = true;
+        }
+      }
+      else {
+        // might be compressed - check it out
+        src.skip(2);
+        if (src.readString(4).equals("SHPI")) {
+          // yep, probably compressed, so decompress it before reading it
+
+          src.seek(0);
+
+          int compLength = (int) src.getLength();
+
+          // work out the decomp length
+          // 2 bytes - Signature
+          short signature = src.readShort();
+          if (signature > 0) { // top bit is 0
+            // 3 bytes - Compressed Size
+            src.skip(3);
+          }
+
+          // 3 bytes - Decompressed Size
+          byte[] decompBytes = new byte[] { 0, src.readByte(), src.readByte(), src.readByte() };
+          int decompLength = IntConverter.convertBig(decompBytes);
+
+          // go back to the start, ready for decompression
+          src.seek(0);
+
+          Exporter_REFPACK exporter = Exporter_REFPACK.getInstance();
+          exporter.open(src, compLength, decompLength);
+
+          byte[] fileData = new byte[decompLength];
+
+          int decompWritePos = 0;
+          while (exporter.available()) { // make sure we read the next bit of data, if required
+            fileData[decompWritePos++] = (byte) exporter.read();
+          }
+
+          src.close();
+          src = new FileManipulator(new ByteBuffer(fileData));
+
+          //exporter.close(); // THIS MIGHT CAUSE PROBLEMS WITH THE BYTE[]?
+
+        }
+        else {
+          ErrorLogger.log("Viewer_BIG_BIGF_FSH_SHPI: Problem decompressing source file");
+          return;
+        }
+      }
+
+      src.seek(0);
+
+      // 4 - Header
+      header = src.readString(4);
       fm.writeString(header);
 
       // 4 - File Length
@@ -968,800 +1212,207 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
       fm.writeBytes(src.readBytes(preDataLength));
 
-      for (int i = 0; i < numImages; i++) {
+      int missingGlobalPalettes = 99; // so we enter the loop at least once
 
-        // move to the next frame, if this isn't the first image
-        if (i > 0) {
-          imageResource = imageResource.getNextFrame();
-          if (imageResource == null) {
-            ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Expected " + numImages + " images but only imported " + i + " from the filesystem");
-            return;
+      boolean[] imageProcessed = new boolean[numImages];
+      ImageResource firstImageResource = imageResource;
+
+      while (missingGlobalPalettes > 0) { // loop so that if the global palette is at the end of the archive, it'll come back and re-write any images that were waiting for it.
+
+        missingGlobalPalettes = 0; // reset
+        imageResource = firstImageResource; // reset
+
+        for (int i = 0; i < numImages; i++) {
+          if (imageProcessed[i]) {
+            if (i > 0) {
+              imageResource = imageResource.getNextFrame();
+            }
+            continue; // this image was already written OK
+          }
+
+          imageProcessed[i] = true; // we're processing it now, 
+
+          int expectedOffset = offsets[i];
+          //int actualOffset = (int) src.getOffset();
+          //
+          //if (expectedOffset != actualOffset) {
+          //  // offsets are probably in the wrong order, so we need to correct that
+          //
+          //  ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing to offset " + expectedOffset + " instead of " + actualOffset);
+
+          src.seek(expectedOffset); // find the right place in the source
+          fm.seek(expectedOffset); // go to the right place in the output as well
+          //System.out.println(expectedOffset);
+          //}
+
+          // move to the next frame, if this isn't the first image
+          if (i > 0) {
+            imageResource = imageResource.getNextFrame();
+            if (imageResource == null) {
+              ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Expected " + numImages + " images but only imported " + i + " from the filesystem");
+              return;
+            }
           }
           width = imageResource.getWidth();
           height = imageResource.getHeight();
           image = imageResource.getImage();
-        }
 
-        // 1 - Image Format
-        int imageType = ByteConverter.unsign(src.readByte());
-        fm.writeByte(imageType);
+          // 1 - Image Format
+          int imageType = ByteConverter.unsign(src.readByte());
+          fm.writeByte(imageType);
 
-        String imageFormat = "DXT3";
-        if (imageType == 96) {
-          imageFormat = "DXT1";
-        }
-        else if (imageType == 97) {
-          imageFormat = "DXT3";
-        }
-        else if (imageType == 98) {
-          imageFormat = "DXT5";
-        }
-        else if (imageType == 109) {
-          imageFormat = "ARGB4444";
-        }
-        else if (imageType == 120) {
-          imageFormat = "RGB565";
-        }
-        else if (imageType == 123) {
-          imageFormat = "8BitPaletted";
-        }
-        else if (imageType == 125) {
-          imageFormat = "BGRA";
-        }
-        else if (imageType == 126) {
-          imageFormat = "ARGB1555";
-        }
-        else if (imageType == 127) {
-          imageFormat = "BGR";
-        }
-        else if (imageType == 36) {
-          imageFormat = "PAL36";
-        }
-        else if (imageType == 35) {
-          imageFormat = "PAL35";
-        }
-        else if (imageType == 2) {
-          imageFormat = "8BitPaletted";
-        }
-        else if (imageType == 1) {
-          imageFormat = "4BitPaletted";
-        }
-        else if (imageType == 64) {
-          imageFormat = "4BitPaletted"; // PS1
-        }
-        else if (imageType == 65) {
-          imageFormat = "8BitPaletted"; // PS1
-        }
-        else {
-          ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Image Format: " + imageType);
-          return;
-        }
+          String imageFormat = "DXT3";
+          if (imageType == 96) {
+            imageFormat = "DXT1";
+          }
+          else if (imageType == 97) {
+            imageFormat = "DXT3";
+          }
+          else if (imageType == 98) {
+            imageFormat = "DXT5";
+          }
+          else if (imageType == 109) {
+            imageFormat = "ARGB4444";
+          }
+          else if (imageType == 120) {
+            imageFormat = "RGB565";
+          }
+          else if (imageType == 123) {
+            imageFormat = "8BitPaletted";
+          }
+          else if (imageType == 125) {
+            imageFormat = "BGRA";
+          }
+          else if (imageType == 126) {
+            imageFormat = "ARGB1555";
+          }
+          else if (imageType == 127) {
+            imageFormat = "BGR";
+          }
+          else if (imageType == 36) {
+            imageFormat = "PAL36";
+          }
+          else if (imageType == 35) {
+            imageFormat = "PAL35";
+          }
+          else if (imageType == 34) {
+            imageFormat = "PAL34";
+          }
+          else if (imageType == 2) {
+            imageFormat = "8BitPaletted";
+          }
+          else if (imageType == 1) {
+            imageFormat = "4BitPaletted";
+          }
+          else if (imageType == 64) {
+            imageFormat = "4BitPaletted"; // PS1
+          }
+          else if (imageType == 65) {
+            imageFormat = "8BitPaletted"; // PS1
+          }
+          else {
+            ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Image Format: " + imageType);
+            return;
+          }
 
-        // 3 - Image Data Length
-        byte[] imageDataLengthBytes = new byte[] { src.readByte(), src.readByte(), src.readByte(), 0 };
-        int imageDataLength = IntConverter.convertLittle(imageDataLengthBytes);
+          // 3 - Image Data Length
+          byte[] imageDataLengthBytes = new byte[] { src.readByte(), src.readByte(), src.readByte(), 0 };
+          int imageDataLength = IntConverter.convertLittle(imageDataLengthBytes);
 
-        if (imageDataLengthBytes[2] == -1) {
-          // calculate the proper image data length, for when there's a global palette
-          imageDataLength = IntConverter.convertLittle(new byte[] { imageDataLengthBytes[0], imageDataLengthBytes[1], 0, 0 });
-        }
+          if (imageDataLengthBytes[2] == -1) {
+            // calculate the proper image data length, for when there's a global palette
+            imageDataLength = IntConverter.convertLittle(new byte[] { imageDataLengthBytes[0], imageDataLengthBytes[1], 0, 0 });
+          }
 
-        if (imageFormat.equals("PAL36") || imageFormat.equals("PAL35")) {
-          imageDataLength = 0;
-        }
+          if (imageFormat.equals("PAL36") || imageFormat.equals("PAL35") || imageFormat.equals("PAL34")) {
+            imageDataLength = 0;
+          }
 
-        fm.writeByte(imageDataLengthBytes[0]);
-        fm.writeByte(imageDataLengthBytes[1]);
-        fm.writeByte(imageDataLengthBytes[2]);
+          fm.writeByte(imageDataLengthBytes[0]);
+          fm.writeByte(imageDataLengthBytes[1]);
+          fm.writeByte(imageDataLengthBytes[2]);
 
-        imageDataLength -= 16; // 16 for the header
+          imageDataLength -= 16; // 16 for the header
 
-        // 2 - Width
-        // 2 - Height
-        // 2 - X Axis Coordinate
-        // 2 - Y Axis Coordinate
-        // 2 - X Axis Position
-        // 2 - Y Axis Position
-        fm.writeBytes(src.readBytes(12));
+          // 2 - Width
+          // 2 - Height
+          // 2 - X Axis Coordinate
+          // 2 - Y Axis Coordinate
+          // 2 - X Axis Position
+          // 2 - Y Axis Position
+          fm.writeBytes(src.readBytes(12));
 
-        // X - Pixels
-        // X - Palette
-        if (imageFormat.equals("DXT5")) {
-          ImageFormatWriter.writeDXT5(fm, imageResource);
-          src.skip(width * height);
-        }
-        else if (imageFormat.equals("DXT3")) {
-          ImageFormatWriter.writeDXT3(fm, imageResource);
-          src.skip(width * height);
-        }
-        else if (imageFormat.equals("DXT1")) {
-          ImageFormatWriter.writeDXT1(fm, imageResource);
-          src.skip(width * height / 2);
-        }
-        else if (imageFormat.equals("RGB565")) {
-          ImageFormatWriter.writeRGB565(fm, imageResource);
-          src.skip(width * height * 2);
-        }
-        else if (imageFormat.equals("BGRA")) {
-          ImageFormatWriter.writeBGRA(fm, imageResource);
-          src.skip(width * height * 4);
-        }
-        else if (imageFormat.equals("ARGB1555")) {
-          ImageFormatWriter.writeARGB1555(fm, imageResource);
-          src.skip(width * height * 2);
-        }
-        else if (imageFormat.equals("BGR")) {
-          ImageFormatWriter.writeBGR(fm, imageResource);
-          src.skip(width * height * 3);
-        }
-        else if (imageFormat.equals("PAL36")) {
-          // Palette
-          ImageFormatWriter.writeRGB(fm, imageResource);
+          // X - Pixels
+          // X - Palette
+          if (imageFormat.equals("DXT5")) {
+            ImageFormatWriter.writeDXT5(fm, imageResource);
+            src.skip(width * height);
+          }
+          else if (imageFormat.equals("DXT3")) {
+            ImageFormatWriter.writeDXT3(fm, imageResource);
+            src.skip(width * height);
+          }
+          else if (imageFormat.equals("DXT1")) {
+            ImageFormatWriter.writeDXT1(fm, imageResource);
+            src.skip(width * height / 2);
+          }
+          else if (imageFormat.equals("RGB565")) {
+            ImageFormatWriter.writeRGB565(fm, imageResource);
+            src.skip(width * height * 2);
+          }
+          else if (imageFormat.equals("BGRA")) {
+            ImageFormatWriter.writeBGRA(fm, imageResource);
+            src.skip(width * height * 4);
+          }
+          else if (imageFormat.equals("ARGB1555")) {
+            ImageFormatWriter.writeARGB1555(fm, imageResource);
+            src.skip(width * height * 2);
+          }
+          else if (imageFormat.equals("BGR")) {
+            ImageFormatWriter.writeBGR(fm, imageResource);
+            src.skip(width * height * 3);
+          }
+          else if (imageFormat.equals("PAL36")) {
+            // Palette
+            ImageFormatWriter.writeRGB(fm, imageResource);
 
-          // 3 bytes per color (RGB)
-          //imageResource = ImageFormatReader.readRGB(fm, width, height);
+            // 3 bytes per color (RGB)
+            //imageResource = ImageFormatReader.readRGB(fm, width, height);
 
-          // 24bit RGB (confirmed RGB for NHL 2000 PC)
-          /*
-          int numColors = width;
-          int[] palette = new int[numColors];
-          for (int p = 0; p < numColors; p++) {
+            // 24bit RGB (confirmed RGB for NHL 2000 PC)
+            /*
+            int numColors = width;
+            int[] palette = new int[numColors];
+            for (int p = 0; p < numColors; p++) {
             int r = ByteConverter.unsign(src.readByte());
             int g = ByteConverter.unsign(src.readByte());
             int b = ByteConverter.unsign(src.readByte());
-          
+            
             palette[p] = ((255 << 24) | (r << 16) | (g << 8) | b);
-          }
-          */
-
-          ImageManipulator im = new ImageManipulator(imageResource);
-          im.convertToPaletted();
-
-          int[] palette = im.getPalette();
-          int numPaletteColors = palette.length;
-
-          src.skip(numPaletteColors * 3);
-
-          // store the global palette for use with other images
-          globalPalette = palette;
-        }
-        else if (imageFormat.equals("PAL35")) {
-          // Palette
-
-          // get and write the new palette
-          // 16bit BGR5551 (NHL 2001 PS1) (where 0,0,0 has a real alpha value, everything else should be treated as alpha = 255)
-          ImageManipulator im = new ImageManipulator(imageResource);
-          im.convertToPaletted();
-
-          int[] palette = im.getPalette();
-          int numPaletteColors = palette.length;
-
-          for (int p = 0; p < numPaletteColors; p++) {
-            // INPUT = ARGB
-            int pixel = palette[p];
-
-            ColorSplitAlpha color = new ColorSplitAlpha(pixel);
-
-            // 5bits - Blue
-            // 5bits - Green
-            // 5bits - Red
-            // 1bit  - Alpha
-            int b = color.getBlue() / 8;
-            int g = color.getGreen() / 8;
-            int r = color.getRed() / 8;
-
-            int a = 1;
-            if (pixel == 0) { // 0,0,0,0 == transparent, everything else is full alpha
-              a = 0;
             }
-
-            // OUTPUT = BGRA5551
-            //int shortValue = (b << 11) | (g << 6) | (r << 1) | a;
-            //fm.writeShort(shortValue);
-
-            int byte1 = r | ((g & 7) << 5);
-            int byte2 = (a << 7) | (b << 2) | ((g >> 3) & 3);
-            fm.writeByte(byte1);
-            fm.writeByte(byte2);
-
-            /*
-            int b2 = ((byte2 >> 2) & 31);
-            int g2 = (((byte2 & 3) << 3) | ((byte1 >> 5) & 7));
-            int r2 = (byte1 & 31);
-            int a2 = (byte2 >> 7);
             */
-          }
 
-          src.skip(numPaletteColors * 2);
-
-          // store the global palette for use with other images
-          globalPalette = palette;
-
-        }
-        else if (imageFormat.equals("ARGB4444")) {
-          ImageFormatWriter.writeARGB4444(fm, imageResource);
-          src.skip(width * height * 2);
-        }
-        else if (imageFormat.equals("8BitPaletted")) {
-          // X - Pixels
-          int numPixels = width * height;
-          src.skip(numPixels);
-
-          if (globalPaletteOffset != -1 && globalPalette == null) {
-            // we need a global palette, but we don't have one, so need to generate one from this image
             ImageManipulator im = new ImageManipulator(imageResource);
             im.convertToPaletted();
-            im.changeColorCount(256);
 
-            int[] pixels = im.getPixels();
-            for (int p = 0; p < numPixels; p++) {
-              fm.writeByte(pixels[p]);
-            }
-
-            globalPalette = im.getPalette();
-          }
-          else if (globalPalette != null && (imageDataLengthBytes[2] == -1 || (imageDataLength == -16))) {
-            // no palette or anything in this image, just had the pixel data and that's it
-
-            // Apply the global color palette to the image, then get the pixels
-            ImageManipulator im = new ImageManipulator(imageResource);
-            im.convertToPaletted();
-            im.swapAndConvertPalette(globalPalette);
-
-            int[] pixels = im.getPixels();
-            for (int p = 0; p < numPixels; p++) {
-              fm.writeByte(pixels[p]);
-            }
-
-            if (imageDataLength == -16) {
-              imageDataLength = 0;
-            }
-          }
-          else {
-
-            // NEED TO READ IN AND FIND THE NUMCOLORS BEFORE WE CAN WRITE INTO THE NEW FILE...
-
-            // Now seek past all the image data (in case there's multiple mipmaps) to find the palette
-            imageDataLength -= numPixels;
-
-            boolean oddWidth = (width % 2 == 1);
-            if (oddWidth && imageDataLength <= 0) {
-              // not actually odd width for this image
-              oddWidth = false;
-            }
-
-            if (oddWidth) {
-              imageDataLength -= height; // an additional 1 byte for each row
-              src.skip(height);
-            }
-
-            if (imageDataLength < 0) {
-              ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Negative image data length for some reason: " + imageDataLength);
-              imageDataLength = 0;
-            }
-
-            byte[] additionalMipmaps = src.readBytes(imageDataLength);
-
-            boolean palettePadded = false;
-
-            // 4 - Palette Format
-            // 2 - Number of Colors?
-            // 2 - Unknown (1)
-            int paletteFormat = src.readByte();
-
-            if ((paletteFormat == 111 || paletteFormat == 124) && globalPalette != null) {
-              // global palette - not sure what this stuff is here, so just write the image, then copy this extra stuff
-
-              // NOW CAN WRITE THINGS TO CATCH UP...
-
-              // Apply the global color palette to the image, then get the pixels
-              ImageManipulator im = new ImageManipulator(imageResource);
-              im.convertToPaletted();
-              im.swapAndConvertPalette(globalPalette);
-
-              int[] pixels = im.getPixels();
-              for (int p = 0; p < numPixels; p++) {
-                fm.writeByte(pixels[p]);
-              }
-
-              int checkByte = paletteFormat;
-
-              while (checkByte == paletteFormat) {
-                // now write the other data, whatever it is
-                fm.writeByte(paletteFormat);
-
-                // we've now caught up to the src, fyi
-
-                int length = 0;
-                if (checkByte == 111) {
-                  // 3 - Length Bytes
-                  fm.writeBytes(src.readBytes(3));
-
-                  // 4 - Length of Other data
-                  length = src.readInt();
-                  fm.writeInt(length);
-                }
-                else if (checkByte == 124) {
-                  // 3 - Length Bytes
-                  length = src.readShort();
-                  fm.writeShort(length);
-
-                  fm.writeBytes(src.readBytes(1));
-
-                  // 4 - Length of Other data
-                  fm.writeBytes(src.readBytes(4));
-
-                  length -= 8; // this length includes these 2 fields
-
-                  if (length < 8) {
-                    length = 0;
-                  }
-                }
-
-                // X - Other Data
-                fm.writeBytes(src.readBytes(length));
-
-                // read the next checkbyte to see if there's more data to copy
-                if (length == 0) {
-                  checkByte = 9999; // something impossibly big
-                }
-                else if (src.getRemainingLength() > 0) {
-                  checkByte = src.readByte();
-                }
-                else {
-                  checkByte = 9999; // something impossibly big
-                }
-              }
-
-              if (checkByte != 9999) { // only go back 1 if we actually read 1
-                src.relativeSeek(src.getOffset() - 1); // go back a byte
-              }
-
-            }
-            else {
-              // a proper palette (or something else we don't know about)
-
-              byte[] paletteHeaderBytes = src.readBytes(7);
-
-              while (paletteFormat == 0) { // skip over null padding at the end of the image
-                paletteFormat = src.readByte();
-                palettePadded = true;
-              }
-
-              // 4 - Number of Colors
-              int numColors = src.readInt();
-
-              // NOW CAN WRITE THINGS TO CATCH UP...
-
-              // Get the pixels and palette for the new image
-              ImageManipulator im = new ImageManipulator(imageResource);
-              im.convertToPaletted();
-              im.changeColorCount(numColors);
-
-              int[] pixels = im.getPixels();
-              int[] palette = im.getPalette();
-
-              if (paletteFormat == 33 || paletteFormat == 35) {
-                // palette[0] needs to be 0,0,0,0 and used for all pixels with no alpha.
-                // Force this by changing the colors to 255 (giving us an empty one at the end), then re-arrange the palette 
-
-                boolean swapped = false;
-
-                // See if we already have a pixel with 0 alpha that we can use
-                int numPaletteColors = palette.length;
-
-                for (int p = 0; p < numPaletteColors; p++) {
-                  if (new ColorSplitAlpha(palette[p]).getAlpha() == 0) {
-                    // found one
-
-                    // Force it to have RGB000
-                    palette[p] = 0;
-
-                    // if this is the first color in the palette, don't need to do anything else.
-                    if (p == 0) {
-                    }
-                    else {
-                      // need to make it the first palette color, then change the palette order around
-                      int[] newPalette = new int[numColors];
-                      System.arraycopy(palette, 0, newPalette, 0, numColors);
-
-                      int oldColor0 = newPalette[0];
-                      newPalette[0] = newPalette[p];
-                      newPalette[p] = oldColor0;
-                      im.swapPaletteOrder(newPalette);
-                    }
-
-                    swapped = true;
-                    break;
-                  }
-                }
-
-                if (!swapped) {
-                  // didn't find any colors with alpha=0, so need to make one
-
-                  // reduce the colors to 255 so we have an empty spot for 0,0,0,0
-                  if (numColors >= 256) {
-                    im.changeColorCount(255);
-                    im.changeColorCount(256); // back to 256 colors again, to add the 0,0,0,0,
-                  }
-
-                  // swap the first and last colors (makes 0,0,0,0 the first color)
-                  int[] newPalette = new int[numColors];
-                  System.arraycopy(palette, 0, newPalette, 0, numColors);
-
-                  int oldColor0 = newPalette[0];
-                  newPalette[0] = newPalette[255];
-                  newPalette[255] = oldColor0;
-
-                  // swap the palette into the image
-                  im.swapPaletteOrder(newPalette);
-
-                }
-
-                // get the new palette and pixels, after any modifications
-                palette = im.getPalette();
-                pixels = im.getPixels();
-              }
-
-              /*
-              // Should be done in an earlier "if" statement, instead of coming here 
-              if (globalPaletteOffset != -1 && globalPalette == null) {
-                // we need a global palette (and it's not stored as a PAL entry in the directory), so grab this one
-                globalPalette = palette;
-              }
-              */
-
-              /*
-              for (int p = 0; p < numPixels; p++) {
-                fm.writeByte(pixels[p]);
-              }
-              */
-
-              int pix = 0;
-              for (int h = 0; h < height; h++) {
-                for (int w = 0; w < width; w++) {
-                  fm.writeByte(pixels[pix]);
-                  pix++;
-                }
-
-                if (oddWidth) {
-                  fm.writeByte(0);
-                }
-              }
-
-              fm.writeBytes(additionalMipmaps);
-
-              if (palettePadded) {
-                fm.writeByte(0);
-              }
-
-              fm.writeByte(paletteFormat);
-              fm.writeBytes(paletteHeaderBytes);
-
-              fm.writeInt(numColors);
-
-              // NOW CONTINUE SIDE-BY-SIDE...
-
-              // 4 - flags (Striping = 8192)
-              int flags = src.readInt();
-              fm.writeInt(flags);
-
-              // X - Color Palette
-              if (paletteFormat == 42) {
-                // 32bit BGRA
-                ImageFormatWriter.writePaletteBGRA(fm, palette);
-                src.skip(numColors * 4);
-              }
-              else if (paletteFormat == 33) {
-                // 32bit RGBA (PS2 Striped)
-                if (flags != 0) {
-                  palette = ImageFormatReader.stripePalettePS2(palette);
-                }
-                //ImageFormatWriter.writePaletteRGBA(fm, palette);
-
-                int numPaletteColors = palette.length;
-
-                for (int p = 0; p < numPaletteColors; p++) {
-                  // INPUT = ARGB
-                  int pixel = palette[p];
-
-                  // 1 - Red
-                  int rPixel = (pixel >> 16) & 255;
-
-                  // 1 - Green
-                  int gPixel = (pixel >> 8) & 255;
-
-                  // 1 - Blue
-                  int bPixel = pixel & 255;
-
-                  // 1 - Alpha
-                  int aPixel = (pixel >> 24) & 255;
-
-                  // reduce alpha by half for PS2
-                  aPixel /= 2;
-                  if (aPixel == 127) {
-                    aPixel = 128;
-                  }
-
-                  // OUTPUT = RGBA
-                  fm.writeByte(rPixel);
-                  fm.writeByte(gPixel);
-                  fm.writeByte(bPixel);
-                  fm.writeByte(aPixel);
-                }
-
-                src.skip(numColors * 4);
-              }
-              else if (paletteFormat == 36) {
-                // 24bit RGB (confirmed RGB for Triple Play 2000)
-                ImageFormatWriter.writePaletteRGB(fm, palette);
-                src.skip(numColors * 3);
-              }
-              else if (paletteFormat == 35) {
-                // 16bit BGR5551 (NHL 2001 PS1) (where 0,0,0 has a real alpha value, everything else should be treated as alpha = 255)
-
-                int numPaletteColors = palette.length;
-
-                for (int p = 0; p < numPaletteColors; p++) {
-                  // INPUT = ARGB
-                  int pixel = palette[p];
-
-                  ColorSplitAlpha color = new ColorSplitAlpha(pixel);
-
-                  // 5bits - Blue
-                  // 5bits - Green
-                  // 5bits - Red
-                  // 1bit  - Alpha
-                  int b = color.getBlue() / 8;
-                  int g = color.getGreen() / 8;
-                  int r = color.getRed() / 8;
-
-                  int a = 1;
-                  if (pixel == 0) { // 0,0,0,0 == transparent, everything else is full alpha
-                    a = 0;
-                  }
-
-                  // OUTPUT = BGRA5551
-                  //int shortValue = (b << 11) | (g << 6) | (r << 1) | a;
-                  //fm.writeShort(shortValue);
-
-                  int byte1 = r | ((g & 7) << 5);
-                  int byte2 = (a << 7) | (b << 2) | ((g >> 3) & 3);
-                  fm.writeByte(byte1);
-                  fm.writeByte(byte2);
-
-                  /*
-                  int b2 = ((byte2 >> 2) & 31);
-                  int g2 = (((byte2 & 3) << 3) | ((byte1 >> 5) & 7));
-                  int r2 = (byte1 & 31);
-                  int a2 = (byte2 >> 7);
-                  */
-                }
-
-                src.skip(numColors * 2);
-              }
-              else {
-                ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Palette Format: " + paletteFormat);
-                return;
-              }
-
-            }
-          }
-
-        }
-        else if (imageFormat.equals("4BitPaletted")) {
-          // X - Pixels
-          int widthForCalc = width;
-          if (widthForCalc % 2 == 1) {
-            widthForCalc++;
-          }
-          boolean widthPadded = ((widthForCalc / 2) % 2) == 1;
-
-          int numPixels = widthForCalc * height / 2;
-          if (widthPadded) {
-            numPixels += height; // add another 1 byte at the end of each row.
-          }
-
-          src.skip(numPixels);
-
-          // NEED TO READ IN AND FIND THE NUMCOLORS BEFORE WE CAN WRITE INTO THE NEW FILE...
-
-          // Now seek past all the image data (in case there's multiple mipmaps) to find the palette
-          imageDataLength -= numPixels;
-          byte[] additionalMipmaps = src.readBytes(imageDataLength);
-
-          boolean palettePadded = false;
-
-          // 4 - Palette Format
-          // 2 - Number of Colors?
-          // 2 - Unknown (1)
-          int paletteFormat = src.readByte();
-
-          byte[] paletteHeaderBytes = src.readBytes(7);
-
-          while (paletteFormat == 0) { // skip over null padding at the end of the image
-            paletteFormat = src.readByte();
-            palettePadded = true;
-          }
-
-          // 4 - Number of Colors
-          int numColors = src.readInt();
-
-          // NOW CAN WRITE THINGS TO CATCH UP...
-
-          // Get the pixels and palette for the new image
-          ImageManipulator im = new ImageManipulator(imageResource);
-          im.convertToPaletted();
-          im.changeColorCount(numColors);
-
-          int[] pixels = im.getPixels();
-          int[] palette = im.getPalette();
-
-          if (paletteFormat == 33 || paletteFormat == 35) {
-            // palette[0] needs to be 0,0,0,0 and used for all pixels with no alpha.
-            // Force this by changing the colors to 255 (giving us an empty one at the end), then re-arrange the palette 
-
-            boolean swapped = false;
-
-            // See if we already have a pixel with 0 alpha that we can use
+            int[] palette = im.getPalette();
             int numPaletteColors = palette.length;
 
-            for (int p = 0; p < numPaletteColors; p++) {
-              if (new ColorSplitAlpha(palette[p]).getAlpha() == 0) {
-                // found one
+            src.skip(numPaletteColors * 3);
 
-                // Force it to have RGB000
-                palette[p] = 0;
-
-                // if this is the first color in the palette, don't need to do anything else.
-                if (p == 0) {
-                }
-                else {
-                  // need to make it the first palette color, then change the palette order around
-                  int[] newPalette = new int[numColors];
-                  System.arraycopy(palette, 0, newPalette, 0, numColors);
-
-                  int oldColor0 = newPalette[0];
-                  newPalette[0] = newPalette[p];
-                  newPalette[p] = oldColor0;
-                  im.swapPaletteOrder(newPalette);
-                }
-
-                swapped = true;
-                break;
-              }
-            }
-
-            if (!swapped) {
-              // didn't find any colors with alpha=0, so need to make one
-
-              // reduce the colors to 15 so we have an empty spot for 0,0,0,0
-              if (numColors >= 16) {
-                im.changeColorCount(15);
-                im.changeColorCount(16); // back to 256 colors again, to add the 0,0,0,0,
-              }
-
-              // swap the first and last colors (makes 0,0,0,0 the first color)
-              int[] newPalette = new int[numColors];
-              System.arraycopy(palette, 0, newPalette, 0, numColors);
-
-              int oldColor0 = newPalette[0];
-              newPalette[0] = newPalette[15];
-              newPalette[15] = oldColor0;
-
-              // swap the palette into the image
-              im.swapPaletteOrder(newPalette);
-
-            }
-
-            // get the new palette and pixels, after any modifications
-            palette = im.getPalette();
-            pixels = im.getPixels();
-          }
-
-          /*
-          // Should be done in an earlier "if" statement, instead of coming here 
-          if (globalPaletteOffset != -1 && globalPalette == null) {
-            // we need a global palette (and it's not stored as a PAL entry in the directory), so grab this one
+            // store the global palette for use with other images
             globalPalette = palette;
+            globalPaletteFormat = 36;
           }
-          */
+          else if (imageFormat.equals("PAL35")) {
+            // Palette
 
-          // write the pixels (2 pixels per byte)
-          // 4-bits per color (The order of the pixels is verified by NHL 2001 PS1)
-          int pix = 0;
-          for (int h = 0; h < height; h++) {
-            for (int w = 0; w < width; w += 2) {
-              int pixel = pixels[pix]; // pixel & 15
-              pix++;
-
-              //int pixel2 = pixel >> 4;
-              //int pixel1 = pixel & 15;
-
-              if (w + 2 <= width) { // if even width, we do add the second pixel, otherwise odd width just ignores it
-                pixel |= (pixels[pix] << 4);
-                pix++;
-              }
-
-              fm.writeByte(pixel);
-            }
-
-            if (widthPadded) {
-              fm.writeByte(0);
-            }
-          }
-
-          fm.writeBytes(additionalMipmaps);
-
-          if (palettePadded) {
-            fm.writeByte(0);
-          }
-
-          fm.writeByte(paletteFormat);
-          fm.writeBytes(paletteHeaderBytes);
-
-          fm.writeInt(numColors);
-
-          // NOW CONTINUE SIDE-BY-SIDE...
-
-          // 4 - flags (Striping = 8192)
-          int flags = src.readInt();
-          fm.writeInt(flags);
-
-          // X - Color Palette
-          if (paletteFormat == 42) {
-            // 32bit BGRA
-            ImageFormatWriter.writePaletteBGRA(fm, palette);
-            src.skip(numColors * 4);
-          }
-          else if (paletteFormat == 33) {
-            // 32bit RGBA (PS2 Striped)
-            if (flags != 0) {
-              palette = ImageFormatReader.stripePalettePS2(palette);
-            }
-            //ImageFormatWriter.writePaletteRGBA(fm, palette);
-
-            int numPaletteColors = palette.length;
-
-            for (int p = 0; p < numPaletteColors; p++) {
-              // INPUT = ARGB
-              int pixel = palette[p];
-
-              // 1 - Red
-              int rPixel = (pixel >> 16) & 255;
-
-              // 1 - Green
-              int gPixel = (pixel >> 8) & 255;
-
-              // 1 - Blue
-              int bPixel = pixel & 255;
-
-              // 1 - Alpha
-              int aPixel = (pixel >> 24) & 255;
-
-              // reduce alpha by half for PS2
-              aPixel /= 2;
-              if (aPixel == 127) {
-                aPixel = 128;
-              }
-
-              // OUTPUT = RGBA
-              fm.writeByte(rPixel);
-              fm.writeByte(gPixel);
-              fm.writeByte(bPixel);
-              fm.writeByte(aPixel);
-            }
-
-            src.skip(numColors * 4);
-          }
-          else if (paletteFormat == 36) {
-            // 24bit RGB (confirmed RGB for Triple Play 2000)
-            ImageFormatWriter.writePaletteRGB(fm, palette);
-            src.skip(numColors * 3);
-          }
-          else if (paletteFormat == 35) {
+            // get and write the new palette
             // 16bit BGR5551 (NHL 2001 PS1) (where 0,0,0 has a real alpha value, everything else should be treated as alpha = 255)
+            ImageManipulator im = new ImageManipulator(imageResource);
+            im.convertToPaletted();
 
+            int[] palette = im.getPalette();
             int numPaletteColors = palette.length;
 
             for (int p = 0; p < numPaletteColors; p++) {
@@ -1798,35 +1449,803 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
               int r2 = (byte1 & 31);
               int a2 = (byte2 >> 7);
               */
-
             }
 
-            src.skip(numColors * 2);
+            src.skip(numPaletteColors * 2);
+
+            // store the global palette for use with other images
+            globalPalette = palette;
+            globalPaletteFormat = 35;
+
+          }
+          else if (imageFormat.equals("PAL34")) {
+            // Palette
+
+            // If this palette is after some of the images (bad order), and we have thus generated a global palette from an image already, we won't
+            // generate a new palette, we'll just use the global one we already generated
+            int[] palette = globalPalette;
+
+            if (palette == null) {
+              ImageManipulator im = new ImageManipulator(imageResource);
+              im.convertToPaletted();
+              palette = im.getPalette();
+            }
+
+            int numPaletteColors = palette.length;
+
+            int numPixels = palette.length;
+
+            for (int p = 0; p < numPixels; p++) {
+              // INPUT = ARGB
+              int pixel = palette[p];
+
+              // 1 - Red
+              int rPixel = ((pixel >> 16) & 255) / 2;
+
+              // 1 - Green
+              int gPixel = ((pixel >> 8) & 255) / 2;
+
+              // 1 - Blue
+              int bPixel = (pixel & 255) / 2;
+
+              // OUTPUT = RGBA
+              fm.writeByte(rPixel);
+              fm.writeByte(gPixel);
+              fm.writeByte(bPixel);
+            }
+
+            src.skip(numPaletteColors * 3);
+
+            // store the global palette for use with other images
+            globalPalette = palette;
+            globalPaletteFormat = 34;
+          }
+          else if (imageFormat.equals("ARGB4444")) {
+            ImageFormatWriter.writeARGB4444(fm, imageResource);
+            src.skip(width * height * 2);
+          }
+          else if (imageFormat.equals("8BitPaletted")) {
+            // X - Pixels
+            int numPixels = width * height;
+            src.skip(numPixels);
+
+            if (globalPaletteOffset != -1 && globalPalette == null) {
+              // we need a global palette, but we don't have one, so need to generate one from this image
+              ImageManipulator im = new ImageManipulator(imageResource);
+              im.convertToPaletted();
+              im.changeColorCount(256);
+
+              int[] pixels = im.getPixels();
+              for (int p = 0; p < numPixels; p++) {
+                fm.writeByte(pixels[p]);
+              }
+
+              globalPalette = im.getPalette();
+            }
+            else if (globalPalette != null && ((imageDataLengthBytes[2] == -1 || (imageDataLength == -16)) || imageDataLength == 0)) {
+              // no palette or anything in this image, just had the pixel data and that's it
+
+              // Apply the global color palette to the image, then get the pixels
+              ImageManipulator im = new ImageManipulator(imageResource);
+              im.convertToPaletted();
+              im.swapAndConvertPalette(globalPalette);
+
+              // write normally, as they are in the palette
+              int[] pixels = im.getPixels();
+              for (int p = 0; p < numPixels; p++) {
+                fm.writeByte(pixels[p]);
+              }
+
+              if (imageDataLength == -16) {
+                imageDataLength = 0;
+              }
+            }
+            else {
+
+              // NEED TO READ IN AND FIND THE NUMCOLORS BEFORE WE CAN WRITE INTO THE NEW FILE...
+
+              // Now seek past all the image data (in case there's multiple mipmaps) to find the palette
+              imageDataLength -= numPixels;
+
+              boolean oddWidth = (width % 2 == 1);
+              if (oddWidth && imageDataLength <= 0) {
+                // not actually odd width for this image
+                oddWidth = false;
+              }
+
+              if (oddWidth) {
+                imageDataLength -= height; // an additional 1 byte for each row
+                src.skip(height);
+              }
+
+              if (imageDataLength < 0) {
+                ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Negative image data length for some reason: " + imageDataLength);
+                imageDataLength = 0;
+              }
+
+              byte[] additionalMipmaps = src.readBytes(imageDataLength);
+
+              boolean palettePadded = false;
+
+              // 4 - Palette Format
+              // 2 - Number of Colors?
+              // 2 - Unknown (1)
+              int paletteFormat = src.readByte();
+
+              if (paletteFormat == 124 && globalPalette == null) {
+                // we want a global palette, but we don't have it yet, so lets generate it.
+
+                // Rather than generating a new palette, we just want to flag this image as needing a global palette, and we'll come back
+                // and re-write this imagr after the global palette has been found.
+                /*
+                ImageManipulator im = new ImageManipulator(imageResource);
+                im.convertToPaletted();
+                im.changeColorCount(256);
+                globalPalette = im.getPalette();
+                */
+                imageProcessed[i] = false; // we want to process this image again, after we have a global palette
+                missingGlobalPalettes++;
+
+                // we're going to "continue", so skip the next 2 fields which we would have been processing, so the fm is in the right place
+                // 3 - Length Bytes
+                src.skip(3);
+
+                // 4 - Length of Other data
+                src.skip(4);
+
+                continue; // stop this image here, process the next one
+              }
+
+              if ((paletteFormat == 111 || paletteFormat == 124) && globalPalette != null) {
+                // global palette - not sure what this stuff is here, so just write the image, then copy this extra stuff
+
+                // NOW CAN WRITE THINGS TO CATCH UP...
+
+                // Apply the global color palette to the image, then get the pixels
+                ImageManipulator im = new ImageManipulator(imageResource);
+                im.convertToPaletted();
+                im.swapAndConvertPalette(globalPalette);
+
+                int[] pixels = im.getPixels();
+                for (int p = 0; p < numPixels; p++) {
+                  fm.writeByte(pixels[p]);
+                }
+
+                int checkByte = paletteFormat;
+
+                while (checkByte == paletteFormat) {
+                  // now write the other data, whatever it is
+                  fm.writeByte(paletteFormat);
+
+                  // we've now caught up to the src, fyi
+
+                  int length = 0;
+                  if (checkByte == 111) {
+                    // 3 - Length Bytes
+                    fm.writeBytes(src.readBytes(3));
+
+                    // 4 - Length of Other data
+                    length = src.readInt();
+                    fm.writeInt(length);
+                  }
+                  else if (checkByte == 124) {
+                    // 3 - Length Bytes
+                    length = src.readShort();
+                    fm.writeShort(length);
+
+                    fm.writeBytes(src.readBytes(1));
+
+                    // 4 - Length of Other data
+                    fm.writeBytes(src.readBytes(4));
+
+                    length -= 8; // this length includes these 2 fields
+
+                    if (length < 8) {
+                      length = 0;
+                    }
+                  }
+
+                  // X - Other Data
+                  fm.writeBytes(src.readBytes(length));
+
+                  // read the next checkbyte to see if there's more data to copy
+                  if (length == 0) {
+                    checkByte = 9999; // something impossibly big
+                  }
+                  else if (src.getRemainingLength() > 0) {
+                    checkByte = src.readByte();
+                  }
+                  else {
+                    checkByte = 9999; // something impossibly big
+                  }
+                }
+
+                if (checkByte != 9999) { // only go back 1 if we actually read 1
+                  src.relativeSeek(src.getOffset() - 1); // go back a byte
+                }
+
+              }
+              else {
+                // a proper palette (or something else we don't know about)
+
+                byte[] paletteHeaderBytes = src.readBytes(7);
+
+                while (paletteFormat == 0) { // skip over null padding at the end of the image
+                  paletteFormat = src.readByte();
+                  palettePadded = true;
+                }
+
+                // 4 - Number of Colors
+                int numColors = src.readInt();
+
+                // NOW CAN WRITE THINGS TO CATCH UP...
+
+                // Get the pixels and palette for the new image
+                ImageManipulator im = new ImageManipulator(imageResource);
+                im.convertToPaletted();
+                im.changeColorCount(numColors);
+
+                int[] pixels = im.getPixels();
+                int[] palette = im.getPalette();
+
+                if (paletteFormat == 33 || paletteFormat == 35) {
+                  // palette[0] needs to be 0,0,0,0 and used for all pixels with no alpha.
+                  // Force this by changing the colors to 255 (giving us an empty one at the end), then re-arrange the palette 
+
+                  boolean swapped = false;
+
+                  // See if we already have a pixel with 0 alpha that we can use
+                  int numPaletteColors = palette.length;
+
+                  for (int p = 0; p < numPaletteColors; p++) {
+                    if (new ColorSplitAlpha(palette[p]).getAlpha() == 0) {
+                      // found one
+
+                      // Force it to have RGB000
+                      palette[p] = 0;
+
+                      // if this is the first color in the palette, don't need to do anything else.
+                      if (p == 0) {
+                      }
+                      else {
+                        // need to make it the first palette color, then change the palette order around
+                        int[] newPalette = new int[numColors];
+                        System.arraycopy(palette, 0, newPalette, 0, numColors);
+
+                        int oldColor0 = newPalette[0];
+                        newPalette[0] = newPalette[p];
+                        newPalette[p] = oldColor0;
+                        im.swapPaletteOrder(newPalette);
+                      }
+
+                      swapped = true;
+                      break;
+                    }
+                  }
+
+                  if (!swapped) {
+                    // didn't find any colors with alpha=0, so need to make one
+
+                    // reduce the colors to 255 so we have an empty spot for 0,0,0,0
+                    if (numColors >= 256) {
+                      im.changeColorCount(255);
+                      im.changeColorCount(256); // back to 256 colors again, to add the 0,0,0,0,
+                    }
+
+                    // swap the first and last colors (makes 0,0,0,0 the first color)
+                    int[] newPalette = new int[numColors];
+                    System.arraycopy(palette, 0, newPalette, 0, numColors);
+
+                    int oldColor0 = newPalette[0];
+                    newPalette[0] = newPalette[255];
+                    newPalette[255] = oldColor0;
+
+                    // swap the palette into the image
+                    im.swapPaletteOrder(newPalette);
+
+                  }
+
+                  // get the new palette and pixels, after any modifications
+                  palette = im.getPalette();
+                  pixels = im.getPixels();
+                }
+
+                /*
+                // Should be done in an earlier "if" statement, instead of coming here 
+                if (globalPaletteOffset != -1 && globalPalette == null) {
+                // we need a global palette (and it's not stored as a PAL entry in the directory), so grab this one
+                globalPalette = palette;
+                }
+                */
+
+                /*
+                for (int p = 0; p < numPixels; p++) {
+                fm.writeByte(pixels[p]);
+                }
+                */
+
+                int pix = 0;
+                for (int h = 0; h < height; h++) {
+                  for (int w = 0; w < width; w++) {
+                    fm.writeByte(pixels[pix]);
+                    pix++;
+                  }
+
+                  if (oddWidth) {
+                    fm.writeByte(0);
+                  }
+                }
+
+                fm.writeBytes(additionalMipmaps);
+
+                if (palettePadded) {
+                  fm.writeByte(0);
+                }
+
+                fm.writeByte(paletteFormat);
+                fm.writeBytes(paletteHeaderBytes);
+
+                fm.writeInt(numColors);
+
+                // NOW CONTINUE SIDE-BY-SIDE...
+
+                // 4 - flags (Striping = 8192)
+                int flags = src.readInt();
+                fm.writeInt(flags);
+
+                // X - Color Palette
+                if (paletteFormat == 42) {
+                  // 32bit BGRA
+                  ImageFormatWriter.writePaletteBGRA(fm, palette);
+                  src.skip(numColors * 4);
+                }
+                else if (paletteFormat == 33) {
+                  // 32bit RGBA (PS2 Striped)
+                  if (flags != 0) {
+                    palette = ImageFormatReader.stripePalettePS2(palette);
+                  }
+                  //ImageFormatWriter.writePaletteRGBA(fm, palette);
+
+                  int numPaletteColors = palette.length;
+
+                  for (int p = 0; p < numPaletteColors; p++) {
+                    // INPUT = ARGB
+                    int pixel = palette[p];
+
+                    // 1 - Red
+                    int rPixel = (pixel >> 16) & 255;
+
+                    // 1 - Green
+                    int gPixel = (pixel >> 8) & 255;
+
+                    // 1 - Blue
+                    int bPixel = pixel & 255;
+
+                    // 1 - Alpha
+                    int aPixel = (pixel >> 24) & 255;
+
+                    // reduce alpha by half for PS2
+                    aPixel /= 2;
+                    if (aPixel == 127) {
+                      aPixel = 128;
+                    }
+
+                    // OUTPUT = RGBA
+                    fm.writeByte(rPixel);
+                    fm.writeByte(gPixel);
+                    fm.writeByte(bPixel);
+                    fm.writeByte(aPixel);
+                  }
+
+                  src.skip(numColors * 4);
+                }
+                else if (paletteFormat == 36) {
+                  // 24bit RGB (confirmed RGB for Triple Play 2000)
+                  ImageFormatWriter.writePaletteRGB(fm, palette);
+                  src.skip(numColors * 3);
+                }
+                else if (paletteFormat == 35) {
+                  // 16bit BGR5551 (NHL 2001 PS1) (where 0,0,0 has a real alpha value, everything else should be treated as alpha = 255)
+
+                  int numPaletteColors = palette.length;
+
+                  for (int p = 0; p < numPaletteColors; p++) {
+                    // INPUT = ARGB
+                    int pixel = palette[p];
+
+                    ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+                    // 5bits - Blue
+                    // 5bits - Green
+                    // 5bits - Red
+                    // 1bit  - Alpha
+                    int b = color.getBlue() / 8;
+                    int g = color.getGreen() / 8;
+                    int r = color.getRed() / 8;
+
+                    int a = 1;
+                    if (pixel == 0) { // 0,0,0,0 == transparent, everything else is full alpha
+                      a = 0;
+                    }
+
+                    // OUTPUT = BGRA5551
+                    //int shortValue = (b << 11) | (g << 6) | (r << 1) | a;
+                    //fm.writeShort(shortValue);
+
+                    int byte1 = r | ((g & 7) << 5);
+                    int byte2 = (a << 7) | (b << 2) | ((g >> 3) & 3);
+                    fm.writeByte(byte1);
+                    fm.writeByte(byte2);
+
+                    /*
+                    int b2 = ((byte2 >> 2) & 31);
+                    int g2 = (((byte2 & 3) << 3) | ((byte1 >> 5) & 7));
+                    int r2 = (byte1 & 31);
+                    int a2 = (byte2 >> 7);
+                    */
+                  }
+
+                  src.skip(numColors * 2);
+                }
+                else if (paletteFormat == 34) {
+                  // 24bit RGB with halved values
+                  int numColorsLocal = palette.length;
+
+                  for (int p = 0; p < numColorsLocal; p++) {
+                    // INPUT = ARGB
+                    int pixel = palette[p];
+
+                    // 1 - Red
+                    int rPixel = ((pixel >> 16) & 255) / 2;
+
+                    // 1 - Green
+                    int gPixel = ((pixel >> 8) & 255) / 2;
+
+                    // 1 - Blue
+                    int bPixel = (pixel & 255) / 2;
+
+                    // OUTPUT = RGB
+                    fm.writeByte(rPixel);
+                    fm.writeByte(gPixel);
+                    fm.writeByte(bPixel);
+                  }
+
+                  src.skip(numColors * 3);
+                }
+                else {
+                  ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Palette Format: " + paletteFormat);
+                  return;
+                }
+
+              }
+            }
+
+          }
+          else if (imageFormat.equals("4BitPaletted")) {
+            // X - Pixels
+            int widthForCalc = width;
+            if (widthForCalc % 2 == 1) {
+              widthForCalc++;
+            }
+            boolean widthPadded = ((widthForCalc / 2) % 2) == 1;
+
+            int numPixels = widthForCalc * height / 2;
+            if (widthPadded) {
+              numPixels += height; // add another 1 byte at the end of each row.
+            }
+
+            src.skip(numPixels);
+
+            // NEED TO READ IN AND FIND THE NUMCOLORS BEFORE WE CAN WRITE INTO THE NEW FILE...
+
+            // Now seek past all the image data (in case there's multiple mipmaps) to find the palette
+            imageDataLength -= numPixels;
+            byte[] additionalMipmaps = src.readBytes(imageDataLength);
+
+            boolean palettePadded = false;
+
+            // 4 - Palette Format
+            // 2 - Number of Colors?
+            // 2 - Unknown (1)
+            int paletteFormat = src.readByte();
+
+            byte[] paletteHeaderBytes = src.readBytes(7);
+
+            while (paletteFormat == 0) { // skip over null padding at the end of the image
+              paletteFormat = src.readByte();
+              palettePadded = true;
+            }
+
+            // 4 - Number of Colors
+            int numColors = src.readInt();
+
+            // NOW CAN WRITE THINGS TO CATCH UP...
+
+            // Get the pixels and palette for the new image
+            ImageManipulator im = new ImageManipulator(imageResource);
+            im.convertToPaletted();
+            im.changeColorCount(numColors);
+
+            int[] pixels = im.getPixels();
+            int[] palette = im.getPalette();
+
+            if (paletteFormat == 33 || paletteFormat == 35) {
+              // palette[0] needs to be 0,0,0,0 and used for all pixels with no alpha.
+              // Force this by changing the colors to 255 (giving us an empty one at the end), then re-arrange the palette 
+
+              boolean swapped = false;
+
+              // See if we already have a pixel with 0 alpha that we can use
+              int numPaletteColors = palette.length;
+
+              for (int p = 0; p < numPaletteColors; p++) {
+                if (new ColorSplitAlpha(palette[p]).getAlpha() == 0) {
+                  // found one
+
+                  // Force it to have RGB000
+                  palette[p] = 0;
+
+                  // if this is the first color in the palette, don't need to do anything else.
+                  if (p == 0) {
+                  }
+                  else {
+                    // need to make it the first palette color, then change the palette order around
+                    int[] newPalette = new int[numColors];
+                    System.arraycopy(palette, 0, newPalette, 0, numColors);
+
+                    int oldColor0 = newPalette[0];
+                    newPalette[0] = newPalette[p];
+                    newPalette[p] = oldColor0;
+                    im.swapPaletteOrder(newPalette);
+                  }
+
+                  swapped = true;
+                  break;
+                }
+              }
+
+              if (!swapped) {
+                // didn't find any colors with alpha=0, so need to make one
+
+                // reduce the colors to 15 so we have an empty spot for 0,0,0,0
+                if (numColors >= 16) {
+                  im.changeColorCount(15);
+                  im.changeColorCount(16); // back to 256 colors again, to add the 0,0,0,0,
+                }
+
+                // swap the first and last colors (makes 0,0,0,0 the first color)
+                int[] newPalette = new int[numColors];
+                System.arraycopy(palette, 0, newPalette, 0, numColors);
+
+                int oldColor0 = newPalette[0];
+                newPalette[0] = newPalette[15];
+                newPalette[15] = oldColor0;
+
+                // swap the palette into the image
+                im.swapPaletteOrder(newPalette);
+
+              }
+
+              // get the new palette and pixels, after any modifications
+              palette = im.getPalette();
+              pixels = im.getPixels();
+            }
+
+            /*
+            // Should be done in an earlier "if" statement, instead of coming here 
+            if (globalPaletteOffset != -1 && globalPalette == null) {
+            // we need a global palette (and it's not stored as a PAL entry in the directory), so grab this one
+            globalPalette = palette;
+            }
+            */
+
+            // write the pixels (2 pixels per byte)
+            // 4-bits per color (The order of the pixels is verified by NHL 2001 PS1)
+            int pix = 0;
+            for (int h = 0; h < height; h++) {
+              for (int w = 0; w < width; w += 2) {
+                int pixel = pixels[pix]; // pixel & 15
+                pix++;
+
+                //int pixel2 = pixel >> 4;
+                //int pixel1 = pixel & 15;
+
+                if (w + 2 <= width) { // if even width, we do add the second pixel, otherwise odd width just ignores it
+                  pixel |= (pixels[pix] << 4);
+                  pix++;
+                }
+
+                fm.writeByte(pixel);
+              }
+
+              if (widthPadded) {
+                fm.writeByte(0);
+              }
+            }
+
+            fm.writeBytes(additionalMipmaps);
+
+            if (palettePadded) {
+              fm.writeByte(0);
+            }
+
+            fm.writeByte(paletteFormat);
+            fm.writeBytes(paletteHeaderBytes);
+
+            fm.writeInt(numColors);
+
+            // NOW CONTINUE SIDE-BY-SIDE...
+
+            // 4 - flags (Striping = 8192)
+            int flags = src.readInt();
+            fm.writeInt(flags);
+
+            // X - Color Palette
+            if (paletteFormat == 42) {
+              // 32bit BGRA
+              ImageFormatWriter.writePaletteBGRA(fm, palette);
+              src.skip(numColors * 4);
+            }
+            else if (paletteFormat == 33) {
+              // 32bit RGBA (PS2 Striped)
+              if (flags != 0) {
+                palette = ImageFormatReader.stripePalettePS2(palette);
+              }
+              //ImageFormatWriter.writePaletteRGBA(fm, palette);
+
+              int numPaletteColors = palette.length;
+
+              for (int p = 0; p < numPaletteColors; p++) {
+                // INPUT = ARGB
+                int pixel = palette[p];
+
+                // 1 - Red
+                int rPixel = (pixel >> 16) & 255;
+
+                // 1 - Green
+                int gPixel = (pixel >> 8) & 255;
+
+                // 1 - Blue
+                int bPixel = pixel & 255;
+
+                // 1 - Alpha
+                int aPixel = (pixel >> 24) & 255;
+
+                // reduce alpha by half for PS2
+                aPixel /= 2;
+                if (aPixel == 127) {
+                  aPixel = 128;
+                }
+
+                // OUTPUT = RGBA
+                fm.writeByte(rPixel);
+                fm.writeByte(gPixel);
+                fm.writeByte(bPixel);
+                fm.writeByte(aPixel);
+              }
+
+              src.skip(numColors * 4);
+            }
+            else if (paletteFormat == 36) {
+              // 24bit RGB (confirmed RGB for Triple Play 2000)
+              ImageFormatWriter.writePaletteRGB(fm, palette);
+              src.skip(numColors * 3);
+            }
+            else if (paletteFormat == 35) {
+              // 16bit BGR5551 (NHL 2001 PS1) (where 0,0,0 has a real alpha value, everything else should be treated as alpha = 255)
+
+              int numPaletteColors = palette.length;
+
+              for (int p = 0; p < numPaletteColors; p++) {
+                // INPUT = ARGB
+                int pixel = palette[p];
+
+                ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+                // 5bits - Blue
+                // 5bits - Green
+                // 5bits - Red
+                // 1bit  - Alpha
+                int b = color.getBlue() / 8;
+                int g = color.getGreen() / 8;
+                int r = color.getRed() / 8;
+
+                int a = 1;
+                if (pixel == 0) { // 0,0,0,0 == transparent, everything else is full alpha
+                  a = 0;
+                }
+
+                // OUTPUT = BGRA5551
+                //int shortValue = (b << 11) | (g << 6) | (r << 1) | a;
+                //fm.writeShort(shortValue);
+
+                int byte1 = r | ((g & 7) << 5);
+                int byte2 = (a << 7) | (b << 2) | ((g >> 3) & 3);
+                fm.writeByte(byte1);
+                fm.writeByte(byte2);
+
+                /*
+                int b2 = ((byte2 >> 2) & 31);
+                int g2 = (((byte2 & 3) << 3) | ((byte1 >> 5) & 7));
+                int r2 = (byte1 & 31);
+                int a2 = (byte2 >> 7);
+                */
+
+              }
+
+              src.skip(numColors * 2);
+            }
+            else if (paletteFormat == 34) {
+              // 24bit RGB with halved values
+              int numColorsLocal = palette.length;
+
+              for (int p = 0; p < numColorsLocal; p++) {
+                // INPUT = ARGB
+                int pixel = palette[p];
+
+                // 1 - Red
+                int rPixel = ((pixel >> 16) & 255) / 2;
+
+                // 1 - Green
+                int gPixel = ((pixel >> 8) & 255) / 2;
+
+                // 1 - Blue
+                int bPixel = (pixel & 255) / 2;
+
+                // OUTPUT = RGB
+                fm.writeByte(rPixel);
+                fm.writeByte(gPixel);
+                fm.writeByte(bPixel);
+              }
+
+              src.skip(numColors * 3);
+            }
+            else {
+              ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Palette Format: " + paletteFormat);
+              return;
+            }
+
+          }
+
+          // X - Data (up to the start of the next image, or to end of archive)
+          int postDataLength = 0;
+          /*
+          if (i == numImages - 1) {
+          postDataLength = (int) src.getRemainingLength(); // remaining archive length
           }
           else {
-            ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Writing an Unknown Palette Format: " + paletteFormat);
-            return;
-          }
-
-        }
-
-        // X - Data (up to the start of the next image, or to end of archive)
-        int postDataLength = 0;
-        if (i == numImages - 1) {
-          postDataLength = (int) src.getRemainingLength(); // remaining archive length
-        }
-        else {
           // length up to the start of the next file
           postDataLength = (int) (offsets[i + 1] - src.getOffset());
+          }
+          
+          if (postDataLength < 0) {
+          */
+          // lets assume the offsets are in the wrong order (eg NHL 96), so sort them and find the right length
+          int startOffset = offsets[i];
+          int closestOffset = (int) src.getLength();
+          for (int o = 0; o < numImages; o++) {
+            if (o == i) {
+              continue; // don't want it to find itself
+            }
+            int thisOffset = offsets[o];
+            if (thisOffset > startOffset && thisOffset < closestOffset) {
+              closestOffset = thisOffset;
+            }
+          }
+
+          // Now we should have the closest offset, so we can check again.
+          postDataLength = (int) (closestOffset - src.getOffset());
+
+          if (postDataLength < 0) {
+            ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Post Data length is negative for some reason: " + postDataLength);
+            postDataLength = 0;
+          }
+          /*
+          }
+          */
+          fm.writeBytes(src.readBytes(postDataLength));
+
         }
-
-        if (postDataLength < 0) {
-          ErrorLogger.log("[Viewer_BIG_BIGF_FSH_SHPI] Post Data length is negative for some reason: " + postDataLength);
-          postDataLength = 0;
-        }
-
-        fm.writeBytes(src.readBytes(postDataLength));
-
       }
 
       if (globalPaletteOffset != -1 && globalPalette != null) {
