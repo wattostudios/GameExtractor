@@ -15,13 +15,17 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.ErrorLogger;
 import org.watto.Language;
+import org.watto.component.PreviewPanel;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.viewer.Viewer_RESOURCES_BIMAGE_MIB;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
@@ -57,6 +61,8 @@ public class Plugin_RESOURCES extends ArchivePlugin {
     //setTextPreviewExtensions("aas48", "aas96", "glsl", "gui", "map", "md5camera", "af", "cg", "def", "fx", "mtr", "pda", "prt", "script", "skin", "sndshd", "uniforms", "vfp", "vp"); // LOWER CASE
 
     //setCanScanForFileTypes(true);
+
+    setCanConvertOnReplace(true);
 
   }
 
@@ -282,6 +288,47 @@ public class Plugin_RESOURCES extends ArchivePlugin {
       return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "TXT");
     }
     return null;
+  }
+
+  /**
+   **********************************************************************************************
+   When replacing files, if the file is of a certain type, it will be converted before replace
+   @param resourceBeingReplaced the Resource in the archive that is being replaced
+   @param fileToReplaceWith the file on your PC that will replace the Resource. This file is the
+          one that will be converted into a different format, if applicable.
+   @return the converted file, if conversion was applicable/successful, else the original fileToReplaceWith
+   **********************************************************************************************
+   **/
+  @Override
+  public File convertOnReplace(Resource resourceBeingReplaced, File fileToReplaceWith) {
+    try {
+
+      PreviewPanel imagePreviewPanel = loadFileForConversion(resourceBeingReplaced, fileToReplaceWith, "bimage");
+      if (imagePreviewPanel == null) {
+        // no conversion needed, or wasn't able to be converted
+        return fileToReplaceWith;
+      }
+
+      // The plugin that will do the conversion
+      Viewer_RESOURCES_BIMAGE_MIB converterPlugin = new Viewer_RESOURCES_BIMAGE_MIB();
+
+      String beingReplacedExtension = resourceBeingReplaced.getExtension();
+      File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + beingReplacedExtension);
+      if (destination.exists()) {
+        destination.delete();
+      }
+
+      FileManipulator fmOut = new FileManipulator(destination, true);
+      converterPlugin.replace(resourceBeingReplaced, imagePreviewPanel, fmOut);
+      fmOut.close();
+
+      return destination;
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return fileToReplaceWith;
+    }
   }
 
 }
