@@ -17,6 +17,7 @@ package org.watto.ge.plugin.viewer;
 import java.awt.Image;
 import java.io.File;
 import org.watto.ErrorLogger;
+import org.watto.Settings;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_3DModel;
 import org.watto.datatype.Archive;
@@ -129,6 +130,40 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
     try {
 
       long arcSize = fm.getLength();
+
+      int version = 0;
+      ArchivePlugin plugin = Archive.getReadPlugin();
+
+      if (plugin instanceof Plugin_ASSETS_5) {
+        version = 5;
+      }
+      else if (plugin instanceof Plugin_ASSETS_6) {
+        version = 6;
+      }
+      else if (plugin instanceof Plugin_ASSETS_8) {
+        version = 8;
+      }
+      else if (plugin instanceof Plugin_ASSETS_9) {
+        version = 9;
+      }
+      else if (plugin instanceof Plugin_ASSETS_14) {
+        version = 14;
+      }
+      else if (plugin instanceof Plugin_ASSETS_15) {
+        version = 15;
+      }
+      else if (plugin instanceof Plugin_ASSETS_17) {
+        version = 17;
+      }
+      else if (plugin instanceof Plugin_ASSETS_20) {
+        version = 20;
+      }
+      else if (plugin instanceof Plugin_ASSETS_21) {
+        version = 21;
+      }
+      else if (plugin instanceof Plugin_ASSETS_22) {
+        version = 22;
+      }
 
       // Read in the model
 
@@ -541,8 +576,14 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       fm.skip(numDetailBlocks * 4);
 
       int vertexBlockSize = 0;
+      if (Settings.getBoolean("DebugMode")) {
+        System.out.println("[Viewer_Unity3D_MESH]: Vertex Check Offset = " + fm.getOffset());
+      }
 
       boolean knownVertexBlockSize = false;
+
+      // a check to see if the vertex block size calculation ends up being even, because if it is, it's probably right.
+      boolean evenCheck = false;
 
       // 4 - Unknown (4)
       //System.out.println(fm.getOffset());
@@ -601,6 +642,85 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         }
 
         int realVertexBlockSize = verticesListLength / numVertices;
+
+        // for v22, at least in Space Tail game, it often doesn't have the 32-byte block, so we want to go back and try to read it properly
+        if (version >= 22 && (realVertexBlockSize < 12 || realVertexBlockSize % 4 != 0)) {
+          // not an even multiple of 4
+          fm.relativeSeek(endOfFaces);
+
+          // 4 - numVertices
+          numVertices = fm.readInt();
+          FieldValidator.checkNumVertices(numVertices);
+
+          // 4 - numDetailsBlocks
+          numDetailBlocks = fm.readInt();
+          FieldValidator.checkRange(numDetailBlocks, 0, 50); // guess
+
+          // X*4 - Detail Blocks
+          fm.skip(numDetailBlocks * 4);
+
+          // 4 - Vertex Field Length
+          verticesListLength = fm.readInt();
+          FieldValidator.checkLength(verticesListLength, arcSize);
+
+          realVertexBlockSize = verticesListLength / numVertices;
+        }
+
+        // check to see if the vertex block size calculation ends up being even, because if it is, it's probably right.
+        if (version >= 22) {
+
+          long vertexStart = fm.getOffset();
+
+          boolean vertexChanged = false;
+
+          // first, check a few floats and see if we can find the appropriate size
+          if (realVertexBlockSize > 40) {
+            fm.skip(36);
+            float checkFloat = fm.readFloat();
+            if (checkFloat == -1 || checkFloat == 1) {
+              // might be a 40-byte block
+              fm.skip(36);
+              checkFloat = fm.readFloat();
+              if (checkFloat == -1 || checkFloat == 1) {
+                // highly likely, but need to triple check
+                fm.skip(36);
+                checkFloat = fm.readFloat();
+                if (checkFloat == -1 || checkFloat == 1) {
+                  // check #4
+                  fm.skip(36);
+                  checkFloat = fm.readFloat();
+                  if (checkFloat == -1 || checkFloat == 1) {
+                    realVertexBlockSize = 40;
+                    //System.out.println("Vertex Block Size (changed): " + vertexBlockSize);
+                    vertexChanged = true;
+
+                    knownVertexBlockSize = true;
+                  }
+                }
+              }
+            }
+
+            fm.relativeSeek(vertexStart);
+          }
+
+          if (!vertexChanged) {
+            evenCheck = ((verticesListLength - 16) % numVertices) == 0;
+            if (evenCheck) {
+              // seems to be split into 3 blocks... numVertices*12, 12 bytes nulls, numVertices*4, 4 bytes null, numVertices*X.
+              // we only need the first 12-byte block
+              realVertexBlockSize = 12;
+            }
+            else {
+              evenCheck = ((verticesListLength - 12) % numVertices) == 0;
+              if (evenCheck) {
+                // seems to be split into 3 blocks... numVertices*12, 12 bytes nulls, numVertices*4, 4 bytes null, numVertices*X.
+                // we only need the first 12-byte block
+                realVertexBlockSize = 24;
+              }
+            }
+          }
+        }
+
         //System.out.println("Vertex Block Size (calculated): " + realVertexBlockSize);
         if (realVertexBlockSize != vertexBlockSize) {
           //ErrorLogger.log("[Viewer_Unity3D_MESH] Vertex Block Size: Flag says " + vertexBlockSize + " but calculation says " + realVertexBlockSize);
@@ -627,7 +747,7 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
 
             // now calculate the vertexBlockSize (and check it looks OK)
             vertexBlockSize = vertLength / numVertices;
-            FieldValidator.checkRange(vertexBlockSize, 20, 128);
+            FieldValidator.checkRange(vertexBlockSize, 12, 128);
 
             // 4 - Filename Length of resS file
             int ressFilenameLength = fm.readInt();
@@ -824,7 +944,13 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
           fm.relativeSeek(vertexStart);
         }
 
-        if (vertexBlockSize == 20) {
+        if (vertexBlockSize == 12) {
+          readVertices12(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 16) {
+          readVertices16(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 20) {
           readVertices20(fm, numVertices, points, normals, texCoords);
         }
         else if (vertexBlockSize == 24) {
@@ -884,6 +1010,18 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         else if (vertexBlockSize == 96) {
           readVertices96(fm, numVertices, points, normals, texCoords);
         }
+        else if (vertexBlockSize == 100) {
+          readVertices100(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 104) {
+          readVertices104(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 108) {
+          readVertices108(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 112) {
+          readVertices112(fm, numVertices, points, normals, texCoords);
+        }
         else {
           ErrorLogger.log("[Viewer_Unity3D_MESH] Can't handle vertex block size: " + vertexBlockSize);
         }
@@ -921,7 +1059,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         */
 
         //if (!knownVertexBlockSize && !repeated && (unknownIntFlag != 0 || boundsCheck > 2)) {
-        if (!knownVertexBlockSize && !repeated && (unknownIntFlag != 0)) {
+        if (evenCheck && version >= 22) {
+          // probably OK, don't repeat. Only for version 22 and above, for now, based on testing
+        }
+        else if (!knownVertexBlockSize && !repeated && (unknownIntFlag != 0)) {
           //System.out.println("Bounds Check Failed: " + boundsCheck);
           // some v15/17 meshes seem to have the vertexes before the texcoords, but don't know how to detect it, so try to pick it up here.
 
@@ -952,17 +1093,32 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
             vertexBlockSize -= 8;
           }
           */
-          if (vertexBlockSize > 40) {
-            vertexBlockSize = 40;
-          }
-          else if (vertexBlockSize > 24) {
-            vertexBlockSize = 24;
+
+          if (version >= 22) {
+            // if v22 doesn't work, try vertex size 24, and then try vertex size 12
+            if (vertexBlockSize == 24) {
+              vertexBlockSize = 12;
+              repeated = true;
+            }
+            else {
+              vertexBlockSize = 24;
+              repeated = false;
+            }
           }
           else {
-            vertexBlockSize -= 8;
+            if (vertexBlockSize > 40) {
+              vertexBlockSize = 40;
+            }
+            else if (vertexBlockSize > 24) {
+              vertexBlockSize = 24;
+            }
+            else {
+              vertexBlockSize -= 8;
+            }
+
+            repeated = true;
           }
 
-          repeated = true;
         }
 
       }
@@ -1011,6 +1167,111 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
     catch (Throwable t) {
       ErrorLogger.log(t);
       return null;
+    }
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void readVertices12(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
+
+    for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+      // 4 - Vertex X
+      // 4 - Vertex Y
+      // 4 - Vertex Z
+      float xPoint = fm.readFloat();
+      float yPoint = fm.readFloat();
+      float zPoint = fm.readFloat();
+
+      points[j] = xPoint;
+      points[j + 1] = yPoint;
+      points[j + 2] = zPoint;
+
+      // Don't know where the texture co-ords are yet
+      float xTexture = 0;
+      float yTexture = 0;
+
+      texCoords[k] = xTexture;
+      texCoords[k + 1] = yTexture;
+
+      // Calculate the size of the object
+      if (xPoint < minX) {
+        minX = xPoint;
+      }
+      if (xPoint > maxX) {
+        maxX = xPoint;
+      }
+
+      if (yPoint < minY) {
+        minY = yPoint;
+      }
+      if (yPoint > maxY) {
+        maxY = yPoint;
+      }
+
+      if (zPoint < minZ) {
+        minZ = zPoint;
+      }
+      if (zPoint > maxZ) {
+        maxZ = zPoint;
+      }
+    }
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void readVertices16(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
+
+    for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+      // 4 - Vertex X
+      // 4 - Vertex Y
+      // 4 - Vertex Z
+      float xPoint = fm.readFloat();
+      float yPoint = fm.readFloat();
+      float zPoint = fm.readFloat();
+
+      points[j] = xPoint;
+      points[j + 1] = yPoint;
+      points[j + 2] = zPoint;
+
+      // 4 - Float
+      fm.skip(4);
+
+      // Don't know where the texture co-ords are yet
+      float xTexture = 0;
+      float yTexture = 0;
+
+      texCoords[k] = xTexture;
+      texCoords[k + 1] = yTexture;
+
+      // Calculate the size of the object
+      if (xPoint < minX) {
+        minX = xPoint;
+      }
+      if (xPoint > maxX) {
+        maxX = xPoint;
+      }
+
+      if (yPoint < minY) {
+        minY = yPoint;
+      }
+      if (yPoint > maxY) {
+        maxY = yPoint;
+      }
+
+      if (zPoint < minZ) {
+        minZ = zPoint;
+      }
+      if (zPoint > maxZ) {
+        maxZ = zPoint;
+      }
     }
 
   }
@@ -2337,6 +2598,282 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
 
       // 64 - Unknown
       fm.skip(64);
+
+      // Don't know where the texture co-ords are yet
+      float xTexture = 0;
+      float yTexture = 0;
+
+      texCoords[k] = xTexture;
+      texCoords[k + 1] = yTexture;
+
+      // Calculate the size of the object
+      if (xPoint < minX) {
+        minX = xPoint;
+      }
+      if (xPoint > maxX) {
+        maxX = xPoint;
+      }
+
+      if (yPoint < minY) {
+        minY = yPoint;
+      }
+      if (yPoint > maxY) {
+        maxY = yPoint;
+      }
+
+      if (zPoint < minZ) {
+        minZ = zPoint;
+      }
+      if (zPoint > maxZ) {
+        maxZ = zPoint;
+      }
+    }
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void readVertices100(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
+
+    for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+      // 4 - Vertex X
+      // 4 - Vertex Y
+      // 4 - Vertex Z
+      float xPoint = fm.readFloat();
+      float yPoint = fm.readFloat();
+      float zPoint = fm.readFloat();
+
+      points[j] = xPoint;
+      points[j + 1] = yPoint;
+      points[j + 2] = zPoint;
+
+      // 4 - Normal X
+      // 4 - Normal Y
+      // 4 - Normal Z
+      float xNormal = fm.readFloat();
+      float yNormal = fm.readFloat();
+      float zNormal = fm.readFloat();
+
+      normals[j] = xNormal;
+      normals[j + 1] = yNormal;
+      normals[j + 2] = zNormal;
+
+      // 4 - Unknown Float
+      // 4 - Unknown Float
+      fm.skip(8);
+
+      // 68 - Unknown
+      fm.skip(68);
+
+      // Don't know where the texture co-ords are yet
+      float xTexture = 0;
+      float yTexture = 0;
+
+      texCoords[k] = xTexture;
+      texCoords[k + 1] = yTexture;
+
+      // Calculate the size of the object
+      if (xPoint < minX) {
+        minX = xPoint;
+      }
+      if (xPoint > maxX) {
+        maxX = xPoint;
+      }
+
+      if (yPoint < minY) {
+        minY = yPoint;
+      }
+      if (yPoint > maxY) {
+        maxY = yPoint;
+      }
+
+      if (zPoint < minZ) {
+        minZ = zPoint;
+      }
+      if (zPoint > maxZ) {
+        maxZ = zPoint;
+      }
+    }
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void readVertices104(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
+
+    for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+      // 4 - Vertex X
+      // 4 - Vertex Y
+      // 4 - Vertex Z
+      float xPoint = fm.readFloat();
+      float yPoint = fm.readFloat();
+      float zPoint = fm.readFloat();
+
+      points[j] = xPoint;
+      points[j + 1] = yPoint;
+      points[j + 2] = zPoint;
+
+      // 4 - Normal X
+      // 4 - Normal Y
+      // 4 - Normal Z
+      float xNormal = fm.readFloat();
+      float yNormal = fm.readFloat();
+      float zNormal = fm.readFloat();
+
+      normals[j] = xNormal;
+      normals[j + 1] = yNormal;
+      normals[j + 2] = zNormal;
+
+      // 4 - Unknown Float
+      // 4 - Unknown Float
+      fm.skip(8);
+
+      // 72 - Unknown
+      fm.skip(72);
+
+      // Don't know where the texture co-ords are yet
+      float xTexture = 0;
+      float yTexture = 0;
+
+      texCoords[k] = xTexture;
+      texCoords[k + 1] = yTexture;
+
+      // Calculate the size of the object
+      if (xPoint < minX) {
+        minX = xPoint;
+      }
+      if (xPoint > maxX) {
+        maxX = xPoint;
+      }
+
+      if (yPoint < minY) {
+        minY = yPoint;
+      }
+      if (yPoint > maxY) {
+        maxY = yPoint;
+      }
+
+      if (zPoint < minZ) {
+        minZ = zPoint;
+      }
+      if (zPoint > maxZ) {
+        maxZ = zPoint;
+      }
+    }
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void readVertices108(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
+
+    for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+      // 4 - Vertex X
+      // 4 - Vertex Y
+      // 4 - Vertex Z
+      float xPoint = fm.readFloat();
+      float yPoint = fm.readFloat();
+      float zPoint = fm.readFloat();
+
+      points[j] = xPoint;
+      points[j + 1] = yPoint;
+      points[j + 2] = zPoint;
+
+      // 4 - Normal X
+      // 4 - Normal Y
+      // 4 - Normal Z
+      float xNormal = fm.readFloat();
+      float yNormal = fm.readFloat();
+      float zNormal = fm.readFloat();
+
+      normals[j] = xNormal;
+      normals[j + 1] = yNormal;
+      normals[j + 2] = zNormal;
+
+      // 4 - Unknown Float
+      // 4 - Unknown Float
+      fm.skip(8);
+
+      // 76 - Unknown
+      fm.skip(76);
+
+      // Don't know where the texture co-ords are yet
+      float xTexture = 0;
+      float yTexture = 0;
+
+      texCoords[k] = xTexture;
+      texCoords[k + 1] = yTexture;
+
+      // Calculate the size of the object
+      if (xPoint < minX) {
+        minX = xPoint;
+      }
+      if (xPoint > maxX) {
+        maxX = xPoint;
+      }
+
+      if (yPoint < minY) {
+        minY = yPoint;
+      }
+      if (yPoint > maxY) {
+        maxY = yPoint;
+      }
+
+      if (zPoint < minZ) {
+        minZ = zPoint;
+      }
+      if (zPoint > maxZ) {
+        maxZ = zPoint;
+      }
+    }
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void readVertices112(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
+
+    for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+      // 4 - Vertex X
+      // 4 - Vertex Y
+      // 4 - Vertex Z
+      float xPoint = fm.readFloat();
+      float yPoint = fm.readFloat();
+      float zPoint = fm.readFloat();
+
+      points[j] = xPoint;
+      points[j + 1] = yPoint;
+      points[j + 2] = zPoint;
+
+      // 4 - Normal X
+      // 4 - Normal Y
+      // 4 - Normal Z
+      float xNormal = fm.readFloat();
+      float yNormal = fm.readFloat();
+      float zNormal = fm.readFloat();
+
+      normals[j] = xNormal;
+      normals[j + 1] = yNormal;
+      normals[j + 2] = zNormal;
+
+      // 4 - Unknown Float
+      // 4 - Unknown Float
+      fm.skip(8);
+
+      // 80 - Unknown
+      fm.skip(80);
 
       // Don't know where the texture co-ords are yet
       float xTexture = 0;

@@ -1,6 +1,6 @@
 <languagePack>
 	<name>English</name>
-	<version>3.14</version>
+	<version>3.15</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -1598,6 +1598,13 @@
 		<lang code="WSTableColumn_Edited_Text" value="Edited Value" />
 		
 		<lang code="ResourceProperty_RelatedResource" value="Related Resource" />
+		
+<!-- New with 3.15 -->
+
+		<lang code="WSLabel_ReloadToShowFontChanges_Text" value="Font changes will take effect when you next run Game Extractor" />
+		
+		<lang code="WSCheckBox_CopyFilenameOnRightClick_Text" value="Copy filename on right-click in the File List" />
+		<lang code="WSCheckBox_CopyFilenameOnRightClick_Tooltip" value="If this checkbox is ticked, when you right-click on an entry in the file list, the filename will be copied to the clipboard." />
 		
 		<lang code="" value="" />
 		

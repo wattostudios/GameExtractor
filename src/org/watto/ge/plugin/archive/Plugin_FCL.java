@@ -24,6 +24,7 @@ import org.watto.ge.plugin.exporter.BlockExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -147,7 +148,10 @@ public class Plugin_FCL extends ArchivePlugin {
         TaskProgressManager.setValue(i);
       }
 
-      String filename = path.getName() + "_uncompressed";
+      String filenameOnly = FilenameSplitter.getFilename(path);
+      String extensionOnly = FilenameSplitter.getExtension(path);
+
+      String filename = filenameOnly + "_ge_decompressed" + "." + extensionOnly;
 
       long offset = (numFiles + 1) * 8;
       long compLength = arcSize - offset;

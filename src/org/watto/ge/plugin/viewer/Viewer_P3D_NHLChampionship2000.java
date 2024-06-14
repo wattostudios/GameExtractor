@@ -148,6 +148,9 @@ public class Viewer_P3D_NHLChampionship2000 extends ViewerPlugin {
 
       long arcSize = fm.getLength();
 
+      ImageResource[] images = new ImageResource[256]; // max - guess
+      int numImages = 0;
+
       // 2 - Unknown (-252)
       // 4 - File Length
       fm.skip(6);
@@ -227,9 +230,8 @@ public class Viewer_P3D_NHLChampionship2000 extends ViewerPlugin {
           ImageResource imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
           imageResource = ImageFormatReader.flipVertically(imageResource);
 
-          fm.close();
-
-          return imageResource;
+          images[numImages] = imageResource;
+          numImages++;
 
         }
         else if (code == 12313) {
@@ -260,7 +262,29 @@ public class Viewer_P3D_NHLChampionship2000 extends ViewerPlugin {
         }
       }
 
-      return null;
+      fm.close();
+
+      if (numImages <= 0) {
+        return null;
+      }
+      else if (numImages == 1) {
+        return images[0];
+      }
+      else {
+        // link all the found images together, and return the first one
+
+        for (int i = 0; i < numImages - 1; i++) {
+          images[i].setNextFrame(images[i + 1]);
+        }
+        for (int i = 1; i < numImages; i++) {
+          images[i].setPreviousFrame(images[i - 1]);
+        }
+        images[0].setPreviousFrame(images[numImages - 1]);
+        images[numImages - 1].setNextFrame(images[0]);
+
+        images[0].setManualFrameTransition(true);
+        return images[0];
+      }
 
     }
     catch (Throwable t) {

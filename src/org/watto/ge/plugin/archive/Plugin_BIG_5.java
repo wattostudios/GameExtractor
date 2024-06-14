@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -42,7 +43,7 @@ public class Plugin_BIG_5 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Sleeping Dogs: Definitive Edition");
+    setGames("Sleeping Dogs");
     setExtensions("big"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -119,21 +120,34 @@ public class Plugin_BIG_5 extends ArchivePlugin {
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      try {
+        FieldValidator.checkNumFiles(numFiles);
 
-      // 4 - null
-      // 4 - Unknown (72)
-      // 12 - null
-      // 4 - Unknown
-      // 8 - null
-      // 14 - Archive Name (null terminated, filled with nulls)
-      // 4 - Unknown (86)
-      // 4 - Unknown
-      // 4 - Unknown (87)
-      // 4 - Unknown
-      // 4 - Unknown (87)
-      // 10 - null
-      fm.skip(76);
+        // 4 - null
+        // 4 - Unknown (72)
+        // 12 - null
+        // 4 - Unknown
+        // 8 - null
+        // 14 - Archive Name (null terminated, filled with nulls)
+        // 4 - Unknown (86)
+        // 4 - Unknown
+        // 4 - Unknown (87)
+        // 4 - Unknown
+        // 4 - Unknown (87)
+        // 10 - null
+        fm.skip(76);
+
+      }
+      catch (Throwable t) {
+        fm.relativeSeek(88);
+
+        numFiles = fm.readInt();
+        FieldValidator.checkNumFiles(numFiles);
+
+        // 4 - Block Size (including this field) (52)
+        // 52 - Unknown
+        fm.skip(52);
+      }
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);

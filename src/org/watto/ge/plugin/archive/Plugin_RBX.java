@@ -1,30 +1,26 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,7 +31,7 @@ public class Plugin_RBX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_RBX() {
@@ -55,7 +51,7 @@ public class Plugin_RBX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -89,7 +85,7 @@ public class Plugin_RBX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -113,34 +109,37 @@ public class Plugin_RBX extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      long[] offsets = new long[numFiles];
+      int[] offsets = new int[numFiles];
       for (int i = 0; i < numFiles; i++) {
 
         // 12 - Filename (null)
         String filename = fm.readNullString(12);
 
         // 4 - File Offset
-        long offset = fm.readInt() + 4;
+        int offset = fm.readInt();
         offsets[i] = offset;
         FieldValidator.checkOffset(offset, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
+        resources[i] = new Resource(path, filename, offset + 4);
 
         TaskProgressManager.setValue(i);
       }
 
-      // Calculate the file sizes
-      java.util.Arrays.sort(offsets);
+      fm.getBuffer().setBufferSize(4); // small quick reads
 
-      for (int i = 0; i < numFiles - 1; i++) {
+      for (int i = 0; i < numFiles; i++) {
         Resource resource = resources[i];
-        resource.setLength(offsets[i + 1] - offsets[i]);
-        resource.setDecompressedLength(resource.getLength());
-        FieldValidator.checkLength(resources[i].getLength(), arcSize);
+        fm.seek(offsets[i]);
+
+        // 4 - File Length
+        int length = fm.readInt();
+        FieldValidator.checkLength(length, arcSize);
+
+        // X - File Data
+        resource.setLength(length);
+        resource.setDecompressedLength(length);
       }
-      resources[numFiles - 1].setLength(arcSize - offsets[numFiles - 1]);
-      resources[numFiles - 1].setDecompressedLength(resources[numFiles - 1].getLength());
 
       fm.close();
 
@@ -155,7 +154,7 @@ public class Plugin_RBX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -181,21 +180,30 @@ public class Plugin_RBX extends ArchivePlugin {
       TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
       long offset = 8 + (numFiles * 16);
       for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
         // 12 Bytes - Filename (null)
-        fm.writeNullString(resources[i].getName(), 12);
+        fm.writeNullString(resource.getName(), 12);
 
         // 4 Bytes - Data Offset
         fm.writeInt((int) offset);
 
-        offset += resources[i].getDecompressedLength();
+        offset += resource.getDecompressedLength() + 4; // +4 for the File Length at the start of each file data
       }
-
-      // To fix a weird offset thingy where each file's offset is off by 4
-      fm.writeInt(0);
 
       // Write Files
       TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
-      write(resources, fm);
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+
+        // 4 - File Length
+        fm.writeInt(resource.getDecompressedLength());
+
+        // X - File Data
+        write(resource, fm);
+
+        TaskProgressManager.setValue(i);
+      }
 
       fm.close();
 

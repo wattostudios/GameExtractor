@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.component.PreviewPanel;
@@ -289,6 +290,10 @@ public class Plugin_BIG_BIGF_3 extends ArchivePlugin {
         }
 
         filename += ".ssh";
+
+        if (offset == 0 && length == 0) {
+          return null; // not this format - will try BIG_BIGF next
+        }
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

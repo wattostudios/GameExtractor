@@ -59,6 +59,7 @@ public class RecentFilesManager {
     try {
 
       String filePath = path.getAbsolutePath();
+      
 
       int numRecentFiles = recentFiles.length;
       for (int i = 0; i < numRecentFiles; i++) {
@@ -119,6 +120,7 @@ public class RecentFilesManager {
 
       for (int i = 0; i < numRecentFiles; i++) {
         String recentFile = Settings.getString("RecentFile" + (i + 1)); // +1 because the 1st recent
+        
         // file is #1, not #0
         recentFiles[i] = recentFile;
       }

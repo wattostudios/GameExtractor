@@ -1,31 +1,32 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.ReplacableResource;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_LZO_MiniLZO;
 import org.watto.io.FileManipulator;
 import org.watto.io.StringHelper;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -36,7 +37,7 @@ public class Plugin_PAK_23 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PAK_23() {
@@ -44,18 +45,19 @@ public class Plugin_PAK_23 extends ArchivePlugin {
     super("PAK_23", "PAK_23");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
-    setCanImplicitReplace(true);
+    setProperties(true, false, true, false);
 
     setGames("Dead To Rights 2");
     setExtensions("pak");
-    setPlatforms("PS2");
+    setPlatforms("PS2", "PC");
+
+    setTextPreviewExtensions("scr", "vfx"); // LOWER CASE
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -108,6 +110,11 @@ public class Plugin_PAK_23 extends ArchivePlugin {
       // NOTE - Compressed files MUST know their DECOMPRESSED LENGTH
       //      - Uncompressed files MUST know their LENGTH
 
+      Exporter_LZO_MiniLZO exporter = Exporter_LZO_MiniLZO.getInstance();
+      exporter.setCheckDecompressedLength(false);
+      exporter.setForceDecompress(true);
+      exporter.setUseActualDecompressedLength(true);
+
       addFileTypes();
 
       // RESETTING THE GLOBAL VARIABLES
@@ -136,30 +143,60 @@ public class Plugin_PAK_23 extends ArchivePlugin {
         String filename = StringHelper.readTerminatedString(fm.getBuffer(), (byte) 10);
         FieldValidator.checkFilename(filename);
 
-        if (filename.charAt(1) == ':') {
-          // remove the drive letter etc.
-          filename = filename.substring(2);
+        int dotPos = filename.indexOf(':');
+        if (dotPos > 0) {
+          filename = filename.substring(dotPos + 2);
         }
 
         // 4 - File Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
-
-        long offset = fm.readInt();
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - File Length
-        long lengthPointerLocation = fm.getOffset();
-        long lengthPointerLength = 4;
+        // 4 - Decompressed File Length
+        int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
 
-        long length = fm.readInt();
+        // 4 - File Length (0=uncompressed)
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Padding Multiple (16384 for most files, 0 for the last file)
-        fm.skip(4);
+        if (length == 0) {
+          // uncompressed
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);
+          length = decompLength;
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length);
+        }
+        else {
+          // lzo1x
+
+          int numBlocks = length / 2048;
+          if (numBlocks == 1) {
+            //path,id,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+          else {
+
+            long[] blockOffsets = new long[numBlocks];
+            long[] blockLengths = new long[numBlocks];
+            long[] blockDecompLengths = new long[numBlocks];
+
+            int blockOffset = offset;
+            for (int b = 0; b < numBlocks; b++) {
+              blockOffsets[b] = blockOffset;
+              blockLengths[b] = 2048;
+              blockDecompLengths[b] = decompLength;
+              blockOffset += 2048;
+            }
+
+            BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+
+            //path,id,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, blockExporter);
+          }
+
+        }
 
         TaskProgressManager.setValue(i);
       }
@@ -172,6 +209,113 @@ public class Plugin_PAK_23 extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+
+      // Write Header Data
+
+      // 4 - Header (4108980338)
+      // 4 - null
+      // 4 - Archive Header Size (16)
+      // 4 - Number Of Files
+      fm.writeBytes(src.readBytes(16));
+
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      // read the directory to get the original filenames, so we can then work out the first offset
+      for (int i = 0; i < numFiles; i++) {
+        // X - Filename (Sometimes including the drive letter "S:/", etc.)
+        // 1 - Filename Terminator (using (byte)10)
+        StringHelper.readTerminatedString(src.getBuffer(), (byte) 10);
+
+        // 4 - File Offset
+        // 4 - File Length
+        // 4 - Padding Multiple (16384 for most files, 0 for the last file)
+        src.skip(12);
+      }
+
+      long offset = src.getOffset();
+      src.relativeSeek(16);
+
+      // read the directory to get the original filenames, so we can then work out the first offset
+      int[] lengths = new int[numFiles];
+      for (int i = 0; i < numFiles; i++) {
+        // X - Filename (Sometimes including the drive letter "S:/", etc.)
+        // 1 - Filename Terminator (using (byte)10)
+        String filename = StringHelper.readTerminatedString(src.getBuffer(), (byte) 10);
+        fm.writeString(filename);
+        fm.writeByte(10);
+
+        // 4 - File Offset
+        fm.writeInt(offset);
+        src.skip(4);
+
+        Resource resource = resources[i];
+        int length = (int) resource.getDecompressedLength();
+
+        if (resource.isReplaced()) {
+          // 4 - Decompressed File Length
+          fm.writeInt(length);
+
+          // 4 - File Length (0=uncompressed)
+          fm.writeInt(0);
+
+          src.skip(8);
+        }
+        else {
+          // 4 - Decompressed File Length
+          // 4 - File Length (0=uncompressed)
+          fm.writeBytes(src.readBytes(8));
+
+          length = (int) resource.getLength();
+        }
+
+        lengths[i] = length;
+
+        offset += length;
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        if (resource.isReplaced()) {
+          write(resource, fm);
+        }
+        else {
+          ExporterPlugin originalExporter = resource.getExporter();
+          resource.setExporter(exporterDefault);
+          write(resource, fm);
+          resource.setExporter(originalExporter);
+        }
+        TaskProgressManager.setValue(i);
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

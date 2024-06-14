@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2023 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.PluginGroup_UE3;
+import org.watto.ge.plugin.archive.Plugin_UE3_564;
 import org.watto.ge.plugin.archive.Plugin_UE3_Generic;
 import org.watto.ge.plugin.archive.datatype.UnrealProperty;
 import org.watto.ge.plugin.exporter.Exporter_LZO_SingleBlock;
@@ -79,7 +80,7 @@ public class Viewer_UE3_Texture2D_Generic extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin readPlugin = Archive.getReadPlugin();
-      if (readPlugin instanceof Plugin_UE3_Generic) {
+      if (readPlugin instanceof Plugin_UE3_Generic || readPlugin instanceof Plugin_UE3_564) {
         rating += 50;
       }
 

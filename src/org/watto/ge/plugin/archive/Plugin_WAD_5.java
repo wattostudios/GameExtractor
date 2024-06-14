@@ -1,31 +1,28 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.ReplacableResource;
+import org.watto.Language;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,11 +41,14 @@ public class Plugin_WAD_5 extends ArchivePlugin {
     super("WAD_5", "WAD_5");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, false);
 
     setGames("Fighting Force");
     setExtensions("wad");
     setPlatforms("PC");
+
+    setFileTypes(new FileType("pdt", "Image Archive", FileType.TYPE_ARCHIVE),
+        new FileType("pbl", "PBL Image", FileType.TYPE_IMAGE));
 
   }
 
@@ -129,15 +129,15 @@ public class Plugin_WAD_5 extends ArchivePlugin {
         FieldValidator.checkFilename(filename);
 
         // 4 - File Length
-        long length = IntConverter.changeFormat(fm.readInt());
+        int length = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - File Offset
-        long offset = IntConverter.changeFormat(fm.readInt());
+        int offset = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkOffset(offset, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new ReplacableResource(path, filename, offset, length);
+        resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
       }
@@ -150,6 +150,64 @@ public class Plugin_WAD_5 extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
+  @Override
+  public void write(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 4 - Number Of Files
+      fm.writeInt(IntConverter.changeFormat(numFiles));
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = 4 + (numFiles * 20);
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long decompLength = resource.getDecompressedLength();
+
+        // 12 - Filename (null terminated, filled with nulls)
+        String filename = resource.getName();
+        if (filename.length() > 12) {
+          filename = filename.substring(0, 12);
+        }
+        fm.writeString(filename);
+
+        int paddingLength = 12 - filename.length();
+        for (int p = 0; p < paddingLength; p++) {
+          fm.writeByte(0);
+        }
+
+        // 4 - File Length
+        fm.writeInt(IntConverter.changeFormat((int) decompLength));
+
+        // 4 - File Offset
+        fm.writeInt(IntConverter.changeFormat((int) offset));
+
+        offset += decompLength;
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      write(resources, fm);
+
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

@@ -35,7 +35,13 @@ to be on your classpath (or in the main Game Extractor directory).
 
 We maintain the project using Eclipse. You should be able to download the repository, and import
 it into Eclipse via the menu path File -- Open Projects from File System. The main entry point
-is under src/org/watto/ge/GameExtractor.java
+is under src/org/watto/ge/GameExtractor.java . When importing into Eclipse, you will need to
+choose Java 1.8 under Project --> Java Compiler, as well as choosing JDK 1.8 under Project -->
+Java Build Path.
+
+Eclipse will give errors relating to Java Media Framework. If you have it installed, make sure
+you add the libraries to the project classpath. Otherwise, just delete the corresponding java
+sources if you're not interested in those in particular.
 
 ## Operating System Support
 

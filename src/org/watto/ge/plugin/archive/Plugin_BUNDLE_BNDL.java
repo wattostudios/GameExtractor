@@ -16,12 +16,14 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import org.watto.ErrorLogger;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Archive;
-import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
@@ -44,8 +46,8 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
     super("BUNDLE_BNDL", "BUNDLE_BNDL");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
-    setCanImplicitReplace(true);
+    setProperties(true, false, true, false);
+    //setCanImplicitReplace(true);
 
     setGames("Ghost Recon Advanced Warfighter",
         "Ghost Recon Advanced Warfighter 2",
@@ -173,15 +175,9 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
           // File Entry
 
           // 8 - File Offset
-          long offsetPointerLocation = fm.getOffset();
-          int offsetPointerLength = 8;
-
           long offset = fm.readLong();
 
           // 4 - File Length
-          long lengthPointerLocation = fm.getOffset();
-          int lengthPointerLength = 4;
-
           long length = fm.readInt();
           FieldValidator.checkLength(length, arcSize);
 
@@ -191,7 +187,6 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
 
           // 1 - Unknown (1)
           fm.skip(1);
-          //System.out.println(fm.readByte());
 
           // X - Filename
           // 1 - null Filename Terminator
@@ -204,7 +199,8 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
           }
 
           //path,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);
+          //resources[realNumFiles] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
           realNumFiles++;
 
           TaskProgressManager.setValue(realNumFiles);
@@ -245,6 +241,121 @@ public class Plugin_BUNDLE_BNDL extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 4 - Header (BNDL)
+      // 4 - Version (2)
+      fm.writeBytes(src.readBytes(8));
+
+      // 8 - First File Offset  (not including null padding)
+      long firstFileOffset = src.readLong();
+      fm.writeLong(firstFileOffset);
+
+      // work out the actual first file offset, including padding
+      int dirPaddingSize = calculatePadding(firstFileOffset, 4);
+
+      long offset = firstFileOffset + dirPaddingSize;
+
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      int realNumFiles = 0;
+      while (src.getOffset() < firstFileOffset) {
+        // 1 - Entry Type
+        int entryType = src.readByte();
+        fm.writeByte(entryType);
+
+        if (entryType == 1) {
+          // Start of SubFolder
+          // 1 - Unknown (1)
+          fm.writeBytes(src.readBytes(1));
+
+          // X - Folder Name
+          // 1 - null Folder Name Terminator
+          fm.writeString(src.readNullString());
+          fm.writeByte(0);
+        }
+        else if (entryType == 2) {
+          // File Entry
+          Resource resource = resources[realNumFiles];
+          long length = resource.getLength();
+
+          // 8 - File Offset
+          fm.writeLong(offset);
+          src.skip(8);
+
+          // 4 - File Length
+          fm.writeInt(resource.getLength());
+          src.skip(4);
+
+          // 1 - Compression Flag? (1=Uncompressed)
+          fm.writeBytes(src.readBytes(1));
+
+          // X - Filename
+          // 1 - null Filename Terminator
+          fm.writeString(src.readNullString());
+          fm.writeByte(0);
+
+          realNumFiles++;
+          offset += length;
+
+          int paddingSize = calculatePadding(length, 4);
+          offset += paddingSize;
+        }
+        else if (entryType == 3) {
+          // End of Current SubFolder
+        }
+      }
+
+      for (int p = 0; p < dirPaddingSize; p++) {
+        fm.writeByte(0);
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+
+        ExporterPlugin originalExporter = resource.getExporter();
+        resource.setExporter(exporterDefault);
+        write(resource, fm);
+        resource.setExporter(originalExporter);
+
+        long length = resource.getLength();
+        int paddingSize = calculatePadding(length, 4);
+        for (int p = 0; p < paddingSize; p++) {
+          fm.writeByte(0);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

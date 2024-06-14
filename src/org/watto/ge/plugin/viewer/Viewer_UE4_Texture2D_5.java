@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.io.File;
+
 import org.watto.Settings;
 import org.watto.SingletonManager;
 import org.watto.component.PreviewPanel;
@@ -45,7 +46,7 @@ public class Viewer_UE4_Texture2D_5 extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Viewer_UE4_Texture2D_5() {
@@ -585,7 +586,7 @@ public class Viewer_UE4_Texture2D_5 extends ViewerPlugin {
 
         return imageResource;
       }
-      System.out.println("Viewer_UE4_Texture2D_6: Unknown Texture2D Format: " + type);
+      System.out.println("Viewer_UE4_Texture2D_5: Unknown Texture2D Format: " + type);
       return null;
 
     }

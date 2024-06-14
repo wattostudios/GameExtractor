@@ -34,6 +34,7 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.event.WSEnterableInterface;
 import org.watto.event.WSSelectableInterface;
+
 import org.watto.ge.helper.ShellFolderFile;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -198,7 +199,13 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
    **/
   public void changeControls(String controlName, boolean fullVersionOnly) {
 
-    boolean fullVersion = false;
+    boolean fullVersion = true;
+    if (fullVersionOnly) {
+      if (!checkFullVersion(false)) {
+        //return;
+        fullVersion = false;
+      }
+    }
 
     WSPanel newControl = currentControl;
 
@@ -310,7 +317,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
   **********************************************************************************************
   **/
   public boolean checkFullVersion() {
-    return false;
+    return checkFullVersion(true);
   }
 
   /**
@@ -322,6 +329,7 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       if (showPopup) {
         WSPopup.showErrorInNewThread("FullVersionOnly", true);
       }
+      return false;
   }
 
   /**

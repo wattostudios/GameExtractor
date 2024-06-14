@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,12 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_NeoXZLib;
 import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
@@ -55,6 +57,9 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
 
     setTextPreviewExtensions("neox", "fxgroup"); // LOWER CASE
 
+    // There is some kind of issue with the decompression that we can't work around, encryption or something.
+    // This plugin was working prior to the game Update 2.0 in April 2023.
+    //setEnabled(false); 
     setCanScanForFileTypes(true);
 
   }
@@ -80,17 +85,23 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
       }
 
       // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
+      if (FieldValidator.checkNumFiles(fm.readInt() / 5)) {
         rating += 5;
       }
 
-      fm.skip(12);
-
-      long arcSize = fm.getLength();
-
-      // Directory Offset
-      if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
+      String arcName = fm.getFile().getName();
+      if (arcName.contains(".part.") && arcName.contains("_0001")) {
         rating += 5;
+      }
+      else {
+        fm.skip(12);
+
+        long arcSize = fm.getLength();
+
+        // Directory Offset
+        if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
+          rating += 5;
+        }
       }
 
       return rating;
@@ -115,7 +126,7 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -128,7 +139,7 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      FieldValidator.checkNumFiles(numFiles / 5);
 
       // 4 - Version 1 (0)
       // 4 - Version 2 (0)
@@ -155,34 +166,59 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - Compressed File Length
-        long length = fm.readInt();
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - Decompressed File Length
-        long decompLength = fm.readInt();
+        int decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
 
         // 4 - Compressed CRC
-        // 4 - Decompressed CRC
-        fm.skip(8);
+        fm.skip(4);
 
-        // 4 - Flags
-        int flags = fm.readInt();
+        // 4 - Decompressed CRC
+        int decompCRC = fm.readInt();
+
+        // 2 - Compression Flag (1=ZLib Compression)
+        int compressionFlags = fm.readShort();
+
+        // 2 - Encryption Flag (3=Encryption)
+        int encryptionFlags = fm.readShort();
 
         String filename = Resource.generateFilename(i);
 
-        if ((flags & 1) == 1) {
-          // ZLib compression
+        if (encryptionFlags == 3) {
+          // Encrypted
+          if ((compressionFlags & 1) == 1) {
+            // ZLib compression
 
-          //path,name,offset,length,decompLength,exporter
-          resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+            //path,name,offset,length,decompLength,exporter
+            Resource resource = new Resource(path, filename, offset, length, decompLength, new Exporter_Custom_NeoXZLib(length, decompLength, decompCRC, true));
+            resources[i] = resource;
+          }
+          else {
+            // No compression
+
+            //path,name,offset,length,decompLength,exporter
+            Resource resource = new Resource(path, filename, offset, length, decompLength, new Exporter_Custom_NeoXZLib(length, decompLength, decompCRC, false));
+            resource.addProperty("DecompressedCRC", decompCRC);
+            resources[i] = resource;
+          }
         }
         else {
-          // No compression
+          // Not Encrypted
+          if ((compressionFlags & 1) == 1) {
+            // ZLib compression
 
-          //path,name,offset,length,decompLength,exporter
-          resources[i] = new Resource(path, filename, offset, length, decompLength);
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength, exporterZLib);
+          }
+          else {
+            // No compression
 
+            //path,name,offset,length,decompLength,exporter
+            resources[i] = new Resource(path, filename, offset, length, decompLength);
+          }
         }
 
         TaskProgressManager.setValue(i);
@@ -320,20 +356,25 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
-    if (headerInt1 == 1868910140) {
-      return "neox";
-    }
-    else if (headerInt1 == 1199064636) {
-      return "neox";
-    }
-    else if (headerInt1 == 1263686734) {
+    //System.out.println(resource.getName());
+
+    if (headerInt1 == 1263686734) {
       return "ntrk";
     }
     else if (headerInt1 == 1347241037) {
       return "mdmp";
     }
     else if (headerInt1 == 1397311314) {
-      return "rgis";
+      return "gis";
+    }
+    else if (headerInt2 == 1146375250) {
+      return "rltd";
+    }
+    else if (headerInt2 == 1145979222) {
+      return "vand";
+    }
+    else if (headerInt2 == 1331185230) {
+      return "nfxo";
     }
     else if (headerInt1 == 55727696) {
       return "pvr";
@@ -341,10 +382,31 @@ public class Plugin_NPK_NXPK extends ArchivePlugin {
     else if (headerInt1 == 1481919403) {
       return "ktx";
     }
+    else if (headerInt1 == -1144487884) { // according to https://github.com/zhouhang95/neox_tools/blob/master/extractor.py
+      return "mesh";
+    }
     else if (headerInt1 == 67324752) {
       return "zip";
     }
-    else if (headerInt1 == 1852400444 || headerInt1 == 1019198447 || headerInt1 == 1836597052) {
+    else if (headerInt1 == 1751607628) {
+      return "LightProbeEditorFile";
+    }
+    else if (headerInt1 == 1414743380) {
+      return "test";
+    }
+    else if (headerInt1 == 1297302868) {
+      return "tesm";
+    }
+    else if (headerInt1 == 1397315139) {
+      return "cvis";
+    }
+    else if (headerInt1 == 7563638) {
+      return "vis";
+    }
+    else if (headerBytes[0] == 60) { // XML (raw)
+      return "xml";
+    }
+    else if (headerInt1 == 1019198447) { // XML (unicode)
       return "xml";
     }
     else if (headerShort1 == 2573 || headerShort1 == 12079 || headerShort1 == 10799 || headerShort1 == 3451 || headerInt1 == 544501353 || headerInt1 == 543582499 || headerInt1 == 1970435187 || headerInt1 == 1920234593 || headerInt1 == 1886216563 || headerInt1 == 1852205347 || headerInt1 == 1718185589 || headerInt1 == 1717920803 || headerInt1 == 1668180259 || headerInt1 == 1667592816 || headerInt1 == 1634692198 || headerInt1 == 1230196560 || headerInt1 == 1129858388 || headerInt1 == 1684631414 || headerInt1 == 1852404597 || headerInt1 == 1954047267 || headerInt1 == 1954047348 || headerInt1 == 1684433187 || headerInt1 == 1835103008 || headerInt1 == 1870225772 || headerInt1 == 2037539190) {

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -30,12 +31,12 @@ public class Plugin_LBX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_LBX() {
 
-    super("LBX", "Master Of Orion LBX");
+    super("LBX", "Master LBX");
 
     //         read write replace rename
     setProperties(true, false, false, false);
@@ -46,11 +47,17 @@ public class Plugin_LBX extends ArchivePlugin {
         "Master of Orion 2");
     setPlatforms("PC");
 
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("xmi", "XMI Audio", FileType.TYPE_AUDIO),
+        new FileType("voc", "Creative Voice Audio", FileType.TYPE_AUDIO));
+
+    setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -92,7 +99,7 @@ public class Plugin_LBX extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -173,6 +180,39 @@ public class Plugin_LBX extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 188079) {
+
+      resource.setOffset(resource.getOffset() + 16);
+      long length = resource.getLength() - 16;
+      resource.setLength(length);
+      resource.setDecompressedLength(length);
+
+      return "voc";
+    }
+    else if (headerInt1 == 122543) {
+
+      resource.setOffset(resource.getOffset() + 16);
+      long length = resource.getLength() - 16;
+      resource.setLength(length);
+      resource.setDecompressedLength(length);
+
+      return "xmi";
+    }
+
+    return null;
   }
 
 }

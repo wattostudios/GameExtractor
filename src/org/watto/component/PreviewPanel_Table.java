@@ -63,7 +63,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public WSTable getTable() {
@@ -72,7 +72,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public Object[][] getData() {
@@ -81,7 +81,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public PreviewPanel_Table(Object[][] data, WSTableColumn[] columns) {
@@ -149,13 +149,30 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
     tableHeader.setReorderingAllowed(false);
     tableHeader.setResizingAllowed(true);
 
-    WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\"></WSPanel>"));
-    detailsInnerPanel.add(detailsTable, BorderLayout.CENTER);
+    // If the details table has more than 8 rows, add the details table in a scrollpane.
+    if (numDetails > 8) {
+      WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\"></WSPanel>"));
+      detailsInnerPanel.add(detailsTable, BorderLayout.CENTER);
 
-    WSPanel detailsPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Table_DetailsPanelHolder\" layout=\"BorderLayout\" showBorder=\"true\" showLabel=\"true\" border-width=\"3\"></WSPanel>"));
-    detailsPanel.add(detailsInnerPanel, BorderLayout.CENTER);
+      JScrollPane detailsScrollPane = new JScrollPane(detailsInnerPanel);
+      detailsScrollPane.setOpaque(false);
+      detailsScrollPane.setBorder(new EmptyBorder(4, 4, 4, 4));
 
-    mainPanel.add(detailsPanel, BorderLayout.SOUTH);
+      WSPanel detailsPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Table_DetailsPanelHolder\" layout=\"BorderLayout\" showBorder=\"true\" showLabel=\"true\" border-width=\"3\" height=\"250\"></WSPanel>"));
+      detailsPanel.add(detailsScrollPane, BorderLayout.CENTER);
+
+      mainPanel.add(detailsPanel, BorderLayout.SOUTH);
+    }
+    else {
+      WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\"></WSPanel>"));
+      detailsInnerPanel.add(detailsTable, BorderLayout.CENTER);
+
+      WSPanel detailsPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Table_DetailsPanelHolder\" layout=\"BorderLayout\" showBorder=\"true\" showLabel=\"true\" border-width=\"3\"></WSPanel>"));
+      detailsPanel.add(detailsInnerPanel, BorderLayout.CENTER);
+
+      mainPanel.add(detailsPanel, BorderLayout.SOUTH);
+    }
+    // Otherwise, add the table directly
 
     // add the main panel
     add(mainPanel, BorderLayout.CENTER);
@@ -174,15 +191,6 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
         ViewerPlugin viewerPlugin = (ViewerPlugin) SingletonManager.get("CurrentViewer");
         if (viewerPlugin != null) {
           if (viewerPlugin.canEdit(this)) {
-            if (GameExtractor.isFullVersion()) {
-
-              WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"1\" />"));
-              saveButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_Text_SaveChanges\" showText=\"true\" />"));
-              saveButton.setEnabled(false);
-              bottomPanel.add(saveButton);
-
-              add(bottomPanel, BorderLayout.SOUTH);
-            }
           }
 
         }
@@ -194,7 +202,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -215,7 +223,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -238,7 +246,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -273,7 +281,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean isObjectChanged() {
@@ -282,7 +290,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setObjectChanged(boolean changed) {
@@ -335,7 +343,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void reloadSelectedValue() {
@@ -347,7 +355,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void reloadSelectedValue(int row, int col) {

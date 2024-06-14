@@ -69,6 +69,19 @@ public class Viewer_POD_POD6_TEX extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
   public int getMatchRating(FileManipulator fm) {
     try {
 

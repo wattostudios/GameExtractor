@@ -1,29 +1,28 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2023 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.component.WSPluginManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -183,10 +182,12 @@ public class Plugin_XWB_WBND extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-        // 2 - Unknown (0/2)
-        // 2 - Unknown (1)
-        // 4 - Unknown
-        fm.skip(8);
+        // 2 - Number of Channels (0/2)
+        // 2 - Format (0=normal pcm) (1=xbox adpcm)
+        fm.skip(4);
+
+        // 4 - Flags
+        int flags = fm.readInt();
 
         // 4 - File Offset (relative to the start of the file data)
         long offset = fm.readInt() + firstFileOffset;
@@ -199,10 +200,35 @@ public class Plugin_XWB_WBND extends ArchivePlugin {
         // 8 - null
         fm.skip(8);
 
-        String filename = names[i];
+        String filename = names[i] + ".wav";
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+        resources[i] = resource;
+
+        short codec = (short) ((flags) & ((1 << 2) - 1));
+        short channels = (short) ((flags >> (2)) & ((1 << 3) - 1));
+        int frequency = ((flags >> (2 + 3)) & ((1 << 18) - 1));
+        short blockAlign = (short) ((flags >> (2 + 3 + 18)) & ((1 << 8) - 1));
+        short bitrate = (short) ((flags >> (2 + 3 + 18 + 8)) & ((1 << 1) - 1));
+
+        if (bitrate == 0) {
+          bitrate = 8;
+        }
+        else if (bitrate == 1) {
+          bitrate = 16;
+        }
+
+        if (codec == 1) {
+          codec = 0x0069; // XBox ADPCM
+        }
+        else if (codec == 0) {
+          codec = 0x0001; // PCM
+        }
+
+        resource.setAudioProperties(frequency, bitrate, channels);
+        resource.setBlockAlign(blockAlign);
+        resource.setCodec(codec);
 
         TaskProgressManager.setValue(i);
       }
@@ -216,6 +242,20 @@ public class Plugin_XWB_WBND extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+   **********************************************************************************************
+   Provide hints to the previewer so that certain document types are displayed appropriately
+   **********************************************************************************************
+   **/
+  @Override
+  public ViewerPlugin previewHint(Resource resource) {
+    String extension = resource.getExtension();
+    if (extension.equalsIgnoreCase("wav")) {
+      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "VGMSTREAM_Audio_WAV_RIFF");
+    }
+    return null;
   }
 
 }

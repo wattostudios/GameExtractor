@@ -68,6 +68,19 @@ public class Viewer_SDU_SRSC_SDUTEX extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
   public int getMatchRating(FileManipulator fm) {
     try {
 

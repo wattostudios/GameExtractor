@@ -1,29 +1,29 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2023 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+import org.watto.Language;
+import org.watto.Settings;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -42,11 +42,16 @@ public class Plugin_HOG extends ArchivePlugin {
     super("HOG", "HOG");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
-    setGames("Syphon Filter: The Omega Strain");
+    setGames("Syphon Filter: The Omega Strain",
+        "Syphon Filter");
     setExtensions("hog");
-    setPlatforms("PS2");
+    setPlatforms("PS2",
+        "PS1");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("tim", "Playstation TIM Image", FileType.TYPE_IMAGE));
 
   }
 
@@ -113,6 +118,9 @@ public class Plugin_HOG extends ArchivePlugin {
 
       // RESETTING THE GLOBAL VARIABLES
 
+      // CLEAR OUT THE PALETTES LOADED FROM A DIFFERENT HOG ARCHIVE
+      PaletteManager.clear();
+
       FileManipulator fm = new FileManipulator(path, false);
 
       long arcSize = (int) fm.getLength();
@@ -176,6 +184,81 @@ public class Plugin_HOG extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // 4 - Unknown (164,240,164,54 or 171,240,164,54)
+      // 4 - Number Of Files
+      // 4 - Archive Header Length (20)
+      // 4 - Filename Directory Offset
+      // 4 - File Data Offset (2048)
+      fm.writeBytes(src.readBytes(20));
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = 0;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        // 4 - File Offset
+        fm.writeInt(offset);
+
+        offset += length;
+        offset += calculatePadding(offset, 2048);
+      }
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        // X - Filename (null)
+        fm.writeString(resource.getName());
+        fm.writeByte(0);
+      }
+
+      // X - null Padding to a multiple of 2048 bytes
+      int padding = calculatePadding(fm.getOffset(), 2048);
+      for (int p = 0; p < padding; p++) {
+        fm.writeByte(0);
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < resources.length; i++) {
+        // X - File Data
+        write(resources[i], fm);
+
+        // X - null Padding to a multiple of 2048 bytes
+        padding = calculatePadding(fm.getOffset(), 2048);
+        for (int p = 0; p < padding; p++) {
+          fm.writeByte(0);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

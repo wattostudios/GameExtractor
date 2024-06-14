@@ -39,26 +39,37 @@ public class WSScrollPane extends JScrollPane implements WSComponent, WSEventabl
 
   /** serialVersionUID */
   private static final long serialVersionUID = 1L;
+
   /** The code for the language and settings **/
   String code = null;
+
   /** The position of this <code>WSComponent</code> in its parent <code>Container</code> **/
   String position = null;
+
   /** The width of this <code>WSComponent</code>s <code>Border</code> **/
   int borderWidth = -1;
+
   /** Whether the height of this <code>WSComponent</code> is fixed or not **/
   boolean fixedHeight = false;
+
   /** Whether the width of this <code>WSComponent</code> is fixed or not **/
   boolean fixedWidth = false;
+
   /** Whether the minimum height of this <code>WSComponent</code> is fixed or not **/
   boolean fixedMinimumHeight = false;
+
   /** Whether the minimum width of this <code>WSComponent</code> is fixed or not **/
   boolean fixedMinimumWidth = false;
+
   /** The layout used to position the children in this panel **/
   String layout = "";
+
   /** Whether to show a label on this <code>WSComponent</code> or not **/
   boolean showLabel = false;
+
   /** Whether to show a border on this <code>WSComponent</code> or not **/
   boolean showBorder = false;
+
   /**
    * Whether to show a border around the <code>WSComponent</code> in the main viewport, or not
    **/
@@ -722,6 +733,9 @@ public class WSScrollPane extends JScrollPane implements WSComponent, WSEventabl
     }
     if (getShowBorder()) {
       node.addAttribute("showBorder", "true");
+    }
+    if (getShowInnerBorder()) {
+      node.addAttribute("showInnerBorder", "true");
     }
     if (getShowBackground()) {
       node.addAttribute("showBackground", "true");

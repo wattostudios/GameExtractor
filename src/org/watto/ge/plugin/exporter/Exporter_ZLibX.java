@@ -16,6 +16,7 @@ package org.watto.ge.plugin.exporter;
 
 import java.io.IOException;
 import java.util.zip.DeflaterOutputStream;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
@@ -26,12 +27,18 @@ public class Exporter_ZLibX extends ExporterPlugin {
 
   static Exporter_ZLibX instance = new Exporter_ZLibX();
 
-  static ZLibXInputStream readSource;
+  static ZLibXInputStream readSource = null;
   static long readLength = 0;
+
+  public void setContinueUntilDecompLength(boolean continueUntilDecompLength) {
+    if (readSource != null) {
+      readSource.setContinueUntilDecompLength(continueUntilDecompLength);
+    }
+  }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Exporter_ZLibX getInstance() {
@@ -42,7 +49,7 @@ public class Exporter_ZLibX extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_ZLibX() {
@@ -51,7 +58,7 @@ public class Exporter_ZLibX extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -61,15 +68,14 @@ public class Exporter_ZLibX extends ExporterPlugin {
         return true;
       }
       return false;
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       return false;
     }
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -78,15 +84,14 @@ public class Exporter_ZLibX extends ExporterPlugin {
       fm.close();
       readSource.close();
       readSource = null;
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       readSource = null;
     }
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -97,14 +102,28 @@ public class Exporter_ZLibX extends ExporterPlugin {
 
       readSource = new ZLibXInputStream(fm, source.getDecompressedLength());
       readLength = source.getDecompressedLength();
+    } catch (Throwable t) {
     }
-    catch (Throwable t) {
+  }
+
+  /**
+   **********************************************************************************************
+   * So we can easily call this from within a Viewer plugin
+   **********************************************************************************************
+   **/
+  public void open(FileManipulator fmIn, int compLengthIn, int decompLengthIn) {
+    try {
+      fm = fmIn;
+
+      readSource = new ZLibXInputStream(fmIn, decompLengthIn);
+      readLength = decompLengthIn;
+    } catch (Throwable t) {
     }
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -124,14 +143,12 @@ public class Exporter_ZLibX extends ExporterPlugin {
 
       outputStream.finish();
 
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       logError(t);
       if (outputStream != null) {
         try {
           outputStream.finish();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
         }
       }
     }
@@ -139,7 +156,7 @@ public class Exporter_ZLibX extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -147,8 +164,7 @@ public class Exporter_ZLibX extends ExporterPlugin {
     try {
       readLength--;
       return readSource.read();
-    }
-    catch (Throwable t) {
+    } catch (Throwable t) {
       t.printStackTrace();
       readLength = 0;
       return 0;

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2022 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -19,12 +19,14 @@ import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Arrays;
+
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+
 /***************************************** TODO LIST *****************************************\
 
 // FOR PACKAGING AND RELEASE...
-- Update the version numbers in the Settings file, Language file, NSIS Installer, and Launcher EXE
+- Update the version numbers in the Settings file, Language file, About files, NSIS Installer, and Launcher EXE
 - Upload the Basic Version and Source Code to a new folder on SourceForge and set it as the default
 - Update the Supported Games List on the website
 - Update the schema.org code at the bottom of the GameExtractor.html page
@@ -50,15 +52,18 @@ import javax.swing.JFrame;
 - Archive with nested directories that we need to read - Plugin_FMF_FMF
 - Archive where multiple files are stored in a single ZLib block, so you need to decompress the ZLib, then find the file within it - Plugin_RSB_1BSR
 - Archive where the user is asked to choose an option (from a ComboBox) in a popup when saving - Plugin_PAK_EYEDENTITY (see start of replace() method)
+- *Archive where you can replace images in an archive, with conversion if it's not the right format (short method) - Plugin_RESOURCES_2
 - Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_POD_POD6 (audio and image) and Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG)
 - Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format (AND where a file contains multiple frames) (Plugin_BIG_BIGF)
 - Archive where filenames are read from an external file list, and matched with hashes stored in the archive (RSDK_RSDK)
+- Archive where, when saving, a directory file is written, as well as multiple other files, which are all then compressed (LHD)
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
 - Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
 - Image Viewer where the image data is a big image, but it's read as blocks of 32x32 - Viewer_RSB_1BSR_PTX (see reorderPixelBlocks() method)
 - Image Viewer where the image width and height are stored on the Resource by the Plugin, so need to be retrieved before processing the image in the Viewer (DAT_66_BITMAP)
 - Image Viewer (example WRITE code) - Viewer_XAF_XAF_STX
+- Image Viewer (example REPLACE code) - Viewer_REZ_REZMGR_DTX (also need to refer to Plugin_REZ_REZMGR to see where replace() is called)
 - Audio Viewer where raw audio is read from a file, a WAV header is prepended, and it's played as an ordinary WAV file - Viewer_A00_MEL
 - 3D Model Viewer - VPK_VPK_VMESHC or Viewer_Unity3D_MESH or Viewer_POD_BIN or Viewer_BMOD_OMOD_OBST
 - 3D Model Viewer with Textures and multiple Mesh Groups - Viewer_GTC_MD2_MDL3
@@ -184,7 +189,7 @@ import javax.swing.JFrame;
 - Add padding support to the ImplicitFileReplacing classes (for all XBox games mostly)
 
 // GAME THINGS...
-- Implement Excitebots CRC algorithm, so we can modify the archives? https://github.com/TheGameCommunity/ExciteBot/blob/master/src/main/java/com/gamebuster19901/excite/game/crc/CRCTester.java
+- Implement Excitebots CRC algorithm, so we can modify the archives? https://github.com/TheGameCommunity/Excite/blob/2f944d4e1f6ea2cb4fe91f406c00889c36198697/src/main/java/com/thegamecommunity/excite/modding/game/propritary/crc/CRCTester.java
 - Some Iron Defense TEX images don't show properly
 - Unreal Engine...
   - Plugins for more Unreal Engine 4 games
@@ -228,6 +233,8 @@ import javax.swing.JFrame;
   - Same for WSCheckBox (and maybe WSRadioButton?)
 
 // BUGS
+- Big issue - when working with directories and files that are not UTF8, storing them in Settings can break the XML reader (and GE won't load).
+  - Not a simple fix - need write() and read() of Settings to do encoding/decoding, and check GE likes it for loading DirList and RecentFiles
 - When you change the PluginListType, it should rebuild the pluginlists (do a hard reload?)
   - Maybe each setting can set whether to do a hard reload or not?
 - Changing fonts doesn't reload the interface properly - might need to add repaint-like methods to all components?
@@ -238,7 +245,7 @@ import javax.swing.JFrame;
 - Need a better way of doing ColorConverter.changeColorCount() when going from 80000 colors to 256, for example.
 
 // ARCHIVE PLUGINS
-- ISO CD Image (and other CD images)
+- Other CD image types
 - Use Wikipedia to find more generic archive types!
 - ARC
 - RAR
@@ -419,7 +426,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **********************************************************************************************
   **/
   public static boolean isFullVersion() {
-    return false;
+      return false;
   }
 
   /**
@@ -452,7 +459,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
       }
     }
 
-    // load the whole program (except for diplaying the GUI)
+    // load the whole program (except for displaying the GUI)
     GameExtractor ge = GameExtractor.getInstance();
 
     // The program is now fully loaded (from the line above), so we can choose GUI or Command Line
@@ -1019,11 +1026,6 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
    **********************************************************************************************
    **/
   public void checkForModifiedExportFiles() {
-    if (isFullVersion()) {
-      Task_CheckForModifiedExportFiles task = new Task_CheckForModifiedExportFiles();
-      task.setDirection(Task.DIRECTION_REDO);
-      new Thread(task).start();
-    }
   }
 
   /**
@@ -1170,39 +1172,10 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **/
   public boolean promptToSave() {
 
-    // First, if we're editing a text file, save the changes. This causes the Archive to be edited, so is picked up below.
-    try {
-      if (isFullVersion()) {
-        if (sidePanelHolder.getCurrentPanel() instanceof SidePanel_Preview) {
-          WSPreviewPanelHolder previewHolder = (WSPreviewPanelHolder) ComponentRepository.get("SidePanel_Preview_PreviewPanelHolder");
-          if (previewHolder != null) {
-            if (previewHolder.getCurrentPanel() instanceof PreviewPanel_Text) {
-              PreviewPanel_Text textPreview = (PreviewPanel_Text) previewHolder.getCurrentPanel();
-              if (textPreview.isTextChanged()) {
-                //textPreview.saveChanges();
-                Task_WriteEditedTextFile task = new Task_WriteEditedTextFile(textPreview);
-                task.setDirection(Task.DIRECTION_REDO);
-                task.setShowPopups(false);
-                task.run();
-              }
-            }
-          }
-        }
-      }
-    }
-    catch (Throwable t) {
-    }
+
 
     // Now check if the Archive was edited at all, and prompt to save
     if (ChangeMonitor.check()) {
-      if (isFullVersion()) {
-        if (ChangeMonitor.popup()) {
-          // save changes
-          setSidePanel("DirectoryList");
-          ((SidePanel_DirectoryList) sidePanelHolder.getCurrentPanel()).changeControls("WritePanel", true);
-          return true;
-        }
-      }
     }
     return false;
   }

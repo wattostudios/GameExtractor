@@ -212,6 +212,7 @@ public class Plugin_PAK_EYEDENTITY extends ArchivePlugin {
           // zlib compression
 
           //path,name,offset,length,decompLength,exporter
+          //resources[i] = new Resource(path, filename, offset, length);
           resources[i] = new Resource(path, filename, offset, length, decompLength, exporterLZ77);
         }
 

@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
@@ -125,7 +126,7 @@ public class Plugin_ASAR extends ArchivePlugin {
       fm.skip(4);
 
       // 4 - Directory Length
-      int dirLength = fm.readInt();
+      int dirLength = fm.readInt() + 10;
       FieldValidator.checkLength(dirLength, arcSize);
 
       // X - JSON Directory
@@ -184,40 +185,49 @@ public class Plugin_ASAR extends ArchivePlugin {
           readDirectory(path, node, dirName, resources);
           continue;
         }
-        else if (node.getChildCount() == 2) {
-          // a file, provided the children are Size and Offset
-          long length = 0;
-          long offset = 0;
+        else {
+          int childCountLocal = node.getChildCount();
+          if (childCountLocal == 2 || childCountLocal == 3) {
+            // a file, provided the children are Size and Offset
+            long length = 0;
+            long offset = 0;
 
-          for (int c = 0; c < 2; c++) {
-            JSONNode childNode = node.getChild(c);
-            String tag = childNode.getTag();
-            if (tag.equals("size")) {
-              length = childNode.getContentLong();
+            for (int c = 0; c < childCountLocal; c++) {
+              JSONNode childNode = node.getChild(c);
+              String tag = childNode.getTag();
+              if (tag.equals("size")) {
+                length = childNode.getContentLong();
+              }
+              else if (tag.equals("offset")) {
+                offset = childNode.getContentLong();
+              }
+              else if (tag.equals("integrity")) {
+                // skip
+              }
+              else if (tag.equals("unpacked")) {
+                // skip - only found in 4 files so far, with content = "true"
+              }
+              else {
+                ErrorLogger.log("[ASAR]: Unknown JSON tag: " + tag);
+              }
             }
-            else if (tag.equals("offset")) {
-              offset = childNode.getContentLong();
+
+            if (length == 0 && offset == 0) {
+              // not sure why - probably an error from above
+              continue;
             }
             else {
-              ErrorLogger.log("[ASAR]: Unknown JSON tag: " + tag);
+              offset += fileDataOffset;
             }
+
+            String filename = parentsName + node.getTag();
+
+            //path,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length);
+            realNumFiles++;
+
+            TaskProgressManager.setValue(offset);
           }
-
-          if (length == 0 && offset == 0) {
-            // not sure why - probably an error from above
-            continue;
-          }
-          else {
-            offset += fileDataOffset;
-          }
-
-          String filename = parentsName + node.getTag();
-
-          //path,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new Resource(path, filename, offset, length);
-          realNumFiles++;
-
-          TaskProgressManager.setValue(offset);
         }
 
       }

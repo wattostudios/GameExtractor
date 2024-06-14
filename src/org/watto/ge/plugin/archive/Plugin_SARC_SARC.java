@@ -15,6 +15,8 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.Language;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -39,10 +41,11 @@ public class Plugin_SARC_SARC extends ArchivePlugin {
     super("SARC_SARC", "SARC_SARC");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, false);
 
     setGames("Just Cause",
-        "Just Cause 2");
+        "Just Cause 2",
+        "Mad Max");
     setExtensions("sarc"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -147,7 +150,8 @@ public class Plugin_SARC_SARC extends ArchivePlugin {
         FieldValidator.checkFilenameLength(filenameLength);
 
         // X - Filename
-        String filename = fm.readString(filenameLength);
+        String filename = fm.readNullString(filenameLength);
+        String originalFilename = filename;
         if (filename.startsWith("C:\\")) {
           filename = filename.substring(3);
         }
@@ -161,7 +165,9 @@ public class Plugin_SARC_SARC extends ArchivePlugin {
         FieldValidator.checkLength(length, arcSize);
 
         //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
+        Resource resource = new Resource(path, filename, offset, length);
+        resource.addProperty("OriginalFilename", originalFilename); // so we can store it properly when write()
+        resources[realNumFiles] = resource;
         realNumFiles++;
 
         TaskProgressManager.setValue(fm.getOffset());
@@ -198,6 +204,111 @@ public class Plugin_SARC_SARC extends ArchivePlugin {
     */
 
     return null;
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
+  @Override
+  public void write(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      long directorySize = 0;
+      for (int i = 0; i < numFiles; i++) {
+        int entrySize = 12 + resources[i].getNameLength();
+        entrySize += calculatePadding(entrySize, 4);
+        directorySize += entrySize;
+      }
+
+      // Write Header Data
+
+      // 4 - Unknown (4)
+      fm.writeInt(4);
+
+      // 4 - Header (SARC)
+      fm.writeString("SARC");
+
+      // 4 - Unknown (2)
+      fm.writeInt(2);
+
+      // 4 - Directory Length
+      fm.writeInt((int) directorySize);
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = 16 + directorySize;
+      offset += calculatePadding(offset, 16);
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long decompLength = resource.getDecompressedLength();
+
+        String filename = resource.getProperty("OriginalFilename");
+        if (filename == null || filename.equals("")) {
+          filename = resource.getName();
+        }
+
+        int filenameLength = filename.length();
+        int filenamePadding = calculatePadding(filenameLength, 4);
+
+        // 4 - Filename Length (including null padding)
+        fm.writeInt(filenameLength + filenamePadding);
+
+        // X - Filename
+        fm.writeString(filename);
+
+        // 0-3 - null Padding to a multiple of 4 bytes
+        for (int p = 0; p < filenamePadding; p++) {
+          fm.writeByte(0);
+        }
+
+        // 4 - File Offset
+        fm.writeInt((int) offset);
+
+        // 4 - File Length
+        fm.writeInt((int) decompLength);
+
+        offset += decompLength;
+        offset += calculatePadding(offset, 4);
+      }
+
+      // 0-15 - null Padding to a multiple of 16 bytes
+      int dirPadding = calculatePadding(fm.getOffset(), 16);
+      for (int p = 0; p < dirPadding; p++) {
+        fm.writeByte(0);
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+
+        // X - File Data
+        write(resource, fm);
+
+        // 0-3 - null Padding to a multiple of 4 bytes
+        int filePadding = calculatePadding(resource.getDecompressedLength(), 4);
+        for (int p = 0; p < filePadding; p++) {
+          fm.writeByte(0);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

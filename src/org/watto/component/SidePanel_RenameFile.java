@@ -276,16 +276,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
    **/
   @Override
   public void onOpenRequest() {
-    if (!GameExtractor.isFullVersion()) {
       changeControls(basicVersionControls);
-    }
-    else if (!Archive.getReadPlugin().canRename()) {
-      changeControls(invalidControls);
-    }
-    else {
-      changeControls(renameControls);
-      loadRenamerPlugins();
-    }
   }
 
   /**

@@ -19,6 +19,7 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;

@@ -175,6 +175,27 @@ public class Exporter_Custom_VAG_Audio extends ExporterPlugin {
         catch (Throwable t) {
         }
       }
+      else {
+        try {
+          // see if the frequency edt are stored on the resource as properties
+          String frequencyString = source.getProperty("Frequency");
+          if (frequencyString != null && frequencyString.length() > 0) {
+            frequency = Integer.parseInt(frequencyString);
+          }
+
+          String bitrateString = source.getProperty("Bitrate");
+          if (bitrateString != null && bitrateString.length() > 0) {
+            bitrate = Short.parseShort(bitrateString);
+          }
+
+          String channelsString = source.getProperty("Channels");
+          if (channelsString != null && channelsString.length() > 0) {
+            channels = Short.parseShort(channelsString);
+          }
+        }
+        catch (Throwable t) {
+        }
+      }
 
       header = pcmwav_header(frequency, channels, bitrate, audioLength, codec, samples, blockAlign, extraData, loop);
 

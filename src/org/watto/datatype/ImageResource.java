@@ -45,6 +45,19 @@ public class ImageResource {
   Resource_Property[] properties = null;
 
   ImageResource nextFrame = null;
+  
+  public int getFrameCount() {
+    // we need to go through and count up all the frames until we're back at this one.
+    int frameCount = 1;
+    
+    ImageResource currentFrame = nextFrame;
+    while (currentFrame != null && currentFrame != this) {
+      frameCount++;
+      currentFrame = currentFrame.getNextFrame();
+    }
+    
+    return frameCount;
+  }
 
   public ImageResource getPreviousFrame() {
     return previousFrame;
@@ -568,6 +581,37 @@ public class ImageResource {
       this.height = thumbHeight;
 
       imageShrunk = true;
+    }
+    catch (Throwable t) {
+      // Couldn't get the pixels for some reason
+      ErrorLogger.log(t);
+    }
+
+  }
+  
+  
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void resize(int width, int height) {
+    if (pixels.length <= 0) {
+      return;
+    }
+try {
+    Image image = getImage();
+    image = image.getScaledInstance(width,height, Image.SCALE_SMOOTH);
+
+    // now that we have a resized image, store it on the ImageResource, replacing the original-sized image
+    PixelGrabber pixelGrabber = new PixelGrabber(image, 0, 0, width, height, false);
+    pixelGrabber.grabPixels();
+
+      // get the pixels, and convert them to positive values in an int[] array
+      this.pixels = (int[]) pixelGrabber.getPixels();
+      this.width = width;
+      this.height = height;
+
     }
     catch (Throwable t) {
       // Couldn't get the pixels for some reason

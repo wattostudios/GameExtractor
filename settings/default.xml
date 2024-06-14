@@ -1,7 +1,9 @@
 <settingsStore>
 	<program>Game Extractor</program>
 	<settings>
-		<setting code="Version" value="3.14" changable="false" />
+		<setting code="Version" value="3.15" changable="false" />
+		
+		<setting code="CopyFilenameOnRightClick" value="false" />
 		<setting code="AboutFile" value="settings/about.xml" />
 		
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />

@@ -42,7 +42,8 @@ public class Plugin_DBF_STATICDATABASE extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, true, false);
 
-    setGames("NHL 2001");
+    setGames("NHL 2000",
+        "NHL 2001");
     setExtensions("dbf"); // MUST BE LOWER CASE
     setPlatforms("PS1");
 

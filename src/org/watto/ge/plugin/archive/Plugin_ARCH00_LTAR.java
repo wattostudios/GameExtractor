@@ -15,12 +15,16 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Custom_ARCH00_LTAR;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
 import org.watto.task.TaskProgressManager;
@@ -42,7 +46,7 @@ public class Plugin_ARCH00_LTAR extends ArchivePlugin {
     super("ARCH00_LTAR", "ARCH00_LTAR");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Condemned: Criminal Origins",
         "FEAR",
@@ -50,8 +54,9 @@ public class Plugin_ARCH00_LTAR extends ArchivePlugin {
         "FEAR: Perseus Mandate",
         "FEAR 2: Project Origin",
         "Middle Earth: Shadow Of Mordor",
+        "Middle Earth: Shadow Of War",
         "SAS: Secure Tomorrow");
-    setExtensions("arch00", "arch01");
+    setExtensions("arch00", "arch01", "arch05");
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
@@ -274,6 +279,143 @@ public class Plugin_ARCH00_LTAR extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      // Write Header Data
+
+      // 4 - Header (LTAR)
+      // 4 - Version (3)
+      fm.writeBytes(src.readBytes(8));
+
+      // 4 - Filename Directory Length
+      int srcFilenameDirLength = src.readInt();
+      fm.writeInt(srcFilenameDirLength);
+
+      // 4 - Number Of Folders (including root)
+      int srcNumFolders = src.readInt();
+      fm.writeInt(srcNumFolders);
+
+      // 4 - Number Of Files
+      int srcNumFiles = src.readInt();
+      fm.writeInt(srcNumFiles);
+
+      // 4 - Unknown (1)
+      // 4 - Unknown (0)
+      // 4 - Unknown (1)
+      // 16 - CRC?
+      fm.writeBytes(src.readBytes(28));
+
+      // NAMES DIRECTORY
+      fm.writeBytes(src.readBytes(srcFilenameDirLength));
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = 48 + srcFilenameDirLength + (srcNumFiles * 32) + (srcNumFolders * 16);
+      int currentFile = 0;
+      for (int i = 0; i < numFiles; i++) {
+
+        // 4 - Filename Offset (relative to the start of the names directory)
+        fm.writeBytes(src.readBytes(4));
+
+        // 8 - File Offset
+        long srcOffset = src.readLong();
+
+        // 8 - Compressed File Length
+        long srcLength = src.readLong();
+
+        // 8 - Decompressed File Length
+        long srcDecompLength = src.readLong();
+
+        // 4 - Compression Flag (0=Uncompressed, 9=Chunked ZLib Compression)
+        int srcCompFlag = src.readInt();
+
+        if (srcLength == 0) {
+          // empty file, not in GE, so just write as is
+          fm.writeLong(srcOffset);
+          fm.writeLong(srcLength);
+          fm.writeLong(srcDecompLength);
+          fm.writeInt(srcCompFlag);
+        }
+        else {
+          // normal file
+          Resource resource = resources[currentFile];
+          currentFile++;
+
+          long length = resource.getDecompressedLength();
+
+          fm.writeLong(offset);
+
+          if (resource.isReplaced()) {
+            // writing in an uncompressed format
+            fm.writeLong(length);
+            fm.writeLong(length);
+            fm.writeInt(0);
+
+            offset += length;
+          }
+          else {
+            // write as it is in the original archive
+            fm.writeLong(srcLength);
+            fm.writeLong(srcDecompLength);
+            fm.writeInt(srcCompFlag);
+
+            offset += srcLength;
+          }
+        }
+
+      }
+
+      // FOLDER DETAILS DIRECTORY
+      fm.writeBytes(src.readBytes(srcNumFolders * 16));
+
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        if (resource.isReplaced()) {
+          // write as a raw file
+          write(resource, fm);
+        }
+        else {
+          // write as it is in the original archive
+          ExporterPlugin originalExporter = resource.getExporter();
+          resource.setExporter(exporterDefault);
+          write(resource, fm);
+          resource.setExporter(originalExporter);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

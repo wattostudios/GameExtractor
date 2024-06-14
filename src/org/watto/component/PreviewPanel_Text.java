@@ -51,7 +51,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public PreviewPanel_Text(String text) {
@@ -90,17 +90,6 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       ArchivePlugin archivePlugin = Archive.getReadPlugin();
       if (archivePlugin != null) {
         if (archivePlugin.canWrite() || archivePlugin.canReplace() || archivePlugin.canImplicitReplace()) {
-          if (GameExtractor.isFullVersion()) {
-            preview.setEditable(true);
-
-            WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"1\" />"));
-            saveButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_Text_SaveChanges\" showText=\"true\" />"));
-            saveButton.setEnabled(false);
-            bottomPanel.add(saveButton);
-
-            add(bottomPanel, BorderLayout.SOUTH);
-          }
-
         }
         else {
           preview.setEditable(false);
@@ -119,7 +108,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -129,7 +118,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -145,7 +134,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -169,7 +158,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -193,7 +182,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -212,7 +201,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -232,7 +221,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean isTextChanged() {
@@ -241,7 +230,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setTextChanged(boolean textChanged) {
@@ -273,23 +262,23 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
         return;
       }
       Resource resource = (Resource) resourceObject;
-    
+
       File exportedPath = resource.getExportedPath();
       if (exportedPath == null || !exportedPath.exists()) {
         // Export it
         File directory = new File(new File(Settings.get("TempDirectory")).getAbsolutePath());
-    
+
         Task_ExportFiles task = new Task_ExportFiles(directory, resource);
         task.setShowPopups(false);
         task.setShowProgressPopups(false); // this barely appears, and slows down the preview repainting significantly, so don't worry about it.
         task.redo();
       }
-    
+
       exportedPath = resource.getExportedPath();
       if (exportedPath == null || !exportedPath.exists()) {
         return; // couldn't extract the file for some reason
       }
-    
+
       // Rename the original extracted file to _GE_ORIGINAL
       File originalPath = new File(exportedPath.getAbsolutePath() + "_ge_original");
       if (originalPath.exists()) {
@@ -298,7 +287,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       else {
         exportedPath.renameTo(originalPath);
       }
-    
+
       // Now save the changes to the proper Extracted filename
       if (exportedPath.exists() && exportedPath.isFile()) {
         // try to delete it first
@@ -307,27 +296,27 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       if (exportedPath.exists() && exportedPath.isFile()) {
         return; // Failed to delete for some reason
       }
-    
+
       FileManipulator fm = new FileManipulator(exportedPath, true);
       fm.writeString(getText());
       fm.close();
-    
+
       if (!exportedPath.exists()) {
         return; // failed to save for some reason
       }
-    
+
       boolean reloadRequired = !resource.isReplaced();
-    
+
       // Set the Resource as being changed
       resource.setReplaced(true);
-    
+
       // Set the Archive as being changed
       ChangeMonitor.change();
-    
+
       // the changes have been saved to the temp file
       textChanged = false;
       saveButton.setEnabled(false);
-    
+
       if (reloadRequired) {
         FileListPanel fileListPanel = ((FileListPanel) ((WSFileListPanelHolder) ComponentRepository.get("FileListPanelHolder")).getCurrentPanel());
         if (fileListPanel instanceof FileListPanel_TreeTable) {
@@ -339,9 +328,9 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
           fileListPanel.reload();
         }
       }
-    
+
       WSPopup.showMessage("PreviewPanel_Text_ChangesSaved", true); // TODO Add to Settings and Language
-    
+
     }
     catch (Throwable t) {
       ErrorLogger.log(t);

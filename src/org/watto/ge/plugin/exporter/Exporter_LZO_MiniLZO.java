@@ -35,6 +35,26 @@ public class Exporter_LZO_MiniLZO extends ExporterPlugin {
 
   int currentByte = 0;
 
+  boolean checkDecompressedLength = true;
+
+  boolean useActualDecompressedLength = false;
+
+  public boolean isUseActualDecompressedLength() {
+    return useActualDecompressedLength;
+  }
+
+  public void setUseActualDecompressedLength(boolean useActualDecompressedLength) {
+    this.useActualDecompressedLength = useActualDecompressedLength;
+  }
+
+  public boolean isCheckDecompressedLength() {
+    return checkDecompressedLength;
+  }
+
+  public void setCheckDecompressedLength(boolean checkDecompressedLength) {
+    this.checkDecompressedLength = checkDecompressedLength;
+  }
+
   /**
   **********************************************************************************************
   Reads a single block from a raw LZO data stream
@@ -118,8 +138,12 @@ public class Exporter_LZO_MiniLZO extends ExporterPlugin {
             MInt out_len = new MInt();
             int r = MiniLZO.lzo1x_decompress(inBuf, (int) inBufSize, outBuf, outBufReadPos, out_len);
             // Allow INPUT_NOT_CONSUMED because we're only tracking the decompressed size, not the compressed size
-            if ((r != Constants.LZO_E_OK && r != Constants.LZO_E_INPUT_NOT_CONSUMED) || (out_len.v) != outBufSize) {
+            if ((r != Constants.LZO_E_OK && r != Constants.LZO_E_INPUT_NOT_CONSUMED) || (checkDecompressedLength && ((out_len.v) != outBufSize))) {
               throw new DataFormatException("compressed data violation");
+            }
+            if (useActualDecompressedLength) {
+              outBufSize = out_len.v;
+              readLength = outBufSize;
             }
           }
           else {

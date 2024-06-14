@@ -298,7 +298,11 @@ public class Task_ExportFiles extends AbstractTask {
           // try to open the preview using each plugin
           for (int i = 0; i < plugins.length; i++) {
             ViewerPlugin previewPlugin = (ViewerPlugin) plugins[i].getPlugin();
+
+            // 3.15 added the TemporarySettings so that when doing Conversions during an Extract, it doesn't call createInterface, which was retaining memory
+            TemporarySettings.set("ExportForConversionOnly", true);
             PreviewPanel previewPanel = previewPlugin.read(path);
+            TemporarySettings.set("ExportForConversionOnly", false);
 
             if (previewPanel != null) {
               // Found a Viewer, which was able to generate a PreviewPanel for the file.
@@ -347,7 +351,7 @@ public class Task_ExportFiles extends AbstractTask {
 
                       // now if we're on the first frame, check that it's not an animation
                       //if (imageResource.isManualFrameTransition()) {
-                      for (int f = 0; f < 1000; f++) { // max 1000 frames to export
+                      for (int f = 0; f < 5000; f++) { // max 5000 frames to export
                         imagePanel.setImageResource(imageResource); // set the current frame
 
                         // prepare the filename
@@ -373,6 +377,9 @@ public class Task_ExportFiles extends AbstractTask {
                     File destination = new File(path.getAbsolutePath() + "." + converterPlugin.getExtension(0));
                     converterPlugin.write(previewPanel, destination);
                     previewsWritten = true;
+
+                    previewPanel.onCloseRequest();
+
                   }
 
                   // skip all the other converters - we've found the right one already
@@ -382,6 +389,7 @@ public class Task_ExportFiles extends AbstractTask {
 
               // skip the rest of the plugins - we're done with this file
               i = plugins.length;
+
             }
 
           }

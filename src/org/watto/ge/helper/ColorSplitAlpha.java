@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -37,7 +37,8 @@ public class ColorSplitAlpha extends ColorSplit {
 
     int checkAlpha = ((color & 0xff000000) >> 24);
     if (checkAlpha < 0) {
-      checkAlpha = 128 + (0 - checkAlpha);
+      //checkAlpha = 128 + (0 - checkAlpha);
+      checkAlpha = 256 + checkAlpha;
       //checkAlpha = ByteConverter.unsign((byte) checkAlpha);
       //127 - checkAlpha;
     }

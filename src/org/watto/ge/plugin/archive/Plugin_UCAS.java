@@ -15,12 +15,17 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.Arrays;
+import org.watto.ErrorLogger;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
+import org.watto.ge.plugin.resource.Resource_PAK_38;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
 import org.watto.io.converter.IntConverter;
@@ -95,6 +100,7 @@ public class Plugin_UCAS extends ArchivePlugin {
    * Reads an [archive] File into the Resources
    **********************************************************************************************
    **/
+  @SuppressWarnings("unused")
   @Override
   public Resource[] read(File path) {
     try {
@@ -131,12 +137,12 @@ public class Plugin_UCAS extends ArchivePlugin {
       FieldValidator.checkOffset(dir1Offset, arcSize);
 
       // 4 - Number of Entries in Directory 1, 2, and 4
-      int numFiles124 = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles124);
+      int numFiles = fm.readInt();
+      FieldValidator.checkNumFiles(numFiles);
 
       // 4 - Number of Entries in Directory 3
-      int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles / 10);
+      int numParts = fm.readInt();
+      FieldValidator.checkNumFiles(numParts / 10);
 
       // 4 - Unknown (12)
       fm.skip(4);
@@ -155,10 +161,13 @@ public class Plugin_UCAS extends ArchivePlugin {
       // 8 - Unknown (-1)
       // 48 - null
 
-      int dir3Offset = dir1Offset + numFiles124 * 12 + numFiles124 * 10;
+      int dir2Offset = dir1Offset + numFiles * 12;
+      FieldValidator.checkOffset(dir2Offset, arcSize);
+
+      int dir3Offset = dir2Offset + numFiles * 10;
       FieldValidator.checkOffset(dir3Offset, arcSize);
 
-      int compressionDirOffset = dir3Offset + numFiles * 12;
+      int compressionDirOffset = dir3Offset + numParts * 12;
       FieldValidator.checkOffset(compressionDirOffset, arcSize);
 
       fm.seek(compressionDirOffset);
@@ -183,15 +192,180 @@ public class Plugin_UCAS extends ArchivePlugin {
         }
       }
 
+      // 
+      // READ THE FILENAMES
+      // 
+      String[] filenames = new String[numFiles];
+      Arrays.fill(filenames, null);
+
+      boolean foundNames = false;
+
+      try { // TRY, SO IT'S OK IF NO FILENAMES ARE FOUND
+        // 4 - Root Filename Length (including null terminator) (10)
+        int rootFilenameLength = fm.readInt();
+        FieldValidator.checkFilenameLength(rootFilenameLength);
+
+        // 9 - Root Filename (../../../)
+        // 1 - null Root Filename Terminator
+        fm.skip(rootFilenameLength);
+
+        // 4 - Number of Folder Names
+        int numFolderNames = fm.readInt();
+        FieldValidator.checkNumFiles(numFolderNames);
+
+        long folderNamesDirOffset = fm.getOffset();
+
+        fm.skip(numFolderNames * 16);
+
+        // 4 - Number of Filenames
+        int numFilenames = fm.readInt();
+        FieldValidator.checkNumFiles(numFilenames);
+
+        long filenamesDirOffset = fm.getOffset();
+
+        fm.skip(numFilenames * 12);
+
+        // 4 - Number of Name Entries
+        int numNames = fm.readInt();
+        FieldValidator.checkNumFiles(numNames);
+
+        String[] names = new String[numNames];
+        for (int n = 0; n < numNames; n++) {
+          // 4 - Name Length (including null terminator)
+          int nameLength = fm.readInt();
+          FieldValidator.checkFilenameLength(nameLength);
+
+          // X - Name
+          // 1 - null Name Terminator
+          String name = fm.readNullString(nameLength);
+          FieldValidator.checkFilename(name);
+          names[n] = name;
+        }
+
+        // go back and work out the folder names
+        fm.relativeSeek(folderNamesDirOffset);
+
+        String[] folderNames = new String[numFolderNames];
+        //int[] folderNameIDs = new int[numFolderNames];
+        //int[] nextNameIDs = new int[numFolderNames];
+        for (int n = 0; n < numFolderNames; n++) {
+          // 4 - Folder Name ID
+          int folderNameID = fm.readInt();
+          if (folderNameID != -1) {
+            FieldValidator.checkRange(folderNameID, 0, numNames);
+          }
+
+          //folderNameIDs[n] = folderNameID;
+
+          // 4 - Next Sub-Folder Name ID
+          int unknown1 = fm.readInt();
+          //nextNameIDs[n] = unknown1;
+
+          //fm.skip(4);
+          //System.out.println(fm.readInt());
+
+          // 4 - Parent Folder ID
+          /*
+          int parentID = fm.readInt();
+          if (parentID != -1) {
+            FieldValidator.checkRange(parentID, 0, numFolderNames);
+          }
+          */
+          int unknown2 = fm.readInt();
+
+          // 4 - Unknown
+          //System.out.println(fm.readInt());
+          //fm.skip(4);
+          int unknown3 = fm.readInt();
+
+          //System.out.println(folderNameID + "\t" + unknown1 + "\t" + unknown2 + "\t" + unknown3);
+
+          if (folderNameID == -1) {
+            folderNames[n] = "";
+          }
+          else {
+            folderNames[n] = names[folderNameID] + "\\";
+          }
+
+          /*
+          if (parentID != -1) {
+            folderNames[n] = folderNames[parentID] + folderNames[n];
+          }
+          */
+
+        }
+
+        /*
+        // re-iterate through each of the subfolders
+        for (int n = 0; n < numFolderNames; n++) {
+          String name = folderNames[n];
+          int nextNameID = nextNameIDs[n];
+          while (nextNameID != -1) {
+            name += folderNames[nextNameID];
+            nextNameID = nextNameIDs[nextNameID];
+          }
+          folderNames[n] = name;
+          System.out.println(name);
+        }
+        */
+
+        // go back and work out the filenames
+        fm.relativeSeek(filenamesDirOffset);
+
+        for (int n = 0; n < numFilenames; n++) {
+          // 4 - Filename ID
+          int filenameID = fm.readInt();
+          FieldValidator.checkRange(filenameID, 0, numNames);
+
+          // 4 - Folder ID
+          /*
+          int folderID = fm.readInt();
+          if (folderID != -1) {
+            FieldValidator.checkRange(folderID, 0, numFolderNames);
+          }
+          */
+          fm.skip(4);
+          //System.out.println(fm.readInt());
+
+          // 4 - File ID
+          int fileID = fm.readInt();
+          FieldValidator.checkRange(fileID, 0, numFiles);
+
+          String filename = names[filenameID];
+          /*
+          if (folderID != -1) {
+            filename = folderNames[folderID] + filename;
+          }
+          */
+
+          filenames[fileID] = filename;
+        }
+
+        foundNames = true;
+
+      }
+      catch (Throwable t) {
+        ErrorLogger.log("[UCAS] No filenames found (or error parsing filenames)");
+        ErrorLogger.log(t);
+      }
+
+      // 
+      // READ ALL THE PARTS
+      // 
+
       fm.seek(dir3Offset);
 
-      Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles);
+      TaskProgressManager.setMaximum(numParts);
 
-      // Loop through directory
       //long multipleFactor = IntConverter.unsign((long)Integer.MAX_VALUE);
       long multipleFactor = ((long) 1) << 32;
-      for (int i = 0; i < numFiles; i++) {
+
+      long[] partOffsets = new long[numParts];
+      long[] partLengths = new long[numParts];
+      long[] partDecompLengths = new long[numParts];
+      ExporterPlugin[] partExporters = new ExporterPlugin[numParts];
+
+      for (int i = 0; i < numParts; i++) {
         // 4 - File Offset (into the UCAS file)
         long offset = IntConverter.unsign(fm.readInt());
 
@@ -224,14 +398,169 @@ public class Plugin_UCAS extends ArchivePlugin {
 
         ExporterPlugin exporter = exporters[compressionFlag];
 
-        String filename = Resource.generateFilename(i);
+        partOffsets[i] = offset;
+        partLengths[i] = length;
+        partDecompLengths[i] = decompLength;
+        partExporters[i] = exporter;
+
+        TaskProgressManager.setValue(i);
+      }
+
+      // 
+      // READ THE FILES
+      // 
+
+      fm.seek(dir2Offset);
+
+      Resource[] resources = new Resource[numFiles];
+
+      TaskProgressManager.setMaximum(numFiles);
+
+      int[] firstPartIDs = new int[numFiles];
+      int[] numPartsInFiles = new int[numFiles];
+      for (int i = 0; i < numFiles; i++) {
+        // 3 - ID of First Part of this File (BIG)
+        byte[] firstPartIDBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
+        int firstPartID = IntConverter.convertBig(firstPartIDBytes);
+        FieldValidator.checkRange(firstPartID, 0, numParts);
+
+        // 1 - null
+        fm.skip(1);
+
+        // 4 - Number of Parts in this File (BIG) (Sometimes needs +1, but not always)
+        //int numPartsInFile = IntConverter.changeFormat(fm.readInt());
+        //FieldValidator.checkRange(numPartsInFile, 0, numParts);
+        fm.skip(4);
+
+        // 2 - Unknown
+        fm.skip(2);
+
+        firstPartIDs[i] = firstPartID;
+      }
+
+      for (int i = 0; i < numFiles - 1; i++) {
+        numPartsInFiles[i] = firstPartIDs[i + 1] - firstPartIDs[i];
+      }
+      numPartsInFiles[numFiles - 1] = numParts - firstPartIDs[numFiles - 1];
+
+      for (int i = 0; i < numFiles; i++) {
+
+        int firstPartID = firstPartIDs[i];
+        int numPartsInFile = numPartsInFiles[i];
+
+        long[] blockOffsets = new long[numPartsInFile];
+        long[] blockLengths = new long[numPartsInFile];
+        long[] blockDecompLengths = new long[numPartsInFile];
+        ExporterPlugin[] blockExporters = new ExporterPlugin[numPartsInFile];
+
+        System.arraycopy(partOffsets, firstPartID, blockOffsets, 0, numPartsInFile);
+        System.arraycopy(partLengths, firstPartID, blockLengths, 0, numPartsInFile);
+        System.arraycopy(partDecompLengths, firstPartID, blockDecompLengths, 0, numPartsInFile);
+        System.arraycopy(partExporters, firstPartID, blockExporters, 0, numPartsInFile);
+
+        int length = 0;
+        int decompLength = 0;
+        for (int p = 0; p < numPartsInFile; p++) {
+          length += blockLengths[p];
+          decompLength += blockDecompLengths[p];
+        }
+
+        long offset = 0;
+        if (numPartsInFile != 0) {
+          offset = blockOffsets[0];
+        }
+
+        String filename = filenames[i];
+        if (filename == null || filename.length() <= 0) {
+          filename = Resource.generateFilename(i);
+        }
+
+        ExporterPlugin blockExporter = new BlockVariableExporterWrapper(blockExporters, blockOffsets, blockLengths, blockDecompLengths);
 
         //path,name,offset,length,decompLength,exporter
-        Resource resource = new Resource(path, filename, offset, length, decompLength, exporter);
+        Resource resource = new Resource_PAK_38(path, filename, offset, length, decompLength, blockExporter);
         resource.forceNotAdded(true);
         resources[i] = resource;
 
         TaskProgressManager.setValue(i);
+      }
+
+      if (foundNames) {
+        // HERE WE DO...
+        // 1. For all uasset files, go through and find all the related files (uexp, ubulk, etc) - files with the same name, different extension.
+        //    Each related file is added as a "Related Resource" of the uasset file, and is also removed from the overall Resource[].
+        // 2. For all uasset files, read a little bit of the file data, work out what the Class is, and therefore what the file type is. 
+
+        // First, sort the resources
+        Arrays.sort(resources);
+
+        Resource_PAK_38[] culledResources = new Resource_PAK_38[numFiles];
+        int numCulledFiles = 0;
+
+        // Now find any with the same name as a uasset
+        Resource_PAK_38 asset = null;
+        String assetName = "";
+        for (int i = 0; i < numFiles; i++) {
+          Resource_PAK_38 resource = (Resource_PAK_38) resources[i];
+
+          if (resource.getExtension().equals("uasset")) {
+            // found an asset
+            asset = resource;
+            assetName = resource.getName();
+
+            culledResources[numCulledFiles] = resource; // we want to keep this file - it's a main uasset file
+            numCulledFiles++;
+
+            int dotPos = assetName.lastIndexOf(".uasset");
+            if (dotPos > 0) {
+              assetName = assetName.substring(0, dotPos + 1);
+            }
+
+            // now read a bit of the uasset file to determine the Class
+            String className = readUAssetClass(resource);
+            if (className != null) {
+              String name = resource.getName() + "." + className;
+              resource.setName(name);
+              resource.setOriginalName(name);
+            }
+
+          }
+          else {
+            // see if the name matches the uasset
+            boolean addedLink = false;
+
+            if (asset != null) {
+              String resName = resource.getName();
+              int dotPos = resName.lastIndexOf(".");
+              if (dotPos > 0) {
+                resName = resName.substring(0, dotPos + 1);
+              }
+              if (resName.equals(assetName)) {
+                // found a "related" resource
+                asset.addRelatedResource(resource);
+                addedLink = true;
+              }
+
+            }
+
+            if (!addedLink) { // only want to keep files that haven't been related to the uasset file
+              culledResources[numCulledFiles] = resource; // we want to keep this file - it's not a uasset file, and not a related file
+              numCulledFiles++;
+            }
+
+          }
+
+          TaskProgressManager.setValue(i);
+
+        }
+
+        // If any resources were culled, want to shrink the array...
+        if (Settings.getBoolean("UE4CullRelatedResources")) { // So that we can easily turn it off to show the ubulk/uexp files and extract them for analysis
+          if (numCulledFiles != numFiles) {
+            resources = new Resource_PAK_38[numCulledFiles];
+            System.arraycopy(culledResources, 0, resources, 0, numCulledFiles);
+          }
+        }
       }
 
       fm.close();
@@ -243,6 +572,16 @@ public class Plugin_UCAS extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+   **********************************************************************************************
+   Reads the properties of a UAsset file, looks for the Class, and returns it
+   **********************************************************************************************
+   **/
+  public String readUAssetClass(Resource resource) {
+    return null;
+
   }
 
 }

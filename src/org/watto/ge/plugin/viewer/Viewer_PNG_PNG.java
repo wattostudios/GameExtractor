@@ -229,6 +229,11 @@ public class Viewer_PNG_PNG extends ViewerPlugin {
       //out.flush();
       out.close();
 
+      pencoder.dispose();
+      bufImage.flush();
+
+      image = null;
+
       g.dispose();
 
     }

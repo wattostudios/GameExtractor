@@ -15,12 +15,21 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.Arrays;
+
+import org.watto.Language;
+import org.watto.Settings;
+import org.watto.component.PreviewPanel;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.PluginFinder;
+import org.watto.ge.plugin.RatedPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.viewer.Viewer_MFS_WIM_WIMG;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -32,7 +41,7 @@ public class Plugin_MFS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_MFS() {
@@ -40,18 +49,20 @@ public class Plugin_MFS extends ArchivePlugin {
     super("MFS", "MFS");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Gladiator: Sword Of Vengeance",
         "Made Man");
     setExtensions("mfs");
     setPlatforms("PC", "XBox");
 
+    setCanConvertOnReplace(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -110,7 +121,7 @@ public class Plugin_MFS extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -233,6 +244,209 @@ public class Plugin_MFS extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 4 - Number Of Files
+      // 4 - Version (1)
+      fm.writeBytes(src.readBytes(8));
+
+      // 4 - First File Offset
+      long offset = src.readInt();
+      fm.writeInt((int) offset);
+
+      // 4 - Header (MFS4)
+      fm.writeBytes(src.readBytes(4));
+
+      // 4 - Padding Size (2048)
+      int paddingSize = src.readInt();
+      fm.writeInt(paddingSize);
+
+      offset /= paddingSize;
+
+      // 32 - Filename Of Archive, in CAPS (eg CD-2.EN)
+      // 4 - Filename Directory Offset
+      fm.writeBytes(src.readBytes(36));
+
+      // 4 - Filename Directory Length (including padding)
+      int filenameDirLength = src.readInt();
+      fm.writeInt(filenameDirLength);
+
+      // 4 - null
+      fm.writeBytes(src.readBytes(4));
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        // 4 - Hash?
+        fm.writeBytes(src.readBytes(4));
+
+        // 4 - File Offset [* PaddingSize]
+        fm.writeInt(offset);
+
+        // 4 - File Size
+        fm.writeInt(length);
+
+        // 4 - File Size
+        fm.writeInt(length);
+
+        src.skip(12);
+
+        // 2 - null
+        // 2 - Unknown
+        fm.writeBytes(src.readBytes(4));
+
+        int lengthPadding = calculatePadding(length, paddingSize);
+        length += lengthPadding;
+        length /= paddingSize;
+
+        offset += length;
+      }
+
+      // write the padding after the directory
+      int padding = calculatePadding((numFiles * 20 + 64), paddingSize);
+      for (int p = 0; p < padding; p++) {
+        fm.writeByte(0);
+      }
+      src.skip(padding);
+
+      // write the filename directory (including padding)
+      fm.writeBytes(src.readBytes(filenameDirLength));
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+
+        // X - File Data
+        write(resource, fm);
+
+        // 0-2047 - null Padding to a multiple of 2048 bytes
+        padding = calculatePadding((resource.getDecompressedLength()), paddingSize);
+        for (int p = 0; p < padding; p++) {
+          fm.writeByte(0);
+        }
+
+        TaskProgressManager.setValue(i);
+
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   When replacing dtx images, if the fileToReplaceWith is a different format image (eg DDS, PNG, ...)
+   it can be converted into a dtx image. All other files are replaced without conversion
+   @param resourceBeingReplaced the Resource in the archive that is being replaced
+   @param fileToReplaceWith the file on your PC that will replace the Resource. This file is the
+          one that will be converted into a different format, if applicable.
+   @return the converted file, if conversion was applicable/successful, else the original fileToReplaceWith
+   **********************************************************************************************
+   **/
+  @Override
+  public File convertOnReplace(Resource resourceBeingReplaced, File fileToReplaceWith) {
+
+    String beingReplacedExtension = resourceBeingReplaced.getExtension();
+    if (beingReplacedExtension.equalsIgnoreCase("wim")) {
+      // try to convert
+
+      String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
+      if (toReplaceWithExtension.equalsIgnoreCase("wim")) {
+        // if the fileToReplace already has a dtx extension, assume it's already a compatible dtx file and doesn't need to be converted
+        return fileToReplaceWith;
+      }
+
+      //
+      //
+      // if we're here, we want to scan to see if we can find an Image ViewerPlugin that can read the file into an ImageResource,
+      // which we can then convert into a dtx using plugin Viewer_REZ_REZMGR_DTX
+      //
+      //
+
+      // 1. Open the file
+      FileManipulator fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 2. Get all the ViewerPlugins that can read this file type
+      RatedPlugin[] plugins = PluginFinder.findPlugins(fm, ViewerPlugin.class); // NOTE: This closes the fm pointer!!!
+      if (plugins == null || plugins.length == 0) {
+        // no viewer plugins found that will accept this file
+        return fileToReplaceWith;
+      }
+
+      Arrays.sort(plugins);
+
+      // re-open the file - it was closed at the end of findPlugins();
+      fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 3. Try each plugin until we find one that can render the file as an ImageResource
+      PreviewPanel imagePreviewPanel = null;
+      for (int i = 0; i < plugins.length; i++) {
+        fm.seek(0); // go back to the start of the file
+
+        imagePreviewPanel = ((ViewerPlugin) plugins[i].getPlugin()).read(fm);
+        if (imagePreviewPanel != null) {
+          // found a previewer
+          break;
+        }
+      }
+
+      fm.close();
+
+      if (imagePreviewPanel == null) {
+        // no plugins were able to open this file successfully
+        return fileToReplaceWith;
+      }
+
+      //
+      //
+      // If we're here, we have a rendered image, so we want to convert it into WIM
+      //
+      //
+      Viewer_MFS_WIM_WIMG converterPlugin = new Viewer_MFS_WIM_WIMG();
+
+      File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + beingReplacedExtension);
+      if (destination.exists()) {
+        destination.delete();
+      }
+
+      FileManipulator fmOut = new FileManipulator(destination, true);
+      converterPlugin.replace(resourceBeingReplaced, imagePreviewPanel, fmOut);
+      fmOut.close();
+
+      return destination;
+
+    }
+    else {
+      return fileToReplaceWith;
     }
   }
 

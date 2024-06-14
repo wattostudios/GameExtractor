@@ -17,9 +17,13 @@ package org.watto.component;
 import java.awt.BorderLayout;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -32,6 +36,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Archive;
@@ -1055,6 +1060,19 @@ public class FileListPanel_Thumbnails extends FileListPanel implements WSClickab
         // if not selected, just select the current row.
         // otherwise, it is already selected (and maybe more are selected too) so don't change the selection
         table.changeSelection(rightClickSelectedRow, rightClickSelectedColumn, true, false);
+      }
+
+      try {
+        if (Settings.getBoolean("CopyFilenameOnRightClick")) {
+
+          Resource resource = getResource(rightClickSelectedRow, rightClickSelectedColumn);
+          StringSelection selection = new StringSelection(resource.getName());
+
+          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+          clipboard.setContents(selection, selection);
+        }
+      }
+      catch (Throwable t) {
       }
 
       WSPopupMenu menu = getRightClickMenu();

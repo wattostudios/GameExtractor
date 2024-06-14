@@ -50,7 +50,7 @@ public class Task_ReadArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public Task_ReadArchive(File path) {
@@ -59,7 +59,7 @@ public class Task_ReadArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -106,10 +106,6 @@ public class Task_ReadArchive extends AbstractTask {
 
       if (Settings.getBoolean("ScanFileIfOpenFailed")) {
         // Run the FormatScanner
-        if (GameExtractor.isFullVersion()) {
-          scanArchive(path);
-          return;
-        }
       }
 
       WSPopup.showError("ReadArchive_NoPluginsFound", true);
@@ -160,11 +156,6 @@ public class Task_ReadArchive extends AbstractTask {
       }
 
       if (Settings.getBoolean("ScanFileIfOpenFailed")) {
-        // Run the FormatScanner
-        if (GameExtractor.isFullVersion()) {
-          scanArchive(path);
-          return;
-        }
       }
 
       // Also shows this message if the scanner does not exist!
@@ -205,7 +196,7 @@ public class Task_ReadArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void scanArchive(File path) {
@@ -279,7 +270,7 @@ public class Task_ReadArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -298,7 +289,7 @@ public class Task_ReadArchive extends AbstractTask {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override

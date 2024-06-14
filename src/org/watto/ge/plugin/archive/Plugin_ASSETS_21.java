@@ -768,7 +768,12 @@ public class Plugin_ASSETS_21 extends ArchivePlugin {
           // 4 - Number of Files
           numFiles = fm.readInt();
           //if (arcSize > 200000000) { // Unturned - big file
-          FieldValidator.checkNumFiles(numFiles / 8);
+          if (numFiles < 8) {
+            FieldValidator.checkNumFiles(numFiles); // otherwise will reject small archives as having 0 files in them
+          }
+          else {
+            FieldValidator.checkNumFiles(numFiles / 8);
+          }
           //}
           //else {
           //  FieldValidator.checkNumFiles(numFiles);

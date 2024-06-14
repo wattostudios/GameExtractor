@@ -15,6 +15,8 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -39,9 +41,10 @@ public class Plugin_GFS extends ArchivePlugin {
     super("GFS", "GFS");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
-    setGames("Skullgirls");
+    setGames("Skullgirls",
+        "Them's Fightin' Herds");
     setExtensions("gfs"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -181,6 +184,84 @@ public class Plugin_GFS extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      long fileDataOffset = 51 + (numFiles * 20);
+      for (int i = 0; i < numFiles; i++) {
+        fileDataOffset += resources[i].getNameLength();
+      }
+
+      // Write Header Data
+
+      // 4 - File Data Offset
+      fm.writeInt(IntConverter.changeFormat((int) fileDataOffset));
+      src.skip(4);
+
+      // 4 - null
+      // 4 - Header Name Length (20)
+      // 20 - Header Name ("Reverge Package File")
+      // 4 - null
+      // 4 - Version Name Length (3)
+      // 3 - Version Name ("1.1")
+      // 4 - null
+      // 4 - Number of Files?
+      fm.writeBytes(src.readBytes(47));
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        // 4 - null
+        fm.writeBytes(src.readBytes(4));
+
+        // 4 - Filename Length
+        // X - Filename
+        String filename = resource.getName();
+        fm.writeBytes(src.readBytes(filename.length() + 4));
+
+        // 8 - File Length
+        fm.writeBytes(src.readBytes(4));
+
+        fm.writeInt(IntConverter.changeFormat((int) length));
+        src.skip(4);
+
+        // 4 - Unknown (1)
+        fm.writeBytes(src.readBytes(4));
+
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      write(resources, fm);
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

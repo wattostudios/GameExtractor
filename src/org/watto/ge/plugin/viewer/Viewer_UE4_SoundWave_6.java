@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.io.File;
+
 import org.watto.Settings;
 import org.watto.SingletonManager;
 import org.watto.component.PreviewPanel;
@@ -352,6 +353,10 @@ public class Viewer_UE4_SoundWave_6 extends ViewerPlugin {
         int extraData = (int) (fm.readInt() - fm.getOffset());
         if (inUExp) {
           extraData -= uassetSize;
+        }
+
+        if (extraData < 0) {
+          extraData = 0;
         }
 
         // X - [OPTIONAL] - extra data

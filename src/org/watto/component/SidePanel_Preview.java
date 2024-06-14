@@ -120,7 +120,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadBasicVersionPreview() {
@@ -176,7 +176,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadBlankPreview() {
@@ -191,7 +191,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void loadPreview(WSPanel panel) {
@@ -224,7 +224,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -347,12 +347,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
       String code = ((WSComponent) c).getCode();
 
       if (code.equals("FileList")) {
-        if (!GameExtractor.isFullVersion()) {
           loadBasicVersionPreview();
-        }
-        else {
-          previewFile();
-        }
         return true;
       }
 
@@ -405,12 +400,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
    **/
   @Override
   public void onOpenRequest() {
-    if (!GameExtractor.isFullVersion()) {
-      loadBasicVersionPreview();
-    }
-    else {
-      previewFile();
-    }
+    loadBasicVersionPreview();
   }
 
   /**
@@ -428,7 +418,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void previewFile() {
@@ -476,7 +466,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void previewFile(File path) {
@@ -554,7 +544,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean previewFile(File path, ViewerPlugin plugin) {
@@ -595,7 +585,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void rememberSelectedExportPlugin() {
@@ -612,7 +602,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -628,7 +618,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void savePreview() {
@@ -743,7 +733,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void showHex() {
@@ -759,7 +749,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void showImageInvestigator() {

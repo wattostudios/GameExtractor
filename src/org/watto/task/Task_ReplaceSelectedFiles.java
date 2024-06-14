@@ -103,7 +103,10 @@ public class Task_ReplaceSelectedFiles extends AbstractTask {
     if (fileListPanel instanceof FileListPanel_TreeTable) {
       // Only want to reload the table, as that's the only thing that's changed.
       // This stops the tree from being reloaded, removing the filter.
-      ((FileListPanel_TreeTable) fileListPanel).reloadTable();
+      
+      // 3.15 changed so any filter + sort is still retained
+      //((FileListPanel_TreeTable) fileListPanel).reloadTable();
+      ((FileListPanel_TreeTable) fileListPanel).repaintTable();
     }
     else {
       fileListPanel.reload();

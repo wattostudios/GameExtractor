@@ -73,6 +73,19 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
   public int getMatchRating(FileManipulator fm) {
     try {
 
@@ -180,7 +193,7 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
       }
 
       if (width == 0 && height == 0) {
-        // we're probably reaching from a DDSX file, not one extracted from an archive
+        // we're probably reading from a DDSX file, not one extracted from an archive
 
         // 4 - Header (DDSx)
         fm.skip(4);
@@ -241,7 +254,7 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
       }
 
       if (Archive.getReadPlugin() instanceof Plugin_BIN_DXP2_2) {
-        // the biggest mipmap is at the end of the file,  not the beginning, so need to skip to it.
+        // the biggest mipmap is at the end of the file, not the beginning, so need to skip to it.
 
         int decompLength = 0;
         if (imageFormat.equals("DXT1")) {
@@ -311,141 +324,103 @@ public class Viewer_BIN_DXP2_DDSX_DDSX extends ViewerPlugin {
   **/
   @Override
   public void write(PreviewPanel preview, FileManipulator fm) {
+  }
+
+  /**
+  **********************************************************************************************
+  We can't WRITE these files from scratch, but we can REPLACE some of the images with new content  
+  **********************************************************************************************
+  **/
+  public void replace(Resource resourceBeingReplaced, PreviewPanel preview, FileManipulator fm) {
     try {
 
       if (!(preview instanceof PreviewPanel_Image)) {
         return;
       }
 
-      ImageManipulator im = new ImageManipulator((PreviewPanel_Image) preview);
+      PreviewPanel_Image ivp = (PreviewPanel_Image) preview;
+      int width = ivp.getImageWidth();
+      int height = ivp.getImageHeight();
 
-      int imageWidth = im.getWidth();
-      int imageHeight = im.getHeight();
+      String imageFormat = "";
 
-      if (imageWidth == -1 || imageHeight == -1) {
-        return;
+      // get the width/height from the properties of the image resource, which were read by the ArchivePlugin
+      try {
+        imageFormat = resourceBeingReplaced.getProperty("ImageFormat");
+      }
+      catch (Throwable t) {
+        //
       }
 
-      // Generate all the mipmaps of the image
+      // Try to write the file out in the right format (same as the source)
+
+      // Some will need to be changed (can't write everything)
+      if (imageFormat.equals("BC7 ") || imageFormat.equals("ATI1") || imageFormat.equals("ATI2") || imageFormat.equals("")) {
+        imageFormat = "DXT5";
+      }
+
+      ImageManipulator im = new ImageManipulator(ivp.getImageResource());
       ImageResource[] mipmaps = im.generateMipmaps();
-      int mipmapCount = mipmaps.length;
 
-      // Set some property defaults in case we're doing a conversion (and thus there probably isn't any properties set)
-      int fileID = 0;
-      int hash = 0;
-      String filename = "";
+      if (Archive.getReadPlugin() instanceof Plugin_BIN_DXP2_2) {
+        // smallest to largest
+        for (int m = mipmaps.length - 1; m >= 0; m--) {
+          ImageResource imageResource = mipmaps[m];
 
-      // Now try to get the property values from the ImageResource, if they exist
-      ImageResource imageResource = ((PreviewPanel_Image) preview).getImageResource();
+          if (imageFormat.equals("DXT1")) {
+            ImageFormatWriter.writeDXT1(fm, imageResource);
+          }
+          else if (imageFormat.equals("DXT3")) {
+            ImageFormatWriter.writeDXT3(fm, imageResource);
+          }
+          else if (imageFormat.equals("DXT5")) {
+            ImageFormatWriter.writeDXT5(fm, imageResource);
+          }
+          else if (imageFormat.equals("21")) {
+            ImageFormatWriter.writeRGBA(fm, imageResource);
+          }
+          else if (imageFormat.equals("50")) {
+            int[] pixels = imageResource.getPixels();
+            int numPixels = pixels.length;
 
-      if (imageResource != null) {
-        mipmapCount = imageResource.getProperty("MipmapCount", mipmapCount);
-        fileID = imageResource.getProperty("FileID", 0);
-        hash = imageResource.getProperty("Hash", 0);
-        filename = imageResource.getProperty("Filename", "");
-      }
-
-      if (filename.equals("")) {
-        filename = fm.getFile().getName();
-      }
-      if (mipmapCount > mipmaps.length) {
-        mipmapCount = mipmaps.length;
-      }
-
-      // work out the file length
-      long fileLength = 28 + filename.length() + 1 + (mipmapCount * 4);
-      for (int i = 0; i < mipmapCount; i++) {
-        int mipmapHeight = mipmaps[i].getHeight();
-        int mipmapWidth = mipmaps[i].getWidth();
-
-        // This is DXT3 format - width/height have to be a minimum of 4 pixels each (smaller images have padding around them to 4x4 size)
-        if (mipmapHeight < 4) {
-          mipmapHeight = 4;
-        }
-        if (mipmapWidth < 4) {
-          mipmapWidth = 4;
-        }
-
-        // DXT3 is 1 byte per pixel
-        int byteCount = (mipmapHeight * mipmapWidth);
-        fileLength += byteCount;
-      }
-
-      // 4 - Header (3TXD)
-      fm.writeString("3TXD");
-
-      // 4 - File Length (including all these header fields)
-      fm.writeInt(fileLength);
-
-      // 4 - File ID
-      fm.writeInt(fileID);
-
-      // 2 - Image Height
-      fm.writeShort((short) imageHeight);
-
-      // 2 - Image Width
-      fm.writeShort((short) imageWidth);
-
-      // 4 - Number Of Mipmaps
-      fm.writeInt(mipmapCount);
-
-      // 4 - File Type? (28)
-      fm.writeInt(28);
-
-      // 4 - Hash?
-      fm.writeInt(hash);
-
-      // X - Filename
-      // 1 - null Filename Terminator
-      fm.writeString(filename);
-      fm.writeByte(0);
-
-      // X - Mipmaps
-      for (int i = 0; i < mipmapCount; i++) {
-        ImageResource mipmap = mipmaps[i];
-
-        int mipmapHeight = mipmap.getHeight();
-        int resizedHeight = mipmapHeight;
-        if (resizedHeight < 4) {
-          resizedHeight = 4;
-        }
-
-        int mipmapWidth = mipmap.getWidth();
-        int resizedWidth = mipmapWidth;
-        if (resizedWidth < 4) {
-          resizedWidth = 4;
-        }
-
-        int pixelCount = resizedWidth * resizedHeight;
-
-        // 4 - Data Length
-        fm.writeInt(pixelCount); // DXT3 is 1bytes per pixel
-
-        int pixelLength = mipmap.getNumPixels();
-        if (pixelLength < pixelCount) {
-          // one of the smallest mipmaps (eg 1x1 or 2x2) --> needs to be resized to 4x4
-          int[] oldPixels = mipmap.getImagePixels();
-          int[] newPixels = new int[pixelCount]; // minimum of 4x4, but if one dimension is already > 4, can be larger
-
-          for (int h = 0; h < resizedHeight; h++) {
-            for (int w = 0; w < resizedWidth; w++) {
-              if (h < mipmapHeight && w < mipmapWidth) {
-                // copy the pixel from the original
-                newPixels[h * resizedWidth + w] = oldPixels[h * mipmapWidth + w];
-              }
-              else {
-                newPixels[h * resizedWidth + w] = 0;
-              }
+            for (int i = 0; i < numPixels; i++) {
+              fm.writeByte(pixels[i]);
             }
           }
-          mipmap.setPixels(newPixels);
-          mipmap.setWidth(resizedWidth);
-          mipmap.setHeight(resizedHeight);
         }
-
-        // X - Pixels
-        ImageFormatWriter.writeDXT3(fm, mipmap);
       }
+      else {
+        // largest to smallest
+        for (int m = 0; m < mipmaps.length; m++) {
+          ImageResource imageResource = mipmaps[m];
+
+          if (imageFormat.equals("DXT1")) {
+            ImageFormatWriter.writeDXT1(fm, imageResource);
+          }
+          else if (imageFormat.equals("DXT3")) {
+            ImageFormatWriter.writeDXT3(fm, imageResource);
+          }
+          else if (imageFormat.equals("DXT5")) {
+            ImageFormatWriter.writeDXT5(fm, imageResource);
+          }
+          else if (imageFormat.equals("21")) {
+            ImageFormatWriter.writeRGBA(fm, imageResource);
+          }
+          else if (imageFormat.equals("50")) {
+            int[] pixels = imageResource.getPixels();
+            int numPixels = pixels.length;
+
+            for (int i = 0; i < numPixels; i++) {
+              fm.writeByte(pixels[i]);
+            }
+          }
+        }
+      }
+
+      // set the new properties on the resource
+      resourceBeingReplaced.setProperty("Width", "" + width);
+      resourceBeingReplaced.setProperty("Height", "" + height);
+      resourceBeingReplaced.setProperty("ImageFormat", "" + imageFormat);
 
       fm.close();
 

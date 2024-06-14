@@ -627,6 +627,7 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
             // bad decompression
             ErrorLogger.log("[ASSETS_17]: Bad Archive Decompression");
             forceDelete = true;
+            break;
           }
 
           while (decompBytesRemaining > 0) { // if it's cut short for some reason, padd out to the right size
@@ -991,7 +992,12 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
 
           for (int e = 0; e < numEntries; e++) {
             // read the archive
-            Resource[] splitResources = read(splitFiles[e]);
+            File splitFile = splitFiles[e];
+            if (splitFile.getAbsolutePath().equals(path.getAbsolutePath())) {
+              // the file we're currently reading - so skip this one
+              continue;
+            }
+            Resource[] splitResources = read(splitFile);
             if (splitResources == null) {
               continue;
             }

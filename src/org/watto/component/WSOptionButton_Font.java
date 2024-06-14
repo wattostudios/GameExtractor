@@ -17,9 +17,10 @@ package org.watto.component;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JComponent;
+
 import org.watto.event.WSClickableInterface;
-import org.watto.ge.GameExtractor;
 import org.watto.plaf.LookAndFeelManager;
 import org.watto.xml.XMLNode;
 import org.watto.xml.XMLReader;
@@ -61,7 +62,7 @@ public class WSOptionButton_Font extends WSOptionPanel implements WSClickableInt
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -103,19 +104,26 @@ public class WSOptionButton_Font extends WSOptionPanel implements WSClickableInt
         //closing the popup happens automatically, we just want to trigger the setting of the new font
         if (fontChooser != null) {
           popup.setVisible(false);
+          WSPopup.showMessageInNewThread("ReloadToShowFontChanges");
+          /* 3.15 These corrupt the settings.xml and interface.xml files, so just show the popup above instead
           LookAndFeelManager.setFont(fontChooser.getFont());
+          
+          
           //LookAndFeelManager.setLookAndFeel("Butterfly");
-
+          
+          
           LookAndFeelManager.getLookAndFeel().loadProperties();
           LookAndFeelManager.getLookAndFeel().getDefaults();
-
+          
+          
           //SwingUtilities.updateComponentTreeUI(GameExtractor.getInstance());
           //SwingUtilities.updateComponentTreeUI((JComponent)ComponentRepository.get("MainWindowFrame"));
           //GameExtractor.getInstance().reload();
           //SwingUtilities.updateComponentTreeUI((JComponent)ComponentRepository.get("Option_Appearance_CurrentFont"));
-
+          
           //SwingUtilities.updateComponentTreeUI((JComponent) ComponentRepository.get("MainWindowFrame"));
           GameExtractor.getInstance().rebuild();
+          */
         }
       }
     }

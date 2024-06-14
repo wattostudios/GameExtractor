@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.component.WSPluginException;
@@ -1303,7 +1304,11 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       // Now find any with the same name as a uasset
       Resource_PAK_38 asset = null;
       String assetName = "";
+
+      fm.getBuffer().setBufferSize(2048); // default size - we shrunk it earlier, but might need it here to decompress files, so increase it again
+
       for (int i = 0; i < numFiles; i++) {
+        //System.out.println(i + " of " + numFiles);
         Resource_PAK_38 resource = resources[i];
 
         if (resource.getExtension().equals("uasset")) {

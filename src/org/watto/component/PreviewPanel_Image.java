@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import org.watto.Settings;
+import org.watto.TemporarySettings;
 import org.watto.datatype.ImageResource;
 import org.watto.datatype.PalettedImageResource;
 import org.watto.event.WSClickableInterface;
@@ -72,6 +73,14 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     zoomImage = image;
 
     imageResource = null;
+
+    // 3.15 added so that when doing Conversions during an Extract, it doesn't call createInterface, which was retaining memory
+    if (TemporarySettings.has("ExportForConversionOnly")) {
+      if (TemporarySettings.getBoolean("ExportForConversionOnly") == true) {
+        // return early, don't build the interface
+        return;
+      }
+    }
 
     createInterface();
 
@@ -134,6 +143,14 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     imageHeight = imageResource.getHeight();
 
     zoomImage = image;
+
+    // 3.15 added so that when doing Conversions during an Extract, it doesn't call createInterface, which was retaining memory
+    if (TemporarySettings.has("ExportForConversionOnly")) {
+      if (TemporarySettings.getBoolean("ExportForConversionOnly") == true) {
+        // return early, don't build the interface
+        return;
+      }
+    }
 
     createInterface();
   }
@@ -320,8 +337,12 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     WSPanel frameControls = null;
     if (imageResource != null && imageResource.isManualFrameTransition()) {
       // Add buttons to move to the next frame
-      frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"GridLayout\" position=\"CENTER\" rows=\"1\" columns=\"2\"><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" /></WSPanel></WSPanel>"));
+      //frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"GridLayout\" position=\"CENTER\" rows=\"1\" columns=\"2\"><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" /></WSPanel></WSPanel>"));
+      frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"ReverseBorderLayout\" position=\"CENTER\" ><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" position=\"WEST\" /><WSLabel code=\"PreviewPanel_Image_FrameCountLabel\" opaque=\"true\" width=\"100\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" position=\"EAST\" /></WSPanel></WSPanel>"));
       Settings.set("PreviewPanel_Image_CurrentFrame", 0); // reset the frame position back to 0 when loading a new image
+
+      WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_FrameCountLabel");
+      frameCountLabel.setText("1  /  " + imageResource.getFrameCount());
     }
     WSPanel paletteControls = null;
     if (imageResource != null && imageResource instanceof PalettedImageResource && PaletteManager.getNumPalettes() > 1) {
@@ -471,6 +492,18 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
           imageLabel.setIcon(new ImageIcon(zoomImage));
 
           Settings.set("PreviewPanel_Image_CurrentFrame", Settings.getInt("PreviewPanel_Image_CurrentFrame") + 1);
+
+          WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_FrameCountLabel");
+
+          int frameCount = imageResource.getFrameCount();
+          int currentFrameNum = Settings.getInt("PreviewPanel_Image_CurrentFrame");
+          if (currentFrameNum >= frameCount) { // we've looped around to the beginning again
+            currentFrameNum = 0;
+            Settings.set("PreviewPanel_Image_CurrentFrame", currentFrameNum);
+          }
+
+          frameCountLabel.setText((currentFrameNum + 1) + "  /  " + frameCount);
+          frameCountLabel.repaint();
         }
       }
       else if (((WSComponent) source).getCode().equals("PreviewPanel_Image_PreviousButton")) {
@@ -486,12 +519,35 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
           imageLabel.setIcon(new ImageIcon(zoomImage));
 
           Settings.set("PreviewPanel_Image_CurrentFrame", Settings.getInt("PreviewPanel_Image_CurrentFrame") - 1);
+
+          WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_FrameCountLabel");
+
+          int frameCount = imageResource.getFrameCount();
+          int currentFrameNum = Settings.getInt("PreviewPanel_Image_CurrentFrame");
+          if (currentFrameNum < 0) { // we've looped around to the beginning again
+            currentFrameNum = frameCount - 1;
+            Settings.set("PreviewPanel_Image_CurrentFrame", currentFrameNum);
+          }
+
+          frameCountLabel.setText((currentFrameNum + 1) + "  /  " + frameCount);
+          frameCountLabel.repaint();
         }
       }
       else if (((WSComponent) source).getCode().equals("PreviewPanel_Image_NextPaletteButton")) {
         // change to the next color palette
         PalettedImageResource paletteImage = (PalettedImageResource) imageResource;
-        paletteImage.setPalette(PaletteManager.getNextPalette().getPalette());
+
+        // if this is an animation, need to apply the new palette to all frames
+        int[] palette = PaletteManager.getNextPalette().getPalette();
+        paletteImage.setPalette(palette);
+
+        if (paletteImage.getNextFrame() != null) {
+          PalettedImageResource nextFrame = (PalettedImageResource) paletteImage.getNextFrame();
+          while (nextFrame != paletteImage) {
+            nextFrame.setPalette(palette);
+            nextFrame = (PalettedImageResource) nextFrame.getNextFrame();
+          }
+        }
 
         image = paletteImage.getImage(); // important, so the Export Preview button exports the right image
         generateZoomImage();
@@ -508,7 +564,18 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
       else if (((WSComponent) source).getCode().equals("PreviewPanel_Image_PreviousPaletteButton")) {
         // change to the previous color palette
         PalettedImageResource paletteImage = (PalettedImageResource) imageResource;
-        paletteImage.setPalette(PaletteManager.getPreviousPalette().getPalette());
+
+        // if this is an animation, need to apply the new palette to all frames
+        int[] palette = PaletteManager.getPreviousPalette().getPalette();
+        paletteImage.setPalette(palette);
+
+        if (paletteImage.getNextFrame() != null) {
+          PalettedImageResource nextFrame = (PalettedImageResource) paletteImage.getNextFrame();
+          while (nextFrame != paletteImage) {
+            nextFrame.setPalette(palette);
+            nextFrame = (PalettedImageResource) nextFrame.getNextFrame();
+          }
+        }
 
         image = paletteImage.getImage(); // important, so the Export Preview button exports the right image
         generateZoomImage();
@@ -541,6 +608,7 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     if (animation != null) {
       animation.stop();
     }
+
   }
 
 }

@@ -94,6 +94,15 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
   
   /**
   **********************************************************************************************
+  Can this plugin replace an existing file (using any missing/unknown information from the original file)?
+  **********************************************************************************************
+  **/
+  public boolean canReplace(PreviewPanel panel) {
+    return false;
+  }
+  
+  /**
+  **********************************************************************************************
   Can this plugin edit an existing file?
   **********************************************************************************************
   **/
@@ -156,6 +165,9 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
     description += "\n - " + Language.get("Description_ReadOperation");
     if (canWrite(new PreviewPanel_Image())) { // Only supports telling people about ImageWriters
       description += "\n - " + Language.get("Description_WriteOperation");
+    }
+    if (canReplace(new PreviewPanel_Image())) { // Only supports telling people about ImageWriters
+      description += "\n - " + Language.get("Description_ReplaceOperation");
     }
 
     if (isStandardFileFormat()) {
@@ -326,6 +338,8 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
       return null;
     }
   }
+  
+  
 
   /**
   **********************************************************************************************
@@ -395,7 +409,6 @@ public abstract class ViewerPlugin extends WSObjectPlugin {
     }
     catch (Throwable t) {
       ErrorLogger.log(t);
-      ;
     }
   }
   

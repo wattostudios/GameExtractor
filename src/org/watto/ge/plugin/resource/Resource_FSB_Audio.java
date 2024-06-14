@@ -67,10 +67,10 @@ public class Resource_FSB_Audio extends Resource {
   public static int CODEC_VORBIS = 15;
 
   /* IT214 data. */
-  public static int CODEC_IT214 = 16;
+  public static int CODEC_IT214 = 1024;//16;
 
   /* IT215 data. */
-  public static int CODEC_IT215 = 17;
+  public static int CODEC_IT215 = 2048;//17;
 
   /** The audio codec used by this file **/
   int codec = -1;
@@ -221,7 +221,8 @@ public class Resource_FSB_Audio extends Resource {
       return ".it";
     }
     else {
-      return ".snd";
+      //return ".snd";
+      return ".wav";
     }
 
   }

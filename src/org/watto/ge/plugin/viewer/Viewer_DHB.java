@@ -14,16 +14,21 @@
 
 package org.watto.ge.plugin.viewer;
 
+import java.awt.Image;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
+import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageFormatWriter;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.archive.Plugin_DHB;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 
 /**
 **********************************************************************************************
@@ -64,13 +69,29 @@ public class Viewer_DHB extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
   public int getMatchRating(FileManipulator fm) {
     try {
 
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (!(plugin instanceof AllFilesPlugin)) {
+      if (plugin instanceof Plugin_DHB) {
+        rating += 50;
+      }
+      else if (!(plugin instanceof AllFilesPlugin)) {
         return 0;
       }
 
@@ -182,6 +203,69 @@ public class Viewer_DHB extends ViewerPlugin {
   @Override
   public void write(PreviewPanel preview, FileManipulator fm) {
 
+  }
+
+  /**
+  **********************************************************************************************
+  We can't WRITE these files from scratch, but we can REPLACE some of the images with new content  
+  **********************************************************************************************
+  **/
+  public void replace(Resource resourceBeingReplaced, PreviewPanel preview, FileManipulator fm) {
+    try {
+
+      if (!(preview instanceof PreviewPanel_Image)) {
+        return;
+      }
+
+      PreviewPanel_Image ivp = (PreviewPanel_Image) preview;
+      Image image = ivp.getImage();
+      int width = ivp.getImageWidth();
+      int height = ivp.getImageHeight();
+
+      if (width == -1 || height == -1) {
+        return;
+      }
+
+      // Try to get the existing ImageResource (if it was stored), otherwise build a new one
+      ImageResource imageResource = ((PreviewPanel_Image) preview).getImageResource();
+      if (imageResource == null) {
+        imageResource = new ImageResource(image, width, height);
+      }
+
+      // Extract the original resource into a byte[] array, so we can reference it
+      int srcLength = (int) resourceBeingReplaced.getDecompressedLength();
+      if (srcLength > 20) {
+        srcLength = 20; // allows enough reading for the header, but not much of the original image data
+      }
+      byte[] srcBytes = new byte[(int) resourceBeingReplaced.getDecompressedLength()];
+      FileManipulator src = new FileManipulator(new ByteBuffer(srcBytes));
+      resourceBeingReplaced.extract(src);
+      src.seek(0);
+
+      // Build the new file using the src[] and adding in the new image content
+
+      // 4 - Unknown (1)
+      // 8 - Image Name (null terminated, filled with nulls)
+      fm.writeBytes(src.readBytes(12));
+
+      // 4 - Image Width
+      fm.writeInt(width);
+      src.skip(4);
+
+      // 4 - Image Height
+      fm.writeInt(height);
+      src.skip(4);
+
+      // X - Image Data (2-bytes per pixel)
+      ImageFormatWriter.writeRGB565(fm, imageResource);
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

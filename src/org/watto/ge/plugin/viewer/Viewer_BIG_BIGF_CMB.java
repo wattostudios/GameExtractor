@@ -71,6 +71,19 @@ public class Viewer_BIG_BIGF_CMB extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
   public int getMatchRating(FileManipulator fm) {
     try {
 

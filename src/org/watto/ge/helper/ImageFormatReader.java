@@ -15,6 +15,7 @@
 package org.watto.ge.helper;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.SingletonManager;
@@ -63,32 +64,32 @@ public class ImageFormatReader {
   **********************************************************************************************
   **/
   protected static float convert16bitToFloat(int hbits) {
-    int mant = hbits & 0x03ff;            // 10 bits mantissa
-    int exp = hbits & 0x7c00;             // 5 bits exponent
+    int mant = hbits & 0x03ff; // 10 bits mantissa
+    int exp = hbits & 0x7c00; // 5 bits exponent
     if (exp == 0x7c00) {
-      exp = 0x3fc00;                      // -> NaN/Inf
+      exp = 0x3fc00; // -> NaN/Inf
     }
-    else if (exp != 0)                    // normalized value
+    else if (exp != 0) // normalized value
     {
-      exp += 0x1c000;                     // exp - 15 + 127
+      exp += 0x1c000; // exp - 15 + 127
       if (mant == 0 && exp > 0x1c400) {
         return Float.intBitsToFloat((hbits & 0x8000) << 16
             | exp << 13 | 0x3ff);
       }
     }
-    else if (mant != 0)                   // && exp==0 -> subnormal
+    else if (mant != 0) // && exp==0 -> subnormal
     {
-      exp = 0x1c400;                      // make it normal
+      exp = 0x1c400; // make it normal
       do {
-        mant <<= 1;                       // mantissa * 2
-        exp -= 0x400;                     // decrease exp by 1
+        mant <<= 1; // mantissa * 2
+        exp -= 0x400; // decrease exp by 1
       }
-      while ((mant & 0x400) == 0);        // while not normal
-      mant &= 0x3ff;                      // discard subnormal bit
-    }                                     // else +/-0 -> +/-0
-    return Float.intBitsToFloat(          // combine all parts
-        (hbits & 0x8000) << 16            // sign  << ( 31 - 15 )
-            | (exp | mant) << 13);        // value << ( 23 - 10 )
+      while ((mant & 0x400) == 0); // while not normal
+      mant &= 0x3ff; // discard subnormal bit
+    } // else +/-0 -> +/-0
+    return Float.intBitsToFloat( // combine all parts
+        (hbits & 0x8000) << 16 // sign  << ( 31 - 15 )
+            | (exp | mant) << 13); // value << ( 23 - 10 )
   }
 
   /**
@@ -694,18 +695,17 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
   }
-  
-  
+
   /**
    **********************************************************************************************
    * Reads an uncompressed 4bit image (eg paletted grayscale image with indexed values)
    **********************************************************************************************
    **/
   public static ImageResource read4BitPaletted(FileManipulator fm, int width, int height, boolean usePaletteManager) {
-    if (!usePaletteManager || PaletteManager.getNumPalettes()<=0) {
-      return read4BitPaletted(fm,width,height);
+    if (!usePaletteManager || PaletteManager.getNumPalettes() <= 0) {
+      return read4BitPaletted(fm, width, height);
     }
-    
+
     int numPixels = width * height;
     int[] pixels = new int[numPixels];
 
@@ -719,10 +719,8 @@ public class ImageFormatReader {
       pixels[i + 1] = pixel2;
     }
 
-    return new PalettedImageResource(pixels, width, height,PaletteManager.getCurrentPalette().getPalette());
+    return new PalettedImageResource(pixels, width, height, PaletteManager.getCurrentPalette().getPalette());
   }
-  
-
 
   /**
    **********************************************************************************************
@@ -749,19 +747,17 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
   }
-  
-  
+
   /**
    **********************************************************************************************
    * Reads an 8bit paletted image, using the given palette
    **********************************************************************************************
    **/
   public static ImageResource read8BitPaletted(FileManipulator fm, int width, int height, boolean usePaletteManager) {
-    if (!usePaletteManager || PaletteManager.getNumPalettes()<=0) {
-      return read8BitPaletted(fm,width,height);
+    if (!usePaletteManager || PaletteManager.getNumPalettes() <= 0) {
+      return read8BitPaletted(fm, width, height);
     }
-    
-    
+
     int numPixels = width * height;
     int[] pixels = new int[numPixels];
 
@@ -769,7 +765,7 @@ public class ImageFormatReader {
       pixels[i] = ByteConverter.unsign(fm.readByte());
     }
 
-    return new PalettedImageResource(pixels, width, height,PaletteManager.getCurrentPalette().getPalette());
+    return new PalettedImageResource(pixels, width, height, PaletteManager.getCurrentPalette().getPalette());
   }
 
   /**
@@ -895,6 +891,8 @@ public class ImageFormatReader {
       int b = ((byte2 & 124) >> 2) * 8;
       int g = (((byte2 & 3) << 3) | ((byte1 & 224) >> 5)) * 8;
       int r = (byte1 & 31) * 8;
+
+      // GGGRRRRR ABBBBBGG
 
       // OUTPUT = ARGB
       pixels[i] = ((r << 16) | (g << 8) | b | (a << 24));
@@ -1716,8 +1714,7 @@ public class ImageFormatReader {
     return new ImageResource(data, width, height);
 
   }
-  
-  
+
   /**
    **********************************************************************************************
    Reads a Wii CMPR Format (similar to DXT1), but in blocks of 4x4 which are themselves within blocks of 8x8
@@ -1727,7 +1724,7 @@ public class ImageFormatReader {
   public static ImageResource readCMPR(FileManipulator fm, int width, int height) {
 
     int originalHeight = height;
-    
+
     // ensure width and height are multiples of 8...
     int heightMod = height % 8;
     if (heightMod != 0) {
@@ -1750,98 +1747,98 @@ public class ImageFormatReader {
 
     for (int y1 = 0; y1 < height; y1 += 8) {
       // CMPR encodes 8x8 blocks of pixels, which are 4x 4x4 blocks
-      for (int x1 = 0; x1 < width; x1 += 8) {    
-    
+      for (int x1 = 0; x1 < width; x1 += 8) {
+
         for (int y = 0; y < 8; y += 4) {
           // DXT encodes 4x4 blocks of pixels
           for (int x = 0; x < 8; x += 4) {
-    
+
             // decode the DXT1 RGB data
-    
+
             // two 16 bit encoded colors (red 5 bits, green 6 bits, blue 5 bits)
             /*
             int c1packed16 = ByteConverter.unsign(fm.readByte()) | (ByteConverter.unsign(fm.readByte()) << 8);
             int c2packed16 = ByteConverter.unsign(fm.readByte()) | (ByteConverter.unsign(fm.readByte()) << 8);
-    
+            
             // separate the R,G,B values (RRRRRGGGGGGBBBBB)
             int color1r = (c1packed16 >> 8) & 0xF8;
             int color1g = (c1packed16 >> 3) & 0xFC;
             int color1b = (c1packed16 << 3) & 0xF8;
-    
+            
             int color2r = (c2packed16 >> 8) & 0xF8;
             int color2g = (c2packed16 >> 3) & 0xFC;
             int color2b = (c2packed16 << 3) & 0xF8;
             */
-    
+
             // two 16 bit encoded colors (RRRRRGGGGGGBBBBB)
             int c1packed16 = (ByteConverter.unsign(fm.readByte()) << 8) | ByteConverter.unsign(fm.readByte());
             int c2packed16 = (ByteConverter.unsign(fm.readByte()) << 8) | ByteConverter.unsign(fm.readByte());
-    
+
             // separate the R,G,B values
-            int color1r = ((c1packed16 >> 11) & 31)*8;
-            int color1g = ((c1packed16 >> 5) & 63)*4;
-            int color1b = (c1packed16 & 31)*8;
-    
-            int color2r = ((c2packed16 >> 11) & 31)*8;
-            int color2g = ((c2packed16 >> 5) & 63)*4;
-            int color2b = (c2packed16 & 31)*8;
-            
+            int color1r = ((c1packed16 >> 11) & 31) * 8;
+            int color1g = ((c1packed16 >> 5) & 63) * 4;
+            int color1b = (c1packed16 & 31) * 8;
+
+            int color2r = ((c2packed16 >> 11) & 31) * 8;
+            int color2g = ((c2packed16 >> 5) & 63) * 4;
+            int color2b = (c2packed16 & 31) * 8;
+
             int colors[] = new int[8]; // color table for all possible codes
             // colors 0 and 1 point to the two 16 bit colors we read in
             colors[0] = (color1r << 16) | (color1g << 8) | color1b | 0xFF000000;
             colors[1] = (color2r << 16) | (color2g << 8) | color2b | 0xFF000000;
-            
+
             // WII difference
             if (colors[0] > colors[1]) {
               // 2x 2/3 colors
-    
+
               // 2/3 Color1, 1/3 color2
               int colorr = (((color1r << 1) + color2r) / 3);// & 0xFF;
               int colorg = (((color1g << 1) + color2g) / 3);// & 0xFF;
               int colorb = (((color1b << 1) + color2b) / 3);// & 0xFF;
               colors[2] = (colorr << 16) | (colorg << 8) | colorb | 0xFF000000;
-      
+
               // 2/3 Color2, 1/3 color1
               colorr = (((color2r << 1) + color1r) / 3);// & 0xFF;
               colorg = (((color2g << 1) + color1g) / 3);// & 0xFF;
               colorb = (((color2b << 1) + color1b) / 3);// & 0xFF;
               colors[3] = (colorr << 16) | (colorg << 8) | colorb | 0xFF000000;
-            
+
             }
             else {
               // 1x 1/2 color, 1x transparent
-              
+
               int colorr = ((color1r + color2r) >> 1);
               int colorg = ((color1g + color2g) >> 1);
               int colorb = ((color1b + color2b) >> 1);
               colors[2] = (colorr << 16) | (colorg << 8) | colorb | 0xFF000000;
-              
+
               colors[3] = 0; // transparent
             }
-    
+
             // read in the color code bits, 16 values, each 2 bits long
             // then look up the color in the color table we built
             //int bits = ByteConverter.unsign(fm.readByte()) + (ByteConverter.unsign(fm.readByte()) << 8) + (ByteConverter.unsign(fm.readByte()) << 16) + (ByteConverter.unsign(fm.readByte()) << 24);
             int bits = ByteConverter.unsign(fm.readByte()) | (ByteConverter.unsign(fm.readByte()) << 8) | (ByteConverter.unsign(fm.readByte()) << 16) | (ByteConverter.unsign(fm.readByte()) << 24);
-    
-              for (int by = 0; by < 4; ++by) {
-                for (int bx = 0; bx < 4; ++bx) {
-                  int code = (bits >> (((by << 2) + bx) << 1)) & 0x3;
-                  //data[(y + by) * width + x + bx] = colors[code];
-                  //int writePos = ((y1+y+by)*width) + (x1+x+bx);
-                  int writePos = ((y1+y+by)*width) + (x1+x+(3-bx));
-                  data[writePos] = colors[code];
-                }
+
+            for (int by = 0; by < 4; ++by) {
+              for (int bx = 0; bx < 4; ++bx) {
+                int code = (bits >> (((by << 2) + bx) << 1)) & 0x3;
+                //data[(y + by) * width + x + bx] = colors[code];
+                //int writePos = ((y1+y+by)*width) + (x1+x+bx);
+                int writePos = ((y1 + y + by) * width) + (x1 + x + (3 - bx));
+                data[writePos] = colors[code];
               }
+            }
           }
         }
-    
+
       }
     }
-    
+
     if (originalHeight <= 4) {
       height = 4;
-  }
+    }
 
     return new ImageResource(data, width, height);
 
@@ -2026,6 +2023,123 @@ public class ImageFormatReader {
       // write the compressed image bytes
       FileManipulator tempFM = new FileManipulator(tempFile, true);
       tempFM.writeBytes(fm.readBytes(numBytes));
+      tempFM.close();
+
+      // get the absolute path to the temporary file of compressed image bytes
+      tempFilePath = tempFile.getAbsolutePath();
+
+      // Create a temporary file for the UNcompressed image bytes
+
+      String tempOutFilePath = tempFilePath + ".dds";
+      File tempOutFile = new File(tempOutFilePath);
+      if (tempOutFile.exists()) {
+        tempOutFile.delete();
+      }
+      tempOutFilePath = tempOutFile.getAbsolutePath();
+
+      //
+      // STEP 3
+      // Run Crunch to convert the compressed image data to a DDS file
+      //
+
+      ProcessBuilder pb = new ProcessBuilder(crunchPath, "-quiet", "-out", tempOutFilePath, "-file", tempFilePath);
+      Process convertProcess = pb.start();
+      int returnCode = convertProcess.waitFor(); // wait for Crunch to finish
+      if (returnCode == 0) {
+        // successful decompression
+        //Thread.sleep(1000); // if we try to read the file too quickly, it doesn't exist yet!
+        if (!tempOutFile.exists()) {
+          ErrorLogger.log("Crunch failed to run the conversion script for the image");
+          return null;
+        }
+      }
+      else {
+        ErrorLogger.log("Crunch had an error processing the file " + tempFilePath);
+        return null;
+      }
+
+      //
+      // STEP 4
+      // Read the DDS data from the output file
+      //
+      if (!tempOutFile.exists()) {
+        ErrorLogger.log("Crunch ran the conversion, but the file is missing: " + tempOutFile);
+        return null;
+      }
+
+      FileManipulator convertedFM = new FileManipulator(tempOutFile, false);
+      ImageResource imageResource = new Viewer_DDS_DDS().readThumbnail(convertedFM);
+      convertedFM.close();
+
+      return imageResource;
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads DXT5 CRUNCHED file data
+   * Calls "Crunch" to convert the compressed data into a DDS image
+   **********************************************************************************************
+   **/
+  public static ImageResource readDXT5Crunched(FileManipulator fm, int width, int height, int numCompressedBytes) {
+    return readDXT1Crunched(fm, width, height, numCompressedBytes);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads DXT1 CRUNCHED file data
+   * Calls "Crunch" to convert the compressed data into a DDS image
+   **********************************************************************************************
+   **/
+  public static ImageResource readDXT1Crunched(FileManipulator fm, int width, int height, int numCompressedBytes) {
+    try {
+
+      //
+      // STEP 1
+      // Check that Crunch is found
+      //
+
+      String crunchPath = Settings.getString("Crunch_Path");
+
+      File crunchFile = new File(crunchPath);
+
+      if (crunchFile.exists() && crunchFile.isDirectory()) {
+        // Path is a directory, append the filename to it
+        crunchPath = crunchPath + File.separatorChar + "crunch_x64.exe";
+        crunchFile = new File(crunchPath);
+      }
+
+      if (!crunchFile.exists()) {
+        // crunch path is invalid
+        ErrorLogger.log("Crunch can't be found at the path " + crunchFile.getAbsolutePath());
+        return null;
+      }
+
+      crunchPath = crunchFile.getAbsolutePath();
+
+      //
+      // STEP 2
+      // Dump all the compressed image bytes to a file
+      //
+
+      // Create a temporary file for the compressed image bytes
+      // NOTE THE FILE EXTENSION *.crn IS VERY IMPORTANT OR CRUNCH WON'T WORK
+      String tempFilePath = new File(Settings.get("TempDirectory")).getAbsolutePath();
+      tempFilePath += File.separator + "crunch_" + System.currentTimeMillis() + ".ge_temp.crn"; // System.currentTimeMillis() to make it a unique filename
+      File tempFile = new File(tempFilePath);
+      if (tempFile.exists()) {
+        tempFile.delete();
+      }
+      //tempFile = FilenameChecker.correctFilename(tempFile); // removes funny characters etc.
+
+      // write the compressed image bytes
+      FileManipulator tempFM = new FileManipulator(tempFile, true);
+      tempFM.writeBytes(fm.readBytes(numCompressedBytes));
       tempFM.close();
 
       // get the absolute path to the temporary file of compressed image bytes
@@ -2742,7 +2856,7 @@ public class ImageFormatReader {
     for (int i = 0; i < numPixels; i++) {
       int pixel = ShortConverter.unsign(fm.readShort());
 
-      int rPixel = ((pixel >> 11) & 31) * 8;
+      int rPixel = ((pixel >> 10) & 31) * 8;
       int gPixel = ((pixel >> 5) & 31) * 8;
       int bPixel = (pixel & 31) * 8;
       int aPixel = 255;
@@ -2769,7 +2883,7 @@ public class ImageFormatReader {
     for (int i = 0; i < numPixels; i++) {
       int pixel = ShortConverter.unsign(fm.readShort());
 
-      int bPixel = ((pixel >> 11) & 31) * 8;
+      int bPixel = ((pixel >> 10) & 31) * 8;
       int gPixel = ((pixel >> 5) & 31) * 8;
       int rPixel = (pixel & 31) * 8;
       int aPixel = 255;
@@ -2796,7 +2910,7 @@ public class ImageFormatReader {
     for (int i = 0; i < numPixels; i++) {
       int pixel = ShortConverter.unsign(ShortConverter.changeFormat(fm.readShort()));
 
-      int rPixel = ((pixel >> 11) & 31) * 8;
+      int rPixel = ((pixel >> 10) & 31) * 8;
       int gPixel = ((pixel >> 5) & 31) * 8;
       int bPixel = (pixel & 31) * 8;
       int aPixel = 255;
@@ -2823,13 +2937,15 @@ public class ImageFormatReader {
     for (int i = 0; i < numPixels; i++) {
       int pixel = ShortConverter.unsign(fm.readShort());
 
-      int rPixel = ((pixel >> 11) & 31) * 8;
+      //int rPixel = ((pixel >> 10) & 31) * 8;
+      int rPixel = ((pixel >> 11) & 31) * 8; // 3.15 Fixed incorrect pixel shift
       int gPixel = ((pixel >> 5) & 63) * 4;
       int bPixel = (pixel & 31) * 8;
       int aPixel = 255;
 
       // OUTPUT = ARGB
       pixels[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+
     }
 
     return new ImageResource(pixels, width, height);
@@ -2850,7 +2966,7 @@ public class ImageFormatReader {
     for (int i = 0; i < numPixels; i++) {
       int pixel = ShortConverter.unsign(ShortConverter.changeFormat(fm.readShort()));
 
-      int rPixel = ((pixel >> 11) & 31) * 8;
+      int rPixel = ((pixel >> 10) & 31) * 8;
       int gPixel = ((pixel >> 5) & 63) * 4;
       int bPixel = (pixel & 31) * 8;
       int aPixel = 255;
@@ -2887,7 +3003,7 @@ public class ImageFormatReader {
 
     return new ImageResource(pixels, width, height);
   }
-  
+
   /**
    **********************************************************************************************
    * Reads ARGB Pixel Data in a 4x4 block format (from Wii)
@@ -2905,37 +3021,35 @@ public class ImageFormatReader {
     if (widthMod != 0) {
       width += (4 - widthMod);
     }
-    
+
     int numPixels = width * height;
 
     // X Bytes - Pixel Data
     int[] pixels = new int[numPixels];
 
-    for (int h=0;h<height;h+=4) {
-      for (int w=0;w<width;w+=4) {
-        
-        
+    for (int h = 0; h < height; h += 4) {
+      for (int w = 0; w < width; w += 4) {
+
         byte[] arBlock = fm.readBytes(32);
         byte[] gbBlock = fm.readBytes(32);
-        
+
         int readPos = 0;
-        for (int h2=0;h2<4;h2++) {
-          for (int w2=0;w2<4;w2++) {
-            int writePos = ((h+h2)*width) + (w+w2);
-            
+        for (int h2 = 0; h2 < 4; h2++) {
+          for (int w2 = 0; w2 < 4; w2++) {
+            int writePos = ((h + h2) * width) + (w + w2);
+
             // INPUT = RGBA
             int aPixel = ByteConverter.unsign(arBlock[readPos]);
-            int rPixel = ByteConverter.unsign(arBlock[readPos+1]);
+            int rPixel = ByteConverter.unsign(arBlock[readPos + 1]);
             int gPixel = ByteConverter.unsign(gbBlock[readPos]);
-            int bPixel = ByteConverter.unsign(gbBlock[readPos+1]);
-            
+            int bPixel = ByteConverter.unsign(gbBlock[readPos + 1]);
+
             // OUTPUT = ARGB
             pixels[writePos] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
-            
+
             readPos += 2;
           }
         }
-        
 
       }
     }
@@ -2974,8 +3088,7 @@ public class ImageFormatReader {
     return new ImageResource(pixels, width, height);
 
   }
-  
-  
+
   /**
    **********************************************************************************************
    * Reads RGB5A3 Pixel Data in a 4x4 block format (from Wii)
@@ -2993,55 +3106,111 @@ public class ImageFormatReader {
     if (widthMod != 0) {
       width += (4 - widthMod);
     }
-    
+
     int numPixels = width * height;
 
     // X Bytes - Pixel Data
     int[] pixels = new int[numPixels];
 
-    for (int h=0;h<height;h+=4) {
-      for (int w=0;w<width;w+=4) {
-        
-        for (int h2=0;h2<4;h2++) {
-          for (int w2=0;w2<4;w2++) {
-            int writePos = ((h+h2)*width) + (w+w2);
+    for (int h = 0; h < height; h += 4) {
+      for (int w = 0; w < width; w += 4) {
+
+        for (int h2 = 0; h2 < 4; h2++) {
+          for (int w2 = 0; w2 < 4; w2++) {
+            int writePos = ((h + h2) * width) + (w + w2);
 
             int byte1 = ByteConverter.unsign(fm.readByte());
             int byte2 = ByteConverter.unsign(fm.readByte());
-          
-            int topBit = byte1>>7;
-        
+
+            int topBit = byte1 >> 7;
+
             if (topBit == 0) {
               // 0AAARRRRGGGGBBBB
-          
-              int a = ((byte1 >> 4)&7) * 32;
+
+              int a = ((byte1 >> 4) & 7) * 32;
               int r = (byte1 & 15) * 16;
-              int g = ((byte2 >> 4)&15) * 16;
+              int g = ((byte2 >> 4) & 15) * 16;
               int b = (byte2 & 15) * 16;
-          
+
               // OUTPUT = ARGB
               pixels[writePos] = ((r << 16) | (g << 8) | b | (a << 24));
-              
+
             }
             else { // topBit == 1
               // 1RRRRRGG GGGBBBBB
-              
+
               int a = 255;
               int r = ((byte1 >> 2) & 31) * 8;
-              int g = (((byte2 >>5) & 7) | ((byte1 &3) <<3)) * 8;
+              int g = (((byte2 >> 5) & 7) | ((byte1 & 3) << 3)) * 8;
               int b = (byte2 & 31) * 8;
-              
-        
+
               // OUTPUT = ARGB
               pixels[writePos] = ((r << 16) | (g << 8) | b | (a << 24));
-          
+
             }
           }
-          
+
         }
       }
 
+    }
 
+    return new ImageResource(pixels, width, height);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads GBAR5551 Pixel Data
+   **********************************************************************************************
+   **/
+  public static ImageResource readGBAR5551(FileManipulator fm, int width, int height) {
+
+    int numPixels = width * height;
+
+    // X Bytes - Pixel Data (gggbbbbb arrrrrgg)
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i++) {
+      int byte1 = ByteConverter.unsign(fm.readByte());
+      int byte2 = ByteConverter.unsign(fm.readByte());
+
+      int r = ((byte2 >> 2) & 31) * 8;
+      int g = (((byte2 & 3) << 3) | ((byte1 >> 5) & 7)) * 8;
+      int b = (byte1 & 31) * 8;
+      int a = (byte2 >> 7) * 255;
+
+      // OUTPUT = ARGB
+      pixels[i] = ((r << 16) | (g << 8) | b | (a << 24));
+    }
+
+    return new ImageResource(pixels, width, height);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads GRAB5551 Pixel Data
+   **********************************************************************************************
+   **/
+  public static ImageResource readGRAB5551(FileManipulator fm, int width, int height) {
+
+    int numPixels = width * height;
+
+    // X Bytes - Pixel Data
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i++) {
+      int byte1 = ByteConverter.unsign(fm.readByte());
+      int byte2 = ByteConverter.unsign(fm.readByte());
+
+      int b = ((byte2 >> 2) & 31) * 8;
+      int g = (((byte2 & 3) << 3) | ((byte1 >> 5) & 7)) * 8;
+      int r = (byte1 & 31) * 8;
+      int a = (byte2 >> 7) * 255;
+
+      // GGGRRRRR ABBBBBGG
+
+      // OUTPUT = ARGB
+      pixels[i] = ((r << 16) | (g << 8) | b | (a << 24));
     }
 
     return new ImageResource(pixels, width, height);
@@ -3059,6 +3228,7 @@ public class ImageFormatReader {
     // X Bytes - Pixel Data
     int[] pixels = new int[numPixels];
 
+    // gggbbbbb arrrrrgg
     for (int i = 0; i < numPixels; i++) {
       int byte1 = ByteConverter.unsign(fm.readByte());
       int byte2 = ByteConverter.unsign(fm.readByte());
@@ -3145,6 +3315,31 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+  Removes all the Alpha values, but only if they're all set to invisible
+   **********************************************************************************************
+   **/
+  public static ImageResource removeAlphaIfAllInvisible(ImageResource image) {
+    int[] pixels = image.getPixels();
+    int numPixels = pixels.length;
+
+    int[] reversedPixels = new int[numPixels];
+    for (int i = 0; i < numPixels; i++) {
+      int pixel = pixels[i];
+
+      int alpha = pixel >> 24;
+      if (alpha != 0) {
+        return image; // at least 1 non-alpha found, so just return the image as it currently is.
+      }
+
+      reversedPixels[i] = ((pixel << 8) >> 8) | (255 << 24); // <<8 >>8 removes the alpha from the top of the pixel
+    }
+
+    image.setPixels(reversedPixels);
+    return image;
+  }
+
+  /**
+   **********************************************************************************************
   Changes all the color values so that 0=255, 1=254, etc. ie for when 0 actually means full color
    **********************************************************************************************
    **/
@@ -3205,6 +3400,32 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+  Converts alpha values 0-127 to 0-255
+   **********************************************************************************************
+   **/
+  public static int[] doubleAlpha(int[] pixels) {
+    int numPixels = pixels.length;
+
+    int[] reversedPixels = new int[numPixels];
+    for (int i = 0; i < numPixels; i++) {
+      int pixel = pixels[i];
+
+      int alphaValue = pixel >> 24;
+      if (alphaValue == -128) {
+        alphaValue = 255;
+      }
+      else {
+        alphaValue *= 2;
+      }
+
+      reversedPixels[i] = (pixel & 0xFFFFFF) | (alphaValue << 24);
+    }
+
+    return reversedPixels;
+  }
+
+  /**
+   **********************************************************************************************
   Changes all the Alpha values so that 0=255, 1=254, etc. Ie for when 0 actually means full alpha
    **********************************************************************************************
    **/
@@ -3258,7 +3479,7 @@ public class ImageFormatReader {
         int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
         int column_location = posY * width * 2 + ((x + swap_selector) & 0x7) * 4;
 
-        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2);     // 0,1,2,3
+        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2); // 0,1,2,3
 
         //bytes[(y * width) + x] = swizzled[block_location + column_location + byte_num];
         bytes[block_location + column_location + byte_num] = swizzled[(y * width) + x];
@@ -3288,7 +3509,7 @@ public class ImageFormatReader {
         int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
         int column_location = posY * width * 2 + ((x + swap_selector) & 0x7) * 4;
 
-        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2);     // 0,1,2,3
+        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2); // 0,1,2,3
 
         //bytes[(y * width) + x] = swizzled[block_location + column_location + byte_num];
         bytes[block_location + column_location + byte_num] = swizzled[(y * width) + x];
@@ -3393,6 +3614,37 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+  Swizzles (Morton Code) an image
+  Based on puyotools --> Libraries/GimSharp/GimTexture/GimDataCodec.cs --> UnSwizzle()
+   **********************************************************************************************
+   **/
+  public static int[] swizzle(int[] bytes, int width, int height, int blockSize) {
+
+    int numBytes = bytes.length;
+    int[] outBytes = new int[numBytes];
+
+    int maxPos = numBytes / blockSize;
+
+    int outPos = 0;
+
+    for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {
+        int index = (int) calculateMorton2D(x, y);
+        if (index >= maxPos) {
+          continue;
+        }
+
+        //System.arraycopy(bytes, index * blockSize, outBytes, outPos, blockSize);
+        System.arraycopy(bytes, outPos, outBytes, index * blockSize, blockSize);
+        outPos += blockSize;
+      }
+    }
+
+    return outBytes;
+  }
+
+  /**
+   **********************************************************************************************
   Un-swizzles an image for the PS2
    **********************************************************************************************
    **/
@@ -3410,7 +3662,7 @@ public class ImageFormatReader {
         int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
         int column_location = posY * width * 2 + ((x + swap_selector) & 0x7) * 4;
 
-        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2);     // 0,1,2,3
+        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2); // 0,1,2,3
 
         bytes[(y * width) + x] = swizzled[block_location + column_location + byte_num];
       }
@@ -3447,7 +3699,7 @@ public class ImageFormatReader {
         int posY = (((y & (~3)) >> 1) + (y & 1)) & 0x7;
         int column_location = posY * width * 2 + ((x + swap_selector) & 0x7) * 4;
 
-        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2);     // 0,1,2,3
+        int byte_num = ((y >> 1) & 1) + ((x >> 2) & 2); // 0,1,2,3
 
         bytes[(y * width) + x] = swizzled[block_location + column_location + byte_num];
       }
@@ -3579,8 +3831,7 @@ public class ImageFormatReader {
     return bytes;
   }
   */
-  
-  
+
   /**
    **********************************************************************************************
    * Rotates the image left by 90 degrees
@@ -3591,30 +3842,26 @@ public class ImageFormatReader {
     // X Bytes - Pixel Data
     int[] pixels = imageResource.getPixels();
     int numPixels = pixels.length;
-    
- // after the rotate, the width and height are swapped, so read them differently here
+
+    // after the rotate, the width and height are swapped, so read them differently here
     int width = imageResource.getHeight();
     int height = imageResource.getWidth();
-    
+
     int[] outPixels = new int[numPixels];
 
     int inPos = 0;
-    for (int w=0;w<width;w++) {
-    for (int h=height-1;h>=0;h--) {
-        outPixels[(h*width)+w] = pixels[inPos];
+    for (int w = 0; w < width; w++) {
+      for (int h = height - 1; h >= 0; h--) {
+        outPixels[(h * width) + w] = pixels[inPos];
         inPos++;
       }
     }
 
-    
     // we already swapped them at the top, so just set them properly here.
     imageResource.setWidth(width);
     imageResource.setHeight(height);
-    
-    imageResource.setPixels(outPixels);
-    
-    
 
+    imageResource.setPixels(outPixels);
 
     return imageResource;
   }
@@ -3647,7 +3894,7 @@ public class ImageFormatReader {
 
     return imageResource;
   }
-  
+
   /**
    **********************************************************************************************
    * Swaps the Alpha and Green values in an image. Input should be in (effectively) GBAR format.
@@ -3667,7 +3914,6 @@ public class ImageFormatReader {
       int bPixel = ((pixel >> 16) & 255);
       int aPixel = ((pixel >> 8) & 255);
       int rPixel = (pixel & 255);
-      
 
       // OUTPUT = ARGB
       pixels[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
@@ -3677,7 +3923,6 @@ public class ImageFormatReader {
 
     return imageResource;
   }
-  
 
   /**
   **********************************************************************************************

@@ -15,11 +15,13 @@
 package org.watto.ge.plugin;
 
 import java.io.File;
+import java.util.Arrays;
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
+import org.watto.component.PreviewPanel;
 import org.watto.component.WSObjectPlugin;
 import org.watto.component.WSPluginException;
 import org.watto.component.WSPluginManager;
@@ -36,6 +38,7 @@ import org.watto.ge.plugin.resource.Resource_Property;
 import org.watto.io.DirectoryBuilder;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameChecker;
+import org.watto.io.FilenameSplitter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -513,6 +516,107 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
   **/
   public boolean canWrite() {
     return canWrite;
+  }
+  
+  
+  /**
+  **********************************************************************************************
+  For use in convertOnReplace() when overwritten by plugins.
+  Basically will take a File, find a converter for it (of type PreviewPanel), and if found,
+  will return the PreviewPanel so you can feed it into an appropriate conversion plugin.
+  **********************************************************************************************
+  **/
+  public PreviewPanel loadFileForConversion(Resource resourceBeingReplaced, File fileToReplaceWith, String ... extensions) {
+    try {
+    
+      int numExtensions = extensions.length;
+      
+   // check if this type of file can be converted or not
+      String beingReplacedExtension = resourceBeingReplaced.getExtension();
+      
+      boolean found = false;
+    for (int i=0;i<numExtensions;i++) {
+      if (beingReplacedExtension.equalsIgnoreCase(extensions[i])) {
+        found = true;
+      }
+    }
+    
+    if (!found) {
+      // this resource isn't one with a converter attached to it - no conversion needed
+      return null;
+    }
+      
+      
+   // check if the file is already the right format
+    String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
+    
+    found = false;
+    for (int i=0;i<numExtensions;i++) {
+      if (toReplaceWithExtension.equalsIgnoreCase(extensions[i])) {
+        found = true;
+      }
+    }
+    
+    if (found) {
+      // already the right format - no conversion needed
+      return null;
+    }
+
+      
+
+      //
+      //
+      // if we're here, we want to scan to see if we can find an Image ViewerPlugin that can read the file into an ImageResource,
+      // which we can then convert into  the appropriate format later on.
+      //
+      //
+
+      // 1. Open the file
+      FileManipulator fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 2. Get all the ViewerPlugins that can read this file type
+      RatedPlugin[] plugins = PluginFinder.findPlugins(fm, ViewerPlugin.class); // NOTE: This closes the fm pointer!!!
+      if (plugins == null || plugins.length == 0) {
+        // no viewer plugins found that will accept this file
+        return null;
+      }
+
+      Arrays.sort(plugins);
+
+      // re-open the file - it was closed at the end of findPlugins();
+      fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 3. Try each plugin until we find one that can render the file as an ImageResource
+      PreviewPanel imagePreviewPanel = null;
+      for (int i = 0; i < plugins.length; i++) {
+        fm.seek(0); // go back to the start of the file
+
+        imagePreviewPanel = ((ViewerPlugin) plugins[i].getPlugin()).read(fm);
+        if (imagePreviewPanel != null) {
+          // found a previewer
+          break;
+        }
+      }
+
+      fm.close();
+
+      if (imagePreviewPanel == null) {
+        // no plugins were able to open this file successfully
+        return null;
+      }
+
+      //
+      //
+      // If we're here, we have a rendered image, ready for conversion.
+      //
+      //
+      return imagePreviewPanel;
+
+    }
+    catch (Throwable t) {
+     ErrorLogger.log(t);
+      return null;
+    }
   }
 
   /**

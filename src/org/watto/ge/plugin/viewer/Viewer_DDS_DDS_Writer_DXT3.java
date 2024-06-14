@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -166,7 +166,7 @@ public class Viewer_DDS_DDS_Writer_DXT3 extends ViewerPlugin {
       fm.writeInt(imageWidth);
 
       // 4 - Linear Size
-      fm.writeInt(imageWidth * imageHeight / 2);
+      fm.writeInt(imageWidth * imageHeight);
 
       // 4 - Depth
       fm.writeInt(0);

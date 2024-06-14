@@ -141,7 +141,9 @@ public class ButterflyTableHeaderUI extends BasicTableHeaderUI {
 
       // if less than 3 characters of text, don't paint the text
       if (text.length() < 3) {
-        text = "";
+        if (!text.equals("ID")) { // except, we want to paint the word ID specifically
+          text = "";
+        }
       }
 
       //ButterflyPainter.paintSquareGradient((Graphics2D)graphics,x - 1,-1,wDraw + 2,h + 1);

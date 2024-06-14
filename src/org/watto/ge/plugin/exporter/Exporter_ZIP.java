@@ -85,7 +85,6 @@ public class Exporter_ZIP extends ExporterPlugin {
   
   **********************************************************************************************
   **/
-  @SuppressWarnings("resource")
   @Override
   public void open(Resource source) {
     try {

@@ -23,6 +23,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_FADPCM;
 import org.watto.ge.plugin.exporter.Exporter_Custom_FSB5_MP3;
 import org.watto.ge.plugin.exporter.Exporter_Custom_FSB5_OGG;
 import org.watto.ge.plugin.exporter.Exporter_Custom_FSB_Audio;
@@ -172,9 +173,9 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
 
   public static int CODEC_VORBIS = 15; // OGG
 
-  public static int CODEC_IT214 = 16;
+  public static int CODEC_IT214 = 1024;//16;
 
-  public static int CODEC_IT215 = 17;
+  public static int CODEC_IT215 = 2048;//17;
 
   /**
   **********************************************************************************************
@@ -375,6 +376,11 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
         if (debug) {
           System.out.println("[Plugin_FSB_FSB5] Codec/Mode is " + mode);
         }
+        /*
+        if (mode == 16) {
+          mode = CODEC_PCM16;
+        }
+        */
 
         // 4 - Flags
         int flags = fm.readInt();
@@ -479,6 +485,7 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
         //ExporterPlugin exporter = Exporter_Custom_FSB_Audio.getInstance();
         ExporterPlugin exporterGeneric = Exporter_Custom_FSB_Audio.getInstance();
         ExporterPlugin exporterMP3 = Exporter_Custom_FSB5_MP3.getInstance();
+        ExporterPlugin exporterFADPCM = Exporter_Custom_FADPCM.getInstance();
 
         // Read the names table
         fm.seek(dirOffset);
@@ -649,6 +656,10 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
             if (mode == CODEC_MPEG) {
               // special exporter for MP3's, fixes the frames etc.
               resource.setExporter(exporterMP3);
+            }
+            else if (mode == 16) {
+              // special exporter for FADPCM
+              resource.setExporter(exporterFADPCM);
             }
 
             resources[realNumFiles] = resource;

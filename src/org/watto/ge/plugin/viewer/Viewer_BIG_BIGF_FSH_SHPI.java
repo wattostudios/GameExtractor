@@ -205,6 +205,8 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
 
   int globalPaletteFormat = 0;
 
+  boolean globalNotLoaded = false;
+
   /**
   **********************************************************************************************
   Reads a resource from the FileManipulator, and generates a Thumbnail for it (generally, only
@@ -222,6 +224,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
       current34Palette = 0;
       globalPalettes34Count = 0;
       globalPaletteFormat = 0;
+      globalNotLoaded = false;
 
       // 4 - Header (SHPI)
       String header = fm.readString(4);
@@ -901,6 +904,11 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
             // uses a global color palette
             palette = globalPalette;
 
+          }
+          else if ((paletteFormat == 124 || paletteFormat == 123) && globalPalette == null) {
+            // needs a global palette, but not loaded yet
+            globalNotLoaded = true; // NHL 97 - not sure what the palette format is, doesn't seem to match anything
+            return null;
           }
           else {
 
@@ -2011,6 +2019,7 @@ public class Viewer_BIG_BIGF_FSH_SHPI extends ViewerPlugin {
                 if (numColors >= 16) {
                   im.changeColorCount(15);
                   im.changeColorCount(16); // back to 256 colors again, to add the 0,0,0,0,
+                  palette = im.getPalette();
                 }
 
                 // swap the first and last colors (makes 0,0,0,0 the first color)

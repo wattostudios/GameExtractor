@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -433,6 +434,102 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           // 4 - Characteristics
           fm.skip(16);
         }
+        else if (sectionName.equals(".enigma1")) {
+          // Possibly contains Enigma VirtualBox archive as per https://lifeinhex.com/ (EnigmaVBUnpacker)
+          // 4 - Virtual Length (length of data - kinda)
+          // 4 - Virtual Address (offset to data - kinda)
+          fm.skip(8);
+
+          // 4 - Length Of Packed Data
+          int packedLength = fm.readInt();
+          FieldValidator.checkLength(packedLength);
+
+          // 4 - Offset To Raw Data (multiple of FileAlignment)
+          int packedOffset = fm.readInt();
+          FieldValidator.checkOffset(packedOffset, arcSize);
+
+          // now go and process the enigma1 piece
+          long currentOffset = fm.getOffset();
+          fm.seek(packedOffset + 224);
+
+          try {
+
+            // 4 - File Data Offset (relative to this offset)
+            // 8 - null
+            // 1 - Unknown (1)
+            // 2 - null
+            // 4 - null
+            // 4 - Unknown (1)
+            // 4 - Unknown (1)
+            fm.skip(27);
+
+            String basePath = "";
+
+            // 4 - Entry Type (1=Directory, 0=File)
+            int entryType = fm.readInt();
+
+            while (entryType == 1) {
+              // X - Directory Name (unicode)
+              // 2 - null Unicode Name Terminator
+              String dirName = fm.readNullUnicodeString();
+              basePath = basePath + dirName + File.separatorChar;
+
+              // 2 - Unknown (2/3)
+              // 8 - Unknown
+              // 8 - Unknown
+              // 8 - Unknown
+              // 4 - null
+              // 4 - Unknown (2/3)
+              // 4 - Unknown (2/3)
+              fm.skip(38);
+
+              // 4 - Entry Type (for the next entry) (1=Directory, 0=File)
+              entryType = fm.readInt();
+            }
+
+            // hopefully we're now at a file
+
+            // X - Filename (unicode)
+            // 2 - null Unicode Filename Terminator
+            String filename = fm.readNullUnicodeString();
+            filename = basePath + filename;
+
+            // 2 - Unknown (2/3)
+            // 1 - null
+            // 4 - File Length
+            // 4 - null
+            // 8 - Unknown
+            // 8 - Unknown
+            // 8 - Unknown
+            // 2 - Unknown (2080)
+            // 1 - null
+            // 12 - null
+            fm.skip(50);
+
+            // 4 - File Length
+            int fileLength = fm.readInt();
+            FieldValidator.checkLength(fileLength, packedLength);
+
+            // 4 - null
+            fm.skip(4);
+
+            // X - Pack File Data
+            long fileOffset = fm.getOffset();
+
+            //path,id,name,offset,length,decompLength,exporter
+            Resource resource = new Resource(path, filename, fileOffset, fileLength);
+            resource.addProperty("OffsetCorrect", true);
+            resources[realNumFiles] = resource;
+            realNumFiles++;
+
+          }
+          catch (Throwable t) {
+            ErrorLogger.log("[DLL_MZ] Possibly not an EnigmaVB Packed EXE");
+          }
+
+          // go back to where we were, keep processing other things
+          fm.seek(currentOffset);
+        }
         else {
           // ignore - only want resources
           // However, we need to still find out if this is the furthest section in the EXE...
@@ -488,12 +585,51 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
                   // Found a Cabinet File appended to the EXE
 
                   //path,id,name,offset,length,decompLength,exporter
-                  resources[realNumFiles] = new Resource(path, path.getName() + ".cab", appendedOffset, appendedLength);
+                  Resource resource = new Resource(path, path.getName() + ".cab", appendedOffset, appendedLength);
+                  resource.addProperty("OffsetCorrect", true);
+                  resources[realNumFiles] = resource;
                   realNumFiles++;
                 }
               }
             }
           }
+        }
+      }
+
+      // Adding support for EXE files with a Resource put at the end of it, via a Footer.
+
+      // Game = Charnel House Trilogy
+      fm.seek(arcSize - 16);
+
+      // 4 - Data File Offset
+      int dataFileOffset = fm.readInt();
+
+      // 4 - Footer (CLIB)
+      String footer1 = fm.readString(4);
+
+      // 4 - Unknown
+      fm.skip(4);
+
+      // 4 - Footer End (SIGE)
+      String footer2 = fm.readString(4);
+
+      if (footer1.equals("CLIB") && footer2.equals("SIGE")) {
+        try {
+          dataFileOffset += 4; // skip the data file header (CLIB)
+          FieldValidator.checkOffset(dataFileOffset, arcSize);
+
+          long dataFileLength = (arcSize - 16) - dataFileOffset;
+          FieldValidator.checkLength(dataFileLength, arcSize);
+
+          //path,id,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, path.getName() + ".clib", dataFileOffset, dataFileLength);
+          resource.addProperty("OffsetCorrect", true);
+          resources[realNumFiles] = resource;
+          realNumFiles++;
+
+        }
+        catch (Throwable t) {
+          // don't want to exit, just ignore the data file, if we have a problem reading it
         }
       }
 
@@ -525,13 +661,20 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
 
           for (int i = 0; i < realNumFiles; i++) {
             Resource resource = resources[i];
+
+            String offsetCheck = resource.getProperty("OffsetCorrect");
+            if (offsetCheck != null && !offsetCheck.equals("")) {
+              // leave this resource alone, it's some other special file (eg MSCF or Enigma) that already has the correct offset
+              continue;
+            }
+
             long offset = resource.getOffset();
             resource.setOffset(offset - difference);
 
             // Then we need to see if there's a Cabinet 3.0 embedded in the EXE - if there is, rename it appropriately, like we do in newer CAB
             // versions (above) where the CAB is just appended to the end of the EXE rather than being embedded in it.
 
-            System.out.println("Old: " + offset + "\tNew: " + resource.getOffset() + "\tName: " + resource.getName());
+            //System.out.println("Old: " + offset + "\tNew: " + resource.getOffset() + "\tName: " + resource.getName());
           }
         }
 
@@ -544,7 +687,9 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
       return null;
 
     }
-    catch (Throwable t) {
+    catch (
+
+    Throwable t) {
       logError(t);
       return null;
     }

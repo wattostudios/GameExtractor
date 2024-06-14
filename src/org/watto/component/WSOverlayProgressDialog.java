@@ -52,6 +52,8 @@ public class WSOverlayProgressDialog extends JPanel implements WSProgressDialogI
   /** If the maximum is too large, the maximum and actual values need to be scaled down **/
   static int scalingFactor = 0;
 
+  Thread repaintTimer = null;
+
   /***********************************************************************************************
   Gets the singleton <code>instance</code> of this <code>WSProgressDialog</code>
   @return the singleton <code>instance</code>
@@ -133,11 +135,23 @@ public class WSOverlayProgressDialog extends JPanel implements WSProgressDialogI
   @Override
   public void setIndeterminate(boolean indeterminate, int barNumber) {
     try {
+      boolean alreadyIndeterminate = bars[barNumber].isIndeterminate();
+
       bars[barNumber].setIndeterminate(indeterminate);
       if (indeterminate) {
         // if true, need to repaint the indeterminate progress
         //new RepaintThread_WhileVisible(this,50).start();
-        new RepaintWhileVisibleThread(bars[barNumber], 50).start();
+        if (!alreadyIndeterminate) {
+          // only want a repaint timer if we don't already have one running
+          if (repaintTimer != null && repaintTimer.isAlive()) {
+            // already have a timer running - don't need another one
+          }
+          else {
+            // start a new timer
+            repaintTimer = new RepaintWhileVisibleThread(bars[barNumber], 50);
+            repaintTimer.start();
+          }
+        }
       }
     }
     catch (Throwable t) {

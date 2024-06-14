@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.OutputStream;
 import javax.swing.Icon;
 import org.watto.ErrorLogger;
+import org.watto.TemporarySettings;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Default;
@@ -771,7 +772,11 @@ public class Resource implements Comparable<Resource> {
 
     ArchivePlugin readPlugin = Archive.getReadPlugin();
     if (readPlugin.canConvertOnReplace()) {
+      
+      // 3.15 added the TemporarySettings so that when doing Conversions during an Extract, it doesn't call createInterface, which was retaining memory
+      TemporarySettings.set("ExportForConversionOnly", true);
       file = readPlugin.convertOnReplace(this, file);
+      TemporarySettings.set("ExportForConversionOnly", false);
     }
 
     sourcePath = file;

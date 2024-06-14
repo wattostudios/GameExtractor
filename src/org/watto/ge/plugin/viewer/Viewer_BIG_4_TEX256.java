@@ -20,6 +20,7 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageFormatWriter;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
@@ -54,6 +55,9 @@ public class Viewer_BIG_4_TEX256 extends ViewerPlugin {
   **/
   @Override
   public boolean canWrite(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
     return false;
   }
 
@@ -136,7 +140,7 @@ public class Viewer_BIG_4_TEX256 extends ViewerPlugin {
       }
 
       // X - Pixels
-      ImageResource imageResource = ImageFormatReader.readRGBA5551(fm, 256, 256);
+      ImageResource imageResource = ImageFormatReader.readGBAR5551(fm, 256, 256);
 
       fm.close();
 
@@ -158,6 +162,35 @@ public class Viewer_BIG_4_TEX256 extends ViewerPlugin {
   **/
   @Override
   public void write(PreviewPanel preview, FileManipulator fm) {
+    try {
+
+      if (!(preview instanceof PreviewPanel_Image)) {
+        return;
+      }
+
+      ImageResource imageResource = ((PreviewPanel_Image) preview).getImageResource();
+
+      int width = imageResource.getWidth();
+      int height = imageResource.getHeight();
+
+      if (width == -1 || height == -1) {
+        return;
+      }
+
+      // need to resize to 256x256 if it isn't already
+      if (width != 256 || height != 256) {
+        imageResource.resize(256, 256);
+      }
+
+      // X - Pixels
+      ImageFormatWriter.writeGBAR5551(fm, imageResource);
+
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

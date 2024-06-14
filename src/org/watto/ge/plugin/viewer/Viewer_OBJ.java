@@ -17,6 +17,7 @@ package org.watto.ge.plugin.viewer;
 import java.awt.Image;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.component.PreviewPanel;
@@ -26,6 +27,7 @@ import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
+
 import javafx.collections.ObservableFloatArray;
 import javafx.geometry.Point3D;
 import javafx.scene.shape.MeshView;
@@ -494,9 +496,9 @@ public class Viewer_OBJ extends ViewerPlugin {
         float normal1 = normals[i];
         float normal2 = normals[i + 1];
         float normal3 = normals[i + 2];
-        if (normal1 != 0 && normal2 != 0 && normal3 != 0) {
-          fm.writeLine("vn " + df.format(normal1) + ' ' + df.format(normal2) + ' ' + df.format(normal3));
-        }
+        //if (normal1 != 0 && normal2 != 0 && normal3 != 0) {
+        fm.writeLine("vn " + df.format(normal1) + ' ' + df.format(normal2) + ' ' + df.format(normal3));
+        //}
       }
       normals = null; // free memory
 
@@ -509,9 +511,9 @@ public class Viewer_OBJ extends ViewerPlugin {
       for (int i = 0; i < numTexCoords; i += 2) {
         float texCoord1 = texCoords[i];
         float texCoord2 = texCoords[i + 1];
-        if (texCoord1 != 0 && texCoord2 != 0) {
-          fm.writeLine("vt " + df.format(texCoord1) + ' ' + df.format(texCoord2));
-        }
+        //if (texCoord1 != 0 && texCoord2 != 0) {
+        fm.writeLine("vt " + df.format(texCoord1) + ' ' + df.format(texCoord2));
+        //}
       }
       texCoords = null; // free memory
 
@@ -526,7 +528,10 @@ public class Viewer_OBJ extends ViewerPlugin {
         int face1 = faces[i] + 1 + verticesProcessed;
         int face2 = faces[i + 1] + 1 + verticesProcessed;
         int face3 = faces[i + 2] + 1 + verticesProcessed;
-        fm.writeLine("f " + face1 + ' ' + face2 + ' ' + face3);
+        //fm.writeLine("f " + face1 + ' ' + face2 + ' ' + face3);
+
+        // because numVertex and numTexCoord are the same, this writes it in format "f v1/vt1 v2/vt2 v3/vt3" for mapping tex-coords to the vertices
+        fm.writeLine("f " + face1 + '/' + face1 + ' ' + face2 + '/' + face2 + ' ' + face3 + '/' + face3);
       }
       faces = null; // free memory
 
@@ -550,7 +555,7 @@ public class Viewer_OBJ extends ViewerPlugin {
       PreviewPanel_3DModel preview3D = (PreviewPanel_3DModel) preview;
 
       // generate a thumbnail-sized snapshot
-      int thumbnailSize = 150;  // bigger than ImageResource, so it is shrunk (and smoothed as a result)
+      int thumbnailSize = 150; // bigger than ImageResource, so it is shrunk (and smoothed as a result)
       preview3D.generateSnapshot(thumbnailSize, thumbnailSize);
 
       Image image = preview3D.getImage();

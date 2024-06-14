@@ -15,11 +15,19 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.Arrays;
+import org.watto.Language;
+import org.watto.component.PreviewPanel;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.PluginFinder;
+import org.watto.ge.plugin.RatedPlugin;
+import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.viewer.Viewer_BIG_4_TEX256;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -39,7 +47,7 @@ public class Plugin_BIG_4 extends ArchivePlugin {
     super("BIG_4", "BIG_4");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, false);
 
     setGames("Legacy of Kain: Soul Reaver");
     setExtensions("big"); // MUST BE LOWER CASE
@@ -49,6 +57,8 @@ public class Plugin_BIG_4 extends ArchivePlugin {
     setFileTypes(new FileType("tex256", "Texture 256 Image", FileType.TYPE_IMAGE));
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+
+    setCanConvertOnReplace(true);
 
     //setCanScanForFileTypes(true);
 
@@ -159,23 +169,130 @@ public class Plugin_BIG_4 extends ArchivePlugin {
   }
 
   /**
-  **********************************************************************************************
-  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
-  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
-  extensions, which will be tried before any standard extensions.
-  @return null if no extension can be determined, or the extension if one can be found
-  **********************************************************************************************
-  **/
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
   @Override
-  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+  public void write(Resource[] resources, File path) {
+    try {
 
-    /*
-    if (headerInt1 == 2037149520) {
-      return "js";
+      FileManipulator fm = new FileManipulator(path, true);
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 2 - Unknown (512)
+      fm.writeShort(512);
+
+      // 2 - Number of Images
+      fm.writeShort(numFiles);
+
+      // 4092 - null Padding to offset 4096
+      for (int p = 0; p < 4092; p++) {
+        fm.writeByte(0);
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      write(resources, fm);
+
+      //ExporterPlugin exporter = new Exporter_ZLib();
+      //long[] compressedLengths = write(exporter,resources,fm);
+
+      fm.close();
+
     }
-    */
+    catch (Throwable t) {
+      logError(t);
+    }
+  }
 
-    return null;
+  /**
+   **********************************************************************************************
+   When replacing TEX images, if the fileToReplaceWith is a different format image (eg DDS, PNG, ...)
+   it can be converted into a TEX image. All other files are replaced without conversion
+   @param resourceBeingReplaced the Resource in the archive that is being replaced
+   @param fileToReplaceWith the file on your PC that will replace the Resource. This file is the
+          one that will be converted into a different format, if applicable.
+   @return the converted file, if conversion was applicable/successful, else the original fileToReplaceWith
+   **********************************************************************************************
+   **/
+  @Override
+  public File convertOnReplace(Resource resourceBeingReplaced, File fileToReplaceWith) {
+    String beingReplacedExtension = resourceBeingReplaced.getExtension();
+    if (beingReplacedExtension.equalsIgnoreCase("tex256")) {
+      // try to convert
+
+      String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
+      if (toReplaceWithExtension.equalsIgnoreCase("tex256")) {
+        // if the fileToReplace already has a tex256 extension, assume it's already a compatible tex256 file and doesn't need to be converted
+        return fileToReplaceWith;
+      }
+
+      //
+      //
+      // if we're here, we want to scan to see if we can find an Image ViewerPlugin that can read the file into an ImageResource,
+      // which we can then convert into a tex256 using plugin Viewer_BIG_4_TEX256
+      //
+      //
+
+      // 1. Open the file
+      FileManipulator fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 2. Get all the ViewerPlugins that can read this file type
+      RatedPlugin[] plugins = PluginFinder.findPlugins(fm, ViewerPlugin.class); // NOTE: This closes the fm pointer!!!
+      if (plugins == null || plugins.length == 0) {
+        // no viewer plugins found that will accept this file
+        return fileToReplaceWith;
+      }
+
+      Arrays.sort(plugins);
+
+      // re-open the file - it was closed at the end of findPlugins();
+      fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 3. Try each plugin until we find one that can render the file as an ImageResource
+      PreviewPanel imagePreviewPanel = null;
+      for (int i = 0; i < plugins.length; i++) {
+        fm.seek(0); // go back to the start of the file
+        imagePreviewPanel = ((ViewerPlugin) plugins[i].getPlugin()).read(fm);
+
+        if (imagePreviewPanel != null) {
+          // 4. We have found a plugin that was able to render the image
+          break;
+        }
+      }
+
+      fm.close();
+
+      if (imagePreviewPanel == null) {
+        // no plugins were able to open this file successfully
+        return fileToReplaceWith;
+      }
+
+      //
+      //
+      // If we're here, we have a rendered image, so we want to convert it into tex256 using Viewer_BIG_4_TEX256
+      //
+      //
+      Viewer_BIG_4_TEX256 converterPlugin = new Viewer_BIG_4_TEX256();
+      //File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + converterPlugin.getExtension(0));
+      File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + beingReplacedExtension);
+      if (destination.exists()) {
+        destination.delete();
+      }
+
+      FileManipulator fmOut = new FileManipulator(destination, true);
+      converterPlugin.write(imagePreviewPanel, fmOut);
+      fmOut.close();
+
+      return destination;
+    }
+    else {
+      return fileToReplaceWith;
+    }
   }
 
 }

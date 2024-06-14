@@ -43,15 +43,17 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Rogue Rocks",
-        "Lumencraft");
+        "Lumencraft",
+        "Martial Law");
     setExtensions("pck"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("stex", "Texture Image", FileType.TYPE_IMAGE),
-        new FileType("oggstr", "OGG Vorbis Audio", FileType.TYPE_AUDIO));
+        new FileType("oggstr", "OGG Vorbis Audio", FileType.TYPE_AUDIO),
+        new FileType("mp3str", "MP3 Audio", FileType.TYPE_AUDIO));
 
-    setTextPreviewExtensions("import", "remap", "shader", "tres", "tscn"); // LOWER CASE
+    setTextPreviewExtensions("import", "remap", "shader", "tres", "tscn", "po"); // LOWER CASE
 
     //setCanScanForFileTypes(true);
 
@@ -172,7 +174,10 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
       // move oggstr along a little bit, to the OGG file.
       for (int i = 0; i < numFiles; i++) {
         Resource resource = resources[i];
-        if (resource.getExtension().equals("oggstr")) {
+
+        String extension = resource.getExtension();
+
+        if (extension.equals("oggstr") || extension.equals("mp3str")) {
           long offset = resource.getOffset();
 
           fm.seek(offset);
@@ -256,7 +261,7 @@ public class Plugin_PCK_GDPC extends ArchivePlugin {
           resource.setLength(length);
 
         }
-        else if (resource.getExtension().equals("stex")) {
+        else if (extension.equals("stex")) {
           long offset = resource.getOffset();
 
           fm.seek(offset);

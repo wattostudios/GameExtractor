@@ -15,10 +15,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -41,7 +44,7 @@ public class Plugin_STZ extends ArchivePlugin {
     super("STZ", "STZ");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Sonic and SEGA All Stars Racing");
     setExtensions("stz"); // MUST BE LOWER CASE
@@ -178,6 +181,126 @@ public class Plugin_STZ extends ArchivePlugin {
     }
 
     return null;
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      // read the first file offset, so we know where to stop the directory
+      int dataOffset = IntConverter.changeFormat(src.readInt());
+      src.relativeSeek(0);
+
+      // skip the directory, lets write the file data first
+      fm.setLength(dataOffset);
+      fm.seek(dataOffset);
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+
+      ExporterPlugin exporterZLib = new Exporter_ZLib();
+      ExporterPlugin exporterDefault = new Exporter_Default();
+
+      long[] compressedLengths = new long[numFiles];
+      int[] paddingSizes = new int[numFiles];
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+        long compLength = resource.getLength();
+        if (resource.isReplaced()) {
+          // need to compress the new file
+          compLength = write(exporterZLib, resource, fm);
+        }
+        else {
+          // original file, already compressed, just copy it
+
+          ExporterPlugin originalExporter = resource.getExporter();
+          resource.setExporter(exporterDefault);
+          write(resource, fm);
+          resource.setExporter(originalExporter);
+        }
+
+        compressedLengths[i] = compLength;
+
+        int padding = calculatePadding(compLength, 64);
+        for (int p = 0; p < padding; p++) {
+          fm.writeByte(0);
+        }
+
+        paddingSizes[i] = padding;
+
+        TaskProgressManager.setValue(i);
+      }
+
+      // write the footer
+      int padding = calculatePadding(fm.getOffset(), 32);
+      for (int p = 0; p < padding; p++) {
+        fm.writeByte(0);
+      }
+
+      // now go back and write the directory
+      fm.seek(0);
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = dataOffset;
+
+      int numEntries = dataOffset / 12;
+      int realNumFiles = 0;
+
+      for (int i = 0; i < numEntries; i++) {
+
+        // 4 - File Offset
+        src.skip(4);
+        fm.writeInt(IntConverter.changeFormat((int) offset));
+
+        // 4 - Decompressed File Length
+        // 4 - Compressed File Length
+        int srcDecompLength = IntConverter.changeFormat(src.readInt());
+        int srcCompLength = IntConverter.changeFormat(src.readInt());
+
+        if (srcCompLength <= 0) {
+          // blank entry
+          fm.writeInt(IntConverter.changeFormat((int) srcDecompLength));
+          fm.writeInt(IntConverter.changeFormat((int) srcCompLength));
+        }
+        else {
+          // real entry
+
+          Resource resource = resources[realNumFiles];
+          long decompLength = resource.getDecompressedLength();
+          long length = compressedLengths[realNumFiles];
+
+          fm.writeInt(IntConverter.changeFormat((int) decompLength));
+          fm.writeInt(IntConverter.changeFormat((int) length));
+
+          offset += length + paddingSizes[realNumFiles];
+          realNumFiles++;
+        }
+
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

@@ -69,8 +69,10 @@ public class Scanner_DDS_DDS extends ScannerPlugin {
       fm.skip(4);
 
       String format = fm.readString(4);
-
-      fm.skip(40);
+      
+      int colorBitCount = fm.readInt();
+      
+      fm.skip(36);
 
       int blockSize = 16;
       if (format.equals("DXT1")) {
@@ -79,6 +81,12 @@ public class Scanner_DDS_DDS extends ScannerPlugin {
 
       if (format.equals("DXT1") || format.equals("DXT3") || format.equals("DXT4") || format.equals("DXT5")) {
         // ok
+      }
+      else if (colorBitCount == 32) {
+        blockSize = 64;
+      }
+      else if (colorBitCount == 16) {
+        blockSize = 32;
       }
       else {
         return null;
@@ -113,7 +121,7 @@ public class Scanner_DDS_DDS extends ScannerPlugin {
 
       fm.skip(length);
 
-      length += 128;
+      length += 128; // for the header
 
       //path,id,name,offset,length,compressed
       return new Resource(".dds", offset, length);

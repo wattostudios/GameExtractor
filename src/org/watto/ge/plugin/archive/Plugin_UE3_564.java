@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2023 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@ import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
+import org.watto.ge.plugin.archive.datatype.UnrealProperty;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -387,6 +388,73 @@ public class Plugin_UE3_564 extends PluginGroup_UE3 {
     }
     catch (Throwable t) {
       logError(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   ByteProperty
+   **********************************************************************************************
+   **/
+  @Override
+  public UnrealProperty readByteProperty(FileManipulator fm, UnrealProperty property) {
+    try {
+      long length = property.getLength();
+      if (length < 0) {
+        return null; // error case
+      }
+
+      // X - Bytes (ignore this first entry)
+      fm.skip(length);
+
+      // X - Bytes (the length of X = LengthProperty from above)
+      if (length == 1) {
+        property.setValue(fm.readByte());
+      }
+      else if (length == 2) {
+        property.setValue(fm.readShort());
+      }
+      else if (length == 4) {
+        property.setValue(fm.readInt());
+      }
+      else if (length == 8) {
+        property.setValue(fm.readLong());
+      }
+      else {
+        byte[] bytes = fm.readBytes((int) length);
+        property.setValue(bytes);
+      }
+
+      return property;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   BoolProperty
+   **********************************************************************************************
+   **/
+  public UnrealProperty readBoolProperty(FileManipulator fm, UnrealProperty property) {
+    try {
+      // 1 - Boolean Value (0/1)
+      int boolValue = fm.readByte();
+
+      if (boolValue == 0) {
+        property.setValue(new Boolean(false));
+      }
+      else {
+        property.setValue(new Boolean(true));
+      }
+
+      return property;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
       return null;
     }
   }

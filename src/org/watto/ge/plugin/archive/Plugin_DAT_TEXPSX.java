@@ -54,7 +54,9 @@ public class Plugin_DAT_TEXPSX extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, true, false);
 
-    setGames("NHL FaceOff 2001");
+    setGames("NHL FaceOff 2001",
+        "NHL FaceOff 99",
+        "007: Tomorrow Never Dies");
     setExtensions("dat"); // DAT files as well, but the header should be enough to detect these files
     setPlatforms("PS2");
 

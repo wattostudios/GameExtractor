@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,12 +15,10 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio;
-import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -115,7 +113,7 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = Exporter_Custom_WAV_RawAudio.getInstance();
+      //ExporterPlugin exporter = Exporter_Custom_WAV_RawAudio.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -146,7 +144,8 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
       // 200 - null Padding to Offset 256
       fm.seek(dirOffset);
 
-      Resource_WAV_RawAudio[] resources = new Resource_WAV_RawAudio[numFiles];
+      //Resource_WAV_RawAudio[] resources = new Resource_WAV_RawAudio[numFiles];
+      Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
@@ -188,7 +187,8 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
         fm.skip(16);
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource_WAV_RawAudio(path, "", offset, length, length, exporter);
+        //resources[i] = new Resource_WAV_RawAudio(path, "", offset, length, length, exporter);
+        resources[i] = new Resource(path, "", offset, length, length);
 
         TaskProgressManager.setValue(i);
       }
@@ -198,37 +198,43 @@ public class Plugin_STR_IOISNDSTREAM_2 extends ArchivePlugin {
         fm.seek(nameOffsets[i]);
         // X - Filename
         // 1 - null Filename Terminator
-        resources[i].setName(fm.readString(nameLengths[i]));
+        String name = fm.readString(nameLengths[i]);
+
+        Resource resource = resources[i];
+        resource.setName(name);
+        resource.setOriginalName(name);
       }
 
+      /*
       // now go and grab the audio details
       for (int i = 0; i < numFiles; i++) {
         fm.seek(audioInfoOffsets[i]);
-
+      
         // 4 - Audio Codec? (2/3)
         // 4 - Unknown
         fm.skip(8);
-
+      
         // 4 - Number of Channels (1)
         short channels = (short) fm.readInt();
         if (channels < 0 || channels > 2) {
           channels = 1;
         }
-
+      
         // 4 - Frequency (44100)
         int frequency = fm.readInt();
         if (frequency < 0 || frequency > 45000) {
           frequency = 44100;
         }
-
+      
         // 4 - Bitrate? (4/16)
         short bitrate = (short) fm.readInt();
         if (bitrate < 0 || bitrate > 64) {
           bitrate = 16;
         }
-
+      
         resources[i].setAudioProperties(frequency, bitrate, channels);
       }
+      */
 
       fm.close();
 

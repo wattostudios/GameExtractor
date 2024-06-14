@@ -1,30 +1,28 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2023 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,8 +42,6 @@ public class Plugin_J2L_JAZZ extends ArchivePlugin {
 
     //         read write replace rename
     setProperties(true, false, false, false);
-
-    setEnabled(false);
 
     setGames("Jazz Jackrabbit 2");
     setExtensions("j2l", "j2t");
@@ -86,12 +82,13 @@ public class Plugin_J2L_JAZZ extends ArchivePlugin {
   
   **********************************************************************************************
   **/
-  @SuppressWarnings("unused")
   @Override
   public Resource[] read(File path) {
     try {
 
       addFileTypes();
+
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       FileManipulator fm = new FileManipulator(path, false);
 
@@ -106,38 +103,48 @@ public class Plugin_J2L_JAZZ extends ArchivePlugin {
       // 4 - Unknown
       fm.skip(230);
 
-      int numFiles = Archive.getMaxFiles(4);
+      int numFiles = Archive.getMaxFiles();
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(arcSize);
 
       // Files Directory
-      int i = 0;
-      while (fm.getOffset() < fm.getLength()) {
+      int realNumFiles = 0;
+      long readBytes = fm.getOffset();
+      long offset = fm.getOffset();
+      while (readBytes < arcSize) {
 
-        // 4 - File Length
+        // 4 - Compressed Size
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Decompressed Length
+        // 4 - Decompressed Size
         int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
 
-        // 24 - Unknown
-
-        // X - File Data
-        long offset = (int) fm.getOffset();
-        fm.skip(length);
-
-        String filename = Resource.generateFilename(i);
+        String filename = Resource.generateFilename(realNumFiles);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        resources[realNumFiles] = new Resource(path, filename, 0, length, decompLength, exporter);
+        realNumFiles++;
 
-        TaskProgressManager.setValue((int) fm.getOffset());
-        i++;
+        TaskProgressManager.setValue(readBytes);
+        readBytes += length + 8;
       }
 
-      resources = resizeResources(resources, i);
+      resources = resizeResources(resources, realNumFiles);
+
+      // go back and set the offsets
+      numFiles = realNumFiles;
+
+      offset += numFiles * 8;
+
+      for (int i = 0; i < numFiles - 1; i++) {
+        Resource resource = resources[i];
+        resource.setOffset(offset);
+        offset += resource.getLength();
+      }
+      resources[numFiles - 1].setOffset(offset);
 
       fm.close();
 

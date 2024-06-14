@@ -27,6 +27,10 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_BIN_30;
 import org.watto.ge.plugin.archive.Plugin_DFS_DFS;
+import org.watto.ge.plugin.archive.Plugin_FOG;
+import org.watto.ge.plugin.archive.Plugin_HOG;
+import org.watto.ge.plugin.archive.Plugin_TIM;
+import org.watto.ge.plugin.archive.Plugin_VFS_VFS2;
 import org.watto.ge.plugin.archive.Plugin_ZAL;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
@@ -50,7 +54,8 @@ public class Viewer_TIM extends ViewerPlugin {
 
     setGames("PlayStation",
         "Bust A Groove",
-        "Space Invaders");
+        "Space Invaders",
+        "Syphon Filter");
     setPlatforms("PSX");
     setStandardFileFormat(true);
   }
@@ -77,11 +82,11 @@ public class Viewer_TIM extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (plugin instanceof Plugin_ZAL || plugin instanceof Plugin_BIN_30 || plugin instanceof Plugin_DFS_DFS) {
+      if (plugin instanceof Plugin_ZAL || plugin instanceof Plugin_BIN_30 || plugin instanceof Plugin_TIM || plugin instanceof Plugin_DFS_DFS || plugin instanceof Plugin_HOG || plugin instanceof Plugin_FOG || plugin instanceof Plugin_VFS_VFS2) {
         rating += 50;
       }
       else if (!(plugin instanceof AllFilesPlugin)) {
-        return 0;
+        //return 0;
       }
 
       if (FieldValidator.checkExtension(fm, extensions)) {
@@ -141,13 +146,59 @@ public class Viewer_TIM extends ViewerPlugin {
   an extracted temp file, not the original archive!
   **********************************************************************************************
   **/
-
   @Override
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
       long arcSize = fm.getLength();
 
+      ImageResource firstImage = null;
+      ImageResource previousImage = null;
+
+      while (fm.getOffset() < arcSize) {
+        ImageResource image = readSingleImage(fm, arcSize);
+
+        if (firstImage == null) {
+          firstImage = image;
+          previousImage = image;
+        }
+        else {
+          previousImage.setNextFrame(image);
+          image.setPreviousFrame(previousImage);
+          previousImage = image;
+        }
+      }
+
+      if (firstImage == null) {
+        return null;
+      }
+
+      if (firstImage != previousImage) {
+        // so that the first and last images point to each other
+        previousImage.setNextFrame(firstImage);
+        firstImage.setPreviousFrame(previousImage);
+
+        // make it multi-frame but not automatic
+        firstImage.setManualFrameTransition(true);
+      }
+
+      fm.close();
+
+      return firstImage;
+    }
+    catch (Throwable t) {
+      logError(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
+  public ImageResource readSingleImage(FileManipulator fm, long arcSize) {
+    try {
       // 1 - Header (16)
       // 1 - Version (0)
       // 2 - null
@@ -368,11 +419,10 @@ public class Viewer_TIM extends ViewerPlugin {
             fm = new FileManipulator(new ByteBuffer(pixelBytes));
           }
 
-          imageResource = ImageFormatReader.readBGRA(fm, width, height);
+          //imageResource = ImageFormatReader.readBGRA(fm, width, height);
+          imageResource = ImageFormatReader.readBGR(fm, width, height);
         }
       }
-
-      fm.close();
 
       return imageResource;
 

@@ -55,11 +55,14 @@
 <li>JMPQ3</li>
 <li>JNA (Java Native Access)</li>
 <li>JOrbis</li>
+<li>jpeg2000</li>
 <li>jsquish</li>
 <li>junrar</li>
 <li>LHA Decompressor for Java</li>
+<li>lzo-java</li>
 <li>lz4-java</li>
 <li>LZSS Compression Routines for Java</li>
+<li>noex-tools</li>
 <li>puyotools</li>
 <li>python-fsb5</li>
 <li>QuickBMS</li>

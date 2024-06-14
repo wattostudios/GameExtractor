@@ -180,7 +180,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public static Icon getAddedIcon(boolean added) {
@@ -277,7 +277,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public static Icon getIcon(String name) {
@@ -366,7 +366,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public static Icon getRenamedIcon(boolean renamed) {
@@ -380,7 +380,7 @@ public class Archive {
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public static Icon getReplacedIcon(boolean replaced) {
@@ -615,22 +615,14 @@ public class Archive {
   public static void setBasePath(File basePathNew) {
     basePath = basePathNew;
 
-    if (GameExtractor.isFullVersion()) {
-      if (basePath == null) {
-        GameExtractor.getInstance().setTitle(Language.get("ProgramName") + " " + Settings.get("Version") + " - http://www.watto.org");
-      }
-      else {
-        GameExtractor.getInstance().setTitle(Language.get("ProgramName") + " " + Settings.get("Version") + " [" + basePath.getName() + "]");
-      }
-    }
-    else {
+
       if (basePath == null) {
         GameExtractor.getInstance().setTitle(Language.get("ProgramName_Free") + " " + Settings.get("Version") + " - http://www.watto.org");
       }
       else {
         GameExtractor.getInstance().setTitle(Language.get("ProgramName_Free") + " " + Settings.get("Version") + " [" + basePath.getName() + "]");
       }
-    }
+
   }
 
   /**

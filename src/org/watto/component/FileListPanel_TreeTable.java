@@ -19,11 +19,15 @@ import java.awt.Dimension;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
@@ -40,6 +44,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultTreeModel;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -679,7 +684,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       FileListModel_Tree groupNode = root;
 
       for (int k = 0; k < root.getChildCount(); k++) {
-        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(compressed)) {  //System.out.println("Found: " + directory);
+        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(compressed)) { //System.out.println("Found: " + directory);
           // found the parent node for this group
           groupNode = (FileListModel_Tree) root.getChildAt(k);
           foundParent = true;
@@ -687,7 +692,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         }
       }
 
-      if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+      if (!foundParent) { //System.out.println("Making Directory: " + directory);
         groupNode = new FileListModel_Tree(compressed);
         root.add(groupNode);
 
@@ -717,7 +722,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       FileListModel_Tree groupNode = root;
 
       for (int k = 0; k < root.getChildCount(); k++) {
-        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(exporter)) {  //System.out.println("Found: " + directory);
+        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(exporter)) { //System.out.println("Found: " + directory);
           // found the parent node for this group
           groupNode = (FileListModel_Tree) root.getChildAt(k);
           foundParent = true;
@@ -725,7 +730,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         }
       }
 
-      if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+      if (!foundParent) { //System.out.println("Making Directory: " + directory);
         groupNode = new FileListModel_Tree(exporter);
         root.add(groupNode);
 
@@ -759,7 +764,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       FileListModel_Tree groupNode = root;
 
       for (int k = 0; k < root.getChildCount(); k++) {
-        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(extension)) {  //System.out.println("Found: " + directory);
+        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(extension)) { //System.out.println("Found: " + directory);
           // found the parent node for this group
           groupNode = (FileListModel_Tree) root.getChildAt(k);
           foundParent = true;
@@ -767,7 +772,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         }
       }
 
-      if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+      if (!foundParent) { //System.out.println("Making Directory: " + directory);
         groupNode = new FileListModel_Tree(extension);
         root.add(groupNode);
 
@@ -807,12 +812,12 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
 
       // add the node to the main tree
       FileListModel_Tree parent = root;
-      for (int j = 0; j < numTokens - 1; j++) {  //System.out.println("In Directory: " + ((String)parent.getUserObject()));
+      for (int j = 0; j < numTokens - 1; j++) { //System.out.println("In Directory: " + ((String)parent.getUserObject()));
         String directory = token.nextToken();
         boolean foundParent = false;
 
         for (int k = 0; k < parent.getChildCount(); k++) {
-          if (((String) ((FileListModel_Tree) parent.getChildAt(k)).getUserObject()).equals(directory)) {  //System.out.println("Found: " + directory);
+          if (((String) ((FileListModel_Tree) parent.getChildAt(k)).getUserObject()).equals(directory)) { //System.out.println("Found: " + directory);
             // found the correct parent directory
             FileListModel_Tree node = (FileListModel_Tree) parent.getChildAt(k);
             foundParent = true;
@@ -821,7 +826,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
           }
         }
 
-        if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+        if (!foundParent) { //System.out.println("Making Directory: " + directory);
           FileListModel_Tree node = new FileListModel_Tree(directory);
           parent.add(node);
           parent = node;
@@ -858,7 +863,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       FileListModel_Tree groupNode = root;
 
       for (int k = 0; k < root.getChildCount(); k++) {
-        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(renamed)) {  //System.out.println("Found: " + directory);
+        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(renamed)) { //System.out.println("Found: " + directory);
           // found the parent node for this group
           groupNode = (FileListModel_Tree) root.getChildAt(k);
           foundParent = true;
@@ -866,7 +871,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         }
       }
 
-      if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+      if (!foundParent) { //System.out.println("Making Directory: " + directory);
         groupNode = new FileListModel_Tree(renamed);
         root.add(groupNode);
 
@@ -896,7 +901,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
       FileListModel_Tree groupNode = root;
 
       for (int k = 0; k < root.getChildCount(); k++) {
-        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(replaced)) {  //System.out.println("Found: " + directory);
+        if (((String) ((FileListModel_Tree) root.getChildAt(k)).getUserObject()).equals(replaced)) { //System.out.println("Found: " + directory);
           // found the parent node for this group
           groupNode = (FileListModel_Tree) root.getChildAt(k);
           foundParent = true;
@@ -904,7 +909,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         }
       }
 
-      if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+      if (!foundParent) { //System.out.println("Making Directory: " + directory);
         groupNode = new FileListModel_Tree(replaced);
         root.add(groupNode);
 
@@ -948,12 +953,12 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
 
       // add the node to the main tree
       FileListModel_Tree parent = root;
-      for (int j = 0; j < numDirs - 1; j++) {  //System.out.println("In Directory: " + ((String)parent.getUserObject()));
+      for (int j = 0; j < numDirs - 1; j++) { //System.out.println("In Directory: " + ((String)parent.getUserObject()));
         String directory = dirs[j];
         boolean foundParent = false;
 
         for (int k = 0; k < parent.getChildCount(); k++) {
-          if (((String) ((FileListModel_Tree) parent.getChildAt(k)).getUserObject()).equals(directory)) {  //System.out.println("Found: " + directory);
+          if (((String) ((FileListModel_Tree) parent.getChildAt(k)).getUserObject()).equals(directory)) { //System.out.println("Found: " + directory);
             // found the correct parent directory
             FileListModel_Tree node = (FileListModel_Tree) parent.getChildAt(k);
             foundParent = true;
@@ -962,7 +967,7 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
           }
         }
 
-        if (!foundParent) {  //System.out.println("Making Directory: " + directory);
+        if (!foundParent) { //System.out.println("Making Directory: " + directory);
           FileListModel_Tree node = new FileListModel_Tree(directory);
           parent.add(node);
           parent = node;
@@ -1707,6 +1712,19 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
         table.setRowSelectionInterval(rightClickSelectedRow, rightClickSelectedRow);
       }
 
+      try {
+        if (Settings.getBoolean("CopyFilenameOnRightClick")) {
+
+          Resource resource = getResource(rightClickSelectedRow);
+          StringSelection selection = new StringSelection(resource.getName());
+
+          Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+          clipboard.setContents(selection, selection);
+        }
+      }
+      catch (Throwable t) {
+      }
+
       WSPopupMenu menu = getRightClickMenu();
       menu.show(table, (int) p.getX() - 10, (int) p.getY() - 10);
 
@@ -1875,6 +1893,17 @@ public class FileListPanel_TreeTable extends FileListPanel implements WSClickabl
     propTable.revalidate();
     propTable.repaint();
 
+  }
+
+  /**
+   **********************************************************************************************
+   Repaints the table only (eg if some files have been replaced, but the overall number of
+   resources hasn't changed)
+   **********************************************************************************************
+   **/
+  public void repaintTable() {
+    table.revalidate();
+    table.repaint();
   }
 
   /**

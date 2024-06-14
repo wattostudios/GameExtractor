@@ -25,7 +25,6 @@ import org.watto.TypecastSingletonManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.GameExtractor;
-import org.watto.ge.helper.FullVersionVerifier;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.task.Task;
 import org.watto.task.Task_AddFiles;
@@ -49,7 +48,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public FileListPanel(String name) {
@@ -61,14 +60,14 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void addFilesFromDrop();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void addFilesFromDrop(File[] dropFiles) {
@@ -80,7 +79,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void changeSelection(int row) {
@@ -88,7 +87,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void changeSelection(int row, int column) {
@@ -133,21 +132,21 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void constructInterface();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void dropFiles(File[] files);
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -168,46 +167,33 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public WSPopupMenu getDropFilesMenu() {
 
-    try {
-      new FullVersionVerifier();
-    }
-    catch (Throwable t3) {
       // don't allow drag-drop for the Basic version - Only "Read Archive"
       return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /></WSPopupMenu>"));
-    }
 
-    ArchivePlugin plugin = Archive.getReadPlugin();
-    if (plugin != null) {
-      if (!plugin.canWrite()) {
-        // archive can do replacing, but not adding files
-        return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /><WSMenuItem code=\"FileListDrop_ReplaceCurrent\" /><WSMenuItem code=\"FileListDrop_ReplaceMatching\" /></WSPopupMenu>"));
-      }
-    }
-    return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /><WSMenuItem code=\"FileListDrop_Add\" /><WSMenuItem code=\"FileListDrop_ReplaceCurrent\" /><WSMenuItem code=\"FileListDrop_ReplaceMatching\" /></WSPopupMenu>"));
   }
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract int getFirstSelectedRow();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract int getNumSelected();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public Resource getResource(int row) {
@@ -216,7 +202,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public Resource getResource(int row, int column) {
@@ -225,7 +211,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public WSPopupMenu getRightClickMenu() {
@@ -237,11 +223,6 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
     menu.add(new WSMenuItem(XMLReader.read("<WSMenuItem code=\"FileList_RightClick_HexEditor\" />")));
     menu.add(new WSMenuItem(XMLReader.read("<WSMenuItem code=\"FileList_RightClick_ImageInvestigator\" />")));
     menu.add(new WSMenuItem(XMLReader.read("<WSMenuItem code=\"FileList_RightClick_MeshInvestigator\" />")));
-    if (GameExtractor.isFullVersion()) {
-      menu.add(new WSPopupMenuSeparator(XMLReader.read("<WSPopupMenuSeparator />")));
-      menu.add(new WSMenuItem(XMLReader.read("<WSMenuItem code=\"FileList_RightClick_RemoveResources\" />")));
-      menu.add(new WSMenuItem(XMLReader.read("<WSMenuItem code=\"FileList_RightClick_RenameResources\" />")));
-    }
     menu.add(new WSPopupMenuSeparator(XMLReader.read("<WSPopupMenuSeparator />")));
     menu.add(new WSMenu(XMLReader.read("<WSMenu code=\"FileList_RightClick_SelectResources\"><WSMenuItem code=\"FileList_RightClick_SelectResources_All\" /><WSMenuItem code=\"FileList_RightClick_SelectResources_None\" /><WSMenuItem code=\"FileList_RightClick_SelectResources_Inverse\" /></WSMenu>")));
     menu.add(new WSPopupMenuSeparator(XMLReader.read("<WSPopupMenuSeparator />")));
@@ -251,14 +232,14 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract Resource[] getSelected();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public int getSelectionType() {
@@ -276,16 +257,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
   public boolean onDrop(Transferable t) {
     try {
 
-      /*
-      try {
-        new FullVersionVerifier();
-      }
-      catch (Throwable t3) {
-        // don't allow drag-drop for the Basic version
-        WSPopup.showErrorInNewThread("FullVersionOnly", true);
-        return true;
-      }
-      */
+
 
       ArchivePlugin plugin = Archive.getReadPlugin();
       if (plugin != null) {
@@ -333,14 +305,14 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void readArchiveFromDrop();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void readArchiveFromDrop(File[] dropFiles) {
@@ -354,14 +326,14 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void reload();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void replaceCurrentFileFromDrop();
@@ -380,7 +352,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void replaceMatchingFilesFromDrop();
@@ -399,28 +371,28 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void selectAll();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void selectInverse();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public abstract void selectNone();
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void selectResource(int row) {
@@ -428,7 +400,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void selectResource(int row, int column) {
@@ -436,7 +408,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setSelectionType(int selectionType) {
@@ -445,7 +417,7 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void stopInlineEditing() {

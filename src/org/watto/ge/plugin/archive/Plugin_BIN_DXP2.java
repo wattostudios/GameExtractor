@@ -15,11 +15,17 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import org.watto.ErrorLogger;
+import org.watto.Language;
+import org.watto.Settings;
+import org.watto.component.PreviewPanel;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
+import org.watto.ge.plugin.viewer.Viewer_BIN_DXP2_DDSX_DDSX;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.StringConverter;
@@ -42,9 +48,10 @@ public class Plugin_BIN_DXP2 extends ArchivePlugin {
     super("BIN_DXP2", "BIN_DXP2");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
-    setGames("Wings Of Prey");
+    setGames("Wings Of Prey",
+        "Blades of Time");
     setExtensions("bin"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -56,6 +63,8 @@ public class Plugin_BIN_DXP2 extends ArchivePlugin {
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
     //setCanScanForFileTypes(true);
+
+    setCanConvertOnReplace(true);
 
   }
 
@@ -215,13 +224,22 @@ public class Plugin_BIN_DXP2 extends ArchivePlugin {
         // 2 - Number Of Mipmaps?
         // 4 - null
         // 2 - Unknown
-        // 4 - Unknown
-        fm.skip(12);
+        fm.skip(8);
 
-        // 4 - Compressed File Length (0 = uncompressed)
+        // 4 - Decompressed File Length
         int decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
-        decompLengths[i] = decompLength;
+
+        // 4 - Compressed File Length (0 = uncompressed)
+        int compLength = fm.readInt();
+        FieldValidator.checkLength(compLength, arcSize);
+
+        if (compLength == 0) {
+          decompLengths[i] = 0;
+        }
+        else {
+          decompLengths[i] = decompLength;
+        }
 
         TaskProgressManager.setValue(i);
       }
@@ -268,6 +286,7 @@ public class Plugin_BIN_DXP2 extends ArchivePlugin {
         else {
           // compressed
 
+          /*
           if (imageFormat.equals("DXT1")) {
             decompLength = width * height / 2;
           }
@@ -280,6 +299,7 @@ public class Plugin_BIN_DXP2 extends ArchivePlugin {
           else if (imageFormat.equals("50")) {
             decompLength = width * height;
           }
+          */
 
           //path,name,offset,length,decompLength,exporter
           resource = new Resource(path, filename, offset, length, decompLength, exporter);
@@ -306,23 +326,243 @@ public class Plugin_BIN_DXP2 extends ArchivePlugin {
   }
 
   /**
-  **********************************************************************************************
-  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
-  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
-  extensions, which will be tried before any standard extensions.
-  @return null if no extension can be determined, or the extension if one can be found
-  **********************************************************************************************
-  **/
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
   @Override
-  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+  public void replace(Resource[] resources, File path) {
+    try {
 
-    /*
-    if (headerInt1 == 2037149520) {
-      return "js";
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Write Header Data
+
+      // 4 - Header (DxP2)
+      // 4 - Version (1)
+      // 4 - Number Of Files
+      fm.writeBytes(src.readBytes(12));
+
+      // 4 - File Data Offset [+16]
+      int offset = src.readInt();
+      fm.writeInt(offset);
+      offset += 16;
+
+      // 4 - Offset to the Filename Offset Directory [+16]
+      // 4 - Number of Filename Offset Entries
+      fm.writeBytes(src.readBytes(8));
+
+      // 4 - Offset to the Image Properties Directory [+16]
+      int propertiesOffset = src.readInt();
+      fm.writeInt(propertiesOffset);
+      propertiesOffset += 16;
+
+      // 4 - Number of Image Property Entries
+      fm.writeBytes(src.readBytes(4));
+
+      // 4 - Offset to the File Data Properties Directory [+16]
+      int detailsOffset = src.readInt();
+      fm.writeInt(detailsOffset);
+
+      // 4 - Number of File Data Property Entries
+      // 4 - null
+      // 4 - null
+      fm.writeBytes(src.readBytes(12));
+
+      // FILENAME DIRECTORY
+      // FILENAME OFFSET DIRECTORY
+      int filenameDirLength = propertiesOffset - (int) fm.getOffset();
+      fm.writeBytes(src.readBytes(filenameDirLength));
+
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      // IMAGE PROPERTIES DIRECTORY
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        if (resource.isReplaced()) {
+          short width = 0;
+          short height = 0;
+          short mipmapCount = 0;
+          String imageFormat = "";
+          int imageFormatNumber = 0;
+
+          try {
+            height = (short) Integer.parseInt(resource.getProperty("Height"));
+            width = (short) Integer.parseInt(resource.getProperty("Width"));
+
+            int minDimension = width;
+            if (height < width) {
+              minDimension = height;
+            }
+            while (minDimension > 0) {
+              mipmapCount++;
+              minDimension /= 2;
+            }
+
+          }
+          catch (Throwable t) {
+          }
+
+          imageFormat = resource.getProperty("ImageFormat");
+          if (imageFormat == null || imageFormat.equals("")) {
+            imageFormat = "DXT5";
+          }
+          while (imageFormat.length() < 4) {
+            imageFormat = imageFormat + " ";
+          }
+
+          try {
+            imageFormatNumber = Integer.parseInt(imageFormat);
+          }
+          catch (Throwable t) {
+            imageFormatNumber = 0;
+          }
+
+          // 4 - Image Format (DDSx)
+          fm.writeBytes(src.readBytes(4));
+
+          // 4 - DDS Format (DXT1/DXT3/DXT5/(byte)21/(byte)50)
+          if (imageFormatNumber != 0) {
+            fm.writeInt(imageFormatNumber);
+          }
+          else {
+            fm.writeString(imageFormat);
+          }
+          src.skip(4);
+
+          // 4 - Unknown
+          fm.writeBytes(src.readBytes(4));
+
+          // 2 - Image Width
+          fm.writeShort(width);
+          src.skip(2);
+
+          // 2 - Image Height
+          fm.writeShort(height);
+          src.skip(2);
+
+          // 2 - Number Of Mipmaps
+          fm.writeShort(mipmapCount);
+          src.skip(2);
+
+          // 4 - null
+          // 2 - Unknown
+          fm.writeBytes(src.readBytes(6));
+
+          // 4 - Decompressed File Length
+          // 4 - Compressed File Length (0 = uncompressed)
+          fm.writeInt(length);
+          fm.writeInt(0);
+          src.skip(8);
+        }
+        else {
+          // 4 - Image Format (DDSx)
+          // 4 - DDS Format (DXT1/DXT3/DXT5/(byte)21/(byte)50)
+          // 4 - Unknown
+          // 2 - Image Width
+          // 2 - Image Height
+          // 2 - Number Of Mipmaps
+          // 4 - null
+          // 2 - Unknown
+          // 4 - Decompressed File Length
+          // 4 - Compressed File Length (0 = uncompressed)
+          fm.writeBytes(src.readBytes(32));
+        }
+
+      }
+
+      // FILE DATA PROPERTIES DIRECTORY
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        long length = resource.getLength();
+        if (resource.isReplaced()) {
+          length = resource.getDecompressedLength();
+        }
+
+        // 4 - File Data Offset
+        fm.writeInt(offset);
+        src.skip(4);
+
+        // 4 - null
+        // 4 - Padding (-1)
+        fm.writeBytes(src.readBytes(8));
+
+        // 4 - Compressed Length
+        fm.writeInt(length);
+        src.skip(4);
+
+        offset += length;
+      }
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+      for (int i = 0; i < resources.length; i++) {
+        Resource resource = resources[i];
+
+        ExporterPlugin originalExporter = resource.getExporter();
+        resource.setExporter(exporterDefault);
+        write(resource, fm);
+        resource.setExporter(originalExporter);
+
+        TaskProgressManager.setValue(i);
+      }
+
+      src.close();
+      fm.close();
+
     }
-    */
+    catch (Throwable t) {
+      logError(t);
+    }
+  }
 
-    return null;
+  /**
+   **********************************************************************************************
+   When replacing files, if the file is of a certain type, it will be converted before replace
+   @param resourceBeingReplaced the Resource in the archive that is being replaced
+   @param fileToReplaceWith the file on your PC that will replace the Resource. This file is the
+          one that will be converted into a different format, if applicable.
+   @return the converted file, if conversion was applicable/successful, else the original fileToReplaceWith
+   **********************************************************************************************
+   **/
+  @Override
+  public File convertOnReplace(Resource resourceBeingReplaced, File fileToReplaceWith) {
+    try {
+
+      PreviewPanel imagePreviewPanel = loadFileForConversion(resourceBeingReplaced, fileToReplaceWith, "ddsx");
+      if (imagePreviewPanel == null) {
+        // no conversion needed, or wasn't able to be converted
+        return fileToReplaceWith;
+      }
+
+      // The plugin that will do the conversion
+      Viewer_BIN_DXP2_DDSX_DDSX converterPlugin = new Viewer_BIN_DXP2_DDSX_DDSX();
+
+      String beingReplacedExtension = resourceBeingReplaced.getExtension();
+      File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + beingReplacedExtension);
+      if (destination.exists()) {
+        destination.delete();
+      }
+
+      FileManipulator fmOut = new FileManipulator(destination, true);
+      converterPlugin.replace(resourceBeingReplaced, imagePreviewPanel, fmOut);
+      fmOut.close();
+
+      return destination;
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return fileToReplaceWith;
+    }
   }
 
 }

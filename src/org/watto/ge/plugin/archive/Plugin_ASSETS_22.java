@@ -267,8 +267,8 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
           rating += 50;
         }
 
-        // 4 - Version Number (6) (BIG ENDIAN)
-        if (IntConverter.changeFormat(fm.readInt()) == 6) {
+        // 4 - Version Number (7) (BIG ENDIAN)
+        if (IntConverter.changeFormat(fm.readInt()) == 7) {
           rating += 5;
         }
 

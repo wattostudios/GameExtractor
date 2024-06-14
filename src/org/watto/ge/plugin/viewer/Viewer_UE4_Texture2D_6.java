@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.io.File;
+
 import org.watto.Settings;
 import org.watto.SingletonManager;
 import org.watto.component.PreviewPanel;
@@ -630,7 +631,9 @@ public class Viewer_UE4_Texture2D_6 extends ViewerPlugin {
         }
         else {
           imageResource = ImageFormatReader.readBC7(fm, width, height);
+          imageResource = ImageFormatReader.swapRedAndBlue(imageResource);
           imageResource.setProperty("ImageFormat", "BC7");
+
         }
         imageResource.setProperty("MipmapCount", "" + mipmapCount);
 

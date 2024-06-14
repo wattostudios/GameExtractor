@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -125,7 +126,7 @@ public class Plugin_PAK_TMSAMVOH extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
-        System.out.println(fm.getOffset());
+        //System.out.println(fm.getOffset());
 
         // 4 - Unknown (164,155,253,255)
         int checkVal = fm.readInt();

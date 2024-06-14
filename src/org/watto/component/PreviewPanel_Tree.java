@@ -52,7 +52,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public WSTree getTree() {
@@ -61,7 +61,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public TreeNode getRootNode() {
@@ -70,7 +70,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public PreviewPanel_Tree(TreeNode nodes) {
@@ -90,32 +90,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
     preview.setEditable(false); // default to not-editable
 
-    /*
-     // Moved to onOpenRequest()
-    try {
-      if (SingletonManager.has("CurrentViewer")) {
-        ViewerPlugin viewerPlugin = (ViewerPlugin) SingletonManager.get("CurrentViewer");
-        if (viewerPlugin != null) {
-          if (viewerPlugin.canWrite(this)) {
-            if (GameExtractor.isFullVersion()) {
-              preview.setEditable(true);
-    
-              WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"1\" />"));
-              saveButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_Text_SaveChanges\" showText=\"true\" />"));
-              saveButton.setEnabled(false);
-              bottomPanel.add(saveButton);
-    
-              add(bottomPanel, BorderLayout.SOUTH);
-            }
-          }
-    
-        }
-      }
-    }
-    catch (Throwable t) {
-      preview.setEditable(false);
-    }
-    */
+
 
     add(new JScrollPane(preview), BorderLayout.CENTER);
 
@@ -133,16 +108,6 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
         ViewerPlugin viewerPlugin = (ViewerPlugin) SingletonManager.get("CurrentViewer");
         if (viewerPlugin != null) {
           if (viewerPlugin.canEdit(this)) {
-            if (GameExtractor.isFullVersion()) {
-              preview.setEditable(true);
-
-              WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"1\" />"));
-              saveButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_Text_SaveChanges\" showText=\"true\" />"));
-              saveButton.setEnabled(false);
-              bottomPanel.add(saveButton);
-
-              add(bottomPanel, BorderLayout.SOUTH);
-            }
           }
 
         }
@@ -155,7 +120,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -172,7 +137,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -193,7 +158,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -234,7 +199,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public boolean isObjectChanged() {
@@ -243,7 +208,7 @@ public class PreviewPanel_Tree extends PreviewPanel implements WSKeyableInterfac
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void setObjectChanged(boolean changed) {

@@ -77,32 +77,32 @@ public class ImageFormatWriter {
   **********************************************************************************************
   **/
   protected static float convert16bitToFloat(int hbits) {
-    int mant = hbits & 0x03ff;            // 10 bits mantissa
-    int exp = hbits & 0x7c00;             // 5 bits exponent
+    int mant = hbits & 0x03ff; // 10 bits mantissa
+    int exp = hbits & 0x7c00; // 5 bits exponent
     if (exp == 0x7c00) {
-      exp = 0x3fc00;                      // -> NaN/Inf
+      exp = 0x3fc00; // -> NaN/Inf
     }
-    else if (exp != 0)                    // normalized value
+    else if (exp != 0) // normalized value
     {
-      exp += 0x1c000;                     // exp - 15 + 127
+      exp += 0x1c000; // exp - 15 + 127
       if (mant == 0 && exp > 0x1c400) {
         return Float.intBitsToFloat((hbits & 0x8000) << 16
             | exp << 13 | 0x3ff);
       }
     }
-    else if (mant != 0)                   // && exp==0 -> subnormal
+    else if (mant != 0) // && exp==0 -> subnormal
     {
-      exp = 0x1c400;                      // make it normal
+      exp = 0x1c400; // make it normal
       do {
-        mant <<= 1;                       // mantissa * 2
-        exp -= 0x400;                     // decrease exp by 1
+        mant <<= 1; // mantissa * 2
+        exp -= 0x400; // decrease exp by 1
       }
-      while ((mant & 0x400) == 0);        // while not normal
-      mant &= 0x3ff;                      // discard subnormal bit
-    }                                     // else +/-0 -> +/-0
-    return Float.intBitsToFloat(          // combine all parts
-        (hbits & 0x8000) << 16            // sign  << ( 31 - 15 )
-            | (exp | mant) << 13);        // value << ( 23 - 10 )
+      while ((mant & 0x400) == 0); // while not normal
+      mant &= 0x3ff; // discard subnormal bit
+    } // else +/-0 -> +/-0
+    return Float.intBitsToFloat( // combine all parts
+        (hbits & 0x8000) << 16 // sign  << ( 31 - 15 )
+            | (exp | mant) << 13); // value << ( 23 - 10 )
   }
 
   /**
@@ -416,7 +416,7 @@ public class ImageFormatWriter {
 
   /**
    **********************************************************************************************
-   * Writes a DXT3 image
+   Writes a DXT3 image
    **********************************************************************************************
    **/
   public static void writeDXT3(FileManipulator fm, ImageResource imageResource) {
@@ -450,7 +450,7 @@ public class ImageFormatWriter {
 
         // Store the alpha table
         for (int k = 0; k < 16; k += 2) {
-          fm.writeByte((byte) ((pixels[k] >>> 24) | (pixels[k + 1] >>> 28)));
+          fm.writeByte((byte) ((pixelBlock[k] >>> 24) | (pixelBlock[k + 1] >>> 28)));
         }
 
         for (int k = 0; k < pixelBlock.length; k++) {
@@ -480,11 +480,180 @@ public class ImageFormatWriter {
 
   /**
    **********************************************************************************************
-   * Writes a DXT3 image
+   Writes a DXT5 image
    **********************************************************************************************
    **/
   public static void writeDXT5(FileManipulator fm, ImageResource imageResource) {
-    writeDXT3(fm, imageResource);
+    int width = imageResource.getWidth();
+    int height = imageResource.getHeight();
+    int[] pixels = imageResource.getImagePixels();
+
+    int[] pixelBlock = new int[16];
+
+    int numBlocksWide = width / 4;
+    int numBlocksHigh = height / 4;
+
+    for (int i = 0; i < numBlocksHigh; i++) {
+      for (int j = 0; j < numBlocksWide; j++) {
+
+        // build the array of data
+        int position = (i * 4 * width) + (j * 4);
+        System.arraycopy(pixels, position, pixelBlock, 0, 4);
+        position += width;
+        System.arraycopy(pixels, position, pixelBlock, 4, 4);
+        position += width;
+        System.arraycopy(pixels, position, pixelBlock, 8, 4);
+        position += width;
+        System.arraycopy(pixels, position, pixelBlock, 12, 4);
+
+        // split the colors into RGB values
+        ColorSplit[] colors = new ColorSplit[16];
+        for (int p = 0; p < 16; p++) {
+          colors[p] = new ColorSplit(pixelBlock[p]);
+        }
+
+        // Generate the alpha table
+        // 3.15 - actually implemented the alpha table generation - such a novel idea
+
+        // first, find the min and max alpha
+        int[] sourceAlphas = new int[16];
+
+        int minAlpha = 255;
+        int maxAlpha = 0;
+        for (int k = 0; k < 16; k++) {
+          int alpha = new ColorSplitAlpha(pixelBlock[k]).getAlpha();
+
+          if (alpha < minAlpha) {
+            minAlpha = alpha;
+          }
+
+          if (alpha > maxAlpha) {
+            maxAlpha = alpha;
+          }
+
+          sourceAlphas[k] = alpha;
+        }
+
+        // check for some shortcuts
+        if (minAlpha == 0 && maxAlpha == 0) {
+          // if min and max alpha are all 0, just shortcut it and store it all as zeros
+          fm.writeByte(0);
+          fm.writeByte(0);
+          fm.writeByte(0);
+          fm.writeByte(0);
+
+          fm.writeByte(0);
+          fm.writeByte(0);
+          fm.writeByte(0);
+          fm.writeByte(0);
+        }
+        else if (minAlpha == 255 && maxAlpha == 255) {
+          // if min and max alpha are all 255, just shortcut it and store it all as 255's
+          fm.writeByte(255);
+          fm.writeByte(255);
+          fm.writeByte(255);
+          fm.writeByte(255);
+
+          fm.writeByte(255);
+          fm.writeByte(255);
+          fm.writeByte(255);
+          fm.writeByte(255);
+        }
+        else {
+
+          // store the max and min alpha values (note the order, it's important!)
+          if (maxAlpha == minAlpha) {
+            // as such, need the min and max to be slightly different, due to the order requirements
+            if (maxAlpha == 255) {
+              minAlpha--;
+            }
+            else {
+              maxAlpha++;
+            }
+          }
+          fm.writeByte(maxAlpha);
+          fm.writeByte(minAlpha);
+
+          // now build the interpolation values
+          int[] alphas = new int[8];
+          alphas[0] = maxAlpha;
+          alphas[1] = minAlpha;
+          alphas[2] = (6 * maxAlpha + minAlpha) / 7;
+          alphas[3] = (5 * maxAlpha + 2 * minAlpha) / 7;
+          alphas[4] = (4 * maxAlpha + 3 * minAlpha) / 7;
+          alphas[5] = (3 * maxAlpha + 4 * minAlpha) / 7;
+          alphas[6] = (2 * maxAlpha + 5 * minAlpha) / 7;
+          alphas[7] = (maxAlpha + 6 * minAlpha) / 7;
+
+          // now for the 16 pixels, work out the alpha indexes for the closest matches
+          for (int k = 0; k < 16; k++) {
+            int alpha = sourceAlphas[k];
+
+            int closestIndex = 0;
+            int closeness = 255;
+
+            for (int c = 0; c < 8; c++) {
+              int howClose = alpha - alphas[c];
+              if (howClose < 0) {
+                howClose = 0 - howClose;
+              }
+
+              if (howClose < closeness) {
+                closeness = howClose;
+                closestIndex = c;
+              }
+            }
+
+            // now we have the closest index, remember it
+            sourceAlphas[k] = closestIndex;
+          }
+
+          // now we have all the indexes, so build the 6-bytes that store the indexes for the pixels
+
+          // first 3 bytes
+          int alphaMap = 0;
+          for (int k = 0, m = 0; k < 8; k++, m++) {
+            alphaMap |= (sourceAlphas[k] << (3 * m));
+          }
+          fm.writeByte((byte) (alphaMap & 255));
+          fm.writeByte((byte) ((alphaMap >> 8) & 255));
+          fm.writeByte((byte) ((alphaMap >> 16) & 255));
+
+          // second 3 bytes
+          alphaMap = 0;
+          for (int k = 8, m = 0; k < 16; k++, m++) {
+            alphaMap |= (sourceAlphas[k] << (3 * m));
+          }
+          fm.writeByte((byte) (alphaMap & 255));
+          fm.writeByte((byte) ((alphaMap >> 8) & 255));
+          fm.writeByte((byte) ((alphaMap >> 16) & 255));
+
+        }
+
+        // write the pixels
+        for (int k = 0; k < pixelBlock.length; k++) {
+          pixelBlock[k] = convertPixelTo565(colors[k]);
+          colors[k] = convertPixelTo565(pixelBlock[k]);
+        }
+
+        int[] extremes = getExtremes(colors);
+
+        int extreme1 = extremes[0];
+        int extreme2 = extremes[1];
+
+        if (pixelBlock[extreme1] < pixelBlock[extreme2]) {
+          int temp = extreme1;
+          extreme1 = extreme2;
+          extreme2 = temp;
+        }
+
+        fm.writeShort((short) pixelBlock[extreme1]);
+        fm.writeShort((short) pixelBlock[extreme2]);
+
+        long bitmask = computeDXTBitMask(colors, extreme1, extreme2);
+        fm.writeInt((int) bitmask);
+      }
+    }
   }
 
   /**
@@ -553,6 +722,38 @@ public class ImageFormatWriter {
 
   /**
    **********************************************************************************************
+   * Writes an ARGB color palette
+   **********************************************************************************************
+   **/
+  public static void writePaletteARGB(FileManipulator fm, int[] palette) {
+    int numColors = palette.length;
+
+    for (int i = 0; i < numColors; i++) {
+      // INPUT = ARGB
+      int pixel = palette[i];
+
+      // 1 - Red
+      int rPixel = (pixel >> 16) & 255;
+
+      // 1 - Green
+      int gPixel = (pixel >> 8) & 255;
+
+      // 1 - Blue
+      int bPixel = pixel & 255;
+
+      // 1 - Alpha
+      int aPixel = (pixel >> 24) & 255;
+
+      // OUTPUT = RGBA
+      fm.writeByte(aPixel);
+      fm.writeByte(rPixel);
+      fm.writeByte(gPixel);
+      fm.writeByte(bPixel);
+    }
+  }
+
+  /**
+   **********************************************************************************************
    * Writes an RGB color palette
    **********************************************************************************************
    **/
@@ -576,6 +777,34 @@ public class ImageFormatWriter {
       fm.writeByte(rPixel);
       fm.writeByte(gPixel);
       fm.writeByte(bPixel);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an BGR color palette
+   **********************************************************************************************
+   **/
+  public static void writePaletteBGR(FileManipulator fm, int[] palette) {
+    int numColors = palette.length;
+
+    for (int i = 0; i < numColors; i++) {
+      // INPUT = ARGB
+      int pixel = palette[i];
+
+      // 1 - Red
+      int rPixel = (pixel >> 16) & 255;
+
+      // 1 - Green
+      int gPixel = (pixel >> 8) & 255;
+
+      // 1 - Blue
+      int bPixel = pixel & 255;
+
+      // OUTPUT = BGR
+      fm.writeByte(bPixel);
+      fm.writeByte(gPixel);
+      fm.writeByte(rPixel);
     }
   }
 
@@ -674,6 +903,35 @@ public class ImageFormatWriter {
 
   /**
    **********************************************************************************************
+   * Writes an BGR565 image
+   **********************************************************************************************
+   **/
+  public static void writeBGR565(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+
+      // OUTPUT = bbbbbggggggrrrrr
+      ColorSplit color = new ColorSplit(pixel);
+
+      // 5bits - Blue
+      // 6bits - Green
+      // 5bits - Red
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 4;
+      int r = color.getRed() / 8;
+
+      int shortValue = (b << 11) | (g << 5) | (r);
+      fm.writeShort(shortValue);
+    }
+  }
+
+  /**
+   **********************************************************************************************
    * Writes an BGR555 image
    **********************************************************************************************
    **/
@@ -730,8 +988,7 @@ public class ImageFormatWriter {
       fm.writeShort(shortValue);
     }
   }
-  
-  
+
   /**
    **********************************************************************************************
    * Writes an BGRA5551 image
@@ -759,6 +1016,105 @@ public class ImageFormatWriter {
       // OUTPUT = BGRA5551
       int shortValue = (b << 11) | (g << 6) | (r << 1) | a;
       fm.writeShort(shortValue);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an BGRA5551 image
+   **********************************************************************************************
+   **/
+  public static void writeGBAR5551(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      // 1bit  - Alpha
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = color.getAlpha() / 255;
+
+      // gggbbbbb arrrrrgg 
+      int byte1 = ((g & 7) << 5) | b;
+      int byte2 = ((g >> 3) & 3) | (r << 2) | (a << 7);
+
+      fm.writeByte(byte1);
+      fm.writeByte(byte2);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an BGAR5551 image
+   **********************************************************************************************
+   **/
+  public static void writeBGAR5551(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      // 1bit  - Alpha
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = color.getAlpha() / 255;
+
+      // gggbbbbb arrrrrgg 
+      int byte1 = ((b & 7) << 5) | g;
+      int byte2 = ((b >> 3) & 3) | (r << 2) | (a << 7);
+
+      fm.writeByte(byte1);
+      fm.writeByte(byte2);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an GRAB5551 image
+   **********************************************************************************************
+   **/
+  public static void writeGRAB5551(FileManipulator fm, ImageResource imageResource) {
+    int[] pixels = imageResource.getImagePixels();
+
+    int numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      // INPUT = ARGB
+      int pixel = pixels[i];
+      ColorSplitAlpha color = new ColorSplitAlpha(pixel);
+
+      // 5bits - Blue
+      // 5bits - Green
+      // 5bits - Red
+      // 1bit  - Alpha
+      int b = color.getBlue() / 8;
+      int g = color.getGreen() / 8;
+      int r = color.getRed() / 8;
+      int a = color.getAlpha() / 255;
+
+      // gggrrrrr abbbbbgg
+      int byte1 = ((g & 7) << 5) | r;
+      int byte2 = ((g >> 3) & 3) | (b << 2) | (a << 7);
+
+      fm.writeByte(byte1);
+      fm.writeByte(byte2);
     }
   }
 

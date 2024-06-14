@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2022 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -14,19 +14,24 @@
 
 package org.watto.ge.plugin.viewer;
 
+import java.awt.Image;
 import org.watto.ErrorLogger;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
+import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageFormatWriter;
+import org.watto.ge.helper.ImageManipulator;
 import org.watto.ge.helper.PaletteGenerator;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_REZ_REZMGR;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
 
 /**
@@ -52,6 +57,7 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
         "Mysterious Journey 2");
     setPlatforms("PC");
     setStandardFileFormat(false);
+
   }
 
   /**
@@ -61,6 +67,19 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
   **/
   @Override
   public boolean canWrite(PreviewPanel panel) {
+    return false;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
+  public boolean canReplace(PreviewPanel panel) {
+    if (panel instanceof PreviewPanel_Image) {
+      return true;
+    }
     return false;
   }
 
@@ -216,7 +235,7 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
           imageFormat = "DXT3";
         }
         else if (imageType == 6) {
-          imageFormat = "DXT5";
+          imageFormat = "DXT3"; // think it's actually DXT3 (some as DXT5 are just all blank)
         }
         else if (imageType == 136 || imageType == 236) {
           imageFormat = "8bitPaletted";
@@ -301,6 +320,7 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
         }
         else if (imageFormat.equals("RGBA")) {
           imageResource = ImageFormatReader.readRGBA(fm, width, height);
+          imageResource = ImageFormatReader.removeAlphaIfAllInvisible(imageResource);
         }
         else if (imageFormat.equals("DXT1")) {
           imageResource = ImageFormatReader.readDXT1(fm, width, height);
@@ -330,11 +350,221 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
   public void write(PreviewPanel preview, FileManipulator fm) {
+  }
+
+  /**
+  **********************************************************************************************
+  We can't WRITE these files from scratch, but we can REPLACE some of the images with new content  
+  **********************************************************************************************
+  **/
+  public void replace(Resource resourceBeingReplaced, PreviewPanel preview, FileManipulator fm) {
+    try {
+
+      if (!(preview instanceof PreviewPanel_Image)) {
+        return;
+      }
+
+      PreviewPanel_Image ivp = (PreviewPanel_Image) preview;
+      Image image = ivp.getImage();
+      int width = ivp.getImageWidth();
+      int height = ivp.getImageHeight();
+
+      if (width == -1 || height == -1) {
+        return;
+      }
+
+      // Try to get the existing ImageResource (if it was stored), otherwise build a new one
+      ImageResource imageResource = ((PreviewPanel_Image) preview).getImageResource();
+      if (imageResource == null) {
+        imageResource = new ImageResource(image, width, height);
+      }
+
+      // Extract the original resource into a byte[] array, so we can reference it
+      int srcLength = (int) resourceBeingReplaced.getDecompressedLength();
+      if (srcLength > 1280) {
+        srcLength = 1280; // allows enough reading for the header and color palette, but not much of the original image data
+      }
+      byte[] srcBytes = new byte[(int) resourceBeingReplaced.getDecompressedLength()];
+      FileManipulator src = new FileManipulator(new ByteBuffer(srcBytes));
+      resourceBeingReplaced.extract(src);
+      src.seek(0);
+
+      // Build the new file using the src[] and adding in the new image content
+
+      // 4 - null
+      fm.writeBytes(src.readBytes(4));
+
+      // 4 - Unknown (-5)
+      int imageVersion = src.readInt();
+      fm.writeInt(imageVersion);
+
+      // 2 - Image Width
+      short srcWidth = src.readShort();
+
+      // 2 - Image Height
+      short srcHeight = src.readShort();
+
+      String imageFormat = null;
+      int numMipmaps = 1;
+
+      if (srcWidth == 0 && srcHeight == 0) {
+        fm.writeShort(0);
+        fm.writeShort(0);
+
+        imageFormat = "Grayscale";
+
+        // 6 - null
+        fm.writeBytes(src.readBytes(6));
+
+        // 2 - Image Width
+        srcWidth = src.readShort();
+        fm.writeShort(width);
+
+        // 2 - Image Height
+        srcHeight = src.readShort();
+        fm.writeShort(height);
+      }
+      else {
+        fm.writeShort(width);
+        fm.writeShort(height);
+
+        // 2 - Number of Mipmaps
+        numMipmaps = src.readShort();
+        fm.writeShort(numMipmaps);
+
+        // 2 - null
+        // 4 - Unknown
+        // 4 - Unknown
+        // 2 - Unknown
+        fm.writeBytes(src.readBytes(12));
+
+        // 1 - Image Format (3=RGBA, 4=DXT1, 6=DXT5)
+        int imageType = ByteConverter.unsign(src.readByte());
+        fm.writeByte(imageType);
+        if (imageType == 0) {
+          if (imageVersion == -5) {
+            imageFormat = "RGBA";
+          }
+          else if (imageVersion == -2 || imageVersion == -3) {
+            imageFormat = "8bitPaletted";
+          }
+        }
+        else if (imageType == 3) {
+          imageFormat = "RGBA";
+        }
+        else if (imageType == 4) {
+          imageFormat = "DXT1";
+        }
+        else if (imageType == 5) {
+          imageFormat = "DXT3";
+        }
+        else if (imageType == 6) {
+          imageFormat = "DXT3"; // think it's actually DXT3 (some as DXT5 are just all blank)
+        }
+        else if (imageType == 136 || imageType == 236) {
+          imageFormat = "8bitPaletted";
+        }
+        else {
+          ErrorLogger.log("REZ_REZMGR_DTX: Unknown Image Type: " + imageType);
+          return;
+        }
+      }
+
+      if (imageFormat.equals("8bitPaletted")) {
+        if (imageVersion == -2) {
+          // 1 - Unknown
+          // 8 - null
+          // 4 - Unknown
+          // 4 - Unknown
+          fm.writeBytes(src.readBytes(17));
+        }
+        else if (imageVersion == -3) {
+          // 1 - Unknown
+          // 4 - Unknown
+          // 4 - null
+          // 128 - null Padding
+          // 4 - Unknown
+          // 4 - Unknown
+          fm.writeBytes(src.readBytes(172 - (int) fm.getLength()));
+        }
+
+        // X - Color Palette (ARGB)
+        ImageManipulator im = new ImageManipulator(imageResource);
+        im.changeColorCount(256);
+
+        int[] palette = im.getPalette();
+        ImageFormatWriter.writePaletteARGB(fm, palette);
+
+        // X - Color Palette Indexes
+        ImageManipulator[] mipmaps = im.generatePalettedMipmaps();
+        for (int m = 0; m < numMipmaps; m++) {
+          int[] pixels = mipmaps[m].getPixels();
+          int numPixels = pixels.length;
+
+          for (int i = 0; i < numPixels; i++) {
+            fm.writeByte(pixels[i]);
+          }
+        }
+
+      }
+      else if (imageFormat.equals("Grayscale")) {
+        ImageManipulator im = new ImageManipulator(imageResource);
+        im.changeColorCount(256);
+
+        // change to grayscale palette
+        int[] palette = PaletteGenerator.getGrayscale();
+        im.setPalette(palette);
+
+        // X - Color Palette Indexes
+        ImageManipulator[] mipmaps = im.generatePalettedMipmaps();
+        for (int m = 0; m < numMipmaps; m++) {
+          int[] pixels = mipmaps[m].getPixels();
+          int numPixels = pixels.length;
+
+          for (int i = 0; i < numPixels; i++) {
+            fm.writeByte(pixels[i]);
+          }
+        }
+
+      }
+      else {
+        // 1 - Unknown
+        // 8 - null
+        // 128 - Description, Padding, other Junk Data
+        fm.writeBytes(src.readBytes(164 - (int) fm.getLength()));
+
+        // X - Pixels
+        ImageManipulator im = new ImageManipulator(imageResource);
+        ImageResource[] mipmaps = im.generateMipmaps();
+
+        for (int m = 0; m < numMipmaps; m++) {
+          if (imageFormat.equals("DXT5")) {
+            ImageFormatWriter.writeDXT5(fm, mipmaps[m]);
+          }
+          else if (imageFormat.equals("RGBA")) {
+            ImageFormatWriter.writeRGBA(fm, mipmaps[m]);
+          }
+          else if (imageFormat.equals("DXT1")) {
+            ImageFormatWriter.writeDXT1(fm, mipmaps[m]);
+          }
+          else if (imageFormat.equals("DXT3")) {
+            ImageFormatWriter.writeDXT3(fm, mipmaps[m]);
+          }
+        }
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }
