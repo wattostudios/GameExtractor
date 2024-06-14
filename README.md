@@ -73,6 +73,29 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.15
+  * [I] Support for more games, with a focus on adding previews and write support, where possible
+  * [+] For archives that can do Convert On Replace, you can now do Replace Matching Files and it
+        will replace proprietary image types with standard ones in bulk
+  * [+] Added a setting to copy the filename to the clipboard when you right-click on a file
+  * [A] Increased the EXE minimum memory to 2GB
+  * [A] The DDS Scanner can now detect more DDS image types (eg 32-bit and 16-bit formats)
+  * [A] FMOD ADPCM audio can now be converted to WAV and previewed
+  * [B] Fixed an issue where memory was retained when converting lots of images during extract
+  * [B] Fixed an issue where memory was retained when replacing files that are converted on replace
+  * [B] Fixed a bug when the alpha would be calculated incorrectly when writing images
+  * [B] Fixed an endless loop when trying to split ASSET archives that aren't correctly decompressed
+  * [B] Fixed a bug where the file list would be re-sorted when replacing files, if a filter + sort
+        was being used in the display.
+  * [B] Changing a color palette of an animation will now update all frames with the new palette
+  * [B] Alpha values are now calculated and stored when writing DXT5 images
+  * [B] Fixed incorrect reading of the colors in images in 555 format
+  * [B] Better reading support for Unity v22 Meshes
+  * [B] Fixed a bug where small Unity bundles would fail to open (if numFiles < 8)
+  * [B] Fixed a bug where Normals and Tex Coords wouldn't be exported in OBJ Meshes if they were zero
+  * [B] Fixed a bug where changing the interface Font would corrupt the settings and interface files
+  * [B] The OBJ mesh exporter now maps Tex Coords to Faces, so textures can be applied to them
+
 * Version 3.14
   * [I] Support for more games, with a focus on adding previews (image and 3D meshes) and thumbnails
   * [+] Added support for encrypted UE4 files when a valid encryption key is supplied
