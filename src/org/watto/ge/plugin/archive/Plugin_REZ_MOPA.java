@@ -15,17 +15,17 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
-import org.watto.ge.helper.QuickBMSHelper;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Default;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -127,10 +127,16 @@ public class Plugin_REZ_MOPA extends ArchivePlugin {
       // If QuickBMS is available, use it to perform the decompression
       ExporterPlugin exporterLZSS = Exporter_Default.getInstance();
       ExporterPlugin exporterRLE = Exporter_Default.getInstance();
+
+      /*
       if (QuickBMSHelper.checkAndShowPopup() != null) {
         exporterLZSS = new Exporter_QuickBMS_Decompression("mohlzss");
         exporterRLE = new Exporter_QuickBMS_Decompression("mohrle");
       }
+      */
+
+      exporterLZSS = new Exporter_QuickBMS_DLL("mohlzss");
+      exporterRLE = new Exporter_QuickBMS_DLL("mohrle");
 
       long arcSize = fm.getLength();
 

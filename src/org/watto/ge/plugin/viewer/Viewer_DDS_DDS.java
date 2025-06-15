@@ -708,8 +708,8 @@ public class Viewer_DDS_DDS extends ViewerPlugin {
         }
         else if (dxgiFormat == 99) {
           // DXGI_FORMAT_BC7_UNORM_SRGB
-          ErrorLogger.log("[Viewer_DDS]: Unsupported Format: DX10: DXGI_FORMAT_BC7_UNORM_SRGB");
-          throw new Exception();
+          imageResource = ImageFormatReader.readBC7(fm, width, height);
+          imageResource.addProperty("ImageFormat", "BC7");
         }
         else if (dxgiFormat == 100) {
           // DXGI_FORMAT_AYUV

@@ -1,33 +1,32 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.HashMap;
+
 import org.watto.Language;
 import org.watto.Settings;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_LZSS_Old;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -50,12 +49,23 @@ public class Plugin_ARK_2 extends ArchivePlugin {
 
     //allowImplicitReplacing = true;
 
-    setGames("MotoGP Ultimate Racing Technology 3");
+    setGames("MotoGP: Ultimate Racing Technology",
+        "MotoGP: Ultimate Racing Technology 2",
+        "MotoGP: Ultimate Racing Technology 3");
     setExtensions("ark");
     setPlatforms("PC");
 
-    setFileTypes("cmp", "Compressed File",
-        "nml", "Non-Compressed File");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("tex", "Texture Image", FileType.TYPE_IMAGE),
+        new FileType("msg", "Language File", FileType.TYPE_DOCUMENT),
+        new FileType("vso", "Vertex Shader", FileType.TYPE_OTHER),
+        new FileType("pso", "Pixel Shader", FileType.TYPE_OTHER),
+        new FileType("font", "Font", FileType.TYPE_OTHER),
+        new FileType("mesh", "Mesh", FileType.TYPE_MODEL));
+
+    setTextPreviewExtensions("params"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -146,8 +156,35 @@ public class Plugin_ARK_2 extends ArchivePlugin {
       fm.skip(12);
 
       Resource[] resources = new Resource[numFiles];
-
       TaskProgressManager.setMaximum(numFiles);
+
+      // See if we have a file with the filenames in it, and if so, we need to read them in so the decryption works properly
+      HashMap<String, String> hashMap = new HashMap<String, String>(numFiles);
+      File hashFile = new File(Settings.get("HashesDirectory") + File.separatorChar + "ARK_2" + File.separatorChar + "filenames.txt");
+      if (hashFile.exists()) {
+        int hashFileLength = (int) hashFile.length();
+
+        char equalSign = '=';
+
+        FileManipulator hashFM = new FileManipulator(hashFile, false);
+        while (hashFM.getOffset() < hashFileLength) {
+          String name = hashFM.readLine();
+          if (name.equals("")) {
+            break; // EOF
+          }
+
+          int equalPos = name.indexOf(equalSign);
+          if (equalPos <= 0) {
+            break; // EOF
+          }
+
+          String hash = name.substring(0, equalPos);
+          String filename = name.substring(equalPos + 1);
+
+          hashMap.put(hash, filename);
+        }
+        hashFM.close();
+      }
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
@@ -163,20 +200,34 @@ public class Plugin_ARK_2 extends ArchivePlugin {
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - Hash?
-        fm.skip(4);
-
+        //fm.skip(4);
+        String hash = fm.readHex(4).toString();
+        /*
+        System.out.println(hash);
+        
         String ext = "cmp";
         if (compressed == 0) {
           ext = "nml";
         }
-
+        
         String filename = Resource.generateFilename(i) + "." + ext;
+        */
+        String filename = hashMap.get(hash);
+        if (filename == null) {
+          filename = Resource.generateFilename(i) + "-" + hash;
+        }
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length, length);
+        if (compressed == 0) {
+          // raw file
 
-        if (compressed != 0) {
-          resources[i].setExporter(exporter);
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, length);
+        }
+        else {
+          // Compressed
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, length * 5, exporter);
         }
 
         TaskProgressManager.setValue(i);
@@ -221,33 +272,72 @@ public class Plugin_ARK_2 extends ArchivePlugin {
 
       long offset = (numFiles * 16) + 24;
 
-      fm.setLength(offset);
-      fm.seek(offset);
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getLength();
+
+        if (resource.isReplaced()) {
+          // replaced
+
+          // 4 - Compression Tag (0=Decompressed 1=Compressed)
+          fm.writeInt(0);
+          src.skip(4);
+
+          // 4 - File Offset
+          fm.writeInt((int) offset);
+          src.skip(4);
+
+          // 4 - File Length
+          fm.writeInt(length);
+          src.skip(4);
+
+          // 4 - Hash
+          fm.writeBytes(src.readBytes(4));
+
+          offset += length;
+
+        }
+        else {
+          // same as in original archive
+
+          // 4 - Compression Tag (0=Decompressed 1=Compressed)
+          fm.writeBytes(src.readBytes(4));
+
+          // 4 - File Offset
+          fm.writeInt((int) offset);
+          src.skip(4);
+
+          // 4 - File Length
+          // 4 - Hash
+          fm.writeBytes(src.readBytes(8));
+
+          offset += length;
+        }
+
+      }
+
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
 
       // Write Files
       TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
-      long[] compressedLengths = write(exporter, resources, fm);
-
-      fm.seek(24);
-
-      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      //long[] compressedLengths = write(exporter, resources, fm);
       for (int i = 0; i < numFiles; i++) {
-        Resource fd = resources[i];
-        long length = fd.getDecompressedLength();
-        String name = fd.getName();
+        Resource resource = resources[i];
 
-        // 4 - Compression Tag (0=Decompressed 1=Compressed)
-        // 4 - File Offset
-        // 4 - File Length
-        src.skip(12);
-        fm.writeInt(1);
-        fm.writeInt((int) offset);
-        fm.writeInt((int) compressedLengths[i]);
+        if (resource.isReplaced()) {
+          // replaced
+          write(resource, fm);
+        }
+        else {
+          // same as in original archive
+          ExporterPlugin origExporter = resource.getExporter();
+          resource.setExporter(exporterDefault);
+          write(resource, fm);
+          resource.setExporter(origExporter);
+        }
 
-        // 4 - Hash?
-        fm.writeBytes(src.readBytes(4));
-
-        offset += compressedLengths[i];
+        TaskProgressManager.setValue(i);
       }
 
       src.close();

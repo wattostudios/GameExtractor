@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -41,6 +42,7 @@ public class Plugin_JA_ARCHINFO extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Train Driver 2005",
+        "Trainz Simulator 2006",
         "Trainz Simulator 2009");
     setExtensions("ja");
     setPlatforms("PC");
@@ -67,13 +69,17 @@ public class Plugin_JA_ARCHINFO extends ArchivePlugin {
         rating += 50;
       }
 
-      // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
-        rating += 5;
-      }
+      fm.skip(4);
 
       // Header
       if (fm.readString(4).equals("0CRA")) {
+        rating += 5;
+      }
+
+      fm.skip(4);
+
+      // Number Of Files
+      if (FieldValidator.checkNumFiles(fm.readInt())) {
         rating += 5;
       }
 
@@ -136,12 +142,15 @@ public class Plugin_JA_ARCHINFO extends ArchivePlugin {
         String filename = fm.readNullString(260);
         FieldValidator.checkFilename(filename);
 
+        int decompLength = 0;
+        long length = 0;
+
         // 4 - Decompressed File Length
-        int decompLength = fm.readInt();
+        decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
 
         // 4 - Compressed File Length (starting from, and including, the CFIL Header)
-        long length = fm.readInt();
+        length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - Hash?

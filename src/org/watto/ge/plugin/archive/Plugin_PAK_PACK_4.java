@@ -15,15 +15,15 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
-import org.watto.ge.helper.QuickBMSHelper;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Default;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -117,9 +117,12 @@ public class Plugin_PAK_PACK_4 extends ArchivePlugin {
 
       // If QuickBMS is available, use it to perform the decompression
       ExporterPlugin exporter = Exporter_Default.getInstance();
+      /*
       if (QuickBMSHelper.checkAndShowPopup() != null) {
         exporter = new Exporter_QuickBMS_Decompression("un49g");
       }
+      */
+      exporter = new Exporter_QuickBMS_DLL("un49g");
 
       FileManipulator fm = new FileManipulator(path, false);
 

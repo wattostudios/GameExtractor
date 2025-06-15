@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,10 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.component.WSPluginManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -46,6 +50,12 @@ public class Plugin_ITK extends ArchivePlugin {
         "Last Dynasty");
     setExtensions("itk");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("vmd", "VMD Audio", FileType.TYPE_AUDIO),
+        new FileType("err", "Error Document", FileType.TYPE_DOCUMENT));
+
+    //setTextPreviewExtensions("err"); // LOWER CASE
 
   }
 
@@ -138,6 +148,23 @@ public class Plugin_ITK extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+   **********************************************************************************************
+   Provide hints to the previewer so that certain document types are displayed appropriately
+   **********************************************************************************************
+   **/
+  @Override
+  public ViewerPlugin previewHint(Resource resource) {
+    String extension = resource.getExtension();
+    if (extension.equalsIgnoreCase("vmd")) {
+      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "FFMPEG_Audio_WAV");
+    }
+    else if (extension.equalsIgnoreCase("err")) {
+      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "TXT");
+    }
+    return null;
   }
 
 }

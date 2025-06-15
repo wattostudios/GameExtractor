@@ -622,7 +622,6 @@ public class Archive {
       else {
         GameExtractor.getInstance().setTitle(Language.get("ProgramName_Free") + " " + Settings.get("Version") + " [" + basePath.getName() + "]");
       }
-
   }
 
   /**

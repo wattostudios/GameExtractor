@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -115,6 +116,10 @@ public class Plugin_MIS_WORLD extends ArchivePlugin {
       long offset = fm.getOffset();
 
       long length = arcSize - offset;
+
+      if (decompLength < length) {
+        return null; // not this type of file
+      }
 
       String filename = "CompressedFile1.cmp";
       Resource[] resources = new Resource[] { new Resource(path, filename, offset, length, decompLength, exporter) };

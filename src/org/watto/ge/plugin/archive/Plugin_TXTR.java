@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -182,6 +183,9 @@ public class Plugin_TXTR extends ArchivePlugin {
       resource.setExporter(Exporter_BZIP2.getInstance());
 
       return "2zoq";
+    }
+    else if (headerInt1 == 1903126886) {
+      return "fioq";
     }
 
     return null;

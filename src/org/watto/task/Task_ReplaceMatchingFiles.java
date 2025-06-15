@@ -16,6 +16,7 @@ package org.watto.task;
 
 import java.io.File;
 import java.util.HashMap;
+
 import org.watto.ChangeMonitor;
 import org.watto.Language;
 import org.watto.component.ComponentRepository;
@@ -88,11 +89,13 @@ public class Task_ReplaceMatchingFiles extends AbstractTask {
     String baseDir = basePath.getAbsolutePath() + File.separator;
     String baseDirParent = basePath.getParentFile().getAbsolutePath() + File.separator;
 
- // *2 because if the ArchivePlugin allows convertOnReplace, we could end up doing a normal replace followed by a convertReplace for each file
-    originalResources = new Resource[resources.length*2]; 
-    replacedResources = new Resource[resources.length*2];
-    
+    // *2 because if the ArchivePlugin allows convertOnReplace, we could end up doing a normal replace followed by a convertReplace for each file
+    originalResources = new Resource[resources.length * 2];
+    replacedResources = new Resource[resources.length * 2];
+
     int numberReplaced = 0;
+
+    //System.out.println("Checking direct matches");
 
     for (int i = 0; i < resources.length; i++) {
       // 1. Check if the file exists
@@ -119,6 +122,8 @@ public class Task_ReplaceMatchingFiles extends AbstractTask {
       }
     }
 
+    //System.out.println("Checking convertable matches");
+
     // 3. Now that we're here, we've replaced all the matching files.
     // However, if the ArchivePlugin canConvertOnReplace, we also want to see if there's any files that we can
     // convert and then replace into the archive.
@@ -136,14 +141,17 @@ public class Task_ReplaceMatchingFiles extends AbstractTask {
       String[] uniqueDirs = uniqueDirsMap.values().toArray(new String[0]);
 
       uniqueDirsMap = null; // free memory
-      
+
       // 3.2 For each unique directory, find all the files on the PC in that directory, but *only* files that have 2 "." in the filename.
       // This is because, when we do an extract and convert, it will extract the file as <original_name>.<ext>.png for example, 
       // and what we're looking for (in the matching) is this format so we can strip off the ".png" and match to that shortened filename.
       // Build a map of all the <short> names, which match to the <long> names.
       int numDirs = uniqueDirs.length;
+
+      //System.out.println("Found directories: " + numDirs);
+
       HashMap<String, File> convertableFilesMap = new HashMap<String, File>();
-      for (int d=0;d<numDirs;d++) {
+      for (int d = 0; d < numDirs; d++) {
         String directoryToFind = uniqueDirs[d];
         File scanDir = new File(baseDir + directoryToFind);
         if (scanDir.exists()) {
@@ -166,12 +174,12 @@ public class Task_ReplaceMatchingFiles extends AbstractTask {
           // can't find this directory anywhere - mustn't be trying to replace files in this directory, skip it
           continue;
         }
-        
+
         // if we're here, we found a directory to scan, so lets find all the files with 2 "." in the name, and add them to the map
         File[] files = scanDir.listFiles();
         int numScanFiles = files.length;
         char dot = '.';
-        for (int s=0;s<numScanFiles;s++) {
+        for (int s = 0; s < numScanFiles; s++) {
           File fileToCheck = files[s];
           if (!fileToCheck.isFile()) {
             // not a file - skip
@@ -189,10 +197,12 @@ public class Task_ReplaceMatchingFiles extends AbstractTask {
             continue;
           }
           // if we're here, there's at least 2 dots, so add the file the map
-          String shortFilename = directoryToFind + filenameToCheck.substring(0,lastDotPos);
+          String shortFilename = directoryToFind + filenameToCheck.substring(0, lastDotPos);
           convertableFilesMap.put(shortFilename, fileToCheck);
         }
       }
+
+      //System.out.println("Compiled map of double dots");
 
       // 3.3 Go through all the Resources, see if there's a matching name in the map. If so, we have a potential file that could be
       // converted to replace this file. Try to convert and replace the file, if possible.
@@ -200,26 +210,30 @@ public class Task_ReplaceMatchingFiles extends AbstractTask {
         Resource resource = resources[i];
         String filename = resource.getName();
 
+        //System.out.println("checking file " + i + " of " + numFiles);
+
         File convertableFile = convertableFilesMap.get(filename);
         if (convertableFile == null) {
           convertableFile = convertableFilesMap.get(File.separatorChar + filename); // 3.15 also need to check for files starting with a single slash
           if (convertableFile == null) {
-          // no match for this resource - skip
-          continue;
+            // no match for this resource - skip
+            continue;
           }
         }
-        
+
         // if we're here, found a file that we'll try to convert to a match
-        
+
         // clone the resource to a separate object
         originalResources[numberReplaced] = (Resource) resources[i].clone();
         replacedResources[numberReplaced] = resources[i];
         numberReplaced++;
-        
+
+        //System.out.println("Replacing file " + filename);
         // perform a replace on the resource
         resources[i].replace(convertableFile);
+        //System.out.println("Done replace");
       }
-      
+
     }
 
     if (numberReplaced < resources.length) {

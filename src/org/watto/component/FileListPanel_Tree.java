@@ -1041,7 +1041,13 @@ public class FileListPanel_Tree extends FileListPanel implements WSClickableInte
   **/
   @Override
   public void reload() {
-    root = new FileListModel_Tree("Archive");
+
+    String rootName = Language.get("FileListTree_RootNodeLabel");
+    if (rootName == null || rootName.equals("") || rootName.equals("FileListTree_RootNodeLabel")) {
+      rootName = "Archive";
+    }
+
+    root = new FileListModel_Tree(rootName);
     tree.setModel(new DefaultTreeModel(root));
 
     if (Archive.getColumn(0) == null) {

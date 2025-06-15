@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -58,8 +58,7 @@ public class _Viewer_XXX extends ViewerPlugin {
     }
     return false;
   }
-  
-  
+
   /**
   **********************************************************************************************
   
@@ -116,7 +115,7 @@ public class _Viewer_XXX extends ViewerPlugin {
       if (FieldValidator.checkWidth(fm.readShort())) {
         rating += 5;
       }
-      
+
       // 2 - Image Height
       if (FieldValidator.checkHeight(fm.readShort())) {
         rating += 5;
@@ -126,17 +125,16 @@ public class _Viewer_XXX extends ViewerPlugin {
       if (FieldValidator.checkWidth(fm.readInt())) {
         rating += 5;
       }
-      
+
       // 4 - Image Height
       if (FieldValidator.checkHeight(fm.readInt())) {
         rating += 5;
       }
 
       // 4 - Number of Mipmaps
-      if (FieldValidator.checkRange(fm.readInt(),1,20)) {
+      if (FieldValidator.checkRange(fm.readInt(), 1, 20)) {
         rating += 5;
       }
-
 
       return rating;
 
@@ -192,7 +190,7 @@ public class _Viewer_XXX extends ViewerPlugin {
 
       // 4 - File Length (including all these header fields)
       FieldValidator.checkLength(fm.readInt(), arcSize);
-      
+
       // 4 - Image Width
       int width = fm.readInt();
       FieldValidator.checkWidth(width);
@@ -227,7 +225,6 @@ public class _Viewer_XXX extends ViewerPlugin {
 
       imageResource.addProperty("MipmapCount", "" + numMipmaps);
 
-
       return imageResource;
 
     }
@@ -239,7 +236,7 @@ public class _Viewer_XXX extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

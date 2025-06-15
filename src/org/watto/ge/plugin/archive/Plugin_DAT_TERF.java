@@ -15,13 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -158,7 +159,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       compressedArchive = true;
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      ExporterPlugin exporter = new Exporter_QuickBMS_DLL("EA_MADDEN");
 
       long arcSize = fm.getLength();
 
@@ -279,7 +281,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       compressedArchive = true;
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      ExporterPlugin exporter = new Exporter_QuickBMS_DLL("EA_MADDEN");
 
       long arcSize = fm.getLength();
 
@@ -377,7 +380,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       compressedArchive = true;
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      ExporterPlugin exporter = new Exporter_QuickBMS_DLL("EA_MADDEN");
 
       long arcSize = fm.getLength();
 
@@ -567,7 +571,8 @@ public class Plugin_DAT_TERF extends ArchivePlugin {
 
       compressedArchive = true;
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("EA_MADDEN");
+      ExporterPlugin exporter = new Exporter_QuickBMS_DLL("EA_MADDEN");
 
       long arcSize = fm.getLength();
 

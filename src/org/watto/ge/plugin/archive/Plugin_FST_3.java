@@ -15,11 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -86,7 +87,8 @@ public class Plugin_FST_3 extends ArchivePlugin {
   public Resource[] read(File path) {
     try {
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("UNLZWX");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("UNLZWX");
+      ExporterPlugin exporter = new Exporter_QuickBMS_DLL("UNLZWX");
       addFileTypes();
 
       FileManipulator fm = new FileManipulator(path, false);

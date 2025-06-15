@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -46,6 +47,7 @@ public class Plugin_VOX_CLIB_2 extends ArchivePlugin {
         "Kathy Rain",
         "Kings Quest 1: Quest for the Crown",
         "Kings Quest 2: Romancing the Stones",
+        "Heroine's Quest: The Herald of Ragnarok",
         "Life Of D. Duck 2",
         "Loftus",
         "Quest For Glory 2",

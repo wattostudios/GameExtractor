@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
@@ -420,12 +421,27 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
         // 1 - null Terminator
         fm.readNullString();
 
+        /*
         // 4 - null
         fm.skip(4);
-
+        
         // 4 - Archive Length (BIG ENDIAN)
         int arcLength = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkLength(arcLength, arcSize);
+        */
+
+        long arcLength = 0;
+
+        // 8 - Archive Length (BIG ENDIAN)
+        byte[] lengthBytes = fm.readBytes(8);
+        try {
+          arcLength = LongConverter.convertBig(lengthBytes);
+          FieldValidator.checkLength(arcLength, arcSize);
+        }
+        catch (Throwable t) {
+          arcLength = IntConverter.convertBig(new byte[] { lengthBytes[4], lengthBytes[5], lengthBytes[6], lengthBytes[7] });
+          FieldValidator.checkLength(arcLength, arcSize);
+        }
 
         // 4 - Compressed Data Header Size (File Data Offset [+46]) (BIG ENDIAN)
         int compDataHeaderSize = IntConverter.changeFormat(fm.readInt());
@@ -448,6 +464,8 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
 
         if ((flags & 3) == 3) {
 
+          boolean usePaddedOffsets = false;
+
           // LZ4 Compression
           byte[] dirBytes = new byte[decompDataHeaderSize];
           int decompWritePos = 0;
@@ -455,6 +473,10 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
           exporter.open(fm, compDataHeaderSize, decompDataHeaderSize);
 
           for (int b = 0; b < decompDataHeaderSize; b++) {
+            if (b == 32 && decompWritePos == 0) {
+              // if we have read 32 bytes but we still haven't written anything, it's probably padded, so want to fail early (the decompression isn't working)
+              break;
+            }
             if (exporter.available()) { // make sure we read the next bit of data, if required
               dirBytes[decompWritePos++] = (byte) exporter.read();
             }
@@ -468,6 +490,32 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
 
           // 4 - Number of Storage Blocks
           int numBlocks = IntConverter.changeFormat(fmDir.readInt());
+          if (numBlocks == 0) {
+            // probably didn't decompress properly - try again, but start decompressing from offset 64 instead of the curreny offset
+            fm.seek(64);
+
+            usePaddedOffsets = true;
+
+            dirBytes = new byte[decompDataHeaderSize];
+            decompWritePos = 0;
+            exporter = Exporter_LZ4.getInstance();
+            exporter.open(fm, compDataHeaderSize, decompDataHeaderSize);
+
+            for (int b = 0; b < decompDataHeaderSize; b++) {
+              if (exporter.available()) { // make sure we read the next bit of data, if required
+                dirBytes[decompWritePos++] = (byte) exporter.read();
+              }
+            }
+
+            // open the decompressed data for processing
+            fmDir = new FileManipulator(new ByteBuffer(dirBytes));
+
+            // 16 - Unknown
+            fmDir.skip(16);
+
+            // 4 - Number of Storage Blocks
+            numBlocks = IntConverter.changeFormat(fmDir.readInt());
+          }
           FieldValidator.checkNumFiles(numBlocks);
 
           int[] blockDecompLengths = new int[numBlocks];
@@ -487,6 +535,24 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
           }
 
           long currentOffset = fm.getOffset();
+
+          if (numBlocks == 1 && blockCompLengths[0] == blockDecompLengths[0]) {
+            // raw block, read where it is (Surviving the Aftermath)
+          }
+          else if (usePaddedOffsets) {
+            while (fm.getOffset() < arcSize) {
+              if (fm.readByte() == 0) {
+                // continue;
+              }
+              else {
+                // found the actual data to decompress
+                currentOffset = fm.getOffset() - 1;
+                fm.relativeSeek(currentOffset);
+                break;
+              }
+            }
+
+          }
 
           // Decompress the file from the blocks
           FileManipulator decompFM = decompressLZ4Archive(fm, (int) currentOffset, blockCompLengths, blockDecompLengths);
@@ -1095,8 +1161,20 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
             else {
               // This file is in an external archive, not the current one
               //System.out.println("EXT" + fm.getOffset());
+
               // 4 - Unknown (1)
-              // 4 - null
+              fm.skip(4);
+
+              // 4 - Description Length (usually null)
+              int descLength = fm.readInt();
+              FieldValidator.checkFilenameLength(descLength + 1); // +1 to allow null
+
+              // X - Description
+              fm.skip(descLength);
+
+              // 0-3 - null Padding to a multiple of 4 bytes
+              fm.skip(calculatePadding(descLength, 4));
+
               // 4 - Unknown (1)
               // 4 - Unknown (2)
               // 4 - Unknown (2/1)
@@ -1107,7 +1185,7 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
               // 4 - null
               // 4 - Unknown (6)
               // 4 - Unknown (1)
-              fm.skip(48);
+              fm.skip(40);
 
               // 4 - null
               fm.skip(4);
@@ -1130,7 +1208,9 @@ public class Plugin_ASSETS_22 extends ArchivePlugin {
                   extSize = fm.readInt();
 
                   if (extSize != imageFileSize) {
-                    extOffset = extSize;
+                    if (extSize != 0) { // if extSize=0, the extOffset is probably a 8-byte value, so keep the extOffset
+                      extOffset = extSize;
+                    }
                     extSize = fm.readInt();
                   }
                 }

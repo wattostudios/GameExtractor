@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
@@ -78,6 +79,9 @@ public class Plugin_PAK_70 extends ArchivePlugin {
       byte[] headerBytes = fm.readBytes(3);
       if (headerBytes[0] == 19 && ByteConverter.unsign(headerBytes[1]) == 246 && headerBytes[2] == 10) {
         rating += 50;
+      }
+      else {
+        rating = 0; // so we don't "decrypt" invalid archives
       }
 
       return rating;

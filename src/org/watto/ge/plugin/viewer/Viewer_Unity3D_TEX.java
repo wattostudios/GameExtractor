@@ -209,10 +209,25 @@ public class Viewer_Unity3D_TEX extends ViewerPlugin {
         imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readRGBA4444(fm, width, height));
         imageResource.addProperty("ImageFormat", "RGBA4444");
       }
+      else if (formatCode == 17) {
+        // 17 = RGBAHalf (TODO: maybe, guessed - RGB color and alpha texture format, 16 bit floating point per channel)
+        imageResource = ImageFormatReader.flipVertically(ImageFormatReader.read16F16F16F16F_RGBA(fm, width, height));
+        imageResource.addProperty("ImageFormat", "16F16F16F16F_RGBA");
+      }
       else if (formatCode == 25) {
         // 25 = BC7
         imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readBC7(fm, width, height));
         imageResource.addProperty("ImageFormat", "BC7");
+      }
+      else if (formatCode == 26) {
+        // 26 = BC4 (Tested successfully for Game = Sons of the Forest)
+        imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readBC4(fm, width, height));
+        imageResource.addProperty("ImageFormat", "BC4");
+      }
+      else if (formatCode == 27) {
+        // 27 = BC5 (Tested successfully for Game = Sons of the Forest)
+        imageResource = ImageFormatReader.flipVertically(ImageFormatReader.readBC5(fm, width, height));
+        imageResource.addProperty("ImageFormat", "BC5");
       }
       else if (formatCode == 28) {
         // 28 = DXT1Crunched

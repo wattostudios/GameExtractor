@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,10 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.component.WSPluginManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
@@ -48,9 +52,7 @@ public class Plugin_BIG_ARCHIVE extends ArchivePlugin {
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("fda", "FDA Audio", FileType.TYPE_AUDIO));
 
     setTextPreviewExtensions("cloud", "dat", "dustcloud", "fp", "help", "hotspot", "lod", "ma", "madstate", "miss", "script", "shader", "st", "vp"); // LOWER CASE
 
@@ -269,6 +271,20 @@ public class Plugin_BIG_ARCHIVE extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+   **********************************************************************************************
+   Provide hints to the previewer so that certain document types are displayed appropriately
+   **********************************************************************************************
+   **/
+  @Override
+  public ViewerPlugin previewHint(Resource resource) {
+    String extension = resource.getExtension();
+    if (extension.equalsIgnoreCase("fda")) {
+      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "VGMSTREAM_Audio_WAV_RIFF");
+    }
+    return null;
   }
 
   /**

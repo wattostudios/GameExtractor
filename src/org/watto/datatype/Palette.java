@@ -80,6 +80,20 @@ public class Palette {
 
   /**
   **********************************************************************************************
+  If the palette has less than <i>numColors</i>, it will be resized, filled with empty colors
+  **********************************************************************************************
+  **/
+  public void resizePalette(int numColors) {
+    int currentNumColors = palette.length;
+    if (currentNumColors < numColors) {
+      int[] oldPalette = palette;
+      palette = new int[numColors];
+      System.arraycopy(oldPalette, 0, palette, 0, currentNumColors);
+    }
+  }
+
+  /**
+  **********************************************************************************************
   
   **********************************************************************************************
   **/

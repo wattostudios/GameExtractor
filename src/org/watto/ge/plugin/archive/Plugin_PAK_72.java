@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -143,7 +143,7 @@ public class Plugin_PAK_72 extends ArchivePlugin {
 
         //path,name,offset,length,decompLength,exporter
         Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
-        resource.setAudioProperties(11025, 16, 1);
+        resource.setAudioProperties(12000, 16, 1);
         //Resource resource = new Resource(path, filename, offset, length);
         resources[realNumFiles] = resource;
         realNumFiles++;

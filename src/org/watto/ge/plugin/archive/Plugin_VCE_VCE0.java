@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
@@ -43,9 +44,11 @@ public class Plugin_VCE_VCE0 extends ArchivePlugin {
     setProperties(true, false, false, false);
     setCanImplicitReplace(true);
 
-    setGames("Homeworld");
+    setGames("Homeworld Classic");
     setExtensions("vce");
     setPlatforms("PC");
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -131,7 +134,7 @@ public class Plugin_VCE_VCE0 extends ArchivePlugin {
 
         // X - File Data
         long offset = fm.getOffset();
-        System.out.println(offset);
+        //System.out.println(offset);
         fm.skip(length);
 
         String filename = Resource.generateFilename(realNumFiles);

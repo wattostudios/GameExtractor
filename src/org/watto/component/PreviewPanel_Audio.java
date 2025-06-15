@@ -16,6 +16,7 @@ package org.watto.component;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+
 import javax.sound.sampled.Clip;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -23,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JSlider;
+
 import org.watto.Settings;
 import org.watto.event.WSClickableInterface;
 import org.watto.task.Task;
@@ -57,7 +59,7 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public PreviewPanel_Audio(Clip sound) {
@@ -75,10 +77,12 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void constructInterface() {
+
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
 
     playbutton = new WSButton(XMLReader.read("<WSButton code=\"AudioPreview_Play\" />"));
     pausebutton = new WSButton(XMLReader.read("<WSButton code=\"AudioPreview_Pause\" />"));
@@ -99,10 +103,10 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
     topPanel.add(position);
     topPanel.add(buttonPanel);
 
-    WSPanel imagePanel = new WSPanel(XMLReader.read("<WSPanel border-width=\"8\" />"));
+    WSPanel imagePanel = new WSPanel(XMLReader.read("<WSPanel code=\"AudioPreview_ImagePanelWrapper\" border-width=\"8\" />"));
     imagePanel.add(new JLabel(new ImageIcon("images/General/Audio_Cover.png")), BorderLayout.CENTER);
 
-    WSPanel overallPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"8\" />"));
+    WSPanel overallPanel = new WSPanel(XMLReader.read("<WSPanel code=\"AudioPreview_OverallPanelWrapper\" vertical-gap=\"8\" />"));
     overallPanel.add(new JPanel(), BorderLayout.NORTH);
     overallPanel.add(imagePanel, BorderLayout.CENTER);
     overallPanel.add(topPanel, BorderLayout.SOUTH);
@@ -112,7 +116,7 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -136,7 +140,7 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -150,7 +154,7 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void pauseAudio() {
@@ -159,7 +163,7 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void playAudio() {
@@ -170,7 +174,7 @@ public class PreviewPanel_Audio extends PreviewPanel implements WSClickableInter
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void stopAudio() {

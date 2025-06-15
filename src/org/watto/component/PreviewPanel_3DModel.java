@@ -53,7 +53,9 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+
 import javax.swing.JComponent;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.event.WSClickableInterface;
@@ -61,6 +63,7 @@ import org.watto.event.WSSelectableInterface;
 import org.watto.event.listener.WSSelectableListener;
 import org.watto.ge.helper.Transform3D;
 import org.watto.xml.XMLReader;
+
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
@@ -380,6 +383,8 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
   **/
   public void createInterface() {
 
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
     WSOptionCheckBox wireframeCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_3DModel_Wireframe\" setting=\"PreviewPanel_3DModel_Wireframe\" />"));
     WSOptionCheckBox smoothingCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_3DModel_Smoothing\" setting=\"PreviewPanel_3DModel_Smoothing\" />"));
     WSOptionCheckBox texturesCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_3DModel_ShowTextures\" setting=\"PreviewPanel_3DModel_ShowTextures\" />"));
@@ -390,7 +395,7 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
     smoothingCheckbox.addItemListener(selectableListener);
     texturesCheckbox.addItemListener(selectableListener);
 
-    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"3\" />"));
+    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_TopPanelWrapper\" showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"3\" />"));
     topPanel.add(wireframeCheckbox);
     topPanel.add(smoothingCheckbox);
     topPanel.add(texturesCheckbox);
@@ -408,20 +413,20 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
     // Rotation Controls
     //
 
-    WSPanel rotatePanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\" layout=\"GridLayout\" rows=\"3\" columns=\"3\" />"));
-    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    WSPanel rotatePanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotatePanelWrapper\" opaque=\"false\" showBorder=\"true\" layout=\"GridLayout\" rows=\"3\" columns=\"3\" />"));
+    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotateBlank1\" opaque=\"false\" />")));
     rotatePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_RotateUp\" />")));
-    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotateBlank2\" opaque=\"false\" />")));
 
     rotatePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_RotateLeft\" />")));
-    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotateBlank3\" opaque=\"false\" />")));
     rotatePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_RotateRight\" />")));
 
-    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotateBlank4\" opaque=\"false\" />")));
     rotatePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_RotateDown\" />")));
-    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    rotatePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotateBlank5\" opaque=\"false\" />")));
 
-    WSPanel rotateWithLabelPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" />"));
+    WSPanel rotateWithLabelPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_RotateWithLabelWrapper\" showBorder=\"true\" />"));
     rotateWithLabelPanel.add(new WSLabel(XMLReader.read("<WSLabel code=\"PreviewPanel_3DModel_RotateLabel\" />")), BorderLayout.NORTH);
     rotateWithLabelPanel.add(rotatePanel, BorderLayout.CENTER);
 
@@ -429,20 +434,20 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
     // Move Controls
     //
 
-    WSPanel movePanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\" layout=\"GridLayout\" rows=\"3\" columns=\"3\" />"));
-    movePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    WSPanel movePanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MovePanelWrapper\" opaque=\"false\" showBorder=\"true\" layout=\"GridLayout\" rows=\"3\" columns=\"3\" />"));
+    movePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MoveBlank1\" opaque=\"false\" />")));
     movePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_MoveUp\" />")));
-    movePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    movePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MoveBlank2\" opaque=\"false\" />")));
 
     movePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_MoveLeft\" />")));
-    movePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    movePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MoveBlank3\" opaque=\"false\" />")));
     movePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_MoveRight\" />")));
 
-    movePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    movePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MoveBlank4\" opaque=\"false\" />")));
     movePanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_MoveDown\" />")));
-    movePanel.add(new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" />")));
+    movePanel.add(new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MoveBlank5\" opaque=\"false\" />")));
 
-    WSPanel moveWithLabelPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" />"));
+    WSPanel moveWithLabelPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_MoveWithLabelWrapper\" showBorder=\"true\" />"));
     moveWithLabelPanel.add(new WSLabel(XMLReader.read("<WSLabel code=\"PreviewPanel_3DModel_MoveLabel\" />")), BorderLayout.NORTH);
     moveWithLabelPanel.add(movePanel, BorderLayout.CENTER);
 
@@ -450,11 +455,11 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
     // Zoom Controls
     //
 
-    WSPanel zoomPanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\" layout=\"GridLayout\" rows=\"2\" columns=\"1\" />"));
+    WSPanel zoomPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_ZoomPanelWrapper\" opaque=\"false\" showBorder=\"true\" layout=\"GridLayout\" rows=\"2\" columns=\"1\" />"));
     zoomPanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_ZoomIn\" />")));
     zoomPanel.add(new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_3DModel_ZoomOut\" />")));
 
-    WSPanel zoomWithLabelPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" />"));
+    WSPanel zoomWithLabelPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_ZoomWithLabelWrapper\" showBorder=\"true\" />"));
     zoomWithLabelPanel.add(new WSLabel(XMLReader.read("<WSLabel code=\"PreviewPanel_3DModel_ZoomLabel\" />")), BorderLayout.NORTH);
     zoomWithLabelPanel.add(zoomPanel, BorderLayout.CENTER);
 
@@ -462,7 +467,7 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
     // Add the controls to the interface
     //
 
-    WSPanel controlPanel = new WSPanel(XMLReader.read("<WSPanel layout=\"GridLayout\" rows=\"1\" columns=\"3\" />"));
+    WSPanel controlPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_ControlPanelWrapper\" layout=\"GridLayout\" rows=\"1\" columns=\"3\" />"));
     controlPanel.add(rotateWithLabelPanel);
     controlPanel.add(moveWithLabelPanel);
     controlPanel.add(zoomWithLabelPanel);

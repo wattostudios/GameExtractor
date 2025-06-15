@@ -5,7 +5,7 @@
 		<setting code="PreviewPanel_3DModel_BackgroundColor" value="GREY" />
 		<setting code="WSGradientColorChooser_Color_Selected" value="-9725853" />
 		<setting code="Popup_ExportFileList_NoColumnsSelected_Show" value="true" />
-		<setting code="DividerLocation" value="0.7401041666666667" />
+		<setting code="DividerLocation" value="0.7270833333333333" />
 		<setting code="DragDropOption" value="DragDrop_Ask" />
 		<setting code="LanguageDirectory" value="language" />
 		<setting code="SelectedScript" value="SND_Daggerfall" />
@@ -13,22 +13,22 @@
 		<setting code="ShowTableColumn_CompressedLength" value="true" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" value="true" />
 		<setting code="Noesis_Path" value="external_bins\noesis" />
-		<setting code="PreviewPanel_ImageInvestigator_Offset" value="40" />
+		<setting code="PreviewPanel_ImageInvestigator_Offset" value="52" />
 		<setting code="Popup_Search_NoColumnsSelected_Show" value="true" />
 		<setting code="MaximumDirectoryFileLength" value="524800" />
 		<setting code="Popup_FileListViewChanged_Show" value="false" />
-		<setting code="ExportFileListColumn_FilePath" value="false" />
+		<setting code="ExportFileListColumn_FilePath" value="true" />
 		<setting code="MaxNumberOfVertices4" value="10000000" />
-		<setting code="PreviewPanel_MeshInvestigator_VertexCountField" value="305" />
+		<setting code="PreviewPanel_MeshInvestigator_VertexCountField" value="149" />
 		<setting code="Popup_AnalyzeDirectory_FileNotADirectory_Show" value="true" />
 		<setting code="PreviewPanel_ImageInvestigator_BigEndianRadioButtonSelected" value="false" />
 		<setting code="ExportFileListColumn_Directory" value="false" />
-		<setting code="PreviewPanel_MeshInvestigator_VertexOffsetField" value="233" />
+		<setting code="PreviewPanel_MeshInvestigator_VertexOffsetField" value="11872" />
 		<setting code="ToolbarButtonListFile" value="settings/toolbarButtonList.xml" />
 		<setting code="AutoChangedToHexPreview" value="false" />
 		<setting code="HexEditorFileSizeLimit" value="100000" />
 		<setting code="Popup_CutArchive_FilesCut_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_PaletteFormat" value="BGR" />
+		<setting code="PreviewPanel_ImageInvestigator_PaletteFormat" value="Grayscale" />
 		<setting code="PreviewPanel_ImageInvestigator_SwizzlePS2CheckboxSelected" value="false" />
 		<setting code="Popup_ModifyArchive_NotWritable_Show" value="true" />
 		<setting code="NintendoSwitchSwizzle" value="false" />
@@ -38,7 +38,7 @@
 		<setting code="Popup_ScriptBuilder_NoNameSpecified_Show" value="true" />
 		<setting code="TypesFile" value="settings/types.xml" />
 		<setting code="AnalysisExtractDirectory" value="extract" />
-		<setting code="ExportFileListColumn_Filename" value="true" />
+		<setting code="ExportFileListColumn_Filename" value="false" />
 		<setting code="Popup_TaskManager_UndoComplete_Show" value="true" />
 		<setting code="Popup_AddFiles_FilesAdded_Show" value="false" />
 		<setting code="ShowTableColumn_Compression" value="false" />
@@ -53,13 +53,13 @@
 		<setting code="NumberOfUndoTasks" value="4" />
 		<setting code="Popup_ReadArchive_ArchiveOpened_Show" value="false" />
 		<setting code="Popup_RemoveFiles_NoFilesToRemove_Show" value="true" />
-		<setting code="PreviewPanel_MeshInvestigator_UVOffsetField" value="60" />
+		<setting code="PreviewPanel_MeshInvestigator_UVOffsetField" value="12" />
 		<setting code="PreviewPanel_ImageInvestigator_VerticalFlipCheckboxSelected" value="false" />
 		<setting code="ShowCustomColumns" value="true" />
 		<setting code="FileListView" value="TreeTable" />
 		<setting code="Popup_Preview_PreviewSaved_Show" value="false" />
 		<setting code="Popup_ReplaceFiles_FilesReplaced_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Width" value="50" />
+		<setting code="PreviewPanel_ImageInvestigator_Width" value="1024" />
 		<setting code="AutoImportModifiedExportFiles" value="false" />
 		<setting code="Popup_ImageInvestigator_PreviewSaved_Show" value="true" />
 		<setting code="DirectoryListDoubleClickDoesOpenArchive" value="true" />
@@ -68,7 +68,7 @@
 		<setting code="FileListTreeTable_DividerLocation" value="0.1990119971771348" />
 		<setting code="LoadingPreviewFromHex" value="false" />
 		<setting code="Popup_SelectResources_Inverse_Show" value="false" />
-		<setting code="SearchColumn_Directory" value="false" />
+		<setting code="SearchColumn_Directory" value="true" />
 		<setting code="Popup_CutArchive_CutFailed_Show" value="true" />
 		<setting code="Scanner_pcx" value="true" />
 		<setting code="ShowTableColumn_Compressed" value="false" />
@@ -90,12 +90,12 @@
 		<setting code="WSTableColumn_R_Width" value="18" />
 		<setting code="ExportFileListColumn_DecompressedLength" value="true" />
 		<setting code="Scanner_gif" value="true" />
-		<setting code="SelectedRenamer" value="3" />
+		<setting code="SelectedRenamer" value="2" />
 		<setting code="WSGradientColorChooserXML" value="xml/WSGradientColorChooser.xml" />
 		<setting code="Popup_RemoveFiles_FilesAdded_Show" value="true" />
 		<setting code="ExtendedSettingsDebug" value="false" />
 		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Format" value="8BitPaletted" />
+		<setting code="PreviewPanel_ImageInvestigator_Format" value="BC7" />
 		<setting code="Popup_AddFiles_NoFilesToAdd_Show" value="true" />
 		<setting code="ExtendedLanguageDebug" value="false" />
 		<setting code="OpenArchiveOnDoubleClick" value="true" />
@@ -106,7 +106,7 @@
 		<setting code="PreviewPanel_3DModel_ShowTextures" value="true" />
 		<setting code="DirectoryListView" value="List" />
 		<setting code="CheckScriptResourceValues" value="true" />
-		<setting code="PreviewPanel_MeshInvestigator_FaceOffsetField" value="18533" />
+		<setting code="PreviewPanel_MeshInvestigator_FaceOffsetField" value="120052" />
 		<setting code="SearchWildcardConversion" value="true" />
 		<setting code="Scanner_ogg" value="true" />
 		<setting code="ExtractDirectory" value="extract" />
@@ -119,21 +119,21 @@
 		<setting code="Scanner_bmp" value="true" />
 		<setting code="ExportPreviewType_class PreviewPanel_Image" value="PNG Image" />
 		<setting code="Popup_AnalyzeDirectory_DirectoryAnalyzed_Show" value="true" />
-		<setting code="WSTableColumn_CompressedLength_Width" value="94" />
+		<setting code="WSTableColumn_CompressedLength_Width" value="117" />
 		<setting code="CopyFilenameOnRightClick" value="true" />
 		<setting code="ShowTableColumn_AddedIcon" value="true" />
 		<setting code="PluginListDisplayType" value="Game" />
 		<setting code="Popup_ConvertArchive_FilenameMissing_Show" value="true" />
-		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\NHL 2004 [PS2]\FACE3006.viv" />
+		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fantastic Four\Interface\bonus\BU24_2.dat" />
 		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
 		<setting code="ShowShortHexEditorField" value="true" />
 		<setting code="SearchColumn_Source" value="false" />
-		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\NHL 2004 [PS2]\FACE3000.viv" />
-		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fuga - Melodies of Steel\pakchunk0-WindowsNoEditor.pak" />
+		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fantastic Four\Music\BRFAST1.dat" />
+		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fantastic Four\Music\ELEVATOR.dat" />
 		<setting code="NumberOfRecentFiles" value="4" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" value="true" />
-		<setting code="SearchColumn_Extension" value="false" />
-		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\The Outforce\PackedProject.OPF" />
+		<setting code="SearchColumn_Extension" value="true" />
+		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fantastic Four\Music\BROOK2.dat" />
 		<setting code="IdentifyUnknownFileTypes" value="true" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex" value="0" />
 		<setting code="Popup_WriteArchive_FilenameMissing_Show" value="true" />
@@ -155,11 +155,12 @@
 		<setting code="WSTableColumn_X_Width" value="63" />
 		<setting code="ShowIntHexEditorField" value="true" />
 		<setting code="ShowTableColumn_DecompressedLengthKB" value="false" />
+		<setting code="ZipPasswordFile" value="settings/zip_passwords.xml" />
 		<setting code="ShowFloatHexEditorField" value="true" />
 		<setting code="InterfaceColors" value="-65536" />
 		<setting code="PluginPathsFile" value="settings/plugins.xml" />
 		<setting code="WSTableColumn_T_Width" value="62" />
-		<setting code="WSTableColumn_Offset_Width" value="97" />
+		<setting code="WSTableColumn_Offset_Width" value="118" />
 		<setting code="LoadingHex" value="false" />
 		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_3DModel" value="OBJ Model" />
 		<setting code="Popup_ExportFiles_SomeFilesExported_Show" value="true" />
@@ -169,8 +170,8 @@
 		<setting code="SettingsFile" value="settings\settings.xml" />
 		<setting code="UE4AESKeysFile" value="settings/keys_ue4.xml" />
 		<setting code="WSTableColumn_c_Width" value="106" />
-		<setting code="PreviewPanel_ImageInvestigator_Height" value="60" />
-		<setting code="PreviewPanel_MeshInvestigator_VertexBlockSizeField" value="60" />
+		<setting code="PreviewPanel_ImageInvestigator_Height" value="512" />
+		<setting code="PreviewPanel_MeshInvestigator_VertexBlockSizeField" value="144" />
 		<setting code="ShowHexIfPreviewFailed" value="true" />
 		<setting code="Popup_ExportFiles_NoFilesSelected_Show" value="true" />
 		<setting code="WSFontChooserXML" value="xml/WSFontChooser.xml" />
@@ -191,7 +192,7 @@
 		<setting code="TiledPreviewBackground" value="true" />
 		<setting code="WSTableColumn_RenamedIcon_Width" value="18" />
 		<setting code="PreviewPanel_ImageInvestigator_RemoveAlphaCheckboxSelected" value="false" />
-		<setting code="WSTableColumn_Time_Width" value="47" />
+		<setting code="WSTableColumn_Time_Width" value="43" />
 		<setting code="AlwaysShowHexEditorSelectedTable" value="true" />
 		<setting code="InterfaceFile" value="interface/interface.xml" />
 		<setting code="Popup_WriteArchive_ArchiveSaved_Show" value="true" />
@@ -200,35 +201,39 @@
 		<setting code="PlayAudioOnLoad" value="true" />
 		<setting code="MaxAllowedScriptErrors" value="10" />
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
-		<setting code="PreviewPanel_Image_CurrentFrame" value="0" />
+		<setting code="PreviewPanel_Image_CurrentFrame" value="8" />
+		<setting code="Popup_SaveChanges_Show" value="true" />
 		<setting code="UpscaleSmallThumbnails" value="false" />
 		<setting code="ShowTableColumn_Value" value="true" />
 		<setting code="vgmstream_Path" value="external_bins\vgmstream" />
 		<setting code="ShowTableColumn_RenamedIcon" value="true" />
 		<setting code="ShowByteHexEditorField" value="true" />
+		<setting code="webpmux_Path" value="external_bins\webpmux" />
 		<setting code="Popup_RenameFiles_NoRenameValue_Show" value="true" />
 		<setting code="ShowAdvancedControlsInDirectoryList" value="false" />
 		<setting code="MaxFilenameLength" value="255" />
 		<setting code="PreviewPanel_ImageInvestigator_LittleEndianRadioButtonSelected" value="true" />
 		<setting code="ShowTableColumn_FilePath" value="true" />
 		<setting code="WSTableColumn_i_Width" value="18" />
+		<setting code="MaxImageDimension" value="2048" />
 		<setting code="PreviewPanel_ImageInvestigator_SwizzleSwitchCheckboxSelected" value="false" />
 		<setting code="CurrentLanguage" value="English" />
-		<setting code="WSTableColumn_DecompressedLength_Width" value="94" />
+		<setting code="WSTableColumn_DecompressedLength_Width" value="115" />
 		<setting code="HighQualityThumbnails" value="true" />
-		<setting code="SelectedOptionGroup" value="2" />
+		<setting code="SelectedOptionGroup" value="6" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" value="false" />
 		<setting code="Popup_TaskManager_RedoComplete_Show" value="true" />
 		<setting code="WSTableColumn_ReplacedIcon_Width" value="18" />
 		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="PNG Image" />
 		<setting code="WSTableColumn_I_Width" value="203" />
-		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\The Outforce\PackedProject.OPF" />
+		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fantastic Four\Music\BROOK2.dat" />
 		<setting code="Theme_ButterflyLookAndFeel_InterfaceColors" value="-9725853" />
 		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
 		<setting code="ShowTableColumn_Filename" value="false" />
 		<setting code="ShowCharHexEditorField" value="false" />
 		<setting code="WSTableColumn_E_Width" value="87" />
 		<setting code="Popup_MeshInvestigator_PreviewSaved_Show" value="true" />
+		<setting code="UnityMeshExtendedErrorChecking" value="true" />
 		<setting code="DebugMode" value="true" />
 		<setting code="PreviewPanel_ImageInvestigator_StripePalettePS2CheckboxSelected" value="false" />
 		<setting code="SearchRegExConversion" value="false" />
@@ -246,15 +251,16 @@
 		<setting code="Scanner_vag" value="true" />
 		<setting code="DefaultInterfaceFile" value="interface/default.xml" />
 		<setting code="DefaultInterfaceColors" value="-12814286" />
+		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_ImageInvestigator" value="PNG Image" />
 		<setting code="PreviewOnDoubleClick" value="true" />
-		<setting code="WSTableColumn_FilePath_Width" value="628" />
+		<setting code="WSTableColumn_FilePath_Width" value="546" />
 		<setting code="Popup_Search_MatchFound_Show" value="false" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" value="false" />
 		<setting code="Popup_RenameFiles_FilesRestored_Show" value="true" />
 		<setting code="SidePanel_DirectoryList_CurrentControl" value="ReadPanel" />
-		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\The Outforce" />
-		<setting code="PreviewPanel_ImageInvestigator_PaletteOffset" value="3070" />
-		<setting code="PreviewPanel_MeshInvestigator_FaceCountField" value="366" />
+		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fantastic Four\Sounds" />
+		<setting code="PreviewPanel_ImageInvestigator_PaletteOffset" value="200" />
+		<setting code="PreviewPanel_MeshInvestigator_FaceCountField" value="200" />
 		<setting code="ShowLongHexEditorField" value="true" />
 		<setting code="ShowSplashScreen" value="true" />
 		<setting code="Popup_ScriptBuilder_ScriptSaved_Show" value="true" />
@@ -272,7 +278,7 @@
 		<setting code="PreviewPanel_3DModel_Wireframe" value="false" />
 		<setting code="LargeButtonIcons" value="false" />
 		<setting code="AllowInlineFileListEditing" value="false" />
-		<setting code="WSTableColumn_CRC_Width" value="53" />
+		<setting code="WSTableColumn_CRC_Width" value="48" />
 		<setting code="InterfaceLookAndFeel" value="ButterflyLookAndFeel" />
 		<setting code="ExportFileListColumn_Compressed" value="true" />
 		<setting code="ShowTableColumn_Offset" value="true" />
@@ -288,7 +294,7 @@
 		<setting code="Popup_ReadArchive_MakeNewArchive_Show" value="false" />
 		<setting code="Popup_Search_NoMatchFound_Show" value="true" />
 		<setting code="TempDirectory" value="temp" />
-		<setting code="WSTableColumn_Description_Width" value="121" />
+		<setting code="WSTableColumn_Description_Width" value="118" />
 		<setting code="MaxNumberOfFiles4" value="100000" />
 		<setting code="Popup_AddBMSOnDoubleClick_Show" value="true" />
 		<setting code="Popup_ReadArchive_ArchiveOpenedWithScanner_Show" value="true" />
@@ -300,7 +306,7 @@
 		<setting code="ShowHexHexEditorField" value="false" />
 		<setting code="Popup_AddFiles_FilesRemoved_Show" value="true" />
 		<setting code="WSTableColumn_a_Width" value="18" />
-		<setting code="CurrentSidePanel" value="SidePanel_Information" />
+		<setting code="CurrentSidePanel" value="SidePanel_DirectoryList" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

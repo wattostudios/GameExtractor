@@ -67,6 +67,7 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
     exporter.open(resource);
 
     fill();
+
   }
 
   /***********************************************************************************************
@@ -409,11 +410,18 @@ public class ExporterByteBuffer implements ManipulatorBuffer {
       bufferLevel = 0;
     }
     else if (offset == 0) {
-      // take the exporter right back to the beginning of the file
-      //exporter.close();
-      //exporter.open(resource);
-      exporter.closeAndReopen(resource); // 3.14 implemented this so exporters that decompress the full file might retain it between reloads.
-      fill(); // does a flush() as part of this.
+      // 3.16 put this here, as closing/opening isn't always that quick, so if we can shortcut it here by moving the buffer back a little, that's much better
+      int difference = (int) (getPointer() - offset);
+      if (difference <= bufferLevel) {
+        bufferLevel -= difference;
+      }
+      else {
+        // take the exporter right back to the beginning of the file
+        //exporter.close();
+        //exporter.open(resource);
+        exporter.closeAndReopen(resource); // 3.14 implemented this so exporters that decompress the full file might retain it between reloads.
+        fill(); // does a flush() as part of this.
+      }
     }
     else if (offset > getPointer()) {
       // seeking to a later spot in the file, so just skip over some bytes

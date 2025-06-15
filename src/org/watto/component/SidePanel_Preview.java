@@ -347,7 +347,7 @@ public class SidePanel_Preview extends WSPanelPlugin implements WSSelectableInte
       String code = ((WSComponent) c).getCode();
 
       if (code.equals("FileList")) {
-          loadBasicVersionPreview();
+        loadBasicVersionPreview();
         return true;
       }
 

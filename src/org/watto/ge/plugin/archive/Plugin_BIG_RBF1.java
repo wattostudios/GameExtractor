@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,13 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.datatype.Archive;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -43,13 +44,11 @@ public class Plugin_BIG_RBF1 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Homeworld");
+    setGames("Homeworld Classic");
     setExtensions("big");
     setPlatforms("PC");
 
-    //setFileTypes("","",
-    //             "",""
-    //             );
+    setTextPreviewExtensions("bat", "cred", "dist", "ebg", "l", "level", "list", "lod", "lst", "mif", "mission", "missphere", "plug", "script", "shp"); // LOWER CASE
 
   }
 
@@ -105,7 +104,8 @@ public class Plugin_BIG_RBF1 extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("TDCB_lzss");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_Decompression("TDCB_lzss");
+      ExporterPlugin exporter = new Exporter_QuickBMS_DLL("TDCB_lzss");
 
       // RESETTING GLOBAL VARIABLES
 
@@ -114,29 +114,32 @@ public class Plugin_BIG_RBF1 extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // 7 - Header (RBF1.23)
-      // 4 - Number Of Files?
-      // 4 - Version (1)
-      fm.skip(15);
+      fm.skip(7);
 
-      int numFiles = Archive.getMaxFiles();
+      // 4 - Number Of Files
+      int numFiles = fm.readInt();
+      FieldValidator.checkNumFiles(numFiles);
+
+      // 4 - Version (1)
+      fm.skip(4);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      long firstOffset = arcSize;
       int realNumFiles = 0;
+      int[] filenameLengths = new int[numFiles];
+      long[] filenameOffsets = new long[numFiles];
       for (int i = 0; i < numFiles; i++) {
-        if (fm.getOffset() >= firstOffset) {
-          break;
-        }
-
-        // 4 - Unknown
-        // 4 - Unknown
+        // 4 - Filename CRC 1
+        // 4 - Filename CRC 2
         fm.skip(8);
 
-        // 4 - Extra Offset
-        int extraOffset = fm.readInt();
+        // 4 - Filename Length
+        int filenameLength = ShortConverter.unsign(fm.readShort());
+        fm.skip(2);
+        FieldValidator.checkFilenameLength(filenameLength);
+        filenameLengths[i] = filenameLength;
 
         // 4 - Compressed Length?
         int length = fm.readInt();
@@ -150,16 +153,14 @@ public class Plugin_BIG_RBF1 extends ArchivePlugin {
         int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        if (offset < firstOffset) {
-          firstOffset = offset;
-        }
-
-        // 4 - Unknown
+        // 4 - Timestamp
         // 4 - null
         // 4 - Unknown
         fm.skip(12);
 
-        offset += extraOffset + 1;
+        filenameOffsets[i] = offset;
+
+        offset += filenameLength + 1;
 
         String filename = Resource.generateFilename(i);
 
@@ -176,7 +177,32 @@ public class Plugin_BIG_RBF1 extends ArchivePlugin {
         TaskProgressManager.setValue(i);
       }
 
-      resources = resizeResources(resources, realNumFiles);
+      if (numFiles != realNumFiles) {
+        resources = resizeResources(resources, realNumFiles);
+        numFiles = realNumFiles;
+      }
+
+      // get the filenames
+      fm.getBuffer().setBufferSize(256);
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        long nameOffset = filenameOffsets[i];
+        int nameLength = filenameLengths[i];
+
+        fm.seek(nameOffset);
+
+        byte[] nameBytes = fm.readBytes(nameLength);
+        int last_char = 0xD5;
+        for (int p = 0; p < nameLength; p++) {
+          last_char ^= nameBytes[p];
+          nameBytes[p] = (byte) last_char;
+        }
+
+        String filename = new String(nameBytes);
+        resource.setName(filename);
+        resource.setOriginalName(filename);
+      }
 
       fm.close();
 

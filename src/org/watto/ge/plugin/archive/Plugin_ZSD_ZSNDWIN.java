@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -213,11 +214,26 @@ public class Plugin_ZSD_ZSNDWIN extends ArchivePlugin {
         else {
           // anything else
 
-          filename += ".wav";
+          if (length % 32 == 0) {
+            // maybe a VAG file (PSX)
+            filename += ".wav";
 
-          //path,id,name,offset,length,decompLength,exporter
-          //resources[i] = new Resource(path, filename, offset, length);
-          resources[i] = new Resource(path, filename, offset, length, length, vagExporter);
+            //path,id,name,offset,length,decompLength,exporter
+            //resources[i] = new Resource(path, filename, offset, length);
+            resources[i] = new Resource(path, filename, offset, length, length, vagExporter);
+          }
+          else {
+            /*
+            filename += ".wav";
+            // maybe a WAV file? Dave Mirra Freestyle BMX might have these Music files encrypted?
+            //path,id,name,offset,length,decompLength,exporter
+            Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+            resource.setAudioProperties(32000, (short) 16, (short) 1);
+            resources[i] = resource;
+            */
+            resources[i] = new Resource(path, filename, offset, length);
+          }
+
         }
 
         TaskProgressManager.setValue(i);

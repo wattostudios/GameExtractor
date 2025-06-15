@@ -45,11 +45,11 @@ Use, distribute, and modify this code freely.
 public class LZSSInputStream extends FilterInputStream {
 
   /** 4k buffers for LZ compression */
-  final private static int N = 4096;
+  private static int N = 4096;
   /** upper limit for LZ match length */
-  final private static int F = 18;
+  private static int F = 18;
   /** LZ encode string into pos and length if match size is greater than this */
-  final private static int THRESHOLD = 2;
+  private static int THRESHOLD = 2;
 
   // for reading LZ files
   int i, j, k, r, c;
@@ -66,6 +66,17 @@ public class LZSSInputStream extends FilterInputStream {
   **/
   public LZSSInputStream(InputStream i) {
     super(i);
+    text_buf = new byte[N + F - 1];
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public LZSSInputStream(InputStream i, int inF) {
+    super(i);
+    F = inF;
     text_buf = new byte[N + F - 1];
   }
 
@@ -149,7 +160,7 @@ public class LZSSInputStream extends FilterInputStream {
   public final int read(byte buf[], int bufi, int s) throws IOException {
     int size = 0;
     if (state == 0) {
-      r = N - F;   // fingbuffer pos?
+      r = N - F; // ringbuffer pos?
       flags = 0; // zero flags
     }
     while (s > 0) {

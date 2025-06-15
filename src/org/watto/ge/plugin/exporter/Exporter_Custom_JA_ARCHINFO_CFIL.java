@@ -14,9 +14,11 @@
 
 package org.watto.ge.plugin.exporter;
 
+import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
 
 public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
@@ -41,7 +43,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_Custom_JA_ARCHINFO_CFIL() {
@@ -50,7 +52,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -63,7 +65,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
     if (bufferPos >= bufferLength) {
       // we've read the whole buffer, need to load the next one
 
-      int blockSize = readSource.readInt();
+      int blockSize = readSource.readShort();
       if (blockSize > 0) {
         // decompress a block
         decompressBlock(blockSize);
@@ -83,7 +85,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -99,7 +101,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public void decompressBlock(int blockSize) {
@@ -137,7 +139,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
           tempBuffer1[i] = tempBuffer3[i];
         }
 
-        currentByte = buffer1[counter];
+        currentByte = ByteConverter.unsign(buffer1[counter]);
         counter = counter + 1;
         tempHolder = 0;
 
@@ -162,7 +164,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
           }
 
           if (tempHolder < 256) {
-            currentByte = buffer1[counter];
+            currentByte = ByteConverter.unsign(buffer1[counter]);
             counter++;
           }
         }
@@ -207,13 +209,14 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
     }
     catch (Throwable t) {
+      ErrorLogger.log(t);
       readLength = 0; // force-quit the decompression!
     }
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -231,7 +234,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -257,7 +260,7 @@ public class Exporter_Custom_JA_ARCHINFO_CFIL extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

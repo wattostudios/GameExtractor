@@ -17,7 +17,9 @@ package org.watto.task;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.Arrays;
+
 import javax.swing.table.AbstractTableModel;
+
 import org.watto.Language;
 import org.watto.SingletonManager;
 import org.watto.component.WSTable;
@@ -137,6 +139,7 @@ public class Task_LoadThumbnailLater extends AbstractTask {
     // now find a previewer for the file
     // preview the first selected file
 
+    //System.out.println("Finding Plugins");
     RatedPlugin[] plugins = PluginFinder.findPlugins(fm, ViewerPlugin.class); // NOTE: This closes the fm pointer!!!
     //System.out.println("    Done");
     if (plugins == null || plugins.length == 0) {
@@ -157,6 +160,8 @@ public class Task_LoadThumbnailLater extends AbstractTask {
       ExporterByteBuffer byteBuffer = new ExporterByteBuffer(resource);
       fm.open(byteBuffer);
     }
+
+    //System.out.println("Trying Plugins");
 
     // try to open the preview using each plugin and previewFile(File,Plugin)
     for (int i = 0; i < plugins.length; i++) {

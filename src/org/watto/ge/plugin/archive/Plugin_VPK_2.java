@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Settings;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.FileType;
@@ -72,6 +73,7 @@ public class Plugin_VPK_2 extends ArchivePlugin {
         new FileType("vmt", "Material Type", FileType.TYPE_DOCUMENT),
         new FileType("vtf", "Texture Image", FileType.TYPE_IMAGE),
         new FileType("vtex_c", "Texture Image", FileType.TYPE_IMAGE),
+        new FileType("vsnd_c", "Sound", FileType.TYPE_AUDIO),
         new FileType("vtx", "Vertex", FileType.TYPE_OTHER),
         new FileType("vvd", "Vertex Data", FileType.TYPE_OTHER),
         new FileType("phy", "Physics Data", FileType.TYPE_OTHER),

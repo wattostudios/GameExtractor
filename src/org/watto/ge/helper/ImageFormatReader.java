@@ -324,17 +324,21 @@ public class ImageFormatReader {
     int[] pixels = new int[numPixels];
 
     for (int i = 0; i < numPixels; i++) {
-      int aPixel = fm.readShort();
+      int aPixel = ShortConverter.unsign(fm.readShort());
       aPixel = (int) (convert16bitToFloat(aPixel) * 255);
+      aPixel = ByteConverter.unsign((byte) aPixel);
 
-      int bPixel = fm.readShort();
+      int bPixel = ShortConverter.unsign(fm.readShort());
       bPixel = (int) (convert16bitToFloat(bPixel) * 255);
+      bPixel = ByteConverter.unsign((byte) bPixel);
 
-      int gPixel = fm.readShort();
-      gPixel = (int) (convert16bitToFloat(gPixel) * 255);
-
-      int rPixel = fm.readShort();
+      int rPixel = ShortConverter.unsign(fm.readShort());
       rPixel = (int) (convert16bitToFloat(rPixel) * 255);
+      rPixel = ByteConverter.unsign((byte) rPixel);
+
+      int gPixel = ShortConverter.unsign(fm.readShort());
+      gPixel = (int) (convert16bitToFloat(gPixel) * 255);
+      gPixel = ByteConverter.unsign((byte) gPixel);
 
       pixels[i] = ((rPixel << 16) | (bPixel << 8) | gPixel | (aPixel << 24));
     }
@@ -356,17 +360,22 @@ public class ImageFormatReader {
     int[] pixels = new int[numPixels];
 
     for (int i = 0; i < numPixels; i++) {
-      int aPixel = fm.readShort();
+
+      int aPixel = ShortConverter.unsign(fm.readShort());
       aPixel = (int) (convert16bitToFloat(aPixel) * 255);
+      aPixel = ByteConverter.unsign((byte) aPixel);
 
-      int rPixel = fm.readShort();
+      int rPixel = ShortConverter.unsign(fm.readShort());
       rPixel = (int) (convert16bitToFloat(rPixel) * 255);
+      rPixel = ByteConverter.unsign((byte) rPixel);
 
-      int gPixel = fm.readShort();
+      int gPixel = ShortConverter.unsign(fm.readShort());
       gPixel = (int) (convert16bitToFloat(gPixel) * 255);
+      gPixel = ByteConverter.unsign((byte) gPixel);
 
-      int bPixel = fm.readShort();
+      int bPixel = ShortConverter.unsign(fm.readShort());
       bPixel = (int) (convert16bitToFloat(bPixel) * 255);
+      bPixel = ByteConverter.unsign((byte) bPixel);
 
       pixels[i] = ((rPixel << 16) | (bPixel << 8) | gPixel | (aPixel << 24));
     }
@@ -388,17 +397,21 @@ public class ImageFormatReader {
     int[] pixels = new int[numPixels];
 
     for (int i = 0; i < numPixels; i++) {
-      int bPixel = fm.readShort();
+      int bPixel = ShortConverter.unsign(fm.readShort());
       bPixel = (int) (convert16bitToFloat(bPixel) * 255);
+      bPixel = ByteConverter.unsign((byte) bPixel);
 
-      int gPixel = fm.readShort();
+      int gPixel = ShortConverter.unsign(fm.readShort());
       gPixel = (int) (convert16bitToFloat(gPixel) * 255);
+      gPixel = ByteConverter.unsign((byte) gPixel);
 
-      int rPixel = fm.readShort();
+      int rPixel = ShortConverter.unsign(fm.readShort());
       rPixel = (int) (convert16bitToFloat(rPixel) * 255);
+      rPixel = ByteConverter.unsign((byte) rPixel);
 
-      int aPixel = fm.readShort();
+      int aPixel = ShortConverter.unsign(fm.readShort());
       aPixel = (int) (convert16bitToFloat(aPixel) * 255);
+      aPixel = ByteConverter.unsign((byte) aPixel);
 
       pixels[i] = ((rPixel << 16) | (bPixel << 8) | gPixel | (aPixel << 24));
     }
@@ -420,17 +433,21 @@ public class ImageFormatReader {
     int[] pixels = new int[numPixels];
 
     for (int i = 0; i < numPixels; i++) {
-      int rPixel = fm.readShort();
+      int rPixel = ShortConverter.unsign(fm.readShort());
       rPixel = (int) (convert16bitToFloat(rPixel) * 255);
+      rPixel = ByteConverter.unsign((byte) rPixel);
 
-      int gPixel = fm.readShort();
+      int gPixel = ShortConverter.unsign(fm.readShort());
       gPixel = (int) (convert16bitToFloat(gPixel) * 255);
+      gPixel = ByteConverter.unsign((byte) gPixel);
 
-      int bPixel = fm.readShort();
+      int bPixel = ShortConverter.unsign(fm.readShort());
       bPixel = (int) (convert16bitToFloat(bPixel) * 255);
+      bPixel = ByteConverter.unsign((byte) bPixel);
 
-      int aPixel = fm.readShort();
+      int aPixel = ShortConverter.unsign(fm.readShort());
       aPixel = (int) (convert16bitToFloat(aPixel) * 255);
+      aPixel = ByteConverter.unsign((byte) aPixel);
 
       pixels[i] = ((rPixel << 16) | (bPixel << 8) | gPixel | (aPixel << 24));
     }
@@ -2768,6 +2785,31 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+   * Reads R Pixel Data, where each color is 16 bits in size
+   **********************************************************************************************
+   **/
+  public static ImageResource readR16(FileManipulator fm, int width, int height) {
+
+    int numPixels = width * height;
+
+    // X Bytes - Pixel Data
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i++) {
+      int rPixel = (ShortConverter.unsign(fm.readShort()) / 2);
+      int gPixel = 0;
+      int bPixel = 0;
+      int aPixel = 255;
+
+      //pixels[i] = ((fm.readByte() << 16) | (fm.readByte() << 8) | fm.readByte() | (((byte) 255) << 24));
+      pixels[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+    }
+
+    return new ImageResource(pixels, width, height);
+  }
+
+  /**
+   **********************************************************************************************
    * Reads RG Pixel Data, where each color is 16 bits in size
    **********************************************************************************************
    **/
@@ -3910,13 +3952,18 @@ public class ImageFormatReader {
       int pixel = pixels[i];
 
       // INPUT = GBAR
-      int gPixel = (pixel >> 24);
-      int bPixel = ((pixel >> 16) & 255);
-      int aPixel = ((pixel >> 8) & 255);
-      int rPixel = (pixel & 255);
+      int gPixel = ((pixel >> 24) & 255); // g
+      if (gPixel < 0) {
+        gPixel = ((128 | (gPixel & 127)) & 255);
+        //gPixel = ByteConverter.unsign((byte) gPixel);
+      }
+      int bPixel = ((pixel >> 16) & 255); // b
+      int aPixel = ((pixel >> 8) & 255); // a
+      int rPixel = (pixel & 255); // r
 
       // OUTPUT = ARGB
       pixels[i] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+
     }
 
     imageResource.setPixels(pixels);

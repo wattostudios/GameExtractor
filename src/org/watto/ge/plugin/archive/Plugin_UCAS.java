@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,18 +16,23 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.helper.UE4Helper;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_Encryption_AES;
+import org.watto.ge.plugin.exporter.Exporter_Oodle;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.ge.plugin.resource.Resource_PAK_38;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
+import org.watto.io.buffer.ExporterByteBuffer;
 import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
@@ -179,8 +184,11 @@ public class Plugin_UCAS extends ArchivePlugin {
         // 32 - Compression Format ("Oodle" + nulls to fill)
         String compression = fm.readNullString(32);
         if (compression.equalsIgnoreCase("Oodle")) {
-          exporters[i + 1] = new Exporter_Default();
-          exporters[i + 1].setName("Oodle Compression");
+          //exporters[i + 1] = new Exporter_Default();
+          //exporters[i + 1].setName("Oodle Compression");
+
+          exporters[i + 1] = new Exporter_Oodle();
+
           //exporters[i + 1] = new Exporter_QuickBMS_Decompression("oodle");
           //exporters[i + 1] = new Exporter_Encryption_AES(ByteArrayConverter.convertLittle(new Hex("D73A797940208F2FB29256BE81A7CBC7B74CBF899441BB277F357F7F4577DBBB")));
         }
@@ -195,14 +203,98 @@ public class Plugin_UCAS extends ArchivePlugin {
       // 
       // READ THE FILENAMES
       // 
+      FileManipulator originalFM = fm; // so we can go back to this FM later, if we had to do a Filename Dir Decryption
+
       String[] filenames = new String[numFiles];
       Arrays.fill(filenames, null);
 
       boolean foundNames = false;
 
-      try { // TRY, SO IT'S OK IF NO FILENAMES ARE FOUND
+      long filenameDirOffset = fm.getOffset();
+      long filenameDirLength = (int) (arcSize - filenameDirOffset);
+
+      // 4 - Root Filename Length (including null terminator) (10)
+      int rootFilenameLength = fm.readInt();
+      if (rootFilenameLength == 512) {
+        // This occurs in the Mail Time game
+        fm.skip(1024); // 512*2
+        fm.skip(numParts * 20);
+        rootFilenameLength = fm.readInt();
+      }
+
+      try {
+        FieldValidator.checkFilenameLength(rootFilenameLength);
+      }
+      catch (Throwable t) {
+        rootFilenameLength = 512;
+      }
+
+      if (rootFilenameLength == 512) {
+        // either it is 512, or was set above. Either way, it's probably encrypted, so lets try to decrypt it
+        // Try all the keys we know about, see if we can find one that works (don't know that this works yet, tbh)
+
+        byte[][] keys = UE4Helper.getAESKeys();
+        int numKeys = keys.length;
+
+        byte[] key = null;
+
+        int testLength = 64;
+        for (int k = 0; k < numKeys; k++) {
+          try {
+            key = keys[k];
+
+            /*
+            if (k == numKeys - 1) {
+              System.out.println("HERE");
+            }
+            */
+
+            Exporter_Encryption_AES decryptor = new Exporter_Encryption_AES(key);
+
+            Resource dirResource = new Resource(sourcePath, "", filenameDirOffset, testLength, testLength, decryptor);
+            ExporterByteBuffer exporterBuffer = new ExporterByteBuffer(dirResource);
+
+            FileManipulator testFM = new FileManipulator(exporterBuffer);
+
+            // 4 - Relative Directory Name Length (including null terminator) (10)
+            int nameLength = testFM.readInt();
+            FieldValidator.checkRange(nameLength, 0, 64);
+
+            // 9 - Relative Directory Name (../../../)
+            // 1 - null Relative Directory Name Terminator
+            testFM.readNullString();
+
+            // 4 - Number of Files
+            int innerNumFiles = testFM.readInt();
+            FieldValidator.checkNumFiles((innerNumFiles / 4) + 1);
+
+            // found one
+            break;
+          }
+          catch (Throwable t2) {
+            key = null;
+          }
+        }
+
+        if (key == null) {
+          // ignore for now (just proceed without filenames)
+          //throw new WSPluginException("[PAK_UCAS] No matching AES key found.");
+        }
+
+        Exporter_Encryption_AES decryptor = new Exporter_Encryption_AES(key);
+
+        Resource dirResource = new Resource(sourcePath, "", filenameDirOffset, filenameDirLength, filenameDirLength, decryptor);
+        ExporterByteBuffer exporterBuffer = new ExporterByteBuffer(dirResource);
+
+        //fm.close();
+        fm = new FileManipulator(exporterBuffer);
+
         // 4 - Root Filename Length (including null terminator) (10)
-        int rootFilenameLength = fm.readInt();
+        rootFilenameLength = fm.readInt();
+      }
+
+      try { // TRY-CATCH, SO THAT IT'S OK IF NO FILENAMES ARE FOUND
+
         FieldValidator.checkFilenameLength(rootFilenameLength);
 
         // 9 - Root Filename (../../../)
@@ -353,6 +445,12 @@ public class Plugin_UCAS extends ArchivePlugin {
       // READ ALL THE PARTS
       // 
 
+      // First, make sure we're reading the original file (not a decrypted filename buffer) 
+      if (fm != originalFM && fm.getBuffer() instanceof ExporterByteBuffer) {
+        fm.close();
+      }
+      fm = originalFM;
+
       fm.seek(dir3Offset);
 
       TaskProgressManager.setMaximum(numParts);
@@ -422,7 +520,7 @@ public class Plugin_UCAS extends ArchivePlugin {
         // 3 - ID of First Part of this File (BIG)
         byte[] firstPartIDBytes = new byte[] { 0, fm.readByte(), fm.readByte(), fm.readByte() };
         int firstPartID = IntConverter.convertBig(firstPartIDBytes);
-        FieldValidator.checkRange(firstPartID, 0, numParts);
+        //FieldValidator.checkRange(firstPartID, 0, numParts);
 
         // 1 - null
         fm.skip(1);
@@ -436,6 +534,19 @@ public class Plugin_UCAS extends ArchivePlugin {
         fm.skip(2);
 
         firstPartIDs[i] = firstPartID;
+      }
+
+      // Check if the part IDs are multiples of 16 or not (if so, need to / each of them by 16)
+      if (firstPartIDs[numFiles - 1] > numParts) {
+        FieldValidator.checkRange(firstPartIDs[numFiles - 1] / 16, 0, numParts);
+
+        // if we're here, we probably need to divide each by 16
+        for (int i = 0; i < numFiles; i++) {
+          int firstPartID = firstPartIDs[i];
+          firstPartID /= 16;
+          FieldValidator.checkRange(firstPartID, 0, numParts);
+          firstPartIDs[i] = firstPartID;
+        }
       }
 
       for (int i = 0; i < numFiles - 1; i++) {
@@ -582,6 +693,145 @@ public class Plugin_UCAS extends ArchivePlugin {
   public String readUAssetClass(Resource resource) {
     return null;
 
+    /*
+    // If this file is a uAsset, it really shouldn't use OODLE compression, but just in case we want to disable it for now (as it uses QuickBMS)
+    ExporterPlugin originalExporter = resource.getExporter();
+    
+    try {
+      long arcSize = resource.getDecompressedLength();
+    
+      ExporterByteBuffer byteBuffer = new ExporterByteBuffer(resource);
+      FileManipulator fm = new FileManipulator(byteBuffer);
+    
+      // 64 - Unknown
+      fm.skip(64);
+      
+      String[] names = new String[256];
+      int numNames = 0;
+      
+      // 2 - Name Length
+      short nameLength = ShortConverter.changeFormat(fm.readShort());
+      while (nameLength != 0) {
+      FieldValidator.checkFilenameLength(nameLength);
+      
+      // X - Name
+        String name = fm.readString(nameLength);
+        names[numNames] = name;
+        numNames++;
+      
+     // 2 - Name Length
+        nameLength = ShortConverter.changeFormat(fm.readShort());
+      }
+      
+      // 4 - Number of Names
+      int nameCount = fm.readInt();
+      try {
+        FieldValidator.checkNumFiles(nameCount);
+      }
+      catch (Throwable t) {
+        nameCount = fm.readInt();
+        FieldValidator.checkNumFiles(nameCount);
+      }
+    
+      // 4 - Name Directory Offset
+      long nameDirOffset = IntConverter.unsign(fm.readInt());
+      FieldValidator.checkOffset(nameDirOffset, arcSize);
+    
+      // 8 - null
+      fm.skip(8);
+    
+      // 4 - Number Of Exports
+      int exportCount = fm.readInt();
+      FieldValidator.checkNumFiles(exportCount);
+    
+      // 4 - Exports Directory Offset
+      long exportDirOffset = IntConverter.unsign(fm.readInt());
+      FieldValidator.checkOffset(exportDirOffset, arcSize);
+    
+      // 4 - Number Of Imports
+      int importCount = fm.readInt();
+      FieldValidator.checkNumFiles(importCount);
+    
+      // 4 - Import Directory Offset
+      long importDirOffset = IntConverter.unsign(fm.readInt());
+      FieldValidator.checkOffset(importDirOffset, arcSize);
+    
+      // 16 - null
+      // 4 - [optional] null
+      // 16 - GUID Hash
+      if (importDirOffset == 0) {
+        // that skipped 8 "null" bytes probably wasn't in this archive, so correct the import details
+        importCount = exportCount;
+        importDirOffset = exportDirOffset;
+        fm.skip(32 - 8);
+      }
+      else {
+        fm.skip(32);
+      }
+    
+      // 4 - Unknown (1)
+      if (fm.readInt() != 1) { // this is to skip the OPTIONAL 4 bytes in MOST circumstances
+        fm.skip(4);
+      }
+    
+      // 4 - Unknown (1/2)
+      // 4 - Unknown (Number of Names - again?)
+      // 36 - null
+      // 4 - Unknown
+      // 4 - null
+      // 4 - Padding Offset
+      // 4 - File Length [+4] (not always - sometimes an unknown length/offset)
+      // 8 - null
+      fm.skip(68);
+    
+      // 4 - Number of ???
+      int numToSkip = fm.readInt();
+      if (numToSkip > 0 && numToSkip < 10) {
+        // 4 - Unknown
+        fm.skip(numToSkip * 4);
+      }
+    
+      // 4 - Unknown (-1)
+      fm.skip(4);
+    
+      // 4 - Files Data Offset
+      long filesDirOffset = IntConverter.unsign(fm.readInt());
+      FieldValidator.checkOffset(filesDirOffset, arcSize + 1);
+    
+      // Read the Names Directory
+      fm.relativeSeek(nameDirOffset); // VERY IMPORTANT (because seek() doesn't allow going backwards in ExporterByteBuffer)
+      UE4Helper.readNamesDirectory(fm, nameCount);
+    
+      // Read the Import Directory
+      fm.relativeSeek(importDirOffset); // VERY IMPORTANT (because seek() doesn't allow going backwards in ExporterByteBuffer)
+      UnrealImportEntry[] imports = UE4Helper.readImportDirectory(fm, importCount);
+    
+      int numFiles = importCount;
+    
+      // Loop through directory
+      for (int i = 0; i < numFiles; i++) {
+        UnrealImportEntry entry = imports[i];
+    
+        if (entry.getType().equals("Class")) {
+          fm.close();
+    
+          // put the original exporter back
+          resource.setExporter(originalExporter);
+    
+          return entry.getName();
+        }
+    
+      }
+    
+      fm.close();
+    }
+    catch (Throwable t) {
+    }
+    
+    // put the original exporter back
+    resource.setExporter(originalExporter);
+    return null;
+    */
   }
 
 }

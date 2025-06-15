@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
@@ -452,6 +453,10 @@ public class Plugin_ASSETS_20 extends ArchivePlugin {
           exporter.open(fm, compDataHeaderSize, decompDataHeaderSize);
 
           for (int b = 0; b < decompDataHeaderSize; b++) {
+            if (b == 32 && decompWritePos == 0) {
+              // if we have read 32 bytes but we still haven't written anything, it's probably padded, so want to fail early (the decompression isn't working)
+              break;
+            }
             if (exporter.available()) { // make sure we read the next bit of data, if required
               dirBytes[decompWritePos++] = (byte) exporter.read();
             }

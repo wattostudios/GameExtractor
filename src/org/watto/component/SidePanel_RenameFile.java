@@ -276,7 +276,7 @@ public class SidePanel_RenameFile extends WSPanelPlugin implements WSSelectableI
    **/
   @Override
   public void onOpenRequest() {
-      changeControls(basicVersionControls);
+    changeControls(basicVersionControls);
   }
 
   /**

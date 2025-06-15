@@ -1,24 +1,21 @@
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       WATTO STUDIOS                                        //
-//                             Java Code, Programs, and Software                              //
-//                                    http://www.watto.org                                    //
-//                                                                                            //
-//                           Copyright (C) 2004-2010  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * Application:  WSProgram 4.0
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2004-2024 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.xml;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.io.FileManipulator;
 import org.watto.io.Manipulator;
@@ -226,6 +223,7 @@ public class XMLReader {
         }
 
         // now we have a complete attribute-value pair
+        //value = new String(value.getBytes(), "UTF-8");
         currentNode.addAttribute(key, value);
         //System.out.println("    " + key + ":" + value);
 
@@ -248,7 +246,40 @@ public class XMLReader {
         character = manipulator.readChar();
       }
       else {
-        character = (char) manipulator.readByte();
+        byte singleByte = manipulator.readByte();
+        if (singleByte < 0) {
+          // UTF-8
+          int byteVal = ByteConverter.unsign(singleByte);
+
+          byte[] utf8Bytes = null;
+          if (byteVal >= 240) {
+            // 4-bytes
+            utf8Bytes = new byte[] { singleByte, manipulator.readByte(), manipulator.readByte(), manipulator.readByte() };
+          }
+          else if (byteVal >= 224) {
+            // 3-bytes
+            utf8Bytes = new byte[] { singleByte, manipulator.readByte(), manipulator.readByte() };
+          }
+          else if (byteVal >= 192) {
+            // 2-bytes
+            utf8Bytes = new byte[] { singleByte, manipulator.readByte() };
+          }
+          else {
+            utf8Bytes = null;
+          }
+
+          if (utf8Bytes == null) {
+            character = (char) singleByte;
+          }
+          else {
+            character = new String(utf8Bytes, "UTF-8").charAt(0);
+          }
+
+        }
+        else {
+          character = (char) singleByte;
+        }
+
         //System.out.println(character);
       }
     }
@@ -450,6 +481,7 @@ public class XMLReader {
       String text = "";
 
       boolean previousWhite = false;
+      boolean checkAmpersand = false;
       while (character != '<') {
         if (manipulator.getOffset() >= manipulator.getLength()) {
           return;
@@ -470,12 +502,22 @@ public class XMLReader {
           }
         }
         else {
+
+          if (character == '&') {
+            checkAmpersand = true;
+          }
+
           // write the normal text
           previousWhite = false;
           text += character;
         }
 
         readChar();
+      }
+
+      if (checkAmpersand) {
+        // look for the &lt; and replace it
+        text = text.replaceAll("&lt;", "<");
       }
 
       // add the text as a child on the current tag

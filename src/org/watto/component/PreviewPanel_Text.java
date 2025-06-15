@@ -18,9 +18,11 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
 import org.watto.Settings;
 import org.watto.datatype.Archive;
 import org.watto.event.WSClickableInterface;
@@ -57,6 +59,8 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
   public PreviewPanel_Text(String text) {
     super();
 
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
     textChanged = false; // not edited
 
     WSOptionCheckBox wordwrapCheckbox = new WSOptionCheckBox(XMLReader.read("<WSOptionCheckBox opaque=\"false\" code=\"PreviewPanel_Text_WordWrap\" setting=\"PreviewPanel_Text_WordWrap\" />"));
@@ -67,7 +71,7 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
     wordwrapCheckbox.addItemListener(selectableListener);
     monospacedFontCheckbox.addItemListener(selectableListener);
 
-    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"2\" />"));
+    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_Text_TopPanelWrapper\" showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"2\" />"));
     topPanel.add(wordwrapCheckbox);
     topPanel.add(monospacedFontCheckbox);
 
@@ -90,6 +94,8 @@ public class PreviewPanel_Text extends PreviewPanel implements WSSelectableInter
       ArchivePlugin archivePlugin = Archive.getReadPlugin();
       if (archivePlugin != null) {
         if (archivePlugin.canWrite() || archivePlugin.canReplace() || archivePlugin.canImplicitReplace()) {
+
+
         }
         else {
           preview.setEditable(false);

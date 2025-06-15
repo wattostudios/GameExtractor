@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
@@ -729,6 +730,32 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
         // Game: Battle Chasers Nightwar 
         rating += 20;
       }
+      else {
+        fm.relativeSeek(0);
+
+        if (fm.readString(4).equals("Snit")) {
+          // No extension, so maybe a UnityFS file? (Slightly modified header - From Car Mechanic Simulator 2018)
+
+          // 8 - Header ("UnityFS" + null)
+          String headerString = fm.readString(3);
+          int headerByte = fm.readByte();
+          if (headerString.equals("yFS") && headerByte == 0) {
+            rating += 50;
+          }
+
+          // 4 - Version Number (6) (BIG ENDIAN)
+          if (IntConverter.changeFormat(fm.readInt()) == 6) {
+            rating += 5;
+          }
+
+          // X - General Version String (5.x.x)
+          if (fm.readString(2).equals("5.")) {
+            rating += 5;
+          }
+
+          return rating;
+        }
+      }
 
       // 4 - Filename Directory Offset [+14 + VersionStringLength] (BIG ENDIAN)
       //fm.skip(4); // already skipped in the check above
@@ -826,7 +853,8 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
       boolean unityFS = false;
       int relativeOffset = 0;
       int relativeDataOffset = 0;
-      if (fm.readString(7).equals("UnityFS")) {
+      String header = fm.readString(7);
+      if (header.equals("UnityFS") || header.equals("SnityFS")) { // SnityFS is a slightly modified header from Car Mechanic Simulator 2018 for the car CMS archives
         // a UnityFS file - skip over the header stuff, to reach the real file data
         unityFS = true;
 
@@ -880,6 +908,10 @@ public class Plugin_ASSETS_17 extends ArchivePlugin {
           exporter.open(fm, compDataHeaderSize, decompDataHeaderSize);
 
           for (int b = 0; b < decompDataHeaderSize; b++) {
+            if (b == 32 && decompWritePos == 0) {
+              // if we have read 32 bytes but we still haven't written anything, it's probably padded, so want to fail early (the decompression isn't working)
+              break;
+            }
             if (exporter.available()) { // make sure we read the next bit of data, if required
               dirBytes[decompWritePos++] = (byte) exporter.read();
             }

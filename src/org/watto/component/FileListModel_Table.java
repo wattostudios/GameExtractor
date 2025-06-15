@@ -150,8 +150,7 @@ public class FileListModel_Table implements FileListModel, TableModel {
     if (!Settings.getBoolean("AllowInlineFileListEditing")) {
       return false;
     }
-    if (columns[column].isEditable()) {
-    }
+
     return false;
   }
 

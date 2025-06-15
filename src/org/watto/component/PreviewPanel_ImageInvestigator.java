@@ -19,9 +19,11 @@ import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.event.WSClickableInterface;
@@ -118,7 +120,10 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
   **********************************************************************************************
   **/
   public void createInterface() {
-    WSScrollPane scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane showBorder=\"true\" showInnerBorder=\"true\" opaque=\"false\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_ImageInvestigator_Background\"><WSLabel code=\"PreviewPanel_ImageInvestigator_ImageLabel\" opaque=\"true\" /></WSPanel></WSScrollPane>"));
+
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
+    WSScrollPane scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane code=\"PreviewPanel_ImageInvestigator_ScrollPanelWrapper\" showBorder=\"true\" showInnerBorder=\"true\" opaque=\"false\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_ImageInvestigator_Background\"><WSLabel code=\"PreviewPanel_ImageInvestigator_ImageLabel\" opaque=\"true\" /></WSPanel></WSScrollPane>"));
     add(scrollPane, BorderLayout.CENTER);
 
     offsetField = new WSTextField(XMLReader.read("<WSTextField code=\"PreviewPanel_ImageInvestigator_OffsetField\" showLabel=\"true\" opaque=\"false\" />"));
@@ -214,19 +219,19 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
     endianRadioButtonPanel.add(littleEndianRadioButton);
     endianRadioButtonPanel.add(bigEndianRadioButton);
 
-    WSPanel settingsEndianPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"4\" horizontal-gap=\"4\" />"));
+    WSPanel settingsEndianPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_ImageInvestigator_SettingsEndianPanelWrapper\" vertical-gap=\"4\" horizontal-gap=\"4\" />"));
     settingsEndianPanel.add(endianRadioButtonPanel, BorderLayout.WEST);
     settingsEndianPanel.add(settingsCheckboxPanel, BorderLayout.CENTER);
 
-    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"4\" horizontal-gap=\"4\" />"));
+    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_ImageInvestigator_TopPanelWrapper\" vertical-gap=\"4\" horizontal-gap=\"4\" />"));
     topPanel.add(offsetWidthHeightPanel, BorderLayout.NORTH);
     topPanel.add(palettePanel, BorderLayout.CENTER);
 
-    WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel border-width=\"6\" vertical-gap=\"4\" />"));
+    WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_ImageInvestigator_BottomPanelWrapper\" border-width=\"6\" vertical-gap=\"4\" />"));
     bottomPanel.add(topPanel, BorderLayout.CENTER);
     bottomPanel.add(settingsEndianPanel, BorderLayout.SOUTH);
 
-    WSPanel bottomPanelWithFormats = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"4\" />"));
+    WSPanel bottomPanelWithFormats = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_ImageInvestigator_BottomPanelWithFormatsWrapper\" vertical-gap=\"4\" />"));
     bottomPanelWithFormats.add(bottomPanel, BorderLayout.NORTH);
     bottomPanelWithFormats.add(formatChooserPanel, BorderLayout.CENTER);
 

@@ -14,10 +14,141 @@
 
 package org.watto.ge.helper;
 
+import java.awt.Image;
+import java.awt.image.IndexColorModel;
+import java.awt.image.PixelGrabber;
 import java.util.Arrays;
+
+import org.watto.ErrorLogger;
 import org.watto.datatype.Palette;
 
+import com.github.archana77archana.quantization.Quantize;
+import com.sun.jimi.core.util.ColorReducer;
+
 public class ColorConverter {
+
+  /**
+  **********************************************************************************************
+  Uses an Octree to reduce the colors in an image
+  **********************************************************************************************
+  **/
+  public static void changeColorCountRGB(ImageManipulator resource, int newNumColors) {
+    Quantize q = new Quantize(newNumColors);
+    int[][] pixelsAs2D = new int[1][0];
+    pixelsAs2D[0] = resource.getImagePixels();
+
+    int[][] result = q.quantizeImage(pixelsAs2D);
+    resource.setImagePixels(result[0]);
+
+    // now that we've reduced the colors, convert it to a proper paletted image
+    resource.convertToPaletted();
+    //int numColors = resource.getNumColors();
+  }
+
+  /**
+  **********************************************************************************************
+  Uses an Octree to reduce the colors in an image
+  **********************************************************************************************
+  **/
+  public static void changeColorCountRGBKeepingExistingAlpha(ImageManipulator resource, int newNumColors) {
+    if (newNumColors > 0) {
+      newNumColors--; // reduce the new num colors by 1, so we can use that remaining color for the alpha
+    }
+
+    int[] pixels = resource.getImagePixels();
+    int numPixels = pixels.length;
+
+    // keep a record of all existing alpha pixels
+    boolean[] alphaPixels = new boolean[numPixels];
+    for (int i = 0; i < numPixels; i++) {
+      if (pixels[i] < 0) {
+        // Alpha = 255
+        alphaPixels[i] = false;
+      }
+      else {
+        // alpha = 0
+        alphaPixels[i] = true;
+      }
+    }
+
+    Quantize q = new Quantize(newNumColors);
+    int[][] pixelsAs2D = new int[1][0];
+    pixelsAs2D[0] = pixels;
+
+    int[][] result = q.quantizeImage(pixelsAs2D);
+    resource.setImagePixels(result[0]);
+
+    // put the alpha pixels back
+    pixels = resource.getImagePixels();
+    numPixels = pixels.length;
+
+    for (int i = 0; i < numPixels; i++) {
+      if (alphaPixels[i]) {
+        // alpha = 0
+        pixels[i] = 0; // no alpha, and because it's no alpha, it doesn't matter that it's also got no color
+      }
+    }
+
+    resource.setImagePixels(pixels);
+
+    //resource.convertToPaletted();
+    //int numColors = resource.getNumColors();
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static void changeColorCount(ImageManipulator resource, int newNumColors) {
+    changeColorCountRGB(resource, newNumColors);
+  }
+
+  /**
+  **********************************************************************************************
+  Uses an Octree to reduce the colors in an image (includes a single pixel in the palette for alpha)
+  **********************************************************************************************
+  **/
+  public static void changeColorCountRGBSingleAlpha(ImageManipulator resource, int newNumColors) {
+    try {
+      ColorReducer reducer = new ColorReducer(newNumColors);
+      Image image = reducer.getColorReducedImage(resource.getImage());
+
+      int width = resource.getWidth();
+      int height = resource.getHeight();
+
+      PixelGrabber pixelGrabber = new PixelGrabber(image, 0, 0, width, height, false);
+      pixelGrabber.grabPixels();
+
+      IndexColorModel model = (IndexColorModel) pixelGrabber.getColorModel();
+      int numColors = model.getMapSize();
+      int[] palette = new int[numColors];
+      for (int c = 0; c < numColors; c++) {
+        palette[c] = model.getRGB(c);
+      }
+
+      // get the pixels, and convert them to positive values in an int[] array
+      byte[] indexes = (byte[]) pixelGrabber.getPixels();
+      int numPixels = indexes.length;
+      int[] pixels = new int[numPixels];
+      for (int p = 0; p < numPixels; p++) {
+        int value = indexes[p];
+        if (value < 0) {
+          value = 256 + value;
+        }
+        pixels[p] = palette[value];
+      }
+
+      resource.setImagePixels(pixels);
+
+      // now convert the image to a paletted one
+      resource.convertToPaletted();
+      //numColors = resource.getNumColors();
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+    }
+  }
 
   /**
   **********************************************************************************************
@@ -26,7 +157,7 @@ public class ColorConverter {
   colors in the image, and determining how similar in appearance they are. If they are almost
   identical, one of the 2 colors are removed. This process continues until only 256 colors
   remain, which becomes the palette.
-
+  
   This method works well because the final color palette will be comprised of the most common-
   appearing colors in the image. Colors that are only slightly different have been replaced by
   a single color, so the appearance of the final image will be much closer to the original than
@@ -36,7 +167,7 @@ public class ColorConverter {
   treated as a single "green" entity in this method.)
   **********************************************************************************************
   **/
-  public static void changeColorCount(ImageManipulator resource, int newNumColors) {
+  public static void changeColorCountByReduction(ImageManipulator resource, int newNumColors) {
 
     int[] palette = resource.getPalette();
     int numColors = palette.length;
@@ -101,10 +232,10 @@ public class ColorConverter {
     /*
     // now need to convert the pixels into the new palette indexes
     Arrays.sort(colors,0,numColors);
-
+    
     int[] pixels = resource.getPixels();
     int numPixels = pixels.length;
-
+    
     // at this point, the colors are sorted by color order, and the getPaletteIndex() contains the palette index.
     for (int i=0;i<numPixels;i++){
       ColorSplit pixel = new ColorSplit(pixels[i]);
@@ -183,7 +314,7 @@ public class ColorConverter {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static void convertToPaletted(ImageManipulator resource) {
@@ -263,7 +394,7 @@ public class ColorConverter {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static void removeAlpha(ImageManipulator resource) {

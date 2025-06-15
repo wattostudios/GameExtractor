@@ -15,13 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_LZSS;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
 import org.watto.task.TaskProgressManager;
@@ -111,7 +112,8 @@ public class Plugin_LINK_LINK extends ArchivePlugin {
       //      - Uncompressed files MUST know their LENGTH
 
       ExporterPlugin exporterLZSS0 = Exporter_LZSS.getInstance();
-      ExporterPlugin exporterPUYOLZ01 = new Exporter_QuickBMS_Decompression("PUYO_LZ01");
+      //ExporterPlugin exporterPUYOLZ01 = new Exporter_QuickBMS_Decompression("PUYO_LZ01");
+      ExporterPlugin exporterPUYOLZ01 = new Exporter_QuickBMS_DLL("PUYO_LZ01");
 
       addFileTypes();
 

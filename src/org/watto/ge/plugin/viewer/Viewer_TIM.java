@@ -14,6 +14,7 @@
 
 package org.watto.ge.plugin.viewer;
 
+import org.watto.TemporarySettings;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
@@ -421,6 +422,12 @@ public class Viewer_TIM extends ViewerPlugin {
 
           //imageResource = ImageFormatReader.readBGRA(fm, width, height);
           imageResource = ImageFormatReader.readBGR(fm, width, height);
+        }
+      }
+
+      if (TemporarySettings.has("SwapRedBlue")) {
+        if (TemporarySettings.getBoolean("SwapRedBlue")) {
+          imageResource = ImageFormatReader.swapRedAndBlue(imageResource);
         }
       }
 

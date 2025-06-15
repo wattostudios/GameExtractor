@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2022 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -40,7 +41,8 @@ public class Plugin_ASTS extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Strange Brigade");
+    setGames("Strange Brigade",
+        "Atomfall");
     setExtensions("asts"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -120,6 +122,8 @@ public class Plugin_ASTS extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
+      int lastOffset = 0;
+      int lastLength = 0;
       for (int i = 0; i < numFiles; i++) {
         // X - Filename
         // 1 - null Filename Terminator
@@ -140,10 +144,26 @@ public class Plugin_ASTS extends ArchivePlugin {
         int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
+        if (offset > lastOffset) {
+          lastOffset = offset;
+          lastLength = length;
+        }
+
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
+      }
+
+      // For some games (Atomfall), the offsets are stored slightly later than the actual values, so we need to go through and adjust
+      int difference = (lastOffset + lastLength) - (int) arcSize;
+      if (difference < 128 && difference > 0) {
+        // adjust all the offsets by this amount
+        for (int i = 0; i < numFiles; i++) {
+          Resource resource = resources[i];
+          resource.setOffset(resource.getOffset() - difference);
+          ;
+        }
       }
 
       fm.close();

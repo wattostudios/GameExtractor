@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -30,7 +31,7 @@ public class Plugin_CSB extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_CSB() {
@@ -40,7 +41,8 @@ public class Plugin_CSB extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Dying Light: Bad Blood");
+    setGames("Dying Light",
+        "Dying Light: Bad Blood");
     setExtensions("csb"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -49,11 +51,13 @@ public class Plugin_CSB extends ArchivePlugin {
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
 
+    setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -158,6 +162,24 @@ public class Plugin_CSB extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 893539142) {
+      return "fsb";
+    }
+
+    return null;
   }
 
 }

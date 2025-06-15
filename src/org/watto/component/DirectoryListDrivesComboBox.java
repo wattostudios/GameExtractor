@@ -18,9 +18,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.io.File;
 import java.util.Arrays;
+
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComponent;
+
 import org.watto.event.WSFocusableInterface;
 import org.watto.event.listener.WSFocusableListener;
 import org.watto.ge.helper.ShellFolderFile;
@@ -28,6 +30,7 @@ import org.watto.plaf.DirectoryListDrivesComboBoxCellRenderer;
 import org.watto.plaf.DirectoryListDrivesComboBoxCurrentValueCellRenderer;
 import org.watto.plaf.DirectoryListDrivesComboBoxEditor;
 import org.watto.xml.XMLNode;
+
 import sun.awt.shell.ShellFolder;
 
 public class DirectoryListDrivesComboBox extends WSComboBox implements WSFocusableInterface {
@@ -106,11 +109,19 @@ public class DirectoryListDrivesComboBox extends WSComboBox implements WSFocusab
     setModel(new DefaultComboBoxModel(drives));
     int insertPos = getItemCount();
 
-    if (directory instanceof ShellFolder) {
-      // it's a directory already
+    try {
+      if (directory instanceof ShellFolder) {
+        // it's a directory already
+      }
+      else if (directory.exists() && directory.isFile()) { // so the combo box only shows the directories, not the files
+        directory = directory.getParentFile();
+      }
     }
-    else if (directory.exists() && directory.isFile()) { // so the combo box only shows the directories, not the files
-      directory = directory.getParentFile();
+    catch (Throwable t) {
+      // ignore it - this is just to catch bad errors form using a BAT to run the program (when running with newer Java versions)
+      if (directory.exists() && directory.isFile()) { // so the combo box only shows the directories, not the files
+        directory = directory.getParentFile();
+      }
     }
 
     File drive = directory;

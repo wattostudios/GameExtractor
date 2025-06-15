@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,11 +15,15 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
@@ -48,6 +52,7 @@ public class Plugin_AFS_AFS extends ArchivePlugin {
     setGames("50 Cent: Bulletproof",
         "Crazy Taxi",
         "DragonBall Z: Budokai 3",
+        "Dragon Ball: Raging Blast 2",
         "Leisure Suit Larry: Manga Cum Laude",
         "Mortal Kombat: Shaolin Monks",
         "Ninja Garden Black",
@@ -63,8 +68,10 @@ public class Plugin_AFS_AFS extends ArchivePlugin {
 
     setExtensions("afs");
 
-    setFileTypes("adx", "ADX Audio",
-        "ahx", "AHX Audio");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("adx", "ADX Audio", FileType.TYPE_AUDIO),
+        new FileType("ahx", "AHX Audio", FileType.TYPE_AUDIO),
+        new FileType("stpk", "STPK Archive", FileType.TYPE_ARCHIVE));
 
   }
 
@@ -270,11 +277,18 @@ public class Plugin_AFS_AFS extends ArchivePlugin {
           }
         }
 
-        fm.getBuffer().setBufferSize(32); // quick reads
+        fm.getBuffer().setBufferSize(64); // quick reads
 
         // Now go to each file, see if we can work out what type they are, and if compression is used
         ExporterPlugin exporter = Exporter_ZLib.getInstance();
+
+        ExporterPlugin exporter_dbz = new Exporter_QuickBMS_DLL("DRAGONBALLZ");
+
+        TaskProgressManager.setMaximum(realNumFiles);
+
         for (int i = 0; i < realNumFiles; i++) {
+          TaskProgressManager.setValue(i);
+
           Resource resource = resources[i];
 
           long offset = resource.getOffset();
@@ -288,6 +302,7 @@ public class Plugin_AFS_AFS extends ArchivePlugin {
 
           if (headerInt == 1398362949) {
             // Pro Evolution Soccer 2008/2009 compressed file header...
+            setCanImplicitReplace(false);
 
             int compLength = fm.readInt();
             FieldValidator.checkLength(compLength, arcSize);
@@ -314,9 +329,80 @@ public class Plugin_AFS_AFS extends ArchivePlugin {
             }
           }
           else {
-            String extension = resource.getExtension();
-            if (extension == null || extension.length() <= 0) {
-              resource.setName(resource.getName() + ".adx"); // ADX audio file
+
+            fm.relativeSeek(offset);
+
+            headerInt = fm.readInt();
+
+            if (headerInt == 1515213907 || headerInt == 1396917296) {
+              // STPZ or SCD0 file from Dragon Ball Raging Blast 2
+              setCanImplicitReplace(false);
+
+              resource.setName(resource.getName() + ".stpk");
+
+              if (headerInt == 1515213907) {
+                // skip the STPZ header, to get to the SCD0 header
+                fm.skip(16);
+              }
+
+              // 4 - Decompressed Length
+              int decompLength = fm.readInt();
+              FieldValidator.checkLength(decompLength);
+
+              // 4 - Compressed Length
+              int length = fm.readInt() - 16;
+              FieldValidator.checkLength(length, arcSize);
+
+              resource.setDecompressedLength(decompLength);
+              resource.setLength(length);
+
+              // 4 - Block Size
+              int blockSize = fm.readInt();
+              //FieldValidator.checkLength(blockSize, decompLength);
+
+              int numBlocks = decompLength / blockSize;
+              int lastBlock = decompLength % blockSize;
+              if (lastBlock != 0) {
+                numBlocks++;
+              }
+
+              long[] blockOffsets = new long[numBlocks];
+              long[] blockLengths = new long[numBlocks];
+              long[] blockDecompLengths = new long[numBlocks];
+
+              for (int b = 0; b < numBlocks; b++) {
+                // 4 - Block Header (0LCS)
+                fm.skip(4);
+
+                // 4 - Decompressed Block Length
+                int decompBlockLength = fm.readInt();
+                FieldValidator.checkLength(decompBlockLength);
+
+                // 4 - Compressed Block Length
+                int compBlockLength = fm.readInt() - 16;
+                FieldValidator.checkLength(compBlockLength);
+
+                // 4 - null
+                fm.skip(4);
+
+                blockOffsets[b] = fm.getOffset();
+                blockLengths[b] = compBlockLength;
+                blockDecompLengths[b] = decompBlockLength;
+
+                fm.skip(compBlockLength);
+              }
+
+              BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter_dbz, blockOffsets, blockLengths, blockDecompLengths);
+
+              resource.setExporter(blockExporter);
+
+            }
+            else {
+              // Anything else - treat as ADX audio
+              String extension = resource.getExtension();
+              if (extension == null || extension.length() <= 0) {
+                resource.setName(resource.getName() + ".adx"); // ADX audio file
+              }
             }
           }
 

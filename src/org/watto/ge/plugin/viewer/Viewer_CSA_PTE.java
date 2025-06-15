@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -180,6 +180,10 @@ public class Viewer_CSA_PTE extends ViewerPlugin {
 
       // 4 - Image Width
       int width = fm.readInt();
+      if (width == 0) {
+        // sometimes there's another 4 bytes prior to here, so *now* we're at the right place, try again
+        width = fm.readInt();
+      }
       FieldValidator.checkWidth(width);
 
       // 4 - Image Height

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -44,7 +45,8 @@ public class Plugin_ASR_ASURAZBB extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Strange Brigade");
+    setGames("Strange Brigade",
+        "Atomfall");
     setExtensions("asr", "gui"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -168,7 +170,12 @@ public class Plugin_ASR_ASURAZBB extends ArchivePlugin {
       Resource[] resources = new Resource[1];
       TaskProgressManager.setMaximum(1);
 
-      String filename = "CompressedFile1.zlb";
+      String archiveName = path.getName();
+      int dotPos = archiveName.lastIndexOf('.');
+      String extension = archiveName.substring(dotPos);
+      archiveName = archiveName.substring(0, dotPos);
+
+      String filename = archiveName + ".decompressed" + extension;
 
       BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
 

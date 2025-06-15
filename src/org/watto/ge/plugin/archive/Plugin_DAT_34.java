@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Palette;
 import org.watto.datatype.Resource;
@@ -48,8 +49,7 @@ public class Plugin_DAT_34 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Nexus: The Kingdom Of The Winds",
-        "Warhammer 40K: Rites of War");
+    setGames("Nexus: The Kingdom Of The Winds");
     setExtensions("dat");
     setPlatforms("PC");
 
@@ -1307,42 +1307,8 @@ public class Plugin_DAT_34 extends ArchivePlugin {
         }
       }
 
-      //
-      // Otherwise handle as a generic archive of this type
-      //
-      FileManipulator fm = new FileManipulator(path, false);
-
-      long arcSize = (int) fm.getLength();
-
-      // 4 - Number Of Files
-      int numFiles = fm.readInt() - 1;
-      FieldValidator.checkNumFiles(numFiles);
-
-      Resource[] resources = new Resource[numFiles];
-
-      TaskProgressManager.setMaximum(numFiles);
-
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        // 4 - File Offset
-        long offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
-
-        // 13 - Filename (null terminated, filled with junk)
-        String filename = fm.readNullString(13);
-        FieldValidator.checkFilename(filename);
-
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
-
-        TaskProgressManager.setValue(i);
-      }
-
-      calculateFileSizes(resources, arcSize);
-
-      fm.close();
-
-      return resources;
+      // all other "generic" formats are now read by DAT_106 instead
+      return null;
 
     }
     catch (Throwable t) {

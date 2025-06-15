@@ -1,9 +1,9 @@
 <languagePack>
 	<name>Portuguese</name>
-	<version>3.15</version>
+	<version>3.16</version>
 	<author>
-		<name>WATTO</name>
-		<email>watto@watto.org</email>
+		<name>Lucas Oliveira</name>
+		<email>lucasaddam@gmail.com</email>
 		<website>http://www.watto.org/extract</website>
 	</author>
 	
@@ -1605,6 +1605,11 @@
 		
 		<lang code="WSCheckBox_CopyFilenameOnRightClick_Text" value="Copy filename on right-click in the File List" />
 		<lang code="WSCheckBox_CopyFilenameOnRightClick_Tooltip" value="If this checkbox is ticked, when you right-click on an entry in the file list, the filename will be copied to the clipboard." />
+		
+<!-- New with 3.16 -->
+
+		<lang code="WSCheckBox_UnityMeshExtendedErrorChecking_Text" value="Unity Mesh Enhanced Error Checking" />
+		<lang code="WSCheckBox_UnityMeshExtendedErrorChecking_Tooltip" value="Tick to validate Unity meshes (provides better chance of rendering meshes correctly)" />
 		
 		<lang code="" value="" />
 		

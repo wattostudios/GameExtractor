@@ -1,30 +1,26 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -45,7 +41,7 @@ public class Plugin_DAT_CACH extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, true, true, true);
 
-    setGames("Air Offensive");
+    setGames("Air Offensive", "Thunder Brigade");
     setExtensions("dat");
     setPlatforms("PC");
 
@@ -130,13 +126,14 @@ public class Plugin_DAT_CACH extends ArchivePlugin {
       // 4 - Directory Length (thisField=FilesDirectoryLength+FilenameDirectoryLength)
       fm.seek(dirOffset + (numFiles * 8));
 
-      Resource[] resources = new Resource[numFiles];
-
-      TaskProgressManager.setMaximum(numFiles);
-
       // Loop through directory
       String[] names = new String[numFiles];
       for (int i = 0; i < numFiles; i++) {
+        if (fm.getOffset() >= arcSize) {
+          // early exit - must have lots of empty entries in the directory (eg 3dmodels.dat of Thunder Brigade)
+          numFiles = i;
+          break;
+        }
         // 4 - File ID (incremental from 0)
         fm.skip(4);
 
@@ -149,6 +146,10 @@ public class Plugin_DAT_CACH extends ArchivePlugin {
       }
 
       fm.seek(dirOffset);
+
+      Resource[] resources = new Resource[numFiles];
+
+      TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {

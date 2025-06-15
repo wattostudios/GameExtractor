@@ -73,6 +73,18 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.16
+  * [I] Support for more games, with a focus on adding previews and write support, where possible.
+  * [+] Added quickbms.dll as a native library for handling complicated compression types.
+  * [+] Added support for reading password-protected ZIP files
+  * [A] Plugins can now be unpacked from a ZIP in the plugins directory, and then loaded and used.
+  * [A] Added algorithms to quickly reduce the number of colors when replacing paletted images.
+  * [A] Added preview and thumbnail support for the first frame of animated WebP images
+  * [B] Memory is now cleaned up properly when Previews are discarded
+  * [B] Unity meshes now have a better chance of rendering correctly when vertex sizes are guessed.
+  * [B] Fixed several bugs with the loading and display of UTF-8 languages.
+  * [B] OGG files from FSB archives should now extract properly in the Basic Version
+
 * Version 3.15
   * [I] Support for more games, with a focus on adding previews and write support, where possible
   * [+] For archives that can do Convert On Replace, you can now do Replace Matching Files and it

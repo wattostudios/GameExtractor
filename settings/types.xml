@@ -74,6 +74,7 @@
 		<type extension="ttf"   function="Image"    description="True Type Font" />
 		<type extension="txt"   function="Document" description="Text Document" />
 		<type extension="wav"   function="Audio"    description="Wave Audio" />
+		<type extension="webp"  function="Image"    description="WebP Image" />
 		<type extension="wm"    function="Audio"    description="Windows Media (Audio/Video)" />
 		<type extension="wma"   function="Audio"    description="Windows Media Audio" />
 		<type extension="wmv"   function="Video"    description="Windows Media Video" />

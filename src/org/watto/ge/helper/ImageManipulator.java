@@ -20,7 +20,9 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
+
 import javax.swing.JLabel;
+
 import org.watto.component.PreviewPanel_3DModel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
@@ -255,6 +257,38 @@ public class ImageManipulator {
 
   /**
   **********************************************************************************************
+  For an image that has a range of alphas, this will change it to only having a single alpha (either on or off)
+  **********************************************************************************************
+  **/
+  public void changeToSingleAlpha(int percentCloseness) {
+
+    int threshold = (int) ((((float) percentCloseness) / 100) * 255);
+
+    if (palette == null || palette.getNumColors() <= 0) {
+      convertToPaletted();
+    }
+
+    // convert the palette
+    int[] paletteArray = palette.getPalette();
+    int numColors = paletteArray.length;
+
+    for (int p = 0; p < numColors; p++) {
+      ColorSplitAlpha color = new ColorSplitAlpha(paletteArray[p]);
+      if (color.getAlpha() < threshold) {
+        color.setAlpha(0);
+      }
+      else {
+        color.setAlpha(255);
+      }
+      paletteArray[p] = color.getColor();
+    }
+
+    palette.setPalette(paletteArray);
+
+  }
+
+  /**
+  **********************************************************************************************
   
   **********************************************************************************************
   **/
@@ -262,7 +296,50 @@ public class ImageManipulator {
     if (palette == null || palette.getNumColors() <= 0) {
       convertToPaletted();
     }
+
     ColorConverter.changeColorCount(this, numColors);
+
+    // After color reduction, if the palette is too small, increase it to the right size
+    int paletteColors = palette.getNumColors();
+    if (paletteColors < numColors) {
+      palette.resizePalette(numColors);
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void changeColorCountRGBSingleAlpha(int numColors) {
+    if (palette == null || palette.getNumColors() <= 0) {
+      convertToPaletted();
+    }
+    ColorConverter.changeColorCountRGBSingleAlpha(this, numColors);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void changeColorCountRGB(int numColors) {
+    if (palette == null || palette.getNumColors() <= 0) {
+      convertToPaletted();
+    }
+    ColorConverter.changeColorCountRGB(this, numColors);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public void changeColorCountRGBKeepingExistingAlpha(int numColors) {
+    if (palette == null || palette.getNumColors() <= 0) {
+      convertToPaletted();
+    }
+    ColorConverter.changeColorCountRGBKeepingExistingAlpha(this, numColors);
   }
 
   /**
@@ -273,6 +350,21 @@ public class ImageManipulator {
   public void convertToPaletted() {
     if (palette == null || palette.getNumColors() <= 0) {
       ColorConverter.convertToPaletted(this);
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  If the palette has less than <i>numColors</i>, it will be resized, filled with empty colors
+  **********************************************************************************************
+  **/
+  public void resizePalette(int numColors) {
+    if (palette == null || palette.getNumColors() <= 0) {
+      ColorConverter.convertToPaletted(this);
+    }
+
+    if (palette.getNumColors() < numColors) {
+      palette.resizePalette(numColors);
     }
   }
 
@@ -463,6 +555,16 @@ public class ImageManipulator {
   
   **********************************************************************************************
   **/
+  public void setImagePixels(int[] pixels) {
+    this.pixels = pixels;
+    this.palette = null;
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
   public int getNumColors() {
     return palette.getNumColors();
   }
@@ -544,7 +646,7 @@ public class ImageManipulator {
   **********************************************************************************************
   **/
   public void setPalette(int[] palette) {
-    if (this.palette.getNumColors() == 0) {
+    if (this.palette == null || this.palette.getNumColors() == 0) {
       // needs the palette to be added to PaletteManager
       setPalette(new Palette(palette));
     }

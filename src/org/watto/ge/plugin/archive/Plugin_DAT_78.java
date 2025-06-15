@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,11 +15,15 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.HashMap;
+
+import org.watto.Settings;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.Hex;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -46,7 +50,7 @@ public class Plugin_DAT_78 extends ArchivePlugin {
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    setFileTypes(new FileType("war", "WAR Image", FileType.TYPE_IMAGE));
+    setFileTypes(new FileType("vrm", "VRM Image Archive", FileType.TYPE_ARCHIVE));
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
@@ -124,8 +128,49 @@ public class Plugin_DAT_78 extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
+      // See if we have a file with the filenames in it, and if so, we need to read them in so the decryption works properly
+      String[] names = null;
+
+      HashMap<String, String> hashMap = new HashMap<String, String>(numFiles);
+      File hashFile = new File(Settings.get("HashesDirectory") + File.separatorChar + "DAT_78" + File.separatorChar + "legacyofkain_defiance.txt");
+      if (hashFile.exists()) {
+        int hashFileLength = (int) hashFile.length();
+
+        char equalsChar = '=';
+
+        FileManipulator hashFM = new FileManipulator(hashFile, false);
+        while (hashFM.getOffset() < hashFileLength) {
+          String name = hashFM.readLine();
+          if (name.equals("")) {
+            break; // EOF
+          }
+
+          int equalPos = name.indexOf(equalsChar);
+          if (equalPos > 0) {
+            String hash = name.substring(0, equalPos);
+            name = name.substring(equalPos + 1);
+
+            hashMap.put(hash, name);
+          }
+
+        }
+        hashFM.close();
+
+        names = new String[numFiles];
+        setCanScanForFileTypes(false);
+      }
+
       // HASH DIRECTORY
-      fm.skip(numFiles * 4);
+      if (names == null) {
+        fm.skip(numFiles * 4);
+      }
+      else {
+        for (int i = 0; i < numFiles; i++) {
+          // 4 - Hash
+          Hex hash = fm.readHex(4);
+          names[i] = hashMap.get(hash.toString());
+        }
+      }
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
@@ -139,6 +184,12 @@ public class Plugin_DAT_78 extends ArchivePlugin {
         FieldValidator.checkOffset(offset, arcSize);
 
         String filename = Resource.generateFilename(i);
+        if (names != null) {
+          filename = names[i];
+          if (filename == null) {
+            filename = Resource.generateFilename(i);
+          }
+        }
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

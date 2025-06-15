@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2023 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -196,6 +197,8 @@ public class Plugin_XWB_WBND extends ArchivePlugin {
         // 4 - File Length
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
+
+        FieldValidator.checkOffset(offset + length, arcSize + 100); // help to rule out some different formats (eg where the files are stored as OGG)
 
         // 8 - null
         fm.skip(8);

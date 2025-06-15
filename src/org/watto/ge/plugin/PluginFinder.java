@@ -15,6 +15,7 @@
 package org.watto.ge.plugin;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.component.WSPlugin;
 import org.watto.component.WSPluginGroup;
@@ -91,6 +92,7 @@ public class PluginFinder {
       else if (pluginType == ViewerPlugin.class) {
         for (int i = 0; i < results.length; i++) {
           fm.seek(0);
+          //System.out.println("Trying plugin " + plugins[i]);
           int rating = ((ViewerPlugin) plugins[i]).getMatchRating(fm);
           if (checkRating && rating < 25) {
             // failed plugin
@@ -121,7 +123,7 @@ public class PluginFinder {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public PluginFinder() {

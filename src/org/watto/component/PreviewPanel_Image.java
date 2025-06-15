@@ -18,8 +18,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
+
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+
 import org.watto.Settings;
 import org.watto.TemporarySettings;
 import org.watto.datatype.ImageResource;
@@ -292,12 +294,14 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
   **/
   public void createInterface() {
 
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
     setFitToPanel(Settings.getBoolean("PreviewPanel_Image_FitToPanel"));
     //generateZoomImage();
 
     //ImageIcon icon = new ImageIcon(zoomImage);
 
-    scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane showBorder=\"true\" showInnerBorder=\"true\" opaque=\"false\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_Background\"><WSLabel code=\"PreviewPanel_Image_ImageLabel\" opaque=\"true\" /></WSPanel></WSScrollPane>"));
+    scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane showBorder=\"true\" showInnerBorder=\"true\" opaque=\"false\" code=\"PreviewPanel_Image_ScrollableImagePanel\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_Background\"><WSLabel code=\"PreviewPanel_Image_ImageLabel\" opaque=\"true\" /></WSPanel></WSScrollPane>"));
 
     imageLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_ImageLabel");
     //imageLabel.setIcon(icon);
@@ -356,7 +360,7 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     WSPanel buttonPanel = null;
 
     if (frameControls != null && paletteControls != null) {
-      buttonPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" layout=\"GridLayout\" position=\"CENTER\" rows=\"2\" columns=\"1\"></WSPanel>"));
+      buttonPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_Image_ButtonPanelWrapperPanel\" obeyBackgroundColor=\"true\" layout=\"GridLayout\" position=\"CENTER\" rows=\"2\" columns=\"1\"></WSPanel>"));
       buttonPanel.add(frameControls);
       buttonPanel.add(paletteControls);
     }
@@ -379,7 +383,7 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     fitToPanelCheckbox.addItemListener(selectableListener);
     transparencyPatternCheckbox.addItemListener(selectableListener);
 
-    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"2\" />"));
+    WSPanel topPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_Image_TopPanelWrapperPanel\" showBorder=\"true\" layout=\"GridLayout\" rows=\"1\" columns=\"2\" />"));
     topPanel.add(fitToPanelCheckbox);
     topPanel.add(transparencyPatternCheckbox);
 
@@ -604,6 +608,7 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
     // Flush the variables clear for garbage collection
     image = null;
     zoomImage = image;
+    imageResource = null;
 
     if (animation != null) {
       animation.stop();

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -31,13 +31,14 @@ import org.watto.ge.plugin.exporter.BlockExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_AES_ZLib;
 import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_Encryption_AES;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_Oodle;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.ge.plugin.resource.Resource_PAK_38;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ExporterByteBuffer;
 import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.LongConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -514,7 +515,8 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       // NOTE: Not real OODLE compression, but we want to tell people that it is, in case they look in the file info sidepanel
       //ExporterPlugin exporterOodle = new Exporter_Default();
       //exporterOodle.setName("Oodle Compression");
-      ExporterPlugin exporterOodle = new Exporter_QuickBMS_Decompression("oodle");
+      //ExporterPlugin exporterOodle = new Exporter_QuickBMS_Decompression("oodle");
+      ExporterPlugin exporterOodle = new Exporter_Oodle();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -768,12 +770,14 @@ public class Plugin_PAK_65 extends ArchivePlugin {
         // 4 - Unknown ((bytes)0,0,0,224)
         byte[] entryType = fm.readBytes(4);
 
-        /*
-        System.out.println((fm.getOffset() - 4) + "\t" + entryType[0] + "\t" + entryType[1] + "\t" + entryType[2] + "\t" + entryType[3]);
-        if (entryType[3] != -32) {
-          System.out.println("HERE");
-        }
-        */
+        // FOR DEBUGGING
+        //System.out.println((fm.getOffset() - 4) + "\t" + entryType[0] + "\t" + entryType[1] + "\t" + entryType[2] + "\t" + entryType[3]);
+        //if (entryType[3] != -32) {
+        //  System.out.println("HERE");
+        //}
+        //if (entryType[1] == 11) {
+        //  System.out.println("HERE");
+        //}
 
         if (entryType[0] == 0 && entryType[1] == 0 && entryType[2] == 0 && entryType[3] == 0) {
           // A Table of Paper
@@ -811,24 +815,45 @@ public class Plugin_PAK_65 extends ArchivePlugin {
           }
           else {
             // 4 - File Length (not including the file header or the padding)
-            length = IntConverter.unsign(fm.readInt());
-            FieldValidator.checkLength(length, arcSize);
-
             // 8 - File Offset
-            offset = fm.readLong();
-            FieldValidator.checkOffset(offset, arcSize);
+            byte[] bytes12 = fm.readBytes(12);
+
+            try {
+              length = IntConverter.convertLittle(new byte[] { bytes12[0], bytes12[1], bytes12[2], bytes12[3] });
+              FieldValidator.checkLength(length, arcSize);
+
+              offset = LongConverter.convertLittle(new byte[] { bytes12[4], bytes12[5], bytes12[6], bytes12[7], bytes12[8], bytes12[9], bytes12[10], bytes12[11] });
+              FieldValidator.checkOffset(offset, arcSize);
+            }
+            catch (Throwable t) { // Century - Age of Ashes (could probably also have checked entryType[0] as per entryType[3] == 97 but not sure if that would impact other tested games)
+              offset = LongConverter.convertLittle(new byte[] { bytes12[0], bytes12[1], bytes12[2], bytes12[3], bytes12[4], bytes12[5], bytes12[6], bytes12[7] });
+              FieldValidator.checkOffset(offset, arcSize);
+
+              length = IntConverter.convertLittle(new byte[] { bytes12[8], bytes12[9], bytes12[10], bytes12[11] });
+              FieldValidator.checkLength(length, arcSize);
+            }
           }
 
           swapped = true;
         }
         else if (entryType[3] == 96) {
           // 8 - File Offset
-          offset = fm.readLong();
-          FieldValidator.checkOffset(offset, arcSize);
-
           // 4 - File Length (not including the file header or the padding)
-          length = IntConverter.unsign(fm.readInt());
-          FieldValidator.checkLength(length, arcSize);
+          byte[] bytes8 = fm.readBytes(8);
+          try {
+            offset = LongConverter.convertLittle(bytes8);
+            FieldValidator.checkOffset(offset, arcSize);
+
+            length = IntConverter.unsign(fm.readInt());
+            FieldValidator.checkLength(length, arcSize);
+          }
+          catch (Throwable t) { // Century - Age of Ashes (could probably also have checked entryType[0] as per entryType[3] == 97 but not sure if that would impact other tested games)
+            length = IntConverter.convertLittle(new byte[] { bytes8[0], bytes8[1], bytes8[2], bytes8[3] });
+            FieldValidator.checkLength(length, arcSize);
+
+            offset = LongConverter.convertLittle(new byte[] { bytes8[4], bytes8[5], bytes8[6], bytes8[7], fm.readByte(), fm.readByte(), fm.readByte(), fm.readByte() });
+            FieldValidator.checkOffset(offset, arcSize);
+          }
 
           swapped = true;
         }
@@ -845,6 +870,20 @@ public class Plugin_PAK_65 extends ArchivePlugin {
           FieldValidator.checkLength(length, arcSize);
 
           swapped = true;
+        }
+        else if ((entryType[0] == 96 || entryType[0] == -96) && entryType[2] == -128) { // Icarus
+          // 4 - File Offset
+          offset = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - Decomp Length?
+          fm.skip(4);
+
+          // 4 - File Length (not including the file header or the padding)
+          length = IntConverter.unsign(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+
+          fm.relativeSeek(fm.getOffset() - 4); // go back 4 bytes, so when we read it down below, it gets back in the right place
         }
         else {
           // 4 - File Offset
@@ -929,7 +968,7 @@ public class Plugin_PAK_65 extends ArchivePlugin {
             // additional 4
             fm.skip(4);
           }
-          if (entryType[2] == -64) {
+          if (entryType[2] == -64 && count != 0) { // 3.16 Added count != 0 from SplitGate
             // additional 4
             fm.skip(4);
           }
@@ -1026,80 +1065,90 @@ public class Plugin_PAK_65 extends ArchivePlugin {
         fm.seek(dir3Offset);
       }
 
-      // 4 - Number of Directories
-      int numDirs = fm.readInt();
-      FieldValidator.checkNumFiles(numDirs);
+      try {
 
-      for (int i = 0; i < numDirs; i++) {
+        // 4 - Number of Directories
+        int numDirs = fm.readInt();
+        FieldValidator.checkNumFiles(numDirs);
 
-        // 4 - Directory Name Length (including null terminator)
-        int dirNameLength = fm.readInt();
+        for (int i = 0; i < numDirs; i++) {
 
-        String dirName = "";
-        if (dirNameLength > 0) {
-          dirNameLength -= 1; // remove the null terminator
+          // 4 - Directory Name Length (including null terminator)
+          int dirNameLength = fm.readInt();
 
-          // X - Directory Name (ASCII)
-          // 1 - null Directory Name Terminator
-          dirName = fm.readString(dirNameLength);
-          fm.skip(1);
-        }
-        else if (dirNameLength < 0) {
-          dirNameLength = 0 - dirNameLength; //Negate it
-          dirNameLength -= 1; // remove the null terminator
+          String dirName = "";
+          if (dirNameLength > 0) {
+            dirNameLength -= 1; // remove the null terminator
 
-          // X - Directory Name (Unicode)
-          // 2 - null Directory Name Terminator
-          dirName = fm.readUnicodeString(dirNameLength);
-          fm.skip(2);
-        }
-
-        // 4 - Number of Files in this Directory (can be null)
-        int numSubFiles = fm.readInt();
-        FieldValidator.checkRange(numSubFiles, 0, numFiles);
-
-        // read each file in this directory
-        for (int j = 0; j < numSubFiles; j++) {
-          // 4 - Filename Length (including null terminator)
-          int filenameLength = fm.readInt();
-
-          String filename = "";
-          if (filenameLength > 0) {
-            filenameLength -= 1; // remove the null terminator
-
-            // X - Filename (ASCII)
-            // 1 - null Filename Terminator
-            filename = fm.readString(filenameLength);
+            // X - Directory Name (ASCII)
+            // 1 - null Directory Name Terminator
+            dirName = fm.readString(dirNameLength);
             fm.skip(1);
           }
-          else if (filenameLength < 0) {
-            filenameLength = 0 - filenameLength; //Negate it
-            filenameLength -= 1; // remove the null terminator
+          else if (dirNameLength < 0) {
+            dirNameLength = 0 - dirNameLength; //Negate it
+            dirNameLength -= 1; // remove the null terminator
 
-            // X - Filename (Unicode)
-            // 2 - null Filename Terminator
-            filename = fm.readUnicodeString(filenameLength);
+            // X - Directory Name (Unicode)
+            // 2 - null Directory Name Terminator
+            dirName = fm.readUnicodeString(dirNameLength);
             fm.skip(2);
           }
 
-          filename = dirName + filename;
+          // 4 - Number of Files in this Directory (can be null)
+          int numSubFiles = fm.readInt();
+          FieldValidator.checkRange(numSubFiles, 0, numFiles);
 
-          // 4 - Offset to corresponding entry in Directory 1 (relative to the start of Directory 1)
-          //int fileID = (fm.readInt() / 12);
-          int entryOffset = fm.readInt();
-          int fileID = Arrays.binarySearch(entryOffsets, entryOffset);
+          // read each file in this directory
+          for (int j = 0; j < numSubFiles; j++) {
+            // 4 - Filename Length (including null terminator)
+            int filenameLength = fm.readInt();
 
-          if (fileID < 0) {
-            // not found - skip this one
-          }
-          else {
-            FieldValidator.checkRange(fileID, 0, numFiles);
+            String filename = "";
+            if (filenameLength > 0) {
+              filenameLength -= 1; // remove the null terminator
 
-            Resource resource = resources[fileID];
-            resource.setName(filename);
-            resource.setOriginalName(filename);
+              // X - Filename (ASCII)
+              // 1 - null Filename Terminator
+              filename = fm.readString(filenameLength);
+              fm.skip(1);
+            }
+            else if (filenameLength < 0) {
+              filenameLength = 0 - filenameLength; //Negate it
+              filenameLength -= 1; // remove the null terminator
+
+              // X - Filename (Unicode)
+              // 2 - null Filename Terminator
+              filename = fm.readUnicodeString(filenameLength);
+              fm.skip(2);
+            }
+
+            filename = dirName + filename;
+
+            // 4 - Offset to corresponding entry in Directory 1 (relative to the start of Directory 1)
+            //int fileID = (fm.readInt() / 12);
+            int entryOffset = fm.readInt();
+            int fileID = Arrays.binarySearch(entryOffsets, entryOffset);
+            //System.out.println(fileID);
+
+            if (fileID < 0) {
+              // not found - skip this one
+            }
+            else {
+              if (fileID >= 0 && fileID < numFiles) {
+                //FieldValidator.checkRange(fileID, 0, numFiles);
+
+                Resource resource = resources[fileID];
+                resource.setName(filename);
+                resource.setOriginalName(filename);
+              }
+            }
           }
         }
+
+      }
+      catch (Throwable t) {
+        ErrorLogger.log(t);
       }
 
       // if we've decrypted the directory, need to go back to the original archive now.
@@ -1442,6 +1491,7 @@ public class Plugin_PAK_65 extends ArchivePlugin {
       // 4 - Unreal Header (193,131,42,158)
       // 4 - Version (6) (XOR with 255)
       // 16 - null
+      // 4 - null (optional - in some newer archives - we pick this up in the try-catch down further)
       // 4 - File Directory Offset?
       // 4 - Unknown (5)
       // 4 - Package Name (None)
@@ -1451,7 +1501,13 @@ public class Plugin_PAK_65 extends ArchivePlugin {
 
       // 4 - Number of Names
       int nameCount = fm.readInt();
-      FieldValidator.checkNumFiles(nameCount);
+      try {
+        FieldValidator.checkNumFiles(nameCount);
+      }
+      catch (Throwable t) {
+        nameCount = fm.readInt();
+        FieldValidator.checkNumFiles(nameCount);
+      }
 
       // 4 - Name Directory Offset
       long nameDirOffset = IntConverter.unsign(fm.readInt());

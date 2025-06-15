@@ -16,6 +16,7 @@ package org.watto.component;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+
 import javax.media.Controller;
 import javax.media.Player;
 import javax.media.Time;
@@ -23,6 +24,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import org.watto.Settings;
 import org.watto.event.WSClickableInterface;
 import org.watto.task.Task;
@@ -72,6 +74,8 @@ public class PreviewPanel_JavaMediaFrameworkAudio extends PreviewPanel implement
   **/
   public void constructInterface() {
 
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
     playbutton = new WSButton(XMLReader.read("<WSButton code=\"AudioPreview_Play\" />"));
     pausebutton = new WSButton(XMLReader.read("<WSButton code=\"AudioPreview_Pause\" />"));
     stopbutton = new WSButton(XMLReader.read("<WSButton code=\"AudioPreview_Stop\" />"));
@@ -84,10 +88,10 @@ public class PreviewPanel_JavaMediaFrameworkAudio extends PreviewPanel implement
     JPanel toppanel = new JPanel(new BorderLayout(5, 5));
     toppanel.add(buttonpanel, BorderLayout.NORTH);
 
-    WSPanel imagePanel = new WSPanel(XMLReader.read("<WSPanel border-width=\"8\" />"));
+    WSPanel imagePanel = new WSPanel(XMLReader.read("<WSPanel code=\"AudioPreview_ImagePanelWrapper\" border-width=\"8\" />"));
     imagePanel.add(new JLabel(new ImageIcon("images/General/Audio_Cover.png")), BorderLayout.CENTER);
 
-    WSPanel overallPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"8\" />"));
+    WSPanel overallPanel = new WSPanel(XMLReader.read("<WSPanel code=\"AudioPreview_OverallPanelWrapper\" vertical-gap=\"8\" />"));
     overallPanel.add(new JPanel(), BorderLayout.NORTH);
     overallPanel.add(imagePanel, BorderLayout.CENTER);
     overallPanel.add(toppanel, BorderLayout.SOUTH);

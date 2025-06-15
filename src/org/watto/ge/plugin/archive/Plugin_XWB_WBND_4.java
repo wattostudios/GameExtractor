@@ -1,0 +1,222 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
+
+package org.watto.ge.plugin.archive;
+
+import java.io.File;
+
+import org.watto.datatype.Resource;
+import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
+
+/**
+**********************************************************************************************
+
+**********************************************************************************************
+**/
+public class Plugin_XWB_WBND_4 extends ArchivePlugin {
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public Plugin_XWB_WBND_4() {
+
+    super("XWB_WBND_4", "XWB_WBND_4");
+
+    //         read write replace rename
+    setProperties(true, false, false, false);
+
+    setGames("The Bard's Tale");
+    setExtensions("xwb");
+    setPlatforms("PC");
+
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
+  public int getMatchRating(FileManipulator fm) {
+    try {
+
+      int rating = 0;
+
+      if (FieldValidator.checkExtension(fm, extensions)) {
+        rating += 25;
+      }
+
+      // Header
+      if (fm.readString(4).equals("WBND")) {
+        rating += 50;
+      }
+
+      // Version (3)
+      if (fm.readInt() == 3) {
+        rating += 5;
+      }
+
+      // Size Of Header 1 (40)
+      if (fm.readInt() == 40) {
+        rating += 5;
+      }
+
+      // Size Of Header 2 (40)
+      if (fm.readInt() == 40) {
+        rating += 5;
+      }
+
+      // Directory Offset (80)
+      if (fm.readInt() == 80) {
+        rating += 4; // so it falls behind the base XWB_WBND plugin
+      }
+
+      return rating;
+
+    }
+    catch (Throwable t) {
+      return 0;
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  @Override
+  public Resource[] read(File path) {
+    try {
+
+      addFileTypes();
+
+      // RESETTING THE GLOBAL VARIABLES
+
+      FileManipulator fm = new FileManipulator(path, false);
+
+      long arcSize = fm.getLength();
+
+      // 4 - Header (WBND)
+      // 4 - Version (3)
+      // 4 - Size Of Header 1 (40)
+      // 4 - Size Of Header 2 (40)
+      fm.skip(16);
+
+      // 4 - Offset To Details Directory (80)
+      long dirOffset = fm.readInt();
+      FieldValidator.checkOffset(dirOffset, arcSize);
+
+      // 4 - Length Of Details Directory
+      fm.skip(4);
+
+      // 4 - Offset To Filename Directory
+      int filenameDirOffset = fm.readInt();
+      FieldValidator.checkOffset(filenameDirOffset, arcSize);
+
+      // 4 - Length Of Filename Directory
+      fm.skip(4);
+
+      // 4 - First File Offset (8192)
+      int firstFileOffset = fm.readInt();
+      FieldValidator.checkOffset(firstFileOffset, arcSize);
+
+      // 4 - Length Of File Data
+      // 2 - Unknown (1)
+      // 2 - Unknown (1)
+      fm.skip(8);
+
+      // 4 - Number Of Files
+      int numFiles = fm.readInt();
+      FieldValidator.checkNumFiles(numFiles);
+
+      // 16 - Archive Filename (null) (without extension)
+      // 4 - Length Of Each Details Entry (24)
+      // 4 - Length Of Each Filename Entry (64)
+      // 4 - Max padding size between each file (2048)
+      // 4 - null
+
+      Resource[] resources = new Resource[numFiles];
+      TaskProgressManager.setMaximum(numFiles);
+
+      fm.seek(filenameDirOffset);
+
+      // FILENAMES DIRECTORY
+      String[] names = new String[numFiles];
+      if (filenameDirOffset > 0) {
+        for (int i = 0; i < numFiles; i++) {
+          // 64 - Filename (null) (without extension)
+          String filename = fm.readNullString(64);
+          FieldValidator.checkFilename(filename);
+          names[i] = filename;
+        }
+      }
+      else {
+        for (int i = 0; i < numFiles; i++) {
+          names[i] = Resource.generateFilename(i);
+        }
+      }
+
+      fm.seek(dirOffset);
+
+      // Loop through directory
+      for (int i = 0; i < numFiles; i++) {
+        // 2 - Number of Channels (0/2)
+        // 2 - Format (0=normal pcm) (1=xbox adpcm)
+        fm.skip(4);
+
+        // 4 - Flags
+        fm.skip(4);
+
+        // 4 - File Offset (relative to the start of the file data)
+        long offset = fm.readInt() + firstFileOffset;
+        FieldValidator.checkOffset(offset, arcSize);
+
+        // 4 - File Length (of the Raw WAV file?)
+        fm.skip(4);
+
+        // 4 - null
+        fm.skip(4);
+
+        // 4 - File Length (off the OGG file)
+        long length = fm.readInt();
+        FieldValidator.checkLength(length, arcSize);
+
+        FieldValidator.checkOffset(offset + length, arcSize + 100); // help to rule out some different formats (eg where the files are stored as OGG)
+
+        String filename = names[i] + ".ogg";
+
+        //path,id,name,offset,length,decompLength,exporter
+        Resource resource = new Resource(path, filename, offset, length);
+        resources[i] = resource;
+
+        TaskProgressManager.setValue(i);
+      }
+
+      fm.close();
+
+      return resources;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      return null;
+    }
+  }
+
+}

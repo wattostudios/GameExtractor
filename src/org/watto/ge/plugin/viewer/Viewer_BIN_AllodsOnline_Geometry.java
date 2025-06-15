@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -133,6 +133,10 @@ public class Viewer_BIN_AllodsOnline_Geometry extends ViewerPlugin {
       System.arraycopy(fileData, 0, realSizeFileData, 0, decompWritePos);
       fileData = realSizeFileData;
 
+      //FileManipulator tmp = new FileManipulator(new File("C:\\out.tmp"), true);
+      //tmp.writeBytes(fileData);
+      //tmp.close();
+
       fm = new FileManipulator(new ByteBuffer(fileData));
 
       // Set up the mesh
@@ -145,174 +149,209 @@ public class Viewer_BIN_AllodsOnline_Geometry extends ViewerPlugin {
       // 4 - Vertex Data Length
       int vertexDataLength = fm.readInt();
 
-      int vertexSize = 32;
-      if (vertexDataLength % 32 != 0) {
+      int[] sizesToTry = new int[] { 32, 36, 24 };
+      int currentSize = 0;
+
+      for (int t = 0; t < sizesToTry.length; t++) {
+        fm.relativeSeek(8); // ensure we go back to the start, to try again for the next round
+
+        int vertexSize = sizesToTry[t];
+
+        if (vertexDataLength % vertexSize != 0) {
+          continue;
+        }
+
+        /*
+        int vertexSize = 32;
+        if (vertexDataLength % 32 != 0) {
         vertexSize = 36;
         if (vertexDataLength % 36 != 0) {
-          ErrorLogger.log("[Viewer_BIN_AllodsOnline_Geometry] Unknown vertex size for data length: " + vertexDataLength);
-          return null;
+          vertexSize = 24;
+          if (vertexDataLength % 24 != 0) {
+            ErrorLogger.log("[Viewer_BIN_AllodsOnline_Geometry] Unknown vertex size for data length: " + vertexDataLength);
+            return null;
+          }
         }
-      }
-
-      int numVertices = vertexDataLength / vertexSize;
-      FieldValidator.checkNumVertices(numVertices);
-
-      int numVertices2 = numVertices * 2;
-      int numVertices3 = numVertices * 3;
-
-      float[] vertices = new float[numVertices3];
-      float[] texCoords = new float[numVertices2];
-
-      float minX = 0f;
-      float maxX = 0f;
-      float minY = 0f;
-      float maxY = 0f;
-      float minZ = 0f;
-      float maxZ = 0f;
-
-      int skipSize = vertexSize - 20;
-
-      for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
-
-        // 4 - Point X (float)
-        // 4 - Point Y (float)
-        // 4 - Point Z (float)
-        float xPoint = fm.readFloat();
-        float yPoint = fm.readFloat();
-        float zPoint = fm.readFloat();
-
-        vertices[j] = xPoint;
-        vertices[j + 1] = yPoint;
-        vertices[j + 2] = zPoint;
-
-        // 4 - Texture U (float)
-        // 4 - Texture V (float)
-        float uPoint = fm.readFloat();
-        float vPoint = fm.readFloat();
-
-        texCoords[k] = uPoint;
-        texCoords[k + 1] = vPoint;
-
-        // 4 - Unknown
-        // 4 - Unknown
-        // 4 - Unknown
-        // if (36) {
-        //   4 - Unknown
-        //   }
-        fm.skip(skipSize);
-
-        if (xPoint < minX) {
-          minX = xPoint;
         }
-        if (xPoint > maxX) {
-          maxX = xPoint;
+        */
+
+        int numVertices = vertexDataLength / vertexSize;
+        FieldValidator.checkNumVertices(numVertices);
+
+        int numVertices2 = numVertices * 2;
+        int numVertices3 = numVertices * 3;
+
+        float[] vertices = new float[numVertices3];
+        float[] texCoords = new float[numVertices2];
+
+        float minX = 0f;
+        float maxX = 0f;
+        float minY = 0f;
+        float maxY = 0f;
+        float minZ = 0f;
+        float maxZ = 0f;
+
+        int skipSize = vertexSize - 20;
+
+        for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
+
+          // 4 - Point X (float)
+          // 4 - Point Y (float)
+          // 4 - Point Z (float)
+          float xPoint = fm.readFloat();
+          float yPoint = fm.readFloat();
+          float zPoint = fm.readFloat();
+
+          vertices[j] = xPoint;
+          vertices[j + 1] = yPoint;
+          vertices[j + 2] = zPoint;
+
+          // 4 - Texture U (float)
+          // 4 - Texture V (float)
+          float uPoint = fm.readFloat();
+          float vPoint = fm.readFloat();
+
+          texCoords[k] = uPoint;
+          texCoords[k + 1] = vPoint;
+
+          // 4 - Unknown
+          // 4 - Unknown
+          // 4 - Unknown
+          // if (36) {
+          //   4 - Unknown
+          //   }
+          fm.skip(skipSize);
+
+          if (xPoint < minX) {
+            minX = xPoint;
+          }
+          if (xPoint > maxX) {
+            maxX = xPoint;
+          }
+
+          if (yPoint < minY) {
+            minY = yPoint;
+          }
+          if (yPoint > maxY) {
+            maxY = yPoint;
+          }
+
+          if (zPoint < minZ) {
+            minZ = zPoint;
+          }
+          if (zPoint > maxZ) {
+            maxZ = zPoint;
+          }
         }
 
-        if (yPoint < minY) {
-          minY = yPoint;
+        // FACES
+        // 4 - Data Type Header (1 = Faces)
+        fm.skip(4);
+
+        // 4 - Faces Data Length
+        int facesDataLength = fm.readInt();
+        int numFaces = facesDataLength / 2;
+        FieldValidator.checkNumFaces(numFaces);
+
+        if (facesDataLength % 2 != 0) {
+          continue;
         }
-        if (yPoint > maxY) {
-          maxY = yPoint;
+
+        int numFaces6 = numFaces * 2;
+
+        int[] faces = new int[numFaces6];
+
+        boolean wrongSize = false;
+        for (int i = 0, j = 0; i < numFaces; i += 3, j += 6) {
+
+          // 2 - Point 1
+          // 2 - Point 2
+          // 2 - Point 3
+          int face1 = ShortConverter.unsign(fm.readShort());
+          int face2 = ShortConverter.unsign(fm.readShort());
+          int face3 = ShortConverter.unsign(fm.readShort());
+
+          // validation for the right vertexSize
+          if (face1 < 0 || face2 < 0 || face3 < 0 || face1 >= numVertices || face2 >= numVertices || face3 >= numVertices) {
+            // wrong size
+            wrongSize = true;
+            break;
+          }
+
+          // reverse face
+          faces[j] = face3;
+          faces[j + 1] = face2;
+          faces[j + 2] = face1;
+
+          // front face
+          faces[j + 3] = face1;
+          faces[j + 4] = face2;
+          faces[j + 5] = face3;
         }
 
-        if (zPoint < minZ) {
-          minZ = zPoint;
+        if (wrongSize) {
+          continue;
         }
-        if (zPoint > maxZ) {
-          maxZ = zPoint;
+
+        if (faces != null && vertices != null && texCoords != null) {
+          // we have a full mesh for a single object - add it to the model
+          triangleMesh.getTexCoords().addAll(texCoords);
+
+          triangleMesh.getPoints().addAll(vertices);
+          triangleMesh.getFaces().addAll(faces);
+
+          faces = null;
+          vertices = null;
+
+          texCoords = null;
         }
-      }
 
-      // FACES
-      // 4 - Data Type Header (1 = Faces)
-      fm.skip(4);
+        // calculate the sizes and centers
+        float diffX = (maxX - minX);
+        float diffY = (maxY - minY);
+        float diffZ = (maxZ - minZ);
 
-      // 4 - Faces Data Length
-      int facesDataLength = fm.readInt();
-      int numFaces = facesDataLength / 2;
-      FieldValidator.checkNumFaces(numFaces);
+        float centerX = minX + (diffX / 2);
+        float centerY = minY + (diffY / 2);
+        float centerZ = minZ + (diffZ / 2);
 
-      int numFaces6 = numFaces * 2;
+        Point3D sizes = new Point3D(diffX, diffY, diffZ);
+        Point3D center = new Point3D(centerX, centerY, centerZ);
 
-      int[] faces = new int[numFaces6];
+        PreviewPanel_3DModel preview = null;
 
-      for (int i = 0, j = 0; i < numFaces; i += 3, j += 6) {
-
-        // 2 - Point 1
-        // 2 - Point 2
-        // 2 - Point 3
-        int face1 = ShortConverter.unsign(fm.readShort());
-        int face2 = ShortConverter.unsign(fm.readShort());
-        int face3 = ShortConverter.unsign(fm.readShort());
-
-        // reverse face
-        faces[j] = face3;
-        faces[j + 1] = face2;
-        faces[j + 2] = face1;
-
-        // front face
-        faces[j + 3] = face1;
-        faces[j + 4] = face2;
-        faces[j + 5] = face3;
-      }
-
-      if (faces != null && vertices != null && texCoords != null) {
-        // we have a full mesh for a single object - add it to the model
-        triangleMesh.getTexCoords().addAll(texCoords);
-
-        triangleMesh.getPoints().addAll(vertices);
-        triangleMesh.getFaces().addAll(faces);
-
-        faces = null;
-        vertices = null;
-
-        texCoords = null;
-      }
-
-      // calculate the sizes and centers
-      float diffX = (maxX - minX);
-      float diffY = (maxY - minY);
-      float diffZ = (maxZ - minZ);
-
-      float centerX = minX + (diffX / 2);
-      float centerY = minY + (diffY / 2);
-      float centerZ = minZ + (diffZ / 2);
-
-      Point3D sizes = new Point3D(diffX, diffY, diffZ);
-      Point3D center = new Point3D(centerX, centerY, centerZ);
-
-      PreviewPanel_3DModel preview = null;
-
-      /*
-      // See if we can find the texture file for this mesh
-      try {
+        /*
+        // See if we can find the texture file for this mesh
+        try {
         String textureFilename = originalFile.getAbsolutePath();
         textureFilename = textureFilename.replaceAll("\\(Geometry\\)", "(Texture)");
         File textureFile = new File(textureFilename);
-      
+        
         if (textureFile.exists()) {
           javafx.scene.image.Image textureImage = loadTextureImage(textureFile);
-      
+        
           if (textureImage != null) {
             Material material = new PhongMaterial(Color.WHITE, textureImage, (javafx.scene.image.Image) null, (javafx.scene.image.Image) null, (javafx.scene.image.Image) null);
             MeshView view = new MeshView(triangleMesh);
             view.setMaterial(material);
-      
+        
             // generate the mesh with the texture attached
             preview = new PreviewPanel_3DModel(view, sizes, center);
           }
         }
-      }
-      catch (Throwable t) {
+        }
+        catch (Throwable t) {
         ErrorLogger.log(t);
-      }
-      */
+        }
+        */
 
-      if (preview == null) { // just render as a plain mesh
-        preview = new PreviewPanel_3DModel(triangleMesh, sizes, center);
-      }
+        if (preview == null) { // just render as a plain mesh
+          preview = new PreviewPanel_3DModel(triangleMesh, sizes, center);
+        }
 
-      return preview;
+        return preview;
+      }
+      return null;
     }
     catch (Throwable t) {
       ErrorLogger.log(t);

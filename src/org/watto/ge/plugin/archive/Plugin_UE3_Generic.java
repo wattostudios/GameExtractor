@@ -1,11 +1,25 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundNodeWave_Generic;
+import org.watto.ge.plugin.exporter.Exporter_Custom_UE3_SoundRiotRawAsset_Generic;
 import org.watto.ge.plugin.resource.Resource_Unreal;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
@@ -98,7 +112,7 @@ public class Plugin_UE3_Generic extends PluginGroup_UE3 {
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      FieldValidator.checkNumFiles(numFiles / 4);
 
       // 4 - File Directory Offset
       long dirOffset = fm.readInt();
@@ -211,14 +225,21 @@ public class Plugin_UE3_Generic extends PluginGroup_UE3 {
 
       String[] parentNames = new String[numFiles];
       for (int i = 0; i < numFiles; i++) {
+        //System.out.println(fm.getOffset());
+
         // 4 - Type Object ID
         int typeID = fm.readInt();
         String type = "";
 
         if (typeID > 0) {
           typeID--;
-          FieldValidator.checkLength(typeID, numNames); // check for the name
-          type = names[typeID];
+          try {
+            FieldValidator.checkLength(typeID, numNames); // check for the name
+            type = names[typeID];
+          }
+          catch (Throwable t) {
+            type = "unknown";
+          }
         }
         else if (typeID == 0) {
           type = names[0];
@@ -266,8 +287,15 @@ public class Plugin_UE3_Generic extends PluginGroup_UE3 {
         // 4 - Unknown
         fm.skip(count * 12);
 
+        // 3.15 UPDATED THE BELOW BASED ON Medal of Honor: Airbourne
         // 24 - null
-        fm.skip(24);
+        fm.skip(4);
+        if (fm.readInt() == 1) {
+          fm.skip(20); // 28 total
+        }
+        else {
+          fm.skip(16); // 24 total
+        }
 
         // put the parent IDs before the filename, in a directory structure.
         String filename = names[nameID];
@@ -288,6 +316,9 @@ public class Plugin_UE3_Generic extends PluginGroup_UE3 {
 
         if (type.equals("SoundNodeWave")) {
           resources[i].setExporter(Exporter_Custom_UE3_SoundNodeWave_Generic.getInstance());
+        }
+        else if (type.equals("SoundRiotRawAsset")) {
+          resources[i].setExporter(Exporter_Custom_UE3_SoundRiotRawAsset_Generic.getInstance());
         }
 
         TaskProgressManager.setValue(i);

@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Settings;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.FileType;
@@ -309,7 +310,7 @@ public class Plugin_VPK extends ArchivePlugin {
                 break;
               }
 
-              System.out.println(fm.getOffset() + "\t" + filename);
+              //System.out.println(fm.getOffset() + "\t" + filename);
 
               // 4 - CRC
               fm.skip(4);

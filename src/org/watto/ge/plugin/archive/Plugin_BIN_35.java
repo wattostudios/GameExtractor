@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -41,8 +42,9 @@ public class Plugin_BIN_35 extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, true, false, false);
 
-    setGames("B-Hunter");
-    setExtensions("bin"); // MUST BE LOWER CASE
+    setGames("B-Hunter",
+        "Beyond Pearl Harbor: Pacific Warriors");
+    setExtensions("bin", "dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!

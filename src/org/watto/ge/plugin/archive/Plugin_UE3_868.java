@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -74,7 +75,7 @@ public class Plugin_UE3_868 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 867, 706, 742, 870, 845);
+    return super.getMatchRating(fm, 868, 849, 787, 860, 648, 678, 740, 854, 864, 865, 866, 867, 706, 742, 870, 845);
   }
 
   /**

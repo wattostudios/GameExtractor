@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.FontMetrics;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
@@ -26,6 +27,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+
 import org.watto.ErrorLogger;
 import org.watto.SingletonManager;
 import org.watto.component.model.UneditableTableModel;
@@ -87,6 +89,8 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
   public PreviewPanel_Table(Object[][] data, WSTableColumn[] columns) {
     super();
 
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
     objectChanged = false; // not edited
 
     WSPanel mainPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Table_MainPanelHolder\" layout=\"BorderLayout\" vertical-gap=\"4\"></WSPanel>"));
@@ -117,7 +121,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
     catch (Throwable t) {
     }
 
-    WSPanel tablePanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\" border-width=\"3\"></WSPanel>"));
+    WSPanel tablePanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_Table_TableScrollPanelWrapper\" opaque=\"false\" showBorder=\"true\" border-width=\"3\"></WSPanel>"));
     JScrollPane scrollPane = new JScrollPane(preview);
     scrollPane.setOpaque(false);
     scrollPane.setBorder(new EmptyBorder(4, 4, 4, 4));
@@ -151,7 +155,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
 
     // If the details table has more than 8 rows, add the details table in a scrollpane.
     if (numDetails > 8) {
-      WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\"></WSPanel>"));
+      WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_Table_DetailsInnerPanelWrapper\" opaque=\"false\" showBorder=\"true\"></WSPanel>"));
       detailsInnerPanel.add(detailsTable, BorderLayout.CENTER);
 
       JScrollPane detailsScrollPane = new JScrollPane(detailsInnerPanel);
@@ -164,7 +168,7 @@ public class PreviewPanel_Table extends PreviewPanel implements WSKeyableInterfa
       mainPanel.add(detailsPanel, BorderLayout.SOUTH);
     }
     else {
-      WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel opaque=\"false\" showBorder=\"true\"></WSPanel>"));
+      WSPanel detailsInnerPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_Table_DetailsInnerPanelWrapper\" opaque=\"false\" showBorder=\"true\"></WSPanel>"));
       detailsInnerPanel.add(detailsTable, BorderLayout.CENTER);
 
       WSPanel detailsPanel = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Table_DetailsPanelHolder\" layout=\"BorderLayout\" showBorder=\"true\" showLabel=\"true\" border-width=\"3\"></WSPanel>"));

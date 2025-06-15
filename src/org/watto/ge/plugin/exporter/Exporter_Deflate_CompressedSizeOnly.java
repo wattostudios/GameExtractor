@@ -19,6 +19,8 @@ import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+
+import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
@@ -161,7 +163,13 @@ public class Exporter_Deflate_CompressedSizeOnly extends ExporterPlugin {
     }
     catch (Throwable t) {
       t.printStackTrace();
-      return 0;
+      try {
+        readSource.close(); // close the stream early, as we've hit EOF
+      }
+      catch (Throwable t2) {
+        ErrorLogger.log(t2);
+      }
+      return -1;
     }
   }
 

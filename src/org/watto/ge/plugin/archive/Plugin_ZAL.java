@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.FileType;
@@ -70,7 +71,7 @@ public class Plugin_ZAL extends ArchivePlugin {
 
       // 4 - Header (28 81 129 42)
       if (fm.readInt() == 713117980) {
-        rating += 50;
+        rating += 25; // only 25 because I want ZAL_2 to take priority, as it handles the compressed formats as well
       }
 
       fm.skip(14);

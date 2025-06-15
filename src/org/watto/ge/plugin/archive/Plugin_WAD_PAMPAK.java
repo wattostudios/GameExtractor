@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,7 +15,11 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.component.WSPluginManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -44,15 +48,13 @@ public class Plugin_WAD_PAMPAK extends ArchivePlugin {
     super("WAD_PAMPAK", "WAD_PAMPAK");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Pro Beach Soccer");
     setExtensions("wad"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("rws", "RWS Audio", FileType.TYPE_AUDIO));
 
   }
 
@@ -535,7 +537,14 @@ public class Plugin_WAD_PAMPAK extends ArchivePlugin {
           resource.setLength(blockCompLengths[0]);
           resource.setDecompressedLength(blockDecompLengths[0]);
           resource.setOffset(blockOffsets[0]);
-          resource.setExporter(exporter);
+
+          if (blockCompLengths[0] == blockDecompLengths[0]) {
+            // not compressed (but still has the ZLB header, for some reason)
+          }
+          else {
+            // compressed
+            resource.setExporter(exporter);
+          }
         }
         else {
           // set a multi-block exporter
@@ -558,6 +567,131 @@ public class Plugin_WAD_PAMPAK extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      // Write Header Data
+
+      // 8 - Header ("PAM_PAK" + (byte)0)
+      // 2 - Number Of Files
+      // 2 - Number of Names
+      // 4 - Filename Directory Length
+      fm.writeBytes(src.readBytes(16));
+
+      // 4 - File Data Offset
+      int dataOffset = src.readInt();
+      fm.writeInt(dataOffset);
+
+      // Write Directory
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+      long offset = dataOffset;
+      int[] originalOffsets = new int[numFiles];
+      int[] originalLengths = new int[numFiles];
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getLength(); // CompressedLength
+
+        // 4 - File Length (Compressed)
+        originalLengths[i] = src.readInt();
+
+        if (!resource.isReplaced()) {
+          length = originalLengths[i]; // this is because we've changed the offsets/lengths for compressed files, so this puts the proper length in
+        }
+
+        fm.writeInt(length);
+
+        // 4 - File Offset
+        originalOffsets[i] = src.readInt();
+        fm.writeInt(offset);
+
+        length += calculatePadding(length, 4); // this isn't written into the directory, but does affect the offsets
+
+        offset += length;
+      }
+
+      // write the filename directory, and all the other content up to the start of the file data
+      int copySize = dataOffset - (numFiles * 8) - 20;
+      fm.writeBytes(src.readBytes(copySize));
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        if (resource.isReplaced()) {
+          // add the file normally (uncompressed)
+
+          // X - File Data
+          write(resource, fm);
+
+          // 0-3 - null Padding to a multiple of 4 bytes (This field does not exist for the Last file in the archive!)
+          if (i != numFiles - 1) {
+            int paddingSize = calculatePadding(resource.getLength(), 4);
+            for (int p = 0; p < paddingSize; p++) {
+              fm.writeByte(0);
+            }
+          }
+        }
+        else {
+          // add the original file, as copied from the originalOffset and originalLength
+          src.seek(originalOffsets[i]);
+          int length = originalLengths[i];
+
+          int blockSize = src.getBuffer().getBufferSize();
+          while (length > 0) {
+            int sizeToCopy = length;
+            if (sizeToCopy > blockSize) {
+              sizeToCopy = blockSize;
+            }
+
+            fm.writeBytes(src.readBytes(sizeToCopy));
+            length -= sizeToCopy;
+          }
+
+          // check that it's a multiple of 4 bytes
+
+          // 0-3 - null Padding to a multiple of 4 bytes (This field does not exist for the Last file in the archive!)
+          if (i != numFiles - 1) {
+            int paddingSize = calculatePadding(originalLengths[i], 4);
+            for (int p = 0; p < paddingSize; p++) {
+              fm.writeByte(0);
+            }
+          }
+
+          //write(resource, fm);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      //ExporterPlugin exporter = new Exporter_ZLib();
+      //long[] compressedLengths = write(exporter,resources,fm);
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

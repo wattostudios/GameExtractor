@@ -4,7 +4,7 @@
 //                                  Extensible Archive Editor                                 //
 //                                https://www.watto.org/extract                               //
 //                                                                                            //
-//                            Copyright (C) 2002-2023 wattostudios                            //
+//                            Copyright (C) 2002-2025 wattostudios                            //
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -116,8 +116,20 @@ website as well.
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+Version 3.16
+[I] Support for more games, with a focus on adding previews and write support, where possible.
+[+] Added quickbms.dll as a native library for handling complicated compression types.
+[+] Added support for reading password-protected ZIP files
+[A] Plugins can now be unpacked from a ZIP in the plugins directory, and then loaded and used.
+[A] Added algorithms to quickly reduce the number of colors when replacing paletted images.
+[A] Added preview and thumbnail support for the first frame of animated WebP images
+[B] Memory is now cleaned up properly when Previews are discarded
+[B] Unity meshes now have a better chance of rendering correctly when vertex sizes are guessed.
+[B] Fixed several bugs with the loading and display of UTF-8 languages.
+[B] OGG files from FSB archives should now extract properly in the Basic Version
+
 Version 3.15
-[I] Support for more games, with a focus on adding previews and write support, where possible
+[I] Support for more games, with a focus on adding previews and write support, where possible.
 [+] For archives that can do Convert On Replace, you can now do Replace Matching Files and it
     will replace proprietary image types with standard ones in bulk
 [+] Added a setting to copy the filename to the clipboard when you right-click on a file

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,11 +15,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -47,9 +49,8 @@ public class Plugin_BIG_GOEFILE extends ArchivePlugin {
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    setFileTypes(new FileType("texture", "Texture Image", FileType.TYPE_IMAGE));
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("texture", "Texture Image", FileType.TYPE_IMAGE),
+        new FileType("sample", "Sample Audio", FileType.TYPE_AUDIO));
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
@@ -120,30 +121,107 @@ public class Plugin_BIG_GOEFILE extends ArchivePlugin {
       // 4 - Unknown (1)
       fm.skip(16);
 
+      // 8 - Directory Header ("symlist" + null)
+      // 4 - Directory Length (including all these header fields)
+      // 4 - null
+      fm.skip(16);
+
+      // 4 - Number of Names
+      int numNames = fm.readInt();
+      FieldValidator.checkNumFiles(numNames);
+
+      String[] names = new String[numNames];
+      for (int i = 0; i < numNames; i++) {
+        // X - Name
+        // 1 - null Name Terminator
+        String name = fm.readNullString();
+        //FieldValidator.checkFilename(name);
+        names[i] = name;
+      }
+
       int numFiles = Archive.getMaxFiles();
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(arcSize);
 
+      long currentOffset = fm.getOffset();
+      if (currentOffset % 2 == 1) {
+        currentOffset++;
+      }
+      fm.getBuffer().setBufferSize(64); // small quick reads
+      fm.seek(1); // to force buffer re-load to the smaller size
+      fm.seek(currentOffset);
+
       // Loop through directory
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
+        long startOffset = fm.getOffset();
+        //System.out.println(startOffset);
+
         // 8 - File Type (null terminated, filled with nulls)
         String fileType = fm.readNullString(8);
 
         // 4 - File Length (including all these header fields)
-        int length = fm.readInt() - 12;
+        int lengthIncludingHeaders = fm.readInt();
+        FieldValidator.checkLength(lengthIncludingHeaders, arcSize);
+
+        // 4 - null
+        fm.skip(4);
+
+        // 2 - Filename ID (0-based index into Names Directory)
+        int filenameID = fm.readShort();
+        FieldValidator.checkRange(filenameID, 0, numNames);
+
+        // 2 - Language ID (0-based index into Names Directory)
+        int langID = fm.readShort();
+        FieldValidator.checkRange(langID, 0, numNames);
+
+        // 8 - symlist ("symlist" + null)
+        // 4 - Unknown (20/28)
+        // 4 - null
+        fm.skip(16);
+
+        // 4 - Number of 2-byte Values (can be null)
+        int num2Bytes = fm.readInt();
+        if (num2Bytes % 2 == 1) {
+          num2Bytes++;
+        }
+        FieldValidator.checkRange(num2Bytes, 0, 5000);//guess
+
+        fm.skip(num2Bytes * 2);
+
+        // 4 - File Length (File Data only)
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
+        int lengthPadding = calculatePadding(length, 4);
+
+        // 8/12 - Unknown
         // X - File Data
-        long offset = fm.getOffset();
-        fm.skip(length);
+        long offset = startOffset + (lengthIncludingHeaders - (length + lengthPadding));
+        FieldValidator.checkOffset(offset, arcSize);
 
-        String filename = Resource.generateFilename(realNumFiles) + "." + fileType;
+        //String filename = Resource.generateFilename(realNumFiles) + "." + fileType;
+        String filename = names[filenameID] + "." + names[langID] + "." + fileType;
 
-        //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
+        if (fileType.equals("sample")) {
+          //path,name,offset,length,decompLength,exporter
+          fm.seek(offset + 4);
+
+          // 4 - Frequency
+          int frequency = fm.readInt();
+
+          Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset + 20, length - 20);
+          resource.setAudioProperties(frequency, (short) 16, (short) 1, true);
+          resources[realNumFiles] = resource;
+        }
+        else {
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
+        }
         realNumFiles++;
+
+        fm.seek(offset + length + lengthPadding);
 
         TaskProgressManager.setValue(offset);
       }
@@ -159,26 +237,6 @@ public class Plugin_BIG_GOEFILE extends ArchivePlugin {
       logError(t);
       return null;
     }
-  }
-
-  /**
-  **********************************************************************************************
-  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
-  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
-  extensions, which will be tried before any standard extensions.
-  @return null if no extension can be determined, or the extension if one can be found
-  **********************************************************************************************
-  **/
-  @Override
-  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
-
-    /*
-    if (headerInt1 == 2037149520) {
-      return "js";
-    }
-    */
-
-    return null;
   }
 
 }

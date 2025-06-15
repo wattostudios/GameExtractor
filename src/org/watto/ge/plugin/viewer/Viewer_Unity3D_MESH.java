@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@ package org.watto.ge.plugin.viewer;
 
 import java.awt.Image;
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.component.PreviewPanel;
@@ -40,6 +41,7 @@ import org.watto.io.FilenameSplitter;
 import org.watto.io.converter.ByteArrayConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
+
 import javafx.geometry.Point3D;
 import javafx.scene.shape.TriangleMesh;
 
@@ -117,6 +119,8 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
   float minZ = 20000f;
 
   float maxZ = -20000f;
+
+  int tripleZeroCount = 0;
 
   /**
   **********************************************************************************************
@@ -212,13 +216,18 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         numVertexInHeader = fm.readInt();
       }
 
-      // 4 - Unknown (usually 0 for the first entry)
-      // 4 - Unknown Float
-      // 4 - Unknown Float
-      // 4 - Unknown Float
-      // 4 - Unknown Float
-      // 4 - Unknown Float
-      fm.skip(24);
+      // 4 - Center X (Float)
+      float centerXHeader = fm.readFloat();
+      // 4 - Center Y (Float)
+      float centerYHeader = fm.readFloat();
+      // 4 - Center Z (Float)
+      float centerZHeader = fm.readFloat();
+      // 4 - Radius X (Float)
+      float radiusXHeader = fm.readFloat();
+      // 4 - Radius Y (Float)
+      float radiusYHeader = fm.readFloat();
+      // 4 - Radius Z (Float)
+      float radiusZHeader = fm.readFloat();
 
       // X - Additional Headers
       if (numHeaders > 1) {
@@ -543,6 +552,7 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       }
       try {
         FieldValidator.checkNumVertices(numVertices);
+        FieldValidator.checkPositive(numVertices - 5); // want to catch some small ones here too, as small is probably wrong
       }
       catch (Throwable t) {
         // for some, it doesn't have the 32-block or size flags, so go back and try reading the numVertices
@@ -576,9 +586,6 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       fm.skip(numDetailBlocks * 4);
 
       int vertexBlockSize = 0;
-      if (Settings.getBoolean("DebugMode")) {
-        System.out.println("[Viewer_Unity3D_MESH]: Vertex Check Offset = " + fm.getOffset());
-      }
 
       boolean knownVertexBlockSize = false;
 
@@ -782,8 +789,70 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
 
           }
           catch (Throwable t) {
-            fm.relativeSeek(vertexStart);
-            vertexBlockSize = 0;
+            if (version >= 22) {
+
+              // v22 Sons of the Forest has an extra 4 bytes here
+
+              try {
+                fm.relativeSeek(vertexStart);
+                fm.skip(212); // extra 4 bytes compared to v20 earlier
+
+                // 4 - Offset to Vertex Data in resS file
+                long vertOffset = fm.readInt();
+
+                // 4 - Length of Vertex Data in resS file
+                int vertLength = fm.readInt();
+                if (vertLength == 0) {
+                  // vertOffset is probably a 8-byte field
+                  vertOffset = IntConverter.unsign((int) vertOffset);
+                  vertLength = fm.readInt();
+                }
+
+                // now calculate the vertexBlockSize (and check it looks OK)
+                vertexBlockSize = vertLength / numVertices;
+                FieldValidator.checkRange(vertexBlockSize, 12, 128);
+
+                // 4 - Filename Length of resS file
+                int ressFilenameLength = fm.readInt();
+                FieldValidator.checkFilenameLength(ressFilenameLength);
+
+                // X - Filename of resS file
+                String ressFilename = fm.readString(ressFilenameLength);
+
+                if (ressFilename.startsWith("archive:/")) {
+                  int slashPos = ressFilename.indexOf('/', 9);
+                  if (slashPos > 0) {
+                    ressFilename = ressFilename.substring(slashPos + 1);
+                  }
+                  else {
+                    ressFilename = ressFilename.substring(9);
+                  }
+                }
+
+                // check that the resS file exists
+                File ressFile = new File(FilenameSplitter.getDirectory(Archive.getBasePath()) + File.separator + ressFilename);
+                if (ressFile.exists()) {
+                  long ressArcSize = ressFile.length();
+                  FieldValidator.checkOffset(vertOffset, ressArcSize);
+                  FieldValidator.checkLength(vertLength, ressArcSize);
+
+                  // if we're here, we found the data in the ress file, so close the FM and open the ress file instead
+                  fm.close();
+                  fm = new FileManipulator(ressFile, false);
+                  fm.seek(vertOffset);
+
+                }
+
+              }
+              catch (Throwable t2) {
+                fm.relativeSeek(vertexStart);
+                vertexBlockSize = 0;
+              }
+            }
+            else {
+              fm.relativeSeek(vertexStart);
+              vertexBlockSize = 0;
+            }
           }
         }
 
@@ -803,6 +872,11 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       boolean repeated = false;
 
       long vertexStart = fm.getOffset();
+
+      if (Settings.getBoolean("DebugMode")) {
+        System.out.println("[Viewer_Unity3D_MESH]: Vertex Start = " + vertexStart);
+      }
+
       while (tryAgain) {
         tryAgain = false;
 
@@ -944,6 +1018,9 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
           fm.relativeSeek(vertexStart);
         }
 
+        // reset the error detector
+        tripleZeroCount = 0;
+
         if (vertexBlockSize == 12) {
           readVertices12(fm, numVertices, points, normals, texCoords);
         }
@@ -1058,6 +1135,7 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         }
         */
 
+        /*
         //if (!knownVertexBlockSize && !repeated && (unknownIntFlag != 0 || boundsCheck > 2)) {
         if (evenCheck && version >= 22) {
           // probably OK, don't repeat. Only for version 22 and above, for now, based on testing
@@ -1065,7 +1143,7 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         else if (!knownVertexBlockSize && !repeated && (unknownIntFlag != 0)) {
           //System.out.println("Bounds Check Failed: " + boundsCheck);
           // some v15/17 meshes seem to have the vertexes before the texcoords, but don't know how to detect it, so try to pick it up here.
-
+        
           // reset the min/max so the zoom is correct
           minX = 20000f;
           maxX = -20000f;
@@ -1073,27 +1151,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
           maxY = -20000f;
           minZ = 20000f;
           maxZ = -20000f;
-
+        
           fm.relativeSeek(vertexStart);
           tryAgain = true;
-          /*
-          if (vertexBlockSize == 52) {
-            vertexBlockSize = 40;
-          }
-          else if (vertexBlockSize == 64) {
-            vertexBlockSize = 24;
-          }
-          else if (vertexBlockSize == 80) {
-            vertexBlockSize = 40;
-          }
-          else if (vertexBlockSize == 36) {
-            vertexBlockSize = 24;
-          }
-          else {
-            vertexBlockSize -= 8;
-          }
-          */
-
+        
           if (version >= 22) {
             // if v22 doesn't work, try vertex size 24, and then try vertex size 12
             if (vertexBlockSize == 24) {
@@ -1115,10 +1176,280 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
             else {
               vertexBlockSize -= 8;
             }
-
+        
             repeated = true;
           }
+        
+        }
+        */
 
+      }
+
+      int originalVertexBlockSize = vertexBlockSize;
+
+      if (knownVertexBlockSize) {
+        tripleZeroCount = 0; // if we KNOW the vertex block size, we don't want to do error-correction on it
+      }
+      else if (version <= 17) {
+        tripleZeroCount = 0; // the problem doesn't seem to occur with earlier meshes
+      }
+      else {
+        // not known block size, so guessing - do a check
+
+        if (Settings.getBoolean("UnityMeshExtendedErrorChecking")) {
+          //
+          //
+          // 3.16 We're actually going to try and check the calculated Center and Diff here, and if it's really close to the values in the header, it's probably OK
+          //
+          //
+          float checkRadiusX = (maxX - minX) / 2;
+          float checkRadiusY = (maxY - minY) / 2;
+          float checkRadiusZ = (maxZ - minZ) / 2;
+
+          float checkCenterX = minX + checkRadiusX;
+          float checkCenterY = minY + checkRadiusY;
+          float checkCenterZ = minZ + checkRadiusZ;
+
+          checkRadiusX -= radiusXHeader;
+          checkRadiusY -= radiusYHeader;
+          checkRadiusZ -= radiusZHeader;
+
+          checkCenterX -= centerXHeader;
+          checkCenterY -= centerYHeader;
+          checkCenterZ -= centerZHeader;
+
+          if (Settings.getBoolean("DebugMode")) {
+            System.out.println("[Viewer_Unity3D_MESH]: Bounding Box Check Values: " + checkRadiusX + "\t" + checkRadiusY + "\t" + checkRadiusZ + "\t" + checkCenterX + "\t" + checkCenterY + "\t" + checkCenterZ + "\t");
+          }
+
+          //checkRadiusX *= 1000;
+          //checkRadiusY *= 1000;
+          //checkRadiusZ *= 1000;
+          // x100 is close enough, x1000 was being too strict and was falsely erroring out on some meshes
+          checkRadiusX *= 100;
+          checkRadiusY *= 100;
+          checkRadiusZ *= 100;
+
+          if (checkRadiusX < 0) {
+            checkRadiusX = 0 - checkRadiusX;
+          }
+          if (checkRadiusY < 0) {
+            checkRadiusY = 0 - checkRadiusY;
+          }
+          if (checkRadiusZ < 0) {
+            checkRadiusZ = 0 - checkRadiusZ;
+          }
+
+          if (((int) checkRadiusX) >= 0 && ((int) checkRadiusX) <= 1 && ((int) checkRadiusY) >= 0 && ((int) checkRadiusY) <= 1 && ((int) checkRadiusZ) >= 0 && ((int) checkRadiusZ) <= 1) {
+            // the radius checks out, so this was probably the right vertex block size
+            tripleZeroCount = 0;
+          }
+          else {
+            tripleZeroCount = 999;
+          }
+        }
+
+      }
+
+      // 3.16 Added lots of error checking here, to better detect bad vertex size calculations
+      while (tripleZeroCount > 4) {
+        // if we have a high "triple zero", then we probably read the mesh wrong, so try a smaller size
+        // FIRST, TRY SOME COMMON SIZES
+
+        if (Settings.getBoolean("DebugMode")) {
+          System.out.println("[Viewer_Unity3D_MESH]: High triple zero count (" + tripleZeroCount + ") for vertex size " + vertexBlockSize);
+        }
+
+        tripleZeroCount = 0;
+
+        minX = 20000f;
+        maxX = -20000f;
+        minY = 20000f;
+        maxY = -20000f;
+        minZ = 20000f;
+        maxZ = -20000f;
+
+        fm.relativeSeek(vertexStart);
+
+        if (vertexBlockSize > 40) {
+          vertexBlockSize = 40;
+        }
+        else if (vertexBlockSize > 24) {
+          vertexBlockSize = 24;
+        }
+        else if (vertexBlockSize > 12) {
+          vertexBlockSize = 12;
+        }
+        else {
+          tripleZeroCount = 999;
+          break;
+        }
+
+        if (vertexBlockSize == 12) {
+          readVertices12(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 24) {
+          readVertices24(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 40) {
+          readVertices40(fm, numVertices, points, normals, texCoords);
+        }
+        else {
+          break;
+        }
+
+        //
+        //
+        // 3.16 We're actually going to try and check the calculated Center and Diff here, and if it's really close to the values in the header, it's probably OK
+        //
+        //
+        float checkRadiusX = (maxX - minX) / 2;
+        float checkRadiusY = (maxY - minY) / 2;
+        float checkRadiusZ = (maxZ - minZ) / 2;
+
+        float checkCenterX = minX + checkRadiusX;
+        float checkCenterY = minY + checkRadiusY;
+        float checkCenterZ = minZ + checkRadiusZ;
+
+        checkRadiusX -= radiusXHeader;
+        checkRadiusY -= radiusYHeader;
+        checkRadiusZ -= radiusZHeader;
+
+        checkCenterX -= centerXHeader;
+        checkCenterY -= centerYHeader;
+        checkCenterZ -= centerZHeader;
+
+        if (Settings.getBoolean("DebugMode")) {
+          System.out.println("[Viewer_Unity3D_MESH]: Bounding Box Check Values: Radius:\t" + checkRadiusX + "\t" + checkRadiusY + "\t" + checkRadiusZ + "\tCenter:\t" + checkCenterX + "\t" + checkCenterY + "\t" + checkCenterZ + "\t");
+        }
+
+        checkRadiusX *= 1000;
+        checkRadiusY *= 1000;
+        checkRadiusZ *= 1000;
+
+        if (checkRadiusX < 0) {
+          checkRadiusX = 0 - checkRadiusX;
+        }
+        if (checkRadiusY < 0) {
+          checkRadiusY = 0 - checkRadiusY;
+        }
+        if (checkRadiusZ < 0) {
+          checkRadiusZ = 0 - checkRadiusZ;
+        }
+
+        if (((int) checkRadiusX) >= 0 && ((int) checkRadiusX) <= 1 && ((int) checkRadiusY) >= 0 && ((int) checkRadiusY) <= 1 && ((int) checkRadiusZ) >= 0 && ((int) checkRadiusZ) <= 1) {
+          // the radius checks out, so this was probably the right vertex block size
+          tripleZeroCount = 0;
+        }
+        else {
+          tripleZeroCount = 999;
+        }
+
+      }
+
+      if (tripleZeroCount > 4) {
+        // reset back to the original size, then go down slowly to find the right one
+        vertexBlockSize = originalVertexBlockSize;
+      }
+
+      // 3.16 Added lots of error checking here, to better detect bad vertex size calculations
+      while (tripleZeroCount > 4) {
+        // if we have a high "triple zero", then we probably read the mesh wrong, so try a smaller size
+
+        if (Settings.getBoolean("DebugMode")) {
+          System.out.println("[Viewer_Unity3D_MESH]: High triple zero count (" + tripleZeroCount + ") for vertex size " + vertexBlockSize);
+        }
+
+        tripleZeroCount = 0;
+
+        minX = 20000f;
+        maxX = -20000f;
+        minY = 20000f;
+        maxY = -20000f;
+        minZ = 20000f;
+        maxZ = -20000f;
+
+        fm.relativeSeek(vertexStart);
+
+        vertexBlockSize -= 4;
+
+        if (vertexBlockSize == 12) {
+          readVertices12(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 16) {
+          readVertices16(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 20) {
+          readVertices20(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 24) {
+          readVertices24(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 28) {
+          readVertices28(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 32) {
+          readVertices32(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 36) {
+          readVertices36(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 40) {
+          readVertices40(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 44) {
+          readVertices44(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 48) {
+          readVertices48(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 52) {
+          readVertices52(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 56) {
+          readVertices56(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 60) {
+          readVertices60(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 64) {
+          readVertices64(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 68) {
+          readVertices68(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 72) {
+          readVertices72(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 76) {
+          readVertices76(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 80) {
+          readVertices80(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 84) {
+          readVertices84(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 88) {
+          readVertices88(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 92) {
+          readVertices92(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 96) {
+          readVertices96(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 100) {
+          readVertices100(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 104) {
+          readVertices104(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 108) {
+          readVertices108(fm, numVertices, points, normals, texCoords);
+        }
+        else if (vertexBlockSize == 112) {
+          readVertices112(fm, numVertices, points, normals, texCoords);
         }
 
       }
@@ -1186,6 +1517,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -1236,6 +1571,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1291,6 +1630,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -1345,6 +1688,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1407,6 +1754,12 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      //System.out.println(xPoint + "\t" + yPoint + "\t" + zPoint);
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1472,6 +1825,12 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      //System.out.println(xPoint + "\t" + yPoint + "\t" + zPoint);
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1539,6 +1898,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -1598,6 +1961,8 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
   **/
   public void readVertices40(FileManipulator fm, int numVertices, float[] points, float[] normals, float[] texCoords) {
 
+    int singleZeroCount = 0;
+
     for (int i = 0, j = 0, k = 0; i < numVertices; i++, j += 3, k += 2) {
       // 4 - Vertex X
       // 4 - Vertex Y
@@ -1605,6 +1970,26 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      //System.out.println(xPoint + "\t" + yPoint + "\t" + zPoint);
+
+      // 3.16 Added lots of error checking here, to better detect bad vertex size calculations
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+      // Special "extra cases" here because "40" is one of the common ones. This checks for double-zeros and single zeros
+      else if ((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1 || zPoint == 0 || zPoint == 1)) {
+        tripleZeroCount++;
+      }
+      else if ((yPoint == 0 || yPoint == 1) && (xPoint == 0 || xPoint == 1 || zPoint == 0 || zPoint == 1)) {
+        tripleZeroCount++;
+      }
+      else if ((zPoint == 0 || zPoint == 1) && (yPoint == 0 || yPoint == 1 || xPoint == 0 || xPoint == 1)) {
+        tripleZeroCount++;
+      }
+      else if (xPoint == 0 || xPoint == 1 || yPoint == 0 || yPoint == 1 || zPoint == 0 || zPoint == 1) {
+        singleZeroCount++; // single zero count
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1657,6 +2042,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       }
     }
 
+    if (singleZeroCount > 10) {
+      tripleZeroCount += singleZeroCount;
+    }
+
   }
 
   /**
@@ -1673,6 +2062,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1742,6 +2135,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1813,6 +2210,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -1883,6 +2284,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -1956,6 +2361,12 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      //System.out.println(xPoint + "\t" + yPoint + "\t" + zPoint);
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2024,6 +2435,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -2094,6 +2509,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2162,6 +2581,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -2232,6 +2655,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2300,6 +2727,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -2370,6 +2801,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2438,6 +2873,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -2508,6 +2947,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2576,6 +3019,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -2646,6 +3093,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2714,6 +3165,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;
@@ -2784,6 +3239,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
 
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
+
       points[j] = xPoint;
       points[j + 1] = yPoint;
       points[j + 2] = zPoint;
@@ -2852,6 +3311,10 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
       float xPoint = fm.readFloat();
       float yPoint = fm.readFloat();
       float zPoint = fm.readFloat();
+
+      if (((xPoint == 0 || xPoint == 1) && (yPoint == 0 || yPoint == 1) && (zPoint == 0 || zPoint == 1)) || (xPoint == yPoint && yPoint == zPoint)) {
+        tripleZeroCount++;
+      }
 
       points[j] = xPoint;
       points[j + 1] = yPoint;

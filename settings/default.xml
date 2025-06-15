@@ -1,14 +1,18 @@
 <settingsStore>
 	<program>Game Extractor</program>
 	<settings>
-		<setting code="Version" value="3.15" changable="false" />
+		<setting code="Version" value="3.16" changable="false" />
 		
 		<setting code="CopyFilenameOnRightClick" value="false" />
 		<setting code="AboutFile" value="settings/about.xml" />
 		
+		<setting code="MaxImageDimension" value="4096" />
+		
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
 		
 		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
+		
+		<setting code="UnityMeshExtendedErrorChecking" value="true" />
 		
 		<setting code="PreviewPanel_Image_FitToPanel" value="false" />
 		
@@ -54,6 +58,8 @@
 		<setting code="FFMPEG_Path" value="external_bins\ffmpeg" />
 		
 		<setting code="dwebp_Path" value="external_bins\dwebp" />
+		
+		<setting code="webpmux_Path" value="external_bins\webpmux" />
 		
 		<setting code="vgmstream_Path" value="external_bins\vgmstream" />
 		
@@ -302,6 +308,7 @@
 		<setting code="Popup_ModifiedFilesImported_Show" value="true" />
 		
 		<setting code="UE4AESKeysFile" value="settings/keys_ue4.xml" />
+		<setting code="ZipPasswordFile" value="settings/zip_passwords.xml" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

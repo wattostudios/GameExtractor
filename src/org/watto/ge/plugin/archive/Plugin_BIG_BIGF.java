@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.component.PreviewPanel;
@@ -32,6 +33,7 @@ import org.watto.ge.plugin.RatedPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_REFPACK;
+import org.watto.ge.plugin.viewer.Viewer_ARC_14_TXFL_TXFL;
 import org.watto.ge.plugin.viewer.Viewer_BIG_BIGF_CMB;
 import org.watto.ge.plugin.viewer.Viewer_BIG_BIGF_FSH_SHPI;
 import org.watto.io.FileManipulator;
@@ -106,13 +108,14 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
         "Need For Speed: Porsche Unleashed",
         "Red Alert 3",
         "Starlancer",
+        "The Urbz: Sims in the City",
         "UEFA Champions League 2004",
         "UEFA Champions League 2005",
         "UEFA Euro 2004");
 
     setExtensions("big", "viv");
 
-    setPlatforms("PC", "PS2", "PS1");
+    setPlatforms("PC", "PS2", "PS1", "XBox");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("shd", "Shader", FileType.TYPE_OTHER),
@@ -317,7 +320,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
         // 4 Bytes - File Size
         int length = IntConverter.changeFormat(fm.readInt());
 
-        if (offset == arcSize && length == -1) {
+        if (offset == arcSize && (length == -1 || length == 0)) {
           length = 0;
         }
         else {
@@ -744,6 +747,75 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
 
         return destination;
       }
+
+    }
+    else if (beingReplacedExtension.equalsIgnoreCase("tgq")) {
+      // try to convert
+
+      String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
+      if (toReplaceWithExtension.equalsIgnoreCase("tgq")) {
+        // if the fileToReplace already has a tgq extension, assume it's already a compatible dtx file and doesn't need to be converted
+        return fileToReplaceWith;
+      }
+
+      //
+      //
+      // if we're here, we want to scan to see if we can find an Image ViewerPlugin that can read the file into an ImageResource,
+      // which we can then convert into a dtx using plugin Viewer_REZ_REZMGR_DTX
+      //
+      //
+
+      // 1. Open the file
+      FileManipulator fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 2. Get all the ViewerPlugins that can read this file type
+      RatedPlugin[] plugins = PluginFinder.findPlugins(fm, ViewerPlugin.class); // NOTE: This closes the fm pointer!!!
+      if (plugins == null || plugins.length == 0) {
+        // no viewer plugins found that will accept this file
+        return fileToReplaceWith;
+      }
+
+      Arrays.sort(plugins);
+
+      // re-open the file - it was closed at the end of findPlugins();
+      fm = new FileManipulator(fileToReplaceWith, false);
+
+      // 3. Try each plugin until we find one that can render the file as an ImageResource
+      PreviewPanel imagePreviewPanel = null;
+      for (int i = 0; i < plugins.length; i++) {
+        fm.seek(0); // go back to the start of the file
+
+        imagePreviewPanel = ((ViewerPlugin) plugins[i].getPlugin()).read(fm);
+        if (imagePreviewPanel != null) {
+          // found a previewer
+          break;
+        }
+      }
+
+      fm.close();
+
+      if (imagePreviewPanel == null) {
+        // no plugins were able to open this file successfully
+        return fileToReplaceWith;
+      }
+
+      //
+      //
+      // If we're here, we have a rendered image, so we want to convert it into TXFL
+      //
+      //
+      Viewer_ARC_14_TXFL_TXFL converterPlugin = new Viewer_ARC_14_TXFL_TXFL();
+
+      File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + beingReplacedExtension);
+      if (destination.exists()) {
+        destination.delete();
+      }
+
+      FileManipulator fmOut = new FileManipulator(destination, true);
+      converterPlugin.replace(resourceBeingReplaced, imagePreviewPanel, fmOut);
+      fmOut.close();
+
+      return destination;
 
     }
     else {

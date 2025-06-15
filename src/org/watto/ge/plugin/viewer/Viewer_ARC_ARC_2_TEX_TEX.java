@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@ import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
+import org.watto.ge.helper.ColorSplitAlpha;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
 import org.watto.ge.helper.ImageFormatWriter;
@@ -225,9 +226,9 @@ public class Viewer_ARC_ARC_2_TEX_TEX extends ViewerPlugin {
 
         fm.relativeSeek(8);
 
-        // 4 - Image Width and Height (HHHHHHHH,HHHHXWWW,WWWWWWWW,WWXXXXXX)
+        // 4 - Image Width and Height (HHHHHHHH,HHHHHWWW,WWWWWWWW,WWXXXXXX)
         long widthHeight = IntConverter.unsign(fm.readInt());
-        int height = (int) (widthHeight >> 20);
+        int height = (int) (widthHeight >> 19);
         int width = (int) ((widthHeight >> 6) & 8191);
 
         FieldValidator.checkHeight(height);
@@ -240,7 +241,95 @@ public class Viewer_ARC_ARC_2_TEX_TEX extends ViewerPlugin {
 
         imageResource = ImageFormatReader.readBC7(fm, width, height);
         imageResource.setProperty("ImageFormat", "BC7");
-        imageResource = ImageFormatReader.swapGBARtoARGB(imageResource);
+        //imageResource = ImageFormatReader.swapGBARtoARGB(imageResource);
+
+        // Apply Capcom MT Framework pixel filter
+        int[] pixels = imageResource.getPixels();
+        int numPixels = pixels.length;
+
+        for (int i = 0; i < numPixels; i++) {
+          int pixel = pixels[i];
+
+          ColorSplitAlpha split = new ColorSplitAlpha(pixel);
+
+          /*
+          // close
+          a *= 2;
+          r = (split.getBlue() * 2 + a) / 3;
+          g = (split.getGreen() + a) / 3;
+          b = (split.getRed() * 2 + a) / 3;
+          a = split.getGreen();
+          */
+
+          int a = split.getAlpha() * 2;
+          int r = ((split.getBlue() * 2) + a) / 3;
+          int g = ((split.getGreen()) + a) / 3;
+          int b = ((split.getRed() * 2) + a) / 3;
+
+          // Increase contrast, reduce brightness
+          int value = (r + g + b) / 3;
+
+          int largeSaturation = 25;
+          int smallSaturation = 10;
+          int brightness = 35;
+
+          r -= brightness;
+          g -= brightness;
+          b -= brightness;
+
+          if (value >= 192) {
+            r += largeSaturation;
+            g += largeSaturation;
+            b += largeSaturation;
+          }
+          else if (value >= 128) {
+            r += smallSaturation;
+            g += smallSaturation;
+            b += smallSaturation;
+          }
+          else if (value >= 64) {
+            r -= smallSaturation;
+            g -= smallSaturation;
+            b -= smallSaturation;
+          }
+          else {
+            r -= largeSaturation;
+            g -= largeSaturation;
+            b -= largeSaturation;
+          }
+
+          a = split.getGreen();
+
+          if (r > 255) {
+            r = 255;
+          }
+          if (g > 255) {
+            g = 255;
+          }
+          if (b > 255) {
+            b = 255;
+          }
+
+          if (r < 0) {
+            r = 0;
+          }
+          if (g < 0) {
+            g = 0;
+          }
+          if (b < 0) {
+            b = 0;
+          }
+
+          split.setRed(r);
+          split.setGreen(g);
+          split.setBlue(b);
+          split.setAlpha(a);
+          pixels[i] = split.getColor();
+
+        }
+
+        imageResource.setPixels(pixels);
+
       }
 
       fm.close();

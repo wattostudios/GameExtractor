@@ -171,10 +171,8 @@ public abstract class FileListPanel extends WSPanelPlugin {// implements WSDropa
   **********************************************************************************************
   **/
   public WSPopupMenu getDropFilesMenu() {
-
-      // don't allow drag-drop for the Basic version - Only "Read Archive"
-      return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /></WSPopupMenu>"));
-
+    // don't allow drag-drop for the Basic version - Only "Read Archive"
+    return new WSPopupMenu(XMLReader.read("<WSPopupMenu><WSMenuItem code=\"FileListDrop_ReadArchive\" /></WSPopupMenu>"));
   }
 
   /**

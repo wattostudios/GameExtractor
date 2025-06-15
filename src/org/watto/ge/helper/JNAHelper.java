@@ -15,7 +15,9 @@
 package org.watto.ge.helper;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
+
 import com.sun.jna.NativeLibrary;
 
 /**
@@ -34,6 +36,7 @@ public class JNAHelper {
 
         NativeLibrary.addSearchPath(NativeOodleDecomp32.JNA_LIBRARY_NAME, basePath);
         NativeLibrary.addSearchPath(NativeOodleDecomp64.JNA_LIBRARY_NAME, basePath);
+        NativeLibrary.addSearchPath(NativeQuickBMS.JNA_LIBRARY_NAME, basePath);
 
         pathsAdded = true;
       }

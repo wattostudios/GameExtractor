@@ -1,31 +1,29 @@
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
-import org.watto.task.TaskProgressManager;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -50,11 +48,10 @@ public class Plugin_PAK extends ArchivePlugin {
     setGames("Railroad Tycoon 2");
     setPlatforms("PC");
 
-    setFileTypes("win", "Text <-> Image Mapping?",
-        "imb", "IMB Image",
-        "pal", "Image Color Palette",
-        "dat", "Game Data",
-        "bin", "Binary Data");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("pal", "Color Palette", FileType.TYPE_PALETTE),
+        new FileType("imb", "IMB Image", FileType.TYPE_IMAGE),
+        new FileType("raw", "RAW File", FileType.TYPE_OTHER));
 
   }
 
@@ -108,8 +105,6 @@ public class Plugin_PAK extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // 4 - Unknown
-
       String[] names = new String[numFiles];
 
       // Loop through name directory
@@ -121,9 +116,15 @@ public class Plugin_PAK extends ArchivePlugin {
         FieldValidator.checkFilename(names[i]);
       }
 
-      fm.seek(6);
+      fm.seek(2);
 
       for (int i = 0; i < numFiles; i++) {
+        // 4 - Hash?
+        fm.skip(4);
+        //int hash = fm.readInt();
+
+        //System.out.println(hash + "\t" + names[i]);
+
         // 4 - Data Offset
         long offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
@@ -131,9 +132,6 @@ public class Plugin_PAK extends ArchivePlugin {
         // 4 - File Length
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
-
-        // 4 - Unknown
-        fm.skip(4);
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, names[i], offset, length);

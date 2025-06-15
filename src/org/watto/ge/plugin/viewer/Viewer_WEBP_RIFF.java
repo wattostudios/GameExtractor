@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -115,6 +116,19 @@ public class Viewer_WEBP_RIFF extends ViewerPlugin {
 
     File convertedFile = convertImage(source);
     if (convertedFile == null || !convertedFile.exists()) {
+
+      // maybe it's an animated file, so try to extract the first frame, then read that webp image
+      convertedFile = extractFrame(source);
+      if (convertedFile == null || !convertedFile.exists()) {
+        return null;
+      }
+      else {
+        // now read that webp frame into a PNG
+        convertedFile = convertImage(convertedFile);
+      }
+    }
+
+    if (convertedFile == null || !convertedFile.exists()) {
       return null;
     }
 
@@ -132,10 +146,10 @@ public class Viewer_WEBP_RIFF extends ViewerPlugin {
   }
 
   /**
-  **********************************************************************************************
-  Uses dwebp to convert the WebP image into a PNG image
-  **********************************************************************************************
-  **/
+   **********************************************************************************************
+   Uses dwebp to convert the WebP image into a PNG image
+   **********************************************************************************************
+   **/
   public File convertImage(File source) {
     try {
 
@@ -164,6 +178,70 @@ public class Viewer_WEBP_RIFF extends ViewerPlugin {
         return new File(outputFilePath);
       }
       ProcessBuilder pb = new ProcessBuilder(dwebpPath, "-o", outputFilePath, source.getAbsolutePath());
+
+      // Progress dialog
+      TaskProgressManager.show(1, 0, Language.get("Progress_ConvertingFiles"));
+      TaskProgressManager.setIndeterminate(true);
+
+      // Start the task
+      TaskProgressManager.startTask();
+
+      Process convertProcess = pb.start();
+      int returnCode = convertProcess.waitFor(); // wait for dwebp to finish
+
+      // Stop the task
+      TaskProgressManager.stopTask();
+
+      if (returnCode == 0) {
+        // successful conversion
+        File outputFile = new File(outputFilePath);
+        if (outputFile.exists()) {
+          return outputFile;
+        }
+      }
+
+      return null;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   Uses webpmux to extract the first frame from an animated WebP, returning a PNG
+   **********************************************************************************************
+   **/
+  public File extractFrame(File source) {
+    try {
+
+      String dwebpPath = Settings.getString("webpmux_Path");
+
+      File dwebpFile = new File(dwebpPath);
+
+      if (dwebpFile.exists() && dwebpFile.isDirectory()) {
+        // Path is a directory, append the filename to it
+        dwebpPath = dwebpPath + File.separatorChar + "webpmux.exe";
+        dwebpFile = new File(dwebpPath);
+      }
+
+      if (!dwebpFile.exists()) {
+        // dwebp path is invalid
+        ErrorLogger.log("webpmux can't be found at the path " + dwebpFile.getAbsolutePath());
+        return null;
+      }
+
+      dwebpPath = dwebpFile.getAbsolutePath();
+
+      //String outputFilePath = source.getAbsolutePath() + ".conv.png";
+      String outputFilePath = Settings.getString("TempDirectory") + File.separatorChar + source.getName() + ".frame1.webp";
+      if (new File(outputFilePath).exists()) {
+        // already converted - previewed this file already
+        return new File(outputFilePath);
+      }
+      ProcessBuilder pb = new ProcessBuilder(dwebpPath, "-get", "frame", "1", "-o", outputFilePath, source.getAbsolutePath());
 
       // Progress dialog
       TaskProgressManager.show(1, 0, Language.get("Progress_ConvertingFiles"));
@@ -229,7 +307,27 @@ public class Viewer_WEBP_RIFF extends ViewerPlugin {
         }
       }
 
+      /*
       File convertedFile = convertImage(sourceFile);
+      if (convertedFile == null || !convertedFile.exists()) {
+        return null;
+      }
+      */
+
+      File convertedFile = convertImage(sourceFile);
+      if (convertedFile == null || !convertedFile.exists()) {
+
+        // maybe it's an animated file, so try to extract the first frame, then read that webp image
+        convertedFile = extractFrame(sourceFile);
+        if (convertedFile == null || !convertedFile.exists()) {
+          return null;
+        }
+        else {
+          // now read that webp frame into a PNG
+          convertedFile = convertImage(convertedFile);
+        }
+      }
+
       if (convertedFile == null || !convertedFile.exists()) {
         return null;
       }

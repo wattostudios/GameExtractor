@@ -15,6 +15,7 @@
 package org.watto.ge.plugin;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.io.FileManipulator;
 
@@ -44,6 +45,7 @@ public class AllFilesPlugin extends ArchivePlugin {
 
     games = new String[] { "All Files" };
     extensions = new String[] { "*" };
+
   }
 
   /**

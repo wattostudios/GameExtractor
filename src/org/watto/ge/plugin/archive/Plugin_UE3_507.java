@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -49,7 +50,8 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
         "Rising Storm 2: Vietnam",
         "Styx: Master of Shadows",
         "The Last Remnant",
-        "Thief");
+        "Thief",
+        "Dishonored");
     setPlatforms("PC");
 
   }
@@ -61,7 +63,7 @@ public class Plugin_UE3_507 extends PluginGroup_UE3 {
   **/
   @Override
   public int getMatchRating(FileManipulator fm) {
-    return super.getMatchRating(fm, 507, 765, 832);
+    return super.getMatchRating(fm, 507, 765, 832, 801);
   }
 
   /**

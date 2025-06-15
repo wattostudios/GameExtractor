@@ -99,8 +99,13 @@ public class DirectoryList_DirectoryList extends DirectoryListPanel implements W
       directory = directory.getParentFile();
     }
 
-    if (directory instanceof ShellFolder) {
-      directory = new ShellFolderFile(directory);
+    try {
+      if (directory instanceof ShellFolder) {
+        directory = new ShellFolderFile(directory);
+      }
+    }
+    catch (Throwable t) {
+      // ignore it - this is just to catch bad errors form using a BAT to run the program (when running with newer Java versions)
     }
 
     Settings.set("CurrentDirectory", directory.getAbsolutePath());

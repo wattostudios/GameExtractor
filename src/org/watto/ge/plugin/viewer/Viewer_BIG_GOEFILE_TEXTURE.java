@@ -45,6 +45,7 @@ public class Viewer_BIG_GOEFILE_TEXTURE extends ViewerPlugin {
     setGames("Blood Omen 2: Legacy of Kain");
     setPlatforms("PC");
     setStandardFileFormat(false);
+    setEnabled(false); // NO LONGER NEEDED, NOW THAT WE READ THE ARCHIVE PROPERLY.
   }
 
   /**

@@ -16,6 +16,7 @@ package org.watto.ge.helper;
 
 import java.awt.Point;
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.ge.plugin.archive.datatype.UnrealImportEntry;
@@ -76,6 +77,7 @@ public class UE4Helper {
       int numKeys = root.getChildCount();
       aesKeys = new byte[numKeys][0];
 
+      /*
       for (int i = 0; i < numKeys; i++) {
         XMLNode keyNode = root.getChild(i);
         if (keyNode != null) {
@@ -88,7 +90,17 @@ public class UE4Helper {
             aesKeys[i] = ByteArrayConverter.convertLittle(new Hex(hexString));
           }
         }
-
+      }
+      */
+      for (int i = 0; i < numKeys; i++) {
+        XMLNode keyNode = root.getChild(i);
+        if (keyNode != null) {
+          String hexString = keyNode.getContent();
+          if (hexString.startsWith("0x")) {
+            hexString = hexString.substring(2);
+          }
+          aesKeys[i] = ByteArrayConverter.convertLittle(new Hex(hexString));
+        }
       }
 
       //aesKeys = new byte[3][0];
@@ -189,6 +201,7 @@ public class UE4Helper {
       version = IntConverter.convertLittle(versionBytes);
       for (int i = 0; i < versions.length; i++) {
         if (version == versions[i]) {
+          ErrorLogger.log("Processing UE4 version " + version);
           rating += 5;
           break;
         }
@@ -576,6 +589,9 @@ public class UE4Helper {
    **********************************************************************************************
    **/
   public static UnrealImportEntry[] readImportDirectory(FileManipulator fm, int importCount) {
+    long startOffset = fm.getOffset();
+
+    boolean try32 = false;
     try {
       UnrealImportEntry[] imports = new UnrealImportEntry[importCount];
 
@@ -585,6 +601,12 @@ public class UE4Helper {
 
         // 8 - Class ID (ID to "Package", "Class", etc)
         long typeID = fm.readLong();
+
+        if (parentNameID > 999999 && typeID > 999999) {
+          // try 32 instead
+          try32 = true;
+          break;
+        }
 
         // 4 - Parent Import Object ID (-1 for no parent) (XOR with 255)
         byte[] parentIDBytes = new byte[4];
@@ -603,12 +625,54 @@ public class UE4Helper {
         imports[i] = new UnrealImportEntry(parentNameID, names[(int) typeID], typeID, parentID, names[nameID], nameID, unknownID);
       }
 
-      return imports;
+      if (!try32) {
+        return imports;
+      }
     }
     catch (Throwable t) {
-
-      ErrorLogger.log(t);
+      try32 = true; // imports weren't 28 bytes, so try 32 bytes (in some newer games)
     }
+
+    if (try32) {
+      fm.relativeSeek(startOffset);
+
+      try {
+        UnrealImportEntry[] imports = new UnrealImportEntry[importCount];
+
+        for (int i = 0; i < importCount; i++) {
+          // 8 - Parent Directory Name ID
+          long parentNameID = fm.readLong();
+
+          // 8 - Class ID (ID to "Package", "Class", etc)
+          long typeID = fm.readLong();
+
+          // 4 - Parent Import Object ID (-1 for no parent) (XOR with 255)
+          byte[] parentIDBytes = new byte[4];
+          parentIDBytes[0] = (byte) ((fm.readByte()) ^ 255);
+          parentIDBytes[1] = (byte) ((fm.readByte()) ^ 255);
+          parentIDBytes[2] = (byte) ((fm.readByte()) ^ 255);
+          parentIDBytes[3] = (byte) ((fm.readByte()) ^ 255);
+          int parentID = IntConverter.convertLittle(parentIDBytes);
+
+          // 4 - Name ID
+          int nameID = fm.readInt();
+
+          // 4 - Unknown ID
+          int unknownID = fm.readInt();
+
+          // 4 - Unknown ID 2 (null?)
+          fm.skip(4);
+
+          imports[i] = new UnrealImportEntry(parentNameID, names[(int) typeID], typeID, parentID, names[nameID], nameID, unknownID);
+        }
+
+        return imports;
+      }
+      catch (Throwable t) {
+        ErrorLogger.log(t);
+      }
+    }
+
     return new UnrealImportEntry[0];
   }
 

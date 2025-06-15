@@ -104,10 +104,6 @@ public class Task_ReadArchive extends AbstractTask {
         return;
       }
 
-      if (Settings.getBoolean("ScanFileIfOpenFailed")) {
-        // Run the FormatScanner
-      }
-
       WSPopup.showError("ReadArchive_NoPluginsFound", true);
       TaskProgressManager.stopTask();
       return;
@@ -153,9 +149,6 @@ public class Task_ReadArchive extends AbstractTask {
       boolean wasBMS = checkForBMS(path);
       if (wasBMS) {
         return;
-      }
-
-      if (Settings.getBoolean("ScanFileIfOpenFailed")) {
       }
 
       // Also shows this message if the scanner does not exist!

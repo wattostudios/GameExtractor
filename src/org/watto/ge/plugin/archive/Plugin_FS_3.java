@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Hashtable;
+
 import org.itadaki.bzip2.BZIP_CRC32;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -123,8 +124,12 @@ public class Plugin_FS_3 extends ArchivePlugin {
 
       // Loop through directory
 
-      Hashtable<Integer, String> names = new Hashtable<Integer, String>(numFiles);
+      // Some games store the filenames as hashes (PS2?), other games store them as offsets into the filename directory (PC-DVD). 
+      // So to make things easier for lookups, we store *both* in the hashtable.
+      Hashtable<Integer, String> names = new Hashtable<Integer, String>(numFiles * 2);
+      long relativeOffset = fm.getOffset();
       for (int i = 0; i < numFiles; i++) {
+        long filenameOffset = fm.getOffset() - relativeOffset;
         // X - Filename
         // 1 - null Filename Terminator
         String filename = fm.readNullString();
@@ -138,8 +143,12 @@ public class Plugin_FS_3 extends ArchivePlugin {
         }
         int crcResult = crc.getCRC();
 
+        // store the CRC
         names.put(crcResult, filename);
         //System.out.println(filename + "\t" + crcResult);
+
+        // also store the offset
+        names.put((int) filenameOffset, filename);
       }
 
       fm.seek(dirOffset + 8 + filenameDirLength + 8);

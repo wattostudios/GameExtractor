@@ -22,8 +22,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.datatype.ImageResource;
@@ -36,6 +38,7 @@ import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
 import org.watto.xml.XMLReader;
+
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingFXUtils;
@@ -136,6 +139,8 @@ public class PreviewPanel_MeshInvestigator extends PreviewPanel_Image implements
   **/
   public void createInterface() {
 
+    // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
+
     jfxPanel = new JFXPanel(); // Scrollable JCompenent
 
     mainPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" border-width=\"4\" vertical-gap=\"4\" code=\"PreviewPanel_3DModel_MainPanel\"></WSPanel>"));
@@ -215,7 +220,7 @@ public class PreviewPanel_MeshInvestigator extends PreviewPanel_Image implements
     facePanel.add(faceCountField);
     facePanel.add(faceBlockSizeField);
 
-    WSPanel vertexFacePanel = new WSPanel(XMLReader.read("<WSPanel layout=\"GridLayout\" rows=\"2\" columns=\"1\" vertical-gap=\"4\" />"));
+    WSPanel vertexFacePanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_VertexFacePanelWrapper\" layout=\"GridLayout\" rows=\"2\" columns=\"1\" vertical-gap=\"4\" />"));
     vertexFacePanel.add(vertexPanel);
     vertexFacePanel.add(facePanel);
 
@@ -223,15 +228,15 @@ public class PreviewPanel_MeshInvestigator extends PreviewPanel_Image implements
     uvPanel.add(uvOffsetField);
     uvPanel.add(calculateUVButton, BorderLayout.EAST);
 
-    WSPanel vertexFaceUVPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"4\" />"));
+    WSPanel vertexFaceUVPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_FaceUVPanelWrapper\" vertical-gap=\"4\" />"));
     vertexFaceUVPanel.add(vertexFacePanel);
     vertexFaceUVPanel.add(uvPanel, BorderLayout.SOUTH);
 
-    WSPanel buttonPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"4\" />"));
+    WSPanel buttonPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_ButtonPanelWrapper\" vertical-gap=\"4\" />"));
     buttonPanel.add(regenerateMeshButton, BorderLayout.CENTER);
     buttonPanel.add(showStatsLogButton, BorderLayout.EAST);
 
-    WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel vertical-gap=\"4\" />"));
+    WSPanel bottomPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_BottomPanelWrapper\" vertical-gap=\"4\" />"));
     bottomPanel.add(vertexFaceUVPanel, BorderLayout.CENTER);
     bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -497,9 +502,9 @@ public class PreviewPanel_MeshInvestigator extends PreviewPanel_Image implements
   **/
   public void showUVTexturePopup() {
 
-    WSPanel mainPanel = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" border-width=\"4\" minimum-width=\"775\" maximum-width=\"775\" minimum-height=\"600\" maximum-height=\"600\" height=\"600\"></WSPanel>"));
+    WSPanel mainPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_PopupMainPanelWrapper\" showBorder=\"true\" border-width=\"4\" minimum-width=\"775\" maximum-width=\"775\" minimum-height=\"600\" maximum-height=\"600\" height=\"600\"></WSPanel>"));
 
-    WSScrollPane scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane showBorder=\"true\" showInnerBorder=\"true\" opaque=\"false\"><WSLabel code=\"PreviewPanel_MeshInvestigator_UVTextureImage\" /></WSScrollPane>"));
+    WSScrollPane scrollPane = new WSScrollPane(XMLReader.read("<WSScrollPane code=\"PreviewPanel_3DModel_PopupScrollPaneWrapper\" showBorder=\"true\" showInnerBorder=\"true\" opaque=\"false\"><WSLabel code=\"PreviewPanel_MeshInvestigator_UVTextureImage\" /></WSScrollPane>"));
     mainPanel.add(scrollPane, BorderLayout.CENTER);
 
     WSButton closeButton = new WSButton(XMLReader.read("<WSButton code=\"PreviewPanel_MeshInvestigator_CloseUVButton\" />"));
@@ -760,7 +765,7 @@ public class PreviewPanel_MeshInvestigator extends PreviewPanel_Image implements
       FieldValidator.checkOffset(vertexOffset, arcSize);
 
       int vertexBlockSize = Integer.parseInt(vertexBlockSizeField.getText());
-      FieldValidator.checkRange(vertexBlockSize, 12, 128);
+      FieldValidator.checkRange(vertexBlockSize, 12, 256);
 
       int uvOffset = 0;
       try {

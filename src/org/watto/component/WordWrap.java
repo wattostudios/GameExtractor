@@ -1,30 +1,28 @@
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       WATTO STUDIOS                                        //
-//                             Java Code, Programs, and Software                              //
-//                                    http://www.watto.org                                    //
-//                                                                                            //
-//                           Copyright (C) 2004-2010  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * Application:  WSProgram 4.0
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2004-2024 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.component;
 
 import java.awt.FontMetrics;
 import java.awt.Insets;
+
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+
 import org.watto.array.ArrayResizer;
 import org.watto.io.FileManipulator;
-
+import org.watto.io.converter.ByteConverter;
 
 /***********************************************************************************************
 Splits <code>String</code>s up into lines that fit a certain width.
@@ -34,8 +32,8 @@ public class WordWrap {
   /***********************************************************************************************
   Constructor
   ***********************************************************************************************/
-  public WordWrap(){}
-
+  public WordWrap() {
+  }
 
   /***********************************************************************************************
   Looks for special characters in the <code>text</code> (such as <b>\n</b> and <b>\t</b>) and
@@ -43,14 +41,55 @@ public class WordWrap {
   @param text the <code>String</code> to convert
   @return the converted <code>String</code>
   ***********************************************************************************************/
-  public static String convertSpecialCharacters(String text){
+  public static String convertSpecialCharacters(String text) {
     String outText = "";
     FileManipulator manipulator = new FileManipulator(new org.watto.io.buffer.StringBuffer(text));
     while (manipulator.getOffset() < manipulator.getLength()) {
-      char letter = (char)manipulator.readByte();
+      //char letter = (char)manipulator.readByte();
+
+      byte singleByte = manipulator.readByte();
+      char letter = (char) singleByte;
+
+      if (singleByte < 0) {
+        // UTF-8
+        int byteVal = ByteConverter.unsign(singleByte);
+
+        byte[] utf8Bytes = null;
+        if (byteVal >= 240) {
+          // 4-bytes
+          utf8Bytes = new byte[] { singleByte, manipulator.readByte(), manipulator.readByte(), manipulator.readByte() };
+        }
+        else if (byteVal >= 224) {
+          // 3-bytes
+          utf8Bytes = new byte[] { singleByte, manipulator.readByte(), manipulator.readByte() };
+        }
+        else if (byteVal >= 192) {
+          // 2-bytes
+          utf8Bytes = new byte[] { singleByte, manipulator.readByte() };
+        }
+        else {
+          utf8Bytes = null;
+        }
+
+        if (utf8Bytes == null) {
+          letter = (char) singleByte;
+        }
+        else {
+          try {
+            letter = new String(utf8Bytes, "UTF-8").charAt(0);
+          }
+          catch (Throwable t) {
+            letter = (char) singleByte;
+          }
+        }
+
+      }
+      else {
+        letter = (char) singleByte;
+      }
 
       if (letter == '\\' && manipulator.getOffset() < manipulator.getLength()) {
-        char nextLetter = (char)manipulator.readByte();
+        char nextLetter = (char) manipulator.readByte();
         if (nextLetter == 'n') {
           // found the newline character
           outText += '\n';
@@ -72,17 +111,15 @@ public class WordWrap {
     return outText;
   }
 
-
   /***********************************************************************************************
   Splits the <code>text</code> so that each line fits in the <code>width</code>
   @param text the <code>String</code> to wrap
   @param width the maximum width of each line
   @return the <code>text</code> split up into separate lines
   ***********************************************************************************************/
-  public static String[] wrap(String text,int width){
-    return wrap(text,new JLabel(),width);
+  public static String[] wrap(String text, int width) {
+    return wrap(text, new JLabel(), width);
   }
-
 
   /***********************************************************************************************
   Splits the <code>text</code> so that each line fits in the width of the <code>component</code>
@@ -90,13 +127,12 @@ public class WordWrap {
   @param component the <code>JComponent</code> that will contain the <code>text</code>
   @return the <code>text</code> split up into separate lines
   ***********************************************************************************************/
-  public static String[] wrap(String text,JComponent component){
+  public static String[] wrap(String text, JComponent component) {
     int width = component.getWidth();
     Insets insets = component.getInsets();
     width -= (insets.left + insets.right);
-    return wrap(text,component,width);
+    return wrap(text, component, width);
   }
-
 
   /***********************************************************************************************
   Splits the <code>text</code> so that each line fits in the <code>width</code> of the
@@ -106,7 +142,7 @@ public class WordWrap {
   @param width the maximum width of each line
   @return the <code>text</code> split up into separate lines
   ***********************************************************************************************/
-  public static String[] wrap(String text,JComponent component,int width){
+  public static String[] wrap(String text, JComponent component, int width) {
     try {
 
       // Allows the last word to be added to the last line.
@@ -122,7 +158,7 @@ public class WordWrap {
         metric = component.getGraphics().getFontMetrics();
       }
       catch (Throwable t2) {
-        return new String[]{text};
+        return new String[] { text };
       }
 
       // set up a buffer for reading over the text
@@ -131,10 +167,60 @@ public class WordWrap {
       String[] lines = new String[0];
 
       // read over the string
-      String line = "";
-      String word = "";
+      String line;
+      String word;
+
+      try {
+        line = new String(new byte[0], "UTF-8");
+        word = new String(new byte[0], "UTF-8");
+      }
+      catch (Throwable t) {
+        line = "";
+        word = "";
+      }
+
       while (manipulator.getOffset() < manipulator.getLength()) {
-        char letter = (char)manipulator.readByte();
+        //char letter = (char) manipulator.readByte();
+        byte singleByte = manipulator.readByte();
+        char letter = (char) singleByte;
+
+        if (singleByte < 0) {
+          // UTF-8
+          int byteVal = ByteConverter.unsign(singleByte);
+
+          byte[] utf8Bytes = null;
+          if (byteVal >= 240) {
+            // 4-bytes
+            utf8Bytes = new byte[] { singleByte, manipulator.readByte(), manipulator.readByte(), manipulator.readByte() };
+          }
+          else if (byteVal >= 224) {
+            // 3-bytes
+            utf8Bytes = new byte[] { singleByte, manipulator.readByte(), manipulator.readByte() };
+          }
+          else if (byteVal >= 192) {
+            // 2-bytes
+            utf8Bytes = new byte[] { singleByte, manipulator.readByte() };
+          }
+          else {
+            utf8Bytes = null;
+          }
+
+          if (utf8Bytes == null) {
+            letter = (char) singleByte;
+          }
+          else {
+            try {
+              letter = new String(utf8Bytes, "UTF-8").charAt(0);
+            }
+            catch (Throwable t) {
+              letter = (char) singleByte;
+            }
+          }
+
+        }
+        else {
+          letter = (char) singleByte;
+        }
 
         if (letter == '\n' || letter == '\r') {
           // a new line
@@ -167,7 +253,7 @@ public class WordWrap {
 
               // else, add the current line, and the word becomes the start of the next line
               int insertPos = lines.length;
-              lines = ArrayResizer.resize(lines,insertPos + 1);
+              lines = ArrayResizer.resize(lines, insertPos + 1);
               lines[insertPos] = line;
 
               line = word;
@@ -177,7 +263,7 @@ public class WordWrap {
 
           // add the new line
           int insertPos = lines.length;
-          lines = ArrayResizer.resize(lines,insertPos + 1);
+          lines = ArrayResizer.resize(lines, insertPos + 1);
           lines[insertPos] = line;
 
           line = "";
@@ -185,7 +271,7 @@ public class WordWrap {
 
           // check for \r\n
           if (letter == '\r' && manipulator.getOffset() < manipulator.getLength()) {
-            letter = (char)manipulator.readByte();
+            letter = (char) manipulator.readByte();
             if (letter != '\n') {
               // wasn't a \n, so was an actual character - add it to the next word
               word += letter;
@@ -219,7 +305,7 @@ public class WordWrap {
 
             // else, add the current line, and the word becomes the start of the next line
             int insertPos = lines.length;
-            lines = ArrayResizer.resize(lines,insertPos + 1);
+            lines = ArrayResizer.resize(lines, insertPos + 1);
             lines[insertPos] = line;
 
             line = word;
@@ -237,14 +323,14 @@ public class WordWrap {
       if (!line.equals("")) {
         // add any leftover text
         int insertPos = lines.length;
-        lines = ArrayResizer.resize(lines,insertPos + 1);
+        lines = ArrayResizer.resize(lines, insertPos + 1);
         lines[insertPos] = line;
       }
 
       return lines;
     }
     catch (Throwable t) {
-      return new String[]{text};
+      return new String[] { text };
     }
   }
 

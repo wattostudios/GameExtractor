@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,14 +16,17 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
+import org.watto.Settings;
 import org.watto.component.WSPluginException;
 import org.watto.component.WSTableColumn;
 import org.watto.datatype.Archive;
@@ -33,10 +36,17 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_Deflate;
 import org.watto.ge.plugin.exporter.Exporter_ZIP;
+import org.watto.ge.plugin.exporter.Exporter_ZIP_ZipCrypto;
 import org.watto.ge.plugin.resource.Resource_ZIP_PK;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteArrayConverter;
 import org.watto.task.TaskProgressManager;
+import org.watto.xml.XMLNode;
+import org.watto.xml.XMLReader;
+
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.inputstream.ZipInputStream;
+import net.lingala.zip4j.model.FileHeader;
 
 /**
 **********************************************************************************************
@@ -286,6 +296,8 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
 
   }
 
+  static String[] passwordList = null;
+
   /**
    **********************************************************************************************
    * Gets a blank resource of this type, for use when adding resources
@@ -415,7 +427,8 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
     }
     catch (Throwable t) {
       logError(t);
-      return readManually(path);
+      //return readManually(path);
+      return readZipCrypto(path);
     }
   }
 
@@ -447,8 +460,26 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
 
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
+
         // 2 - Header (PK)
         fm.skip(2);
+        /*
+        // do a look here, for a few bytes, to see if we can find the PK header,
+        // either at this offset, or maybe padded off by a few bytes.
+        for (int p = 0; p < 256; p++) {
+          byte nextByte = fm.readByte();
+          boolean found = false;
+          while (nextByte == 80) {
+            nextByte = fm.readByte();
+            found = true;
+          }
+          if (found && nextByte == 75) {
+            // found the header
+            break;
+          }
+        }
+        System.out.println(fm.getOffset() - 2);
+        */
 
         // 4 - Entry Type (1311747 = File Entry)
         int entryType = fm.readInt();
@@ -591,6 +622,13 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           // 2 - null
           fm.skip(16);
         }
+        /*// don't want this, as we try Crypto before we try Manual
+        else if (entryType == 51643395 || entryType == 2032129) {
+          // Encrypted File Entry
+          fm.close();
+          return readZipCrypto(path);
+        }
+        */
         else {
           byte[] intBytes = ByteArrayConverter.convertLittle(entryType);
           if (intBytes[0] == 7 && intBytes[1] == 8) {
@@ -623,6 +661,120 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
     }
     catch (Throwable t) {
       logError(t);
+      return null;
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  Read a password-protected ZIP file
+  **********************************************************************************************
+  **/
+  public Resource[] readZipCrypto(File path) {
+    try {
+
+      addFileTypes();
+
+      net.lingala.zip4j.ZipFile zipArchive = new net.lingala.zip4j.ZipFile(path);
+
+      FileHeader[] entries = (FileHeader[]) zipArchive.getFileHeaders().toArray(new FileHeader[0]);
+      int numFiles = entries.length;
+
+      Resource[] resources = new Resource[numFiles];
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Loop through directory
+      int i = 0;
+      //while (entries.hasMoreElements()) {
+      FileHeader smallestFile = null;
+      long smallestLength = 0;
+      for (int e = 0; e < numFiles; e++) {
+        //ZipArchiveEntry zippedFile = entries.nextElement();
+        FileHeader zippedFile = entries[e];
+        if (!zippedFile.isDirectory()) {
+
+          String filename = zippedFile.getFileName();
+          long length = zippedFile.getCompressedSize();
+          long decompLength = zippedFile.getUncompressedSize();
+          long crc = zippedFile.getCrc();
+          long time = zippedFile.getLastModifiedTime();
+          long offset = zippedFile.getOffsetLocalHeader();
+
+          ExporterPlugin exporter = new Exporter_ZIP_ZipCrypto(zippedFile);
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource_ZIP_PK(path, filename, offset, length, decompLength, exporter, crc, time);
+
+          TaskProgressManager.setValue(i);
+          i++;
+
+          if (smallestFile == null) {
+            smallestFile = zippedFile;
+            smallestLength = decompLength;
+          }
+          else {
+            if (decompLength < smallestLength && decompLength > 0) {
+              smallestFile = zippedFile;
+              smallestLength = decompLength;
+            }
+          }
+        }
+      }
+
+      resources = resizeResources(resources, i);
+
+      // Now we want to try all the passwords we're aware of, to see if we can find a matching one
+      String password = null;
+
+      if (passwordList == null || passwordList.length <= 0) {
+        loadPasswordList();
+      }
+      //passwordList = new String[] { "dummy", "test", "W4sF0rgotten", "funny" };
+      int numPasswords = passwordList.length;
+
+      byte[] b = new byte[4 * 4096];
+      for (int p = 0; p < numPasswords; p++) {
+        ZipInputStream is = null;
+        try {
+          password = passwordList[p];
+          zipArchive.setPassword(password.toCharArray());
+          is = zipArchive.getInputStream(smallestFile);
+          while (is.read(b) != -1) {
+            // Do nothing as we just want to verify password
+          }
+        }
+        catch (ZipException ex) {
+          password = null;
+        }
+        catch (IOException ex) {
+          password = null;
+        }
+
+        if (is != null) {
+          is.close();
+        }
+        if (password != null) {
+          // found a working password
+          break;
+        }
+      }
+
+      // If we found a password, set it here for the exporter
+      Exporter_ZIP_ZipCrypto.setPassword(password);
+
+      zipArchive.close();
+
+      if (password == null || password.equals("")) {
+        // no password found, try manual reading
+        return readManually(path);
+      }
+
+      return resources;
+
+    }
+    catch (Throwable t) {
+      logError(t);
+      readManually(path);
       return null;
     }
   }
@@ -692,6 +844,56 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
     }
     catch (Throwable t) {
       logError(t);
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static void loadPasswordList() {
+    try {
+      String keysFileString = Settings.get("ZipPasswordFile");
+
+      if (keysFileString == null || keysFileString.equals("")) {
+        return;
+      }
+
+      File keysFile = new File(keysFileString);
+      if (!keysFile.exists()) {
+        return;
+      }
+
+      // Parse the XML
+      XMLNode root = XMLReader.read(keysFile);
+
+      int numKeys = root.getChildCount();
+      passwordList = new String[numKeys];
+
+      /*
+      for (int i = 0; i < numKeys; i++) {
+        XMLNode keyNode = root.getChild(i);
+        if (keyNode != null) {
+          XMLNode passwordNode = keyNode.getChild("password");
+          if (passwordNode != null) {
+            String passwordString = passwordNode.getContent();
+            passwordList[i] = passwordString;
+          }
+        }
+      }
+      */
+      for (int i = 0; i < numKeys; i++) {
+        XMLNode passwordNode = root.getChild(i);
+        if (passwordNode != null) {
+          String passwordString = passwordNode.getContent();
+          passwordList[i] = passwordString;
+        }
+      }
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
     }
   }
 

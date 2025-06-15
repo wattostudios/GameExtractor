@@ -1,31 +1,30 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.ErrorLogger;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.ReplacableResource;
+import org.watto.component.PreviewPanel;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.viewer.Viewer_LMP_TEX;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -43,16 +42,17 @@ public class Plugin_LMP extends ArchivePlugin {
 
     super("LMP", "LMP");
 
-    canRead = true;
-    canWrite = true;
-    canReplace = false;
-    canRename = false;
+    //         read write replace rename
+    setProperties(true, true, false, false);
 
     setGames("Baldurs Gate: Dark Alliance",
-        "The Bard Tale");
+        "The Bard's Tale");
     setExtensions("lmp");
     setPlatforms("PC", "XBox");
 
+    setFileTypes(new FileType("tex", "Texture Image", FileType.TYPE_IMAGE));
+
+    setCanConvertOnReplace(true);
   }
 
   /**
@@ -124,21 +124,15 @@ public class Plugin_LMP extends ArchivePlugin {
         FieldValidator.checkFilename(filename);
 
         // 4 - File Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
-
         long offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
-        long lengthPointerLocation = fm.getOffset();
-        long lengthPointerLength = 4;
-
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);
+        resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
       }
@@ -236,6 +230,47 @@ public class Plugin_LMP extends ArchivePlugin {
     }
     catch (Throwable t) {
       logError(t);
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   When replacing files, if the file is of a certain type, it will be converted before replace
+   @param resourceBeingReplaced the Resource in the archive that is being replaced
+   @param fileToReplaceWith the file on your PC that will replace the Resource. This file is the
+          one that will be converted into a different format, if applicable.
+   @return the converted file, if conversion was applicable/successful, else the original fileToReplaceWith
+   **********************************************************************************************
+   **/
+  @Override
+  public File convertOnReplace(Resource resourceBeingReplaced, File fileToReplaceWith) {
+    try {
+
+      PreviewPanel imagePreviewPanel = loadFileForConversion(resourceBeingReplaced, fileToReplaceWith, "tex");
+      if (imagePreviewPanel == null) {
+        // no conversion needed, or wasn't able to be converted
+        return fileToReplaceWith;
+      }
+
+      // The plugin that will do the conversion
+      Viewer_LMP_TEX converterPlugin = new Viewer_LMP_TEX();
+
+      String beingReplacedExtension = resourceBeingReplaced.getExtension();
+      File destination = new File(fileToReplaceWith.getAbsolutePath() + "." + beingReplacedExtension);
+      if (destination.exists()) {
+        destination.delete();
+      }
+
+      FileManipulator fmOut = new FileManipulator(destination, true);
+      converterPlugin.replace(resourceBeingReplaced, imagePreviewPanel, fmOut);
+      fmOut.close();
+
+      return destination;
+
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return fileToReplaceWith;
     }
   }
 

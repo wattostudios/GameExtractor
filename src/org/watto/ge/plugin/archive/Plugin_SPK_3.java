@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,9 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.zip.DeflaterOutputStream;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Archive;
@@ -22,10 +25,13 @@ import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
+import org.watto.io.converter.ByteArrayConverter;
 import org.watto.io.converter.StringConverter;
+import org.watto.io.stream.ManipulatorOutputStream;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -45,7 +51,7 @@ public class Plugin_SPK_3 extends ArchivePlugin {
     super("SPK_3", "SPK_3");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, true);
 
     setGames("Wolfenstein");
     setExtensions("spk", "mpk"); // MUST BE LOWER CASE
@@ -305,6 +311,239 @@ public class Plugin_SPK_3 extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
+  @Override
+  public void write(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+
+      // first find all the extensions that we have, and the number of files of each extension
+      String[] extensions = new String[numFiles];
+      int[] extensionCount = new int[numFiles];
+      boolean[] extensionFull = new boolean[numFiles];
+      long[] decompLengths = new long[numFiles];
+      long[] dirLengths = new long[numFiles];
+      int numExtensions = 0;
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        String extension = resource.getExtension();
+
+        int decompLength = (int) resource.getDecompressedLength();
+        decompLength += calculatePadding(decompLength, 4);
+
+        int entryLength = resource.getNameLength() - 5 + 1 + 8;//-5 to remove the extension
+
+        boolean found = false;
+        for (int e = 0; e < numExtensions; e++) {
+          if (extensions[e].equals(extension) && !extensionFull[e]) {
+            // found it
+
+            // see if the decompLength is small enough
+            if (decompLengths[e] + decompLength >= 10500000) { // guess
+              // too large, need a new group for this extension (which will be added down below)
+              extensionFull[e] = true;
+              break;
+            }
+            // otherwise, we're OK, the file length is OK so just add it to the existing one
+            extensionCount[e]++;
+            decompLengths[e] += decompLength;
+            dirLengths[e] += entryLength;
+            found = true;
+            break;
+          }
+        }
+
+        if (!found) {
+          // add a new extension
+          extensions[numExtensions] = extension;
+          extensionCount[numExtensions] = 1;
+          decompLengths[numExtensions] = decompLength + 4; // add the 4 null bytes at the end of the whole type directory
+          dirLengths[numExtensions] = entryLength;
+          numExtensions++;
+        }
+      }
+
+      // add padding to the dirLengths, and append to the decompLengths
+      for (int e = 0; e < numExtensions; e++) {
+        dirLengths[e] += calculatePadding(dirLengths[e], 4);
+        decompLengths[e] += dirLengths[e];
+      }
+
+      // Write Header Data
+
+      // 4 - Unknown (300)
+      fm.writeInt(300);
+
+      // Write the extensions
+      long[] compLengths = new long[numExtensions];
+      long[] compLengthOffsets = new long[numExtensions];
+      boolean[] processed = new boolean[numFiles];
+      int numProcessed = 0; // for setting the progress bar only
+      for (int e = 0; e < numExtensions; e++) {
+        String extension = extensions[e];
+        int numFilesOfType = extensionCount[e];
+        long decompLength = decompLengths[e];
+
+        String extensionResized = StringConverter.reverse(extension);
+        int extensionLength = extensionResized.length();
+        if (extensionLength > 4) {
+          extensionResized = extensionResized.substring(0, 4);
+        }
+        else if (extensionLength < 4) {
+          while (extensionLength < 4) {
+            extensionResized += " ";
+            extensionLength++;
+          }
+        }
+
+        // 4 - File Type (LCED/RTXT/SDNS/etc...)
+        fm.writeString(extensionResized);
+
+        // 4 - Decompressed File Length
+        fm.writeInt(decompLength);
+
+        // 4 - Compressed File Length
+        compLengthOffsets[e] = fm.getOffset();
+        fm.writeInt(0);
+
+        // X - File Data (ZLib Compression)
+        long startOffset = fm.getOffset();
+
+        // start the compression
+        DeflaterOutputStream outputStream = null;
+        try {
+          outputStream = new DeflaterOutputStream(new ManipulatorOutputStream(fm));
+
+          // write the directory
+          // 4 - Number of Files of this Type
+          outputStream.write(ByteArrayConverter.convertLittle(numFilesOfType));
+
+          // for each file of this Type
+          int bytesWritten = 0;
+          for (int i = 0, j = 0; i < numFiles && j < numFilesOfType; i++) {
+            if (processed[i]) {
+              continue;
+            }
+
+            Resource resource = resources[i];
+
+            if (resource.getExtension().equals(extension)) {
+              // found a file of this type
+
+              // X - Filename
+              String name = resource.getName();
+              name = name.substring(0, name.length() - 5); // remove the extension
+              outputStream.write(ByteArrayConverter.convertLittle(name));
+
+              // 1 - null Filename Terminator
+              outputStream.write(0);
+
+              int length = (int) resource.getDecompressedLength();
+
+              // 4 - File Length
+              outputStream.write(ByteArrayConverter.convertLittle(length));
+
+              // 4 - File Length
+              outputStream.write(ByteArrayConverter.convertLittle(length));
+
+              bytesWritten += name.length() + 1 + 4 + 4;
+
+              j++;
+            }
+
+          }
+
+          // 0-3 - null Padding to a multiple of 4 bytes
+          int padding = calculatePadding(bytesWritten, 4);
+          for (int p = 0; p < padding; p++) {
+            outputStream.write(0);
+          }
+
+          // write the files
+          for (int i = 0, j = 0; i < numFiles && j < numFilesOfType; i++) {
+            if (processed[i]) {
+              continue;
+            }
+
+            Resource resource = resources[i];
+            if (resource.getExtension().equals(extension)) {
+              // found a file of this type
+
+              // X - File Data
+              ExporterPlugin fileExporter = resource.getExporter();
+              fileExporter.open(resource);
+
+              while (fileExporter.available()) {
+                outputStream.write(fileExporter.read());
+              }
+
+              fileExporter.close();
+
+              // 0-3 - null Padding to a multiple of 4 bytes
+              padding = calculatePadding(resource.getDecompressedLength(), 4);
+              for (int p = 0; p < padding; p++) {
+                outputStream.write(0);
+              }
+
+              processed[i] = true;
+
+              j++;
+
+              numProcessed++;
+              TaskProgressManager.setValue(numProcessed);
+            }
+          }
+
+          // finished writing all the files for this type
+
+          // 4 - null
+          outputStream.write(ByteArrayConverter.convertLittle(0));
+
+          outputStream.finish();
+
+        }
+        catch (Throwable t) {
+          logError(t);
+          if (outputStream != null) {
+            try {
+              outputStream.finish();
+            }
+            catch (IOException ioe) {
+            }
+          }
+        }
+
+        // finish up, then get ready for the next extension
+        long endOffset = fm.getOffset();
+        compLengths[e] = endOffset - startOffset;
+
+      }
+
+      // Go back and write the compLengths into the archive
+      for (int e = 0; e < numExtensions; e++) {
+        fm.seek(compLengthOffsets[e]);
+        // 4 - Compressed File Length
+        fm.writeInt(compLengths[e]);
+      }
+
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

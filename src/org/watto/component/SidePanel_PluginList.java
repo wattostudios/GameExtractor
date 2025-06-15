@@ -19,9 +19,11 @@ import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.event.WSSelectableInterface;
@@ -72,7 +74,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void changePluginType() {
@@ -82,7 +84,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -145,17 +147,6 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
     }
     else if (type.equals(Language.get("Plugin_Viewer_Name"))) {
 
-      if (GameExtractor.isFullVersion()) {
-        // The Viewer plugins exist in the Basic Version for showing Thumbnails, but we need to pretend they don't exist
-        // (they can't be used for real previews anyway, due to other functionality being removed)
-        WSPluginGroup group = WSPluginManager.getGroup("Viewer");
-        if (group != null) {
-          plugins = group.getPlugins();
-        }
-        else {
-          plugins = new WSPlugin[0];
-        }
-      }
     }
 
     if (Settings.getBoolean("SortPluginLists")) {
@@ -218,7 +209,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -244,7 +235,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public WSPlugin[] loadExporters() {
@@ -335,7 +326,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
         new Exporter_MSZIP(),
         new Exporter_PRS_8ING(),
         new Exporter_QCMP1(),
-        new Exporter_QuickBMS_Decompression(""),
+        new Exporter_QuickBMS_DLL(""),
         new Exporter_QuickLZ(),
         new Exporter_RAR_RAR(),
         new Exporter_REFPACK(),
@@ -363,7 +354,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public WSPlugin[] loadScriptArchivePlugins() {
@@ -502,7 +493,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   @Override
@@ -529,7 +520,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void showPluginDescription() {
@@ -539,7 +530,7 @@ public class SidePanel_PluginList extends WSPanelPlugin implements WSSelectableI
 
   /**
   **********************************************************************************************
-  
+
   **********************************************************************************************
   **/
   public void showPluginDescription(Object pluginObj) {

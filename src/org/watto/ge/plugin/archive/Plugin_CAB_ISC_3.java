@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.component.WSPluginException;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -55,7 +56,7 @@ public class Plugin_CAB_ISC_3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -133,7 +134,8 @@ public class Plugin_CAB_ISC_3 extends ArchivePlugin {
 
       // RESETTING GLOBAL VARIABLES
 
-      long arcSize = (int) path.length();
+      //long arcSize = (int) path.length();
+      long arcSize = path.length();
 
       File sourcePath = null;
       String basePathSubstring = "";
@@ -315,7 +317,10 @@ public class Plugin_CAB_ISC_3 extends ArchivePlugin {
         // now add the directory name
         filename = dirNames[directoryIDs[i]] + filename;
 
-        resources[i].setName(filename);
+        Resource resource = resources[i];
+        resource.setName(filename);
+        resource.setOriginalName(filename);
+        resource.forceNotAdded(true);
       }
 
       resources = resizeResources(resources, realNumFiles);

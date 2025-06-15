@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -185,6 +186,39 @@ public class Plugin_PAK_26 extends ArchivePlugin {
     }
     else if (headerShort1 == -257) {
       return "txt";
+    }
+
+    // Not sure, there's just lots of these 3 types
+    if (headerInt1 == 0) {
+      return "type0";
+    }
+    else if (headerInt1 == 1) {
+      return "type1";
+    }
+    else if (headerInt1 == 27) {
+      return "type27";
+    }
+
+    int length = (int) resource.getDecompressedLength();
+
+    if (headerInt1 == 16 && headerInt2 == (length - 12)) {
+      return "mesh16";
+    }
+    else if (headerInt1 == 11 && headerInt2 == (length - 12)) {
+      return "mesh11";
+    }
+
+    else if (headerInt2 == 1 && length > 50 && length < 1200) {
+      return "audio_def1";
+    }
+    else if (headerInt2 == 2 && length > 50 && length < 1200) {
+      return "audio_def2";
+    }
+    else if (headerInt2 == 3 && length > 50 && length < 1200) {
+      return "audio_def3";
+    }
+    else if (headerInt2 == 4 && length > 50 && length < 1200) {
+      return "audio_def4";
     }
 
     return null;

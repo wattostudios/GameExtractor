@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
@@ -403,6 +404,8 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
       int resourceLength = 0; // length of the resources section
       int furthestSectionOffset = 0; // the furthest section in the EXE file
       int furthestSectionLength = 0; // the furthest section in the EXE file
+
+      long endOfRSRC = -1;
       for (int i = 0; i < numSections; i++) {
         // 8 - Section Name (null terminated) (.rsrc = Resource)
         String sectionName = fm.readNullString(8);
@@ -419,6 +422,8 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           // 4 - Offset To Raw Data (multiple of FileAlignment)
           resourceOffset = fm.readInt();
           FieldValidator.checkOffset(resourceOffset, arcSize);
+
+          endOfRSRC = resourceLength + resourceOffset;
 
           TaskProgressManager.setMaximum(resourceLength + resourceOffset);
 
@@ -530,6 +535,39 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           // go back to where we were, keep processing other things
           fm.seek(currentOffset);
         }
+        else if (sectionName.equals("pck")) {
+          // Godot engine
+          // 4 - Virtual Length (length of data - kinda)
+          // 4 - Virtual Address (offset to data - kinda)
+          fm.skip(8);
+
+          // 4 - Length Of Packed Data
+          int packedLength = fm.readInt();
+          FieldValidator.checkLength(packedLength);
+
+          // 4 - Offset To Raw Data (multiple of FileAlignment)
+          int packedOffset = fm.readInt();
+          FieldValidator.checkOffset(packedOffset, arcSize);
+
+          // 4 - Offset To Relocations
+          // 4 - Offset To Line Numbers
+          // 2 - Number Of Relocations
+          // 2 - Number Of Line Numbers
+          // 4 - Characteristics
+          fm.skip(16);
+
+          //path,id,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, path.getName() + ".pck", packedOffset, packedLength);
+          resource.addProperty("OffsetCorrect", true);
+          resources[realNumFiles] = resource;
+          realNumFiles++;
+
+          if (packedOffset > furthestSectionOffset) {
+            furthestSectionOffset = packedOffset;
+            furthestSectionLength = packedLength;
+          }
+
+        }
         else {
           // ignore - only want resources
           // However, we need to still find out if this is the furthest section in the EXE...
@@ -594,6 +632,62 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
             }
           }
         }
+      }
+
+      // Also want to try the same as above, but using the offset for the end of the RSRC section
+      if (endOfRSRC > 0 && endOfRSRC < arcSize) {
+        fm.seek(endOfRSRC);
+
+        String header = fm.readString(2);
+        if (header.equals("zl")) { // "zlb" + (byte)26, followed by a 4-byte unknown (SFX-ZIP Archive)
+
+          long appendedOffset = fm.getOffset() - 2;
+
+          /*
+          // check if this is a GOG EXE, where the ZLib data follows immediately after this field
+          fm.skip(2);
+          if (fm.readByte() == 120) {
+            // probably a GOG EXE
+            appendedOffset += 4;
+            long appendedLength = arcSize - appendedOffset;
+          
+            ExporterPlugin exporterZlib = Exporter_ZLib_CompressedSizeOnly.getInstance();
+          
+            //path,id,name,offset,length,decompLength,exporter
+            Resource resource = new Resource(path, path.getName() + ".gog_data", appendedOffset, appendedLength, appendedLength, exporterZlib);
+            resource.addProperty("OffsetCorrect", true);
+            resources[realNumFiles] = resource;
+            realNumFiles++;
+          }
+          else {
+          */
+          // some other ZLib
+
+          long appendedLength = arcSize - appendedOffset;
+
+          //path,id,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, path.getName() + ".zlb", appendedOffset, appendedLength);
+          resource.addProperty("OffsetCorrect", true);
+          resources[realNumFiles] = resource;
+          realNumFiles++;
+          /*  
+          }
+          */
+
+        }
+        else if (header.equals("PK")) {
+          // zip file
+
+          long appendedOffset = fm.getOffset() - 2;
+          long appendedLength = arcSize - appendedOffset;
+
+          //path,id,name,offset,length,decompLength,exporter
+          Resource resource = new Resource(path, path.getName() + ".zip", appendedOffset, appendedLength);
+          resource.addProperty("OffsetCorrect", true);
+          resources[realNumFiles] = resource;
+          realNumFiles++;
+        }
+
       }
 
       // Adding support for EXE files with a Resource put at the end of it, via a Footer.

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,12 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.BlockVariableExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
@@ -243,7 +245,8 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
   public void readDirectory(Resource[] resources, FileManipulator fm, File path, String parentDirName) throws Exception {
 
     long arcSize = (int) fm.getLength();
-    ExporterPlugin exporter = Exporter_ZLib.getInstance();
+    ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
+    ExporterPlugin exporterDefault = Exporter_Default.getInstance();
 
     // 4 - Parent Directory Offset (relative to the folders directory offset)
     fm.skip(4);
@@ -342,43 +345,72 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
           FieldValidator.checkLength(length, arcSize);
 
           // 4 - Block Size (16384)
-          fm.skip(4);
+          //fm.skip(4);
+          int blockSize = fm.readInt();
 
-          int numBlocks = (int) (decompLength / 16384);
-          if (decompLength % 16384 != 0) {
+          if (length == 0 && blockSize != 16384) {
+            length = blockSize;
+            blockSize = fm.readInt();
+          }
+
+          //System.out.println(filename + "\t" + blockSize + "\t" + decompLength);
+
+          int numBlocks = (int) (decompLength / blockSize) * 2; // *2 to allow for "extra bytes" between each compressed chunk
+          if (decompLength % blockSize != 0) {
             numBlocks++;
           }
 
           long[] blockOffsets = new long[numBlocks];
           long[] blockLengths = new long[numBlocks];
           long[] blockDecompLengths = new long[numBlocks];
+          ExporterPlugin[] blockExporters = new ExporterPlugin[numBlocks];
 
           for (int b = 0; b < numBlocks; b++) {
             // 4 - Decompressed Block Length
             int blockDecompLength = fm.readInt();
             FieldValidator.checkLength(blockDecompLength);
-            blockDecompLengths[b] = blockDecompLength;
 
             // 4 - Compressed Block Length
             int blockLength = fm.readInt();
             FieldValidator.checkLength(blockLength, arcSize);
-            blockLengths[b] = blockLength;
 
             // 4 - More Blocks Flag? (16 = more blocks, 0 = last block)
-            fm.skip(4);
+            int extraBytes = fm.readInt();
+            //blockDecompLength += extraBytes;
+            //blockLength += extraBytes;
+
+            blockDecompLengths[b] = blockDecompLength;
+            blockLengths[b] = blockLength;
 
             // 4 - Decompressed Block Offset
             long blockOffset = fm.readInt() + offset;
             FieldValidator.checkLength(blockOffset, arcSize);
             blockOffsets[b] = blockOffset;
+
+            blockExporters[b] = exporterZLib;
+
+            if (extraBytes != 0) {
+              // reduce the previous block by the extraBytes
+              blockDecompLength -= extraBytes;
+              blockDecompLengths[b] = blockDecompLength;
+
+              // now add the 16 bytes as raw data
+              b++;
+              blockOffsets[b] = blockOffset + blockLength;
+              blockLengths[b] = extraBytes;
+              blockDecompLengths[b] = extraBytes;
+              blockExporters[b] = exporterDefault;
+            }
+
           }
 
           if (numBlocks == 1) {
             //path,name,offset,length,decompLength,exporter
-            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporterZLib);
           }
           else {
-            BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+            //BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+            BlockVariableExporterWrapper blockExporter = new BlockVariableExporterWrapper(blockExporters, blockOffsets, blockLengths, blockDecompLengths);
 
             //path,name,offset,length,decompLength,exporter
             resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, blockExporter);

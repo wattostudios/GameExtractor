@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2022 wattostudios
+ * Copyright:    Copyright (c) 2002-2024 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
@@ -146,6 +147,26 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       // Loop through directory
       while (fm.getOffset() < dataOffset - 4) {
         readDirectory(fm, path, resources, "", dataOffset, arcSize);
+      }
+
+      //
+      // THIS CODE IS ONLY TO STOP FALSE POSITIVES IN THE AUTODETECT
+      //
+      if (realNumFiles <= 3) {
+        return null; // to try and stop false positives
+      }
+      else {
+        // other false positives have all the files at the same offset with zero size
+        Resource resource1 = resources[0];
+        Resource resource2 = resources[1];
+        Resource resource3 = resources[2];
+
+        if (resource1.getOffset() == resource2.getOffset() && resource1.getLength() == resource2.getLength()) {
+          return null;
+        }
+        else if (resource1.getLength() == 0 && resource2.getLength() == 0 && resource3.getLength() == 0) {
+          return null;
+        }
       }
 
       resources = resizeResources(resources, realNumFiles);

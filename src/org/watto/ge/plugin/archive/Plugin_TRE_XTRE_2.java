@@ -15,11 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.ge.plugin.exporter.Exporter_REFPACK;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -126,7 +127,8 @@ public class Plugin_TRE_XTRE_2 extends ArchivePlugin {
       exporter.setSkipHeaders(true);
 
       //Exporter_LZWX exporterLZWX = Exporter_LZWX.getInstance();
-      ExporterPlugin exporterLZWX = new Exporter_QuickBMS_Decompression("UNLZWX");
+      //ExporterPlugin exporterLZWX = new Exporter_QuickBMS_Decompression("UNLZWX");
+      ExporterPlugin exporterLZWX = new Exporter_QuickBMS_DLL("UNLZWX");
 
       // RESETTING GLOBAL VARIABLES
 

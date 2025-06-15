@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import org.watto.ErrorLogger;
+import org.watto.Settings;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
@@ -200,16 +201,24 @@ public class Viewer_VPK_VPK_VTEXC extends ViewerPlugin {
         }
       }
 
+      // Image formats ref = https://github.com/ValveResourceFormat/ValveResourceFormat/blob/789de71c7c6b13e0a019dff8bec93fa824c3f1ef/ValveResourceFormat/Resource/Enums/VTexFormat.cs
+
       // work out how many bytes per pixel, based on the Image Format
       float bytesPerPixel = 1;
-      if (imageFormat == 1) { // DXT1
+      if (imageFormat == 1) {
         bytesPerPixel = 0.5f;
       }
-      else if (imageFormat == 2 || imageFormat == 20) { // DXT3
+      else if (imageFormat == 2 || imageFormat == 3 || imageFormat == 20) {
         bytesPerPixel = 1;
       }
-      else if (imageFormat == 4 || imageFormat == 28) { // RGBA
+      else if (imageFormat == 8) {
+        bytesPerPixel = 2;
+      }
+      else if (imageFormat == 4 || imageFormat == 28 || imageFormat == 9) {
         bytesPerPixel = 4;
+      }
+      else if (imageFormat == 10) {
+        bytesPerPixel = 8;
       }
       else {
         ErrorLogger.log("[Viewer_VPK_VPK_VTEXC] Unknown Image Format: " + imageFormat);
@@ -223,6 +232,24 @@ public class Viewer_VPK_VPK_VTEXC extends ViewerPlugin {
 
       totalNumBytes = numBytes;
 
+      // if the image is too large (for our Settings), choose a smaller one
+      int maxSize = Settings.getInt("MaxImageDimension");
+      if (maxSize <= 0) {
+        // ignore it
+      }
+      else if (width > maxSize || height > maxSize) {
+        // find the mipmap that's the right size
+
+        while (width > maxSize || height > maxSize) {
+          width /= 2;
+          height /= 2;
+
+          numPixels = width * height;
+          numBytes = (int) (bytesPerPixel * numPixels);
+          totalNumBytes += numBytes;
+        }
+      }
+
       // now go to the offset to the mipmap we want
       long offset = fm.getLength() - totalNumBytes;
       fm.seek(offset);
@@ -233,14 +260,35 @@ public class Viewer_VPK_VPK_VTEXC extends ViewerPlugin {
         imageResource = ImageFormatReader.readDXT1(fm, width, height);
         imageResource.addProperty("ImageFormat", "DXT1");
       }
-      else if (imageFormat == 2 || imageFormat == 20) { // DXT3
-        imageResource = ImageFormatReader.readDXT3(fm, width, height);
-        imageResource.addProperty("ImageFormat", "DXT3");
+      else if (imageFormat == 2) { // DXT5
+        imageResource = ImageFormatReader.readDXT5(fm, width, height);
+        imageResource.addProperty("ImageFormat", "DXT5");
+      }
+      else if (imageFormat == 3) { // I8
+        imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
+        imageResource.addProperty("ImageFormat", "I8");
       }
       else if (imageFormat == 4 || imageFormat == 28) { // RGBA
         imageResource = ImageFormatReader.readRGBA(fm, width, height);
         imageResource.addProperty("ImageFormat", "RGBA");
       }
+      else if (imageFormat == 8) { // R16
+        imageResource = ImageFormatReader.readR16(fm, width, height);
+        imageResource.addProperty("ImageFormat", "R16");
+      }
+      else if (imageFormat == 9) { // R16G16
+        imageResource = ImageFormatReader.readR16G16(fm, width, height);
+        imageResource.addProperty("ImageFormat", "R16G16");
+      }
+      else if (imageFormat == 10) { // RGBA16161616
+        imageResource = ImageFormatReader.read16F16F16F16F_RGBA(fm, width, height);
+        imageResource.addProperty("ImageFormat", "16F16F16F16F_RGBA");
+      }
+      else if (imageFormat == 20) { // BC7
+        imageResource = ImageFormatReader.readBC7(fm, width, height);
+        imageResource.addProperty("ImageFormat", "BC7");
+      }
+
       else {
         return null; // unknown (or other) image format
       }

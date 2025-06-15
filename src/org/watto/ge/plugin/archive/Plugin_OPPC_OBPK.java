@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
@@ -243,11 +244,18 @@ public class Plugin_OPPC_OBPK extends ArchivePlugin {
       // 4 - number of ID Entries
       int numIDs = fm.readInt();
       for (int i = 0; i < numIDs; i++) {
+
+        if (fm.getOffset() >= arcSize) {
+          // error detection for invalid archives
+          return null;
+        }
+
         // 4 - Unknown (1)
         int count = fm.readInt();
 
         // 4 - Unknown
         fm.skip(count * 4);
+
       }
 
       // 4 - Number of Entries (Files + Folders)

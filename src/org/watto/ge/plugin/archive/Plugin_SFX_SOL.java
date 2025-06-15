@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,10 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.component.WSPluginManager;
 import org.watto.datatype.Archive;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
 import org.watto.task.TaskProgressManager;
@@ -42,16 +46,15 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Leisure Suit Larry 6: Shape Up Or Slip Out",
+    setGames("EcoQuest 2: Lost Secret of the Rainforest",
+        "Leisure Suit Larry 6: Shape Up Or Slip Out",
         "Leisure Suit Larry 7: Love For Sail",
         "Police Quest: SWAT");
     setExtensions("sfx", "aud"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("aud", "AUD Audio", FileType.TYPE_AUDIO));
 
   }
 
@@ -206,6 +209,9 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
 
         // 3 - Type? (SOL)
         String fileType = fm.readString(3);
+        if (fileType.equals("SOL")) {
+          solOffset = fm.getOffset() - 3;
+        }
 
         // 4 - Unknown (223748608)
         fm.skip(4);
@@ -226,8 +232,9 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
         fm.skip(length);
 
         if (fileType.equals("SOL")) {
-          offset = solOffset;
+          offset = solOffset - 2;
           length += 14;
+          fileType += ".aud";
         }
 
         String filename = Resource.generateFilename(realNumFiles) + "." + fileType;
@@ -250,6 +257,20 @@ public class Plugin_SFX_SOL extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+   **********************************************************************************************
+   Provide hints to the previewer so that certain document types are displayed appropriately
+   **********************************************************************************************
+   **/
+  @Override
+  public ViewerPlugin previewHint(Resource resource) {
+    String extension = resource.getExtension();
+    if (extension.equalsIgnoreCase("aud")) {
+      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "FFMPEG_Audio_WAV");
+    }
+    return null;
   }
 
 }

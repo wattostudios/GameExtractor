@@ -23,10 +23,12 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_RESOURCES_2;
+import org.watto.ge.plugin.archive.Plugin_TANGORESOURCE;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.FloatConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
+
 import javafx.geometry.Point3D;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
@@ -73,7 +75,7 @@ public class Viewer_RESOURCES_2_BMD6MODEL extends ViewerPlugin {
       int rating = 0;
 
       ArchivePlugin plugin = Archive.getReadPlugin();
-      if (plugin instanceof Plugin_RESOURCES_2) {
+      if (plugin instanceof Plugin_RESOURCES_2 || plugin instanceof Plugin_TANGORESOURCE) {
         rating += 50;
       }
 

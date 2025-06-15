@@ -1,0 +1,1618 @@
+<languagePack>
+	<name>Russian (русский)</name>
+	<version>3.16</version>
+	<author>
+		<name>berry</name>
+		<email>igory.ygr200@gmail.com</email>
+		<website>https://github.com/Blueberryy</website>
+	</author>
+	
+	<texts>
+	
+	
+		<!-- REQUIRED -->
+		
+		
+		<lang code="ProgramName" value="Game Extractor" />
+		<lang code="ProgramName_Free" value="Game Extractor (основная версия)" />
+		
+		<lang code="Welcome" value="Добро пожаловать в Game Extractor!" />
+		
+		<lang code="PopupDialog_Error_Title" value="Ошибка" />
+		<lang code="PopupDialog_Confirm_Title" value="Подтвердить" />
+		<lang code="PopupDialog_Message_Title" value="Сообщение" />
+		<lang code="WSPopupDialogWrapLabel_ShowLanguagePackOutdatedError_Text" value="Языковой пакет устарел - пожалуйста, скачайте новый!" />
+		<lang code="PopupDialog_HidableCheckBox_Message" value="Показывать сообщение снова?" />
+		
+		<lang code="WSButton_OK_Text" value="OK" />
+		<lang code="WSButton_OK_Text_Small" value="OK" />
+		<lang code="WSButton_OK_Tooltip" value="Подтвердить." />
+		<lang code="WSButton_Yes_Text" value="Да" />
+		<lang code="WSButton_Yes_Text_Small" value="Да" />
+		<lang code="WSButton_Yes_Tooltip" value="Подтвердить." />
+		<lang code="WSButton_No_Text" value="Нет" />
+		<lang code="WSButton_No_Text_Small" value="Нет" />
+		<lang code="WSButton_No_Tooltip" value="Отмена." />
+		
+		<lang code="WSSplashDialog_Plugins" value="Загрузка плагинов" />
+		<lang code="WSSplashDialog_ConstructInterface" value="Построение интерфейса" />
+		
+		
+		<!-- WSProgressDialog -->
+		
+		
+		<lang code="WSButton_CloseProgress_Text" value="Закрыть всплывающее окно" />
+		
+		
+		<!-- WSComboButton -->
+		
+		
+		<lang code="WSButton_WSComboButtonArrow_Text" value="" />
+		
+	
+		<!-- WSFontChooser -->
+		
+		
+		<lang code="WSCheckBox_FontAllCaps_Text" value="Все заглавные" />
+		<lang code="WSCheckBox_FontDoubleStrikethrough_Text" value="Двойное зачёркивание" />
+		<lang code="WSCheckBox_FontEmboss_Text" value="Рельеф" />
+		<lang code="WSCheckBox_FontEngrave_Text" value="Гравировка" />
+		<lang code="WSCheckBox_FontHidden_Text" value="Скрытый" />
+		<lang code="WSCheckBox_FontOutline_Text" value="Контур" />
+		<lang code="WSCheckBox_FontShadow_Text" value="Тень" />
+		<lang code="WSCheckBox_FontSmallCaps_Text" value="Маленькие заглавные" />
+		<lang code="WSCheckBox_FontStrikethrough_Text" value="Зачёркивание" />
+		<lang code="WSCheckBox_FontSubscript_Text" value="Подстрочный индекс" />
+		<lang code="WSCheckBox_FontSuperscript_Text" value="Надстрочный индекс" />
+		<lang code="WSLabel_FontColorLabel_Text" value="Цвет" />
+		<lang code="WSLabel_FontNameLabel_Text" value="Шрифт" />
+		<lang code="WSLabel_FontPreview_Text" value="Предпросмотр стиля шрифта" />
+		<lang code="WSLabel_FontSizeLabel_Text" value="Размер" />
+		<lang code="WSLabel_FontStyleLabel_Text" value="Стиль" />
+		<lang code="WSLabel_FontUnderlineColorLabel_Text" value="Цвет подчёркивания" />
+		<lang code="WSLabel_FontUnderlineStyleLabel_Text" value="Стиль подчёркивания" />
+		<lang code="WSFontChooser_FontStyle_Bold" value="Жирный" />
+		<lang code="WSFontChooser_FontStyle_BoldItalic" value="Жирный курсив" />
+		<lang code="WSFontChooser_FontStyle_Italic" value="Курсив" />
+		<lang code="WSFontChooser_FontStyle_Plain" value="Обычный" />
+		<lang code="WSFontChooser_FontStyle_Bold Italic" value="Жирный курсив" />
+		
+		
+		<!-- WSSmallColorChooser -->
+		
+
+		<lang code="WSButton_ColorMoreColors_Text" value="Другие цвета..." />
+		
+		<lang code="WSColorChooser_Color_0,0,0" value="Чёрный" />
+		<lang code="WSColorChooser_Color_128,0,0" value="Тёмно-красный" />
+		<lang code="WSColorChooser_Color_255,0,0" value="Красный" />
+		<lang code="WSColorChooser_Color_255,0,255" value="Лиловый" />
+		<lang code="WSColorChooser_Color_255,153,204" value="Розовый" />
+		<lang code="WSColorChooser_Color_153,51,0" value="Тёмно-оранжевый" />
+		<lang code="WSColorChooser_Color_255,102,0" value="Оранжевый" />
+		<lang code="WSColorChooser_Color_255,153,0" value="Светло-оранжевый" />
+		<lang code="WSColorChooser_Color_255,204,0" value="Персиковый" />
+		<lang code="WSColorChooser_Color_255,204,153" value="Абрикосовый" />
+		<lang code="WSColorChooser_Color_51,51,0" value="Тёмно-оливковый" />
+		<lang code="WSColorChooser_Color_128,128,0" value="Оливковый" />
+		<lang code="WSColorChooser_Color_153,204,0" value="Светло-оливковый" />
+		<lang code="WSColorChooser_Color_255,255,0" value="Жёлтый" />
+		<lang code="WSColorChooser_Color_255,255,153" value="Светло-жёлтый" />
+		<lang code="WSColorChooser_Color_0,51,0" value="Тёмный аквамарин" />
+		<lang code="WSColorChooser_Color_0,128,0" value="Тёмно-зелёный" />
+		<lang code="WSColorChooser_Color_51,153,102" value="Аквамарин" />
+		<lang code="WSColorChooser_Color_0,255,0" value="Зелёный" />
+		<lang code="WSColorChooser_Color_204,255,204" value="Светло-зелёный" />
+		<lang code="WSColorChooser_Color_0,51,102" value="Тёмно-океановый" />
+		<lang code="WSColorChooser_Color_0,128,128" value="Океановый" />
+		<lang code="WSColorChooser_Color_51,204,204" value="Светло-океановый" />
+		<lang code="WSColorChooser_Color_0,255,255" value="Голубой" />
+		<lang code="WSColorChooser_Color_204,255,255" value="Светло-голубой" />
+		<lang code="WSColorChooser_Color_0,0,128" value="Тёмно-синий" />
+		<lang code="WSColorChooser_Color_0,0,255" value="Синий" />
+		<lang code="WSColorChooser_Color_51,102,255" value="Светло-синий" />
+		<lang code="WSColorChooser_Color_0,204,255" value="Небесный" />
+		<lang code="WSColorChooser_Color_153,204,255" value="Светло-небесный" />
+		<lang code="WSColorChooser_Color_51,51,153" value="Фиолетовый" />
+		<lang code="WSColorChooser_Color_102,102,153" value="Светло-фиолетовый" />
+		<lang code="WSColorChooser_Color_128,0,128" value="Пурпурный" />
+		<lang code="WSColorChooser_Color_153,51,102" value="Бордовый" />
+		<lang code="WSColorChooser_Color_204,153,255" value="Светло-пурпурный" />
+		<lang code="WSColorChooser_Color_51,51,51" value="Ночной серый" />
+		<lang code="WSColorChooser_Color_128,128,128" value="Тёмно-серый" />
+		<lang code="WSColorChooser_Color_153,153,153" value="Серый" />
+		<lang code="WSColorChooser_Color_192,192,192" value="Светло-серый" />
+		<lang code="WSColorChooser_Color_255,255,255" value="Белый" />
+		
+		<lang code="WSButton_ColorChooserClosePopup_Text" value="Сменить цвет" />
+		<lang code="WSLabel_ColorInfoPanelName_Text" value="" />
+
+		
+		<!-- WSMonthCalendar -->
+		
+		
+		<lang code="WSButton_NextMonth_Text" value=">" />
+		<lang code="WSButton_PreviousMonth_Text" value="<" />
+		
+		<lang code="WSButton_NextYear_Text" value=">>" />
+		<lang code="WSButton_PreviousYear_Text" value="<<" />
+		
+		<lang code="WSLabel_MondayHeaderSmall_Text" value="П" />
+		<lang code="WSLabel_TuesdayHeaderSmall_Text" value="В" />
+		<lang code="WSLabel_WednesdayHeaderSmall_Text" value="С" />
+		<lang code="WSLabel_ThursdayHeaderSmall_Text" value="Ч" />
+		<lang code="WSLabel_FridayHeaderSmall_Text" value="П" />
+		<lang code="WSLabel_SaturdayHeaderSmall_Text" value="С" />
+		<lang code="WSLabel_SundayHeaderSmall_Text" value="В" />
+		
+		<lang code="MonthJanuary" value="Январь" />
+		<lang code="MonthFebruary" value="Февраль" />
+		<lang code="MonthMarch" value="Март" />
+		<lang code="MonthApril" value="Апрель" />
+		<lang code="MonthMay" value="Май" />
+		<lang code="MonthJune" value="Июнь" />
+		<lang code="MonthJuly" value="Июль" />
+		<lang code="MonthAugust" value="Август" />
+		<lang code="MonthSeptember" value="Сентябрь" />
+		<lang code="MonthOctober" value="Октябрь" />
+		<lang code="MonthNovember" value="Ноябрь" />
+		<lang code="MonthDecember" value="Декабрь" />
+		
+		
+		<!-- WSGradientColorChooser -->
+		
+		
+		<lang code="WSTextField_GradientColorChooserBlueValue_Label" value="Синий" />
+		<lang code="WSTextField_GradientColorChooserGreenValue_Label" value="Зелёный" />
+		<lang code="WSTextField_GradientColorChooserRedValue_Label" value="Красный" />
+		<lang code="WSTextField_GradientColorChooserHexValue_Label" value="Hex" />
+		
+		
+		<!-- CUSTOM -->
+		
+		<lang code="" value="" />
+		
+		<lang code="AllFiles" value="Все файлы" />
+		<lang code="ColumnValue" value="Значение столбца" />
+		<lang code="Description_ArchivePlugin" value="Плагин архивации способен читать и записывать архивы." />
+		<lang code="Description_Author" value="Этот сценарий написан " />
+		<lang code="Description_DefaultExtensions" value="Этот плагин работает со следующими расширениями: " />
+		<lang code="Description_DefaultGames" value="Этот плагин используется для следующих игр: " />
+		<lang code="Description_DefaultPlatforms" value="Этот плагин может анализировать следующие платформы: " />
+		<lang code="Description_DirectoryListPanel" value="Списки папок - это способ представления файлов и каталогов пользователю, позволяющий находить и выбирать файлы." />
+		<lang code="Description_ExporterPlugin" value="Экспортёры отвечают за чтение и запись отдельных файлов архива. Любое сжатие и шифрование выполняется этими плагинами." />
+		<lang code="Description_FileListExporterPlugin" value="Экспортёры списков файлов могут сохранять список файлов в архиве." />
+		<lang code="Description_FileListPanel" value="Списки файлов - это способ отображения файлов в архиве." />
+		<lang code="Description_ImplicitReplaceOperation" value="Автоматическая замена" />
+		<lang code="Description_NoDefaultExtensions" value="В этом плагине нет расширений по умолчанию." />
+		<lang code="Description_NoDefaultGames" value="Этот плагин является обычным и может использоваться в различных играх." />
+		<lang code="Description_NoDefaultPlatforms" value="В этом плагине нет платформ по умолчанию." />
+		<lang code="Description_OptionsPlugin" value="Группы параметров - это плагины, содержащие группу настроек, которые можно изменить." />
+		<lang code="Description_PluginDisabled" value="Этот плагин отключён." />
+		<lang code="Description_PluginEnabled" value="Этот плагин включён." />
+		<lang code="Description_StandardFileFormat" value="Формат файла, считываемый этим плагином, является стандартным или часто используемым." />
+		<lang code="Description_NonStandardFileFormat" value="Формат файла, считываемый этим плагином, является собственным." />
+		<lang code="Description_ReadOperation" value="Чтение" />
+		<lang code="Description_RenameOperation" value="Переименование" />
+		<lang code="Description_RenamerPlugin" value="Плагины переименования могут изменять имена файла в архиве." />
+		<lang code="Description_ReplaceOperation" value="Замена" />
+		<lang code="Description_ScannerPlugin" value="Сканеры могут просматривать архив и находить основные файлы, такие как звуки и изображения." />
+		<lang code="Description_Script" value="Сценарий - это файл, который описывает, как читать архив." />
+		<lang code="Description_ScriptArchivePlugin" value="Читатель сценариев способен читать архив с помощью файла сценария." />
+		<lang code="Description_SidePanel" value="Боковые панели - это панели, которые появляются справа от Game Extractor и управляют задачами, которые можно выполнять." />
+		<lang code="Description_SupportedOperations" value="Поддерживаются следующие действия: " />
+		<lang code="Description_Version" value="Версия сценария " />
+		<lang code="Description_ViewerPlugin" value="Плагины предпросмотра могут отображать предварительный просмотр файла в архиве. Некоторые плагины также используются для преобразования изображений в различные форматы и для создания миниатюр." />
+		<lang code="Description_WriteOperation" value="Сохранение" />
+		<lang code="DragDrop_Add" value="Добавить файлы" />
+		<lang code="DragDrop_Ask" value="Показать меню" />
+		<lang code="DragDrop_ReplaceCurrent" value="Замена файла на курсоре" />
+		<lang code="DragDrop_ReplaceMatching" value="Замена совпадающих файлов" />
+		<lang code="Extension" value="Расширение" />
+		<lang code="FileListTree_RootNodeLabel" value="Архив" />
+		<lang code="Game" value="Игра" />
+		<lang code="HexEditor_BinaryValue" value="Двоичное" />
+		<lang code="HexEditor_ByteValue" value="Байт" />
+		<lang code="HexEditor_CharValue" value="Строка ASCII" />
+		<lang code="HexEditor_DoubleValue" value="Двойное (8 байт)" />
+		<lang code="HexEditor_FloatValue" value="Дробное (4 байта)" />
+		<lang code="HexEditor_HexValue" value="Шестнадцатеричное" />
+		<lang code="HexEditor_IntValue" value="Целое (4 байта)" />
+		<lang code="HexEditor_LongValue" value="Длинное (8 байт)" />
+		<lang code="HexEditor_ShortValue" value="Короткое (2 байта)" />
+		<lang code="HexEditor_TimestampValue" value="Метка времени" />
+		<lang code="HexEditor_UnicodeValue" value="Строка Юникода" />
+		<lang code="Information_AllowedFunctions" value="Действия" />
+		<lang code="Information_ArchiveSize" value="Размер архива" />
+		<lang code="Information_BasePath" value="Основной путь" />
+		<lang code="Information_NumSelectedFiles" value="Выбранное число" />
+		<lang code="Information_NumberOfFiles" value="Число файлов" />
+		<lang code="Information_PluginClass" value="Тип плагина" />
+		<lang code="Information_PluginName" value="Имя плагина" />
+		<lang code="Information_SupportedExtensions" value="Расширения" />
+		<lang code="Information_SupportedGames" value="Игры" />
+		<lang code="Information_SupportedPlatforms" value="Платформы" />
+		<lang code="Name" value="Имя плагина" />
+		<lang code="PluginsOnlyInFullVersion" value="Эти плагины доступны только в Game Extractor (полная версия). Для получения дополнительной информации зайдите на сайт http://www.watto.org/extract" />
+		<lang code="Options_Appearance_SidePanel_Options_Appearance_Main_Text" value="Внешний вид" />
+		<lang code="Options_Directories_SidePanel_Options_Directories_Main_Text" value="Папки" />
+		<lang code="Options_General_SidePanel_Options_General_Main_Text" value="Общее" />
+		<lang code="Options_HexEditorFields_SidePanel_Options_HexEditorFields_Main_Text" value="Поля шестнадцатеричного просмотрщика" />
+		<lang code="Options_OpeningArchives_SidePanel_Options_OpeningArchives_Main_Text" value="Открытие и сохранение архивов" />
+		<lang code="Options_Popups_SidePanel_Options_Popups_Main_Text" value="Всплывающие окна" />
+		<lang code="Options_PreviewingFiles_SidePanel_Options_PreviewingFiles_Main_Text" value="Предпросмотр файлов" />
+		<lang code="Options_Scanners_SidePanel_Options_Scanners_Main_Text" value="Сканеры" />
+		<lang code="Options_TableColumns_SidePanel_Options_TableColumns_Main_Text" value="Столбцы таблицы" />
+		<lang code="Options_ToolbarButtons_SidePanel_Options_ToolbarButtons_Main_Text" value="Кнопки панели инструментов" />
+		<lang code="Plugin_Archive_Name" value="Архивы" />
+		<lang code="Plugin_DirectoryList_Name" value="Списки папок" />
+		<lang code="Plugin_Exporter_Name" value="Экспортёры файлов" />
+		<lang code="Plugin_FileListExporter_Name" value="Экспортёры списков файлов" />
+		<lang code="Plugin_FileList_Name" value="Списки файлов" />
+		<lang code="Plugin_OptionGroup_Name" value="Группы параметров" />
+		<lang code="Plugin_Renamer_Name" value="Переименователи" />
+		<lang code="Plugin_Scanner_Name" value="Сканеры" />
+		<lang code="Plugin_ScriptArchive_Name" value="Чтецы сценариев" />
+		<lang code="Plugin_Script_Name" value="Сценарии" />
+		<lang code="Plugin_SidePanel_Name" value="Боковые панели" />
+		<lang code="Plugin_Viewer_Name" value="Предпросмотрщики" />
+		<lang code="PopupDialog_Error_Title" value="Ошибка" />
+		<lang code="PopupDialog_Message_Title" value="Сообщение" />
+		<lang code="Progress_AddingFiles" value="Добавление файлов" />
+		<lang code="Progress_ConvertingFiles" value="Преобразование файлов" />
+		<lang code="Progress_DecompressingArchive" value="Распаковка архива" />
+		<lang code="Progress_DecompressingFiles" value="Распаковка файлов" />
+		<lang code="Progress_AddingFiles_Undo" value="Удаление добавленных файлов" />
+		<lang code="Progress_CuttingArchive" value="Вырезание файла" />
+		<lang code="Progress_ExportingFiles" value="Экспорт файлов" />
+		<lang code="Progress_LoadingThumbnails" value="Загрузка миниатюр" />
+		<lang code="Progress_PerformingCalculations" value="Выполнение вычислений" />
+		<lang code="Progress_PleaseWait" value="Пожалуйста, подождите" />
+		<lang code="Progress_ReadingArchive" value="Чтение архива" />
+		<lang code="Progress_RemovingFiles" value="Удаление файлов" />
+		<lang code="Progress_RemovingFiles_Undo" value="Добавление удалённых файлов" />
+		<lang code="Progress_RenamingFiles" value="Переименование файлов" />
+		<lang code="Progress_RenamingFiles_Undo" value="Обратное переименование файлов" />
+		<lang code="Progress_ReplacingFiles" value="Замена файлов" />
+		<lang code="Progress_ReplacingFiles_Undo" value="Восстановление заменённых файлов" />
+		<lang code="Progress_ScanningArchive" value="Сканирование файлов" />
+		<lang code="Progress_SearchingFiles" value="Поиск файлов" />
+		<lang code="Progress_WritingArchive" value="Сохранение архива" />
+		<lang code="Progress_WritingDirectory" value="Запись папки" />
+		<lang code="Progress_WritingFiles" value="Сохранение файлов" />
+		<lang code="ScriptError_BlankLineNotAllowed" value="Пустые строки недопустимы." />
+		<lang code="ScriptError_ClosingXMLNotAtEnd" value="Закрывающий тег </BMS> может находиться только в последней строке." />
+		<lang code="ScriptError_CommandUnknown" value="Команда неизвестна." />
+		<lang code="ScriptError_DoNotMatching" value="Отсутствует как минимум одна команда WHILE." />
+		<lang code="ScriptError_ElseWithoutIf" value="Для этой команды ELSE нет подходящего IF." />
+		<lang code="ScriptError_EndIfWithoutIf" value="Для этой команды ENDIF нет подходящего IF." />
+		<lang code="ScriptError_EndMarkerNotAtEnd" value="Конечный маркер «;» допускается только в конце строки." />
+		<lang code="ScriptError_EndMarkerUsedInLine" value="Конечный маркер «;» допускается только в конце строки." />
+		<lang code="ScriptError_FileNotOpened" value="Файл не открыт." />
+		<lang code="ScriptError_ForNotMatching" value="Отсутствует как минимум одна команда NEXT." />
+		<lang code="ScriptError_IfNotMatching" value="Отсутствует как минимум одна команда ENDIF." />
+		<lang code="ScriptError_MissingEndMarker" value="Конечный маркер «;» отсутствует в этой строке." />
+		<lang code="ScriptError_MissingVariablesInLine" value="В этой строке недостаточно параметров." />
+		<lang code="ScriptError_MultipleSpaces" value="Несколько пробелов между словами недопустимы." />
+		<lang code="ScriptError_NextWithoutFor" value="Для этой команды NEXT нет подходящего FOR." />
+		<lang code="ScriptError_NoSpaceBeforeEndMarker" value="Перед конечным маркером «;» нет пробела." />
+		<lang code="ScriptError_OpeningXMLNotAtStart" value="Открывающий тег <BMS ... > может находиться только в первой строке." />
+		<lang code="ScriptError_SpaceAtStart" value="Пробелы в начале строки недопустимы." />
+		<lang code="ScriptError_TooManyVariablesInLine" value="В этой строке слишком много параметров." />
+		<lang code="ScriptError_ValueNotAllowed" value="Параметр не является одним из допустимых значений." />
+		<lang code="ScriptError_VariableExpected" value="Переменной не существует." />
+		<lang code="ScriptError_VariableOrNumberExpected" value="Переменной не существует, или её значение не является числом." />
+		<lang code="ScriptError_WhileWithoutDo" value="Для этой команды WHILE нет подходящего DO." />
+		<lang code="ScriptError_XMLNotMatching" value="Вы должны указать оба или ни одного из тегов <BMS ... > и </BMS>." />
+		<lang code="SidePanel_DirectoryList_SidePanel_DirectoryList_Text" value="Управление архивами (список папок)" />
+		<lang code="SidePanel_RenameFile_SidePanel_RenameFile_Text" value="Переименователь файлов" />
+		<lang code="SidePanel_About_SidePanel_About_Text" value="О программе Game Extractor" />
+		<lang code="SidePanel_FileListExporter_SidePanel_FileListExporter_Text" value="Экспорт списка файлов" />
+		<lang code="SidePanel_Help_SidePanel_Help_Text" value="Справка" />
+		<lang code="SidePanel_HexEditor_SidePanel_HexEditor_Text" value="Шестнадцатеричный редактор" />
+		<lang code="SidePanel_Information_SidePanel_Information_Text" value="Информация об архиве" />
+		<lang code="SidePanel_Options_SidePanel_Options_Text" value="Параметры и настройки программы" />
+		<lang code="SidePanel_PluginList_SidePanel_PluginList_Text" value="Список плагинов" />
+		<lang code="SidePanel_Preview_SidePanel_Preview_Text" value="Предпросмотрщик файлов" />
+		<lang code="SidePanel_ScriptBuilder_SidePanel_ScriptBuilder_Text" value="Конструктор сценариев" />
+		
+		<lang code="Task_AddFiles" value="Файлов добавлено: &number&" />
+		<lang code="Task_RemoveFiles" value="Файлов удалено: &number&" />
+		<lang code="Task_RenameFiles_NoSearch" value="Файлов переименовано: &number& со значением &quot;&value&&quot;" />
+		<lang code="Task_RenameFiles_WithSearch" value="Файлов переименовано: &number& по поисковому критерию &quot;&search&&quot; и значением &quot;&value&&quot;" />
+		<lang code="Task_ReplaceMatchingFiles" value="Файлов заменено: &number&" />
+		<lang code="Task_ReplaceSelectedFiles" value="Файлов заменено: &number&" />
+		<lang code="Unknown" value="Неизвестно" />
+		<lang code="File" value="- файл" />
+		<lang code="WSButton_About_Text" value="О программе" />
+		<lang code="WSButton_About_Tooltip" value="О программе Game Extractor и его авторе." />
+		<lang code="WSButton_AddResources_Text" value="Добавить файлы" />
+		<lang code="WSButton_AddResources_Tooltip" value="Добавление файлов с компьютера в архив." />
+		<lang code="WSButton_AudioPreview_Pause_Text" value="Пауза" />
+		<lang code="WSButton_AudioPreview_Play_Text" value="Воспроизвести" />
+		<lang code="WSButton_AudioPreview_Stop_Text" value="Остановить" />
+		<lang code="WSButton_Choose_Text" value="Выбор" />
+		<lang code="WSButton_Choose_Tooltip" value="Выбрать..." />
+		<lang code="WSButton_CloseProgram_Text" value="Закрыть программу" />
+		<lang code="WSButton_CloseProgram_Tooltip" value="Закрытие Game Extractor." />
+		<lang code="WSButton_ComboArrowButton_Text" value="" />
+		<lang code="WSButton_ComboArrowButton_Tooltip" value="Выбор..." />
+		<lang code="WSButton_CurrentFont_Text" value="Выбор" />
+		<lang code="WSButton_CurrentFont_Tooltip" value="Шрифт, используемый в программе." />
+		<lang code="WSButton_CutArchive_Tooltip" value="Копирование некоторой информации из файла на компьютере и упаковка её в архив, готовый для анализа." />
+		<lang code="WSButton_ExtractResources_Selected_Text" value="Извлечение файлов" />
+		<lang code="WSButton_ExtractResources_Selected_Tooltip" value="Извлечение выделенных файлов из архива на компьютер." />
+		<lang code="WSButton_ExtractResources_Text" value="Извлечение файлов" />
+		<lang code="WSButton_ExtractResources_Tooltip" value="Извлечение файлов из архива на компьютер." />
+		<lang code="WSButton_ExtractSelectedResources_Tooltip" value="Показывает боковую панель для извлечения файлов из архива на компьютер." />
+		<lang code="WSButton_FileListExporter_Text" value="Экспортёр списка файлов" />
+		<lang code="WSButton_FileListExporter_Tooltip" value="Сохраняет документ со списком всех файлов в архиве." />
+		<lang code="WSButton_FileListView_Text" value="Просмотр списка файлов" />
+		<lang code="WSButton_FileListView_Tooltip" value="Изменяет способ отображения файлов в архиве." />
+		
+		<lang code="WSButton_FileListView_Table_Text" value="Таблица списка файлов" />
+		<lang code="WSButton_FileListView_Table_Tooltip" value="Отображение списка файлов в виде таблицы." />
+		<lang code="WSButton_FileListView_Tree_Text" value="Древовидный список файлов" />
+		<lang code="WSButton_FileListView_Tree_Tooltip" value="Отображение списка файлов в виде дерева." />
+		<lang code="WSButton_FileListView_TreeTable_Text" value="Список файлов групповой таблицы" />
+		<lang code="WSButton_FileListView_TreeTable_Tooltip" value="Отображение списка файлов в виде сгруппированной таблицы." />
+		<lang code="WSButton_FileListView_Thumbnails_Text" value="Список файлов миниатюр" />
+		<lang code="WSButton_FileListView_Thumbnails_Tooltip" value="Отображение списка файлов в виде списка миниатюр." />
+		
+		<lang code="WSButton_FontChooserClosePopup_Text" value="Сменить шрифт" />
+		<lang code="WSButton_Help_Text" value="Справка" />
+		<lang code="WSButton_Help_Tooltip" value="Отображение справочных документов." />
+		<lang code="WSButton_HexEditor_Text" value="Шестнадцатеричный просмотрщик" />
+		<lang code="WSButton_HexEditor_Tooltip" value="Показать шестнадцатеричный просмотрщик для отображения содержимого файлов в архиве." />
+		<lang code="WSButton_Information_Text" value="Информация" />
+		<lang code="WSButton_Information_Tooltip" value="Показать информацию о текущем архиве и его файлах." />
+		<lang code="WSButton_NewArchive_Text" value="Новый архив" />
+		<lang code="WSButton_NewArchive_Tooltip" value="Создание нового пустого архива." />
+		<lang code="WSButton_Option_ToolbarButtons_AddButton_Small" value="Добавить \/" />
+		<lang code="WSButton_Option_ToolbarButtons_AddButton_Text" value="Добавить в панель инструментов \/" />
+		<lang code="WSButton_Option_ToolbarButtons_AddButton_Tooltip" value="Добавление выделенной кнопки в панель инструментов." />
+		<lang code="WSButton_Option_ToolbarButtons_MoveDown_Text" value="Переместить кнопку вниз" />
+		<lang code="WSButton_Option_ToolbarButtons_MoveDown_Tooltip" value="Перемещение выделенной кнопки вниз (меняет местами с кнопкой под ней)." />
+		<lang code="WSButton_Option_ToolbarButtons_MoveUp_Text" value="Переместить кнопку вверх" />
+		<lang code="WSButton_Option_ToolbarButtons_MoveUp_Tooltip" value="Перемещение выделенной кнопки вверх (меняет местами с кнопкой над ней)." />
+		<lang code="WSButton_Option_ToolbarButtons_RemoveButton_Small" value="Удалить /\" />
+		<lang code="WSButton_Option_ToolbarButtons_RemoveButton_Text" value="Удалить из панели инструментов /\" />
+		<lang code="WSButton_Option_ToolbarButtons_RemoveButton_Tooltip" value="Удаление выделенной кнопки с панели инструментов." />
+		<lang code="WSButton_Options_Text" value="Настройки" />
+		<lang code="WSButton_Options_Tooltip" value="Изменение принципа работы и внешнего вида Game Extractor." />
+		<lang code="WSButton_ParentDirectory_Tooltip" value="Перейти в предыдущую (родительскую) папку." />
+		<lang code="WSButton_PluginList_Text" value="Список плагинов" />
+		<lang code="WSButton_PluginList_Tooltip" value="Отображение списка загруженных плагинов." />
+		<lang code="WSButton_PreviewResource_Text" value="Предпросмотр файла" />
+		<lang code="WSButton_PreviewResource_Tooltip" value="Позволяет просматривать файлы в архиве." />
+		<lang code="WSButton_ReadArchive_Normal_Tooltip" value="Открыть архив на компьютере." />
+		<lang code="WSButton_ReadArchive_Text" value="Открыть архив" />
+		<lang code="WSButton_RedoTaskComboButton_Tooltip" value="Повторно применить изменение, которое было отменено." />
+		<lang code="WSButton_RemoveResources_Text" value="Удалить файлы" />
+		<lang code="WSButton_RemoveResources_Tooltip" value="Удаление выделенных файлов из архива." />
+		<lang code="WSButton_RenameResources_Text" value="Переименовать файлы" />
+		<lang code="WSButton_RenameResources_Tooltip" value="Переименовывание выделенных файлов в архиве." />
+		
+		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Text" value="Создать" />
+		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Tooltip" value="Пересоздание изображения, используя свойства, заданные в других полях." />
+		
+		<lang code="WSButton_ReplaceResources_Text" value="Заменить файлы" />
+		<lang code="WSButton_ReplaceResources_Tooltip" value="Замена файлов в архиве на файлы на компьютере." />
+		<lang code="WSButton_ScriptBuilder_Tooltip" value="Отображение боковой панели для создания сценариев." />
+		<lang code="WSButton_SelectResources_All_Text" value="Выделить все" />
+		<lang code="WSButton_SelectResources_All_Tooltip" value="Выделение файлов в архиве." />
+		<lang code="WSButton_Separator_Tooltip" value="Обеспечение разделителя между кнопками на панели инструментов." />
+		<lang code="WSButton_SidePanel_DirectoryList_AddFileButton_Tooltip" value="Добавление файлов в архив." />
+		<lang code="WSButton_SidePanel_DirectoryList_ConvertArchiveButton_Tooltip" value="Сохранение архива в выбранном формате." />
+		<lang code="WSButton_SidePanel_DirectoryList_ConvertPanelButton_Tooltip" value="Отображение элементов управления преобразования архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_CutArchiveButton_Tooltip" value="Элементы управления для вырезания архива для анализа." />
+		<lang code="WSButton_SidePanel_DirectoryList_CutPanelButton_Tooltip" value="Отображение элементов управления вырезания архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportAllButton_Tooltip" value="Извлечение всех файлов из архива на компьютер." />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportPanelButton_Tooltip" value="Показать элементы управления экспортом файлов." />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportSelectedButton_Tooltip" value="Извлечение выделенных файлов из архива на компьютер." />
+		<lang code="WSButton_SidePanel_DirectoryList_ModifyPanelButton_Tooltip" value="Отображение элементов управления изменения архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadArchiveButton_Tooltip" value="Открытие выделенного архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadPanelButton_Tooltip" value="Отображение элементов управления открытия архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadScriptArchiveButton_Tooltip" value="Открытие архива с помощью выделенного сценария." />
+		<lang code="WSButton_SidePanel_DirectoryList_RemoveFileButton_Tooltip" value="Удаление файлов из архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileMatchingButton_Tooltip" value="Замена файлов в архиве на соответствующие файлы на компьютере." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileSelectedButton_Tooltip" value="Замена выделенных файлов в архиве файлами на компьютере." />
+		<lang code="WSButton_SidePanel_DirectoryList_ScanArchiveButton_Tooltip" value="Сканирование архива на наличие файлов." />
+		<lang code="WSButton_SidePanel_DirectoryList_ScriptPanelButton_Tooltip" value="Открытие архива с помощью сценария." />
+		<lang code="WSButton_SidePanel_DirectoryList_WriteArchiveButton_Tooltip" value="Сохранение архива." />
+		<lang code="WSButton_SidePanel_DirectoryList_WritePanelButton_Tooltip" value="Отображение элементов управления сохранением архива." />
+		<lang code="WSButton_SidePanel_FileListExporter_ExportButton_Text" value="Экспортировать список" />
+		<lang code="WSButton_SidePanel_FileListExporter_ExportButton_Tooltip" value="Сохранение списка файлов на компьютере." />
+		<lang code="WSButton_SidePanel_Options_SaveOptionsButton_Text" value="Сохранить настройки" />
+		<lang code="WSButton_SidePanel_Options_SaveOptionsButton_Tooltip" value="Сохранение выбранных настроек." />
+		<lang code="WSButton_SidePanel_Preview_WritePreviewButton_Tooltip" value="Сохранение предпросмотра на компьютере в выбранном формате." />
+		<lang code="WSButton_SidePanel_RenameFile_RenameSelectedButton_Text" value="Переименовать выделенные файлы" />\
+		<lang code="WSButton_SidePanel_RenameFile_RenameSelectedButton_Tooltip" value="Переименование выделенных файлов." />\
+		<lang code="WSButton_SidePanel_RenameFile_RenameAllButton_Text" value="Переименовать все файлы" />
+		<lang code="WSButton_SidePanel_RenameFile_RenameAllButton_Tooltip" value="Переименование всех файлов." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_CheckScript_Tooltip" value="Проверка сценария на наличие ошибок." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_OpenScript_Tooltip" value="Открытие существующего сценария для редактирования." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_SaveScript_Tooltip" value="Сохранение сценария в файл." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_TestScript_Tooltip" value="Проверка сценария на архиве." />
+		<lang code="WSButton_SidePanel_Search_FindNextButton_Text" value="Найти далее" />
+		<lang code="WSButton_SidePanel_Search_FindNextButton_Tooltip" value="Поиск следующего совпадающего файла." />
+		<lang code="WSButton_SidePanel_Search_SelectAllButton_Text" value="Выделить совпадения" />
+		<lang code="WSButton_SidePanel_Search_SelectAllButton_Tooltip" value="Выделение всех подходящих файлов." />
+		<lang code="WSButton_UndoTaskComboButton_Tooltip" value="Отмена изменения, сделанного в архиве." />
+		<lang code="WSButton_WriteArchive_Text" value="Сохранить архив" />
+		<lang code="WSButton_WriteArchive_Tooltip" value="Сохранение архива на компьютере." />
+		<lang code="WSCheckBox_AllowInlineFileListEditing_Text" value="Разрешить встроенное переименование файлов" />
+		<lang code="WSCheckBox_AllowInlineFileListEditing_Tooltip" value="Двойное нажатие по имени файла в списке файлов позволит вам переименовать его в таблице." />
+		<lang code="WSCheckBox_RemoveImageAfterThumbnailGeneration_Text" value="Удалять временные данные изображения после создания миниатюр?" />
+		<lang code="WSCheckBox_RemoveImageAfterThumbnailGeneration_Tooltip" value="После создания миниатюры вы хотите удалить исходные данные изображения из памяти (отмечено) или сохранить их (не отмечено)? Не отмеченная галочка использует больше памяти." />
+		<lang code="WSCheckBox_HighQualityThumbnails_Text" value="Показывать высококачественные миниатюры (медленнее)" />
+		<lang code="WSCheckBox_HighQualityThumbnails_Tooltip" value="Установите галочку, чтобы показывать миниатюры высокого качества (медленнее), снимите галочку для быстрого создания миниатюр более низкого качества." />
+		<lang code="WSCheckBox_UpscaleSmallThumbnails_Text" value="Увеличить миниатюры маленьких изображений?" />
+		<lang code="WSCheckBox_UpscaleSmallThumbnails_Tooltip" value="Если изображение меньше, чем миниатюра, хотите ли вы увеличить его (отмечено) или показать в натуральную величину (не отмечено)." />
+		<lang code="WSCheckBox_AlwaysShowHexEditorSelectedTable_Text" value="Всегда показывать таблицу значений шестнадцатеричном просмотрщике" />
+		<lang code="WSCheckBox_AlwaysShowHexEditorSelectedTable_Tooltip" value="Всегда показывать таблицу выделенных значений в шестнадцатеричном просмотрщике (отмечено) или скрывать её, когда ни одна ячейка не выделена (не отмечено)." />
+		<lang code="WSCheckBox_AutoResizeTableColumns_Text" value="Автоматически изменять размер столбцов таблицы" />
+		<lang code="WSCheckBox_AutoResizeTableColumns_Tooltip" value="При изменении размера столбцов таблицы они будут меняться, чтобы зафиксировать ширину таблицы. Если флажок не установлен, столбцы таблицы могут быть настолько широкими, насколько вы хотите." />
+		<lang code="WSCheckBox_CheckScriptResourceValues_Text" value="Сценарии проверяют недействительные свойства файлов?" />
+		<lang code="WSCheckBox_CheckScriptResourceValues_Tooltip" value="При открытии с помощью сценария файлы, найденные в архиве, будут проверяться на недопустимые длины и смещения (отмечено), для лучшего обнаружения ошибок." />
+		<lang code="WSCheckBox_OnlyShowStandardConverters_Text" value="При экспорте файлов преобразователь показывает только стандартные форматы?" />
+		<lang code="WSCheckBox_OnlyShowStandardConverters_Tooltip" value="При экспорте файлов показывает только стандартные форматы файлов в списке преобразователей (отмечено) или все доступные преобразователи (не отмечено)." />
+		<lang code="WSCheckBox_ColorScriptSyntax_Text" value="Синтаксис цвета в конструкторе сценариев" />
+		<lang code="WSCheckBox_ColorScriptSyntax_Tooltip" value="Раскрашивать синтаксис в конструкторе сценариев (отмечено) или не раскрашивать (не отмечено)." />
+		<lang code="WSCheckBox_DebugMode_Text" value="Режим отладки" />
+		<lang code="WSCheckBox_DebugMode_Tooltip" value="Записывает все сообщения об ошибках на экран (отмечено), или только в файл журнала ошибок (не отмечено)." />
+		<lang code="WSCheckBox_DoubleClickInFileListDoesPreview_Text" value="Двойное нажатие показывает предпросмотр" />
+		<lang code="WSCheckBox_DoubleClickInFileListDoesPreview_Tooltip" value="Двойное нажатие по файлу в списке файлов показывает предварительный просмотр этого файла." />
+		<lang code="WSCheckBox_LargeButtonIcons_Text" value="Большие кнопки (требуется перезапуск)" />
+		<lang code="WSCheckBox_LargeButtonIcons_Tooltip" value="Кнопки имеют большие (отмечено) или маленькие (не отмечено) изображения." />
+		<lang code="WSCheckBox_LoadScriptsAtStartup_Text" value="Загрузка сценариев при запуске" />
+		<lang code="WSCheckBox_LoadScriptsAtStartup_Tooltip" value="При запуске Game Extractor загружать сценарии (отмечено), или загружать сценарии только тогда, когда они необходимы (не отмечено)." />
+		<lang code="WSCheckBox_OpenArchiveOnDoubleClick_Text" value="Открытие архива по двойному нажатию" />
+		<lang code="WSCheckBox_OpenArchiveOnDoubleClick_Tooltip" value="При двойном нажатии по файлу в списке папок он будет открыт." />
+		<lang code="WSCheckBox_LoadAllThumbnailsWhenOpeningArchive_Text" value="Загрузка всех миниатюр при открытии архива (медленнее)." />
+		<lang code="WSCheckBox_LoadAllThumbnailsWhenOpeningArchive_Tooltip" value="При открытии архива загружает все миниатюры сразу (отмечено, медленнее), или загружает миниатюры только по мере их прокрутки (не отмечено, быстрее)." />
+		<lang code="WSCheckBox_PlayAudioOnLoad_Text" value="Воспроизведение звука при предпросмотре" />
+		<lang code="WSCheckBox_PlayAudioOnLoad_Tooltip" value="При предварительном просмотре аудиофайла начинает воспроизведение сразу же после загрузки предварительного просмотра (отмечено) или ждёт, пока вы не нажмёте «Воспроизведение» (не отмечено)." />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesAdded_Show_Text" value="Добавление файлов" />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesAdded_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы добавляются в архив." />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesRemoved_Show_Text" value="Отмена добавленных файлов" />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesRemoved_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы удаляются из архива." />
+		<lang code="WSCheckBox_Popup_AddFiles_NoFilesToAdd_Show_Text" value="Нет выделенных файлов для добавления" />
+		<lang code="WSCheckBox_Popup_AddFiles_NoFilesToAdd_Show_Tooltip" value="Показывать всплывающее сообщение, если не было выделено ни одного файла для добавления в архив." />
+		<lang code="WSCheckBox_Popup_ConvertArchive_FilenameMissing_Show_Text" value="Нет имени файла для преобразования" />
+		<lang code="WSCheckBox_Popup_ConvertArchive_FilenameMissing_Show_Tooltip" value="Показывать всплывающее сообщение, если для преобразованного архива нет имени файла." />
+		<lang code="WSCheckBox_Popup_CutArchive_CutFailed_Show_Text" value="Вырезание архива не удалось" />
+		<lang code="WSCheckBox_Popup_CutArchive_CutFailed_Show_Tooltip" value="Показывать всплывающее сообщение при неудачном вырезании архива." />
+		<lang code="WSCheckBox_Popup_CutArchive_FilesCut_Show_Text" value="Вырезание архива завершено" />
+		<lang code="WSCheckBox_Popup_CutArchive_FilesCut_Show_Tooltip" value="Показывать всплывающее сообщение при удачном вырезании архива." />
+		<lang code="WSCheckBox_Popup_CutArchive_InvalidInputFile_Show_Text" value="Неверный входной файл для вырезания" />
+		<lang code="WSCheckBox_Popup_CutArchive_InvalidInputFile_Show_Tooltip" value="Показывать всплывающее сообщение, когда для вырезания используется недопустимый входной файл." />
+		<lang code="WSCheckBox_Popup_ExportFileList_ListExported_Show_Text" value="Сохранение списка файлов" />
+		<lang code="WSCheckBox_Popup_ExportFileList_ListExported_Show_Tooltip" value="Показывать всплывающее сообщение, когда список файлов был сохранён." />
+		<lang code="WSCheckBox_Popup_ExportFileList_NoColumnsSelected_Show_Text" value="Не выделены столбцы списка файлов" />
+		<lang code="WSCheckBox_Popup_ExportFileList_NoColumnsSelected_Show_Tooltip" value="Показывать всплывающее сообщение, если для сохранения списка файлов не выделено ни одной столбца." />
+		<lang code="WSCheckBox_Popup_ExportFiles_FilesExported_Show_Text" value="Файлы извлечены" />
+		<lang code="WSCheckBox_Popup_ExportFiles_FilesExported_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы будут извлечены." />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesSelected_Show_Text" value="Файлы для извлечения не выделены" />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesSelected_Show_Tooltip" value="Показывать всплывающее сообщение, если нет файлов для извлечения." />
+		<lang code="WSCheckBox_Popup_FileListViewChanged_Show_Text" value="Смена просмотра списка файлов" />
+		<lang code="WSCheckBox_Popup_FileListViewChanged_Show_Tooltip" value="Показывать всплывающее сообщение при изменении просмотра списка файлов." />
+		<lang code="WSCheckBox_Popup_FullVersionOnly_Show_Text" value="Только полная версия" />
+		<lang code="WSCheckBox_Popup_FullVersionOnly_Show_Tooltip" value="Показывать всплывающее сообщение, когда задача доступна только в полной версии." />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotReplacable_Show_Text" value="Не разрешено заменить файлы" />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotReplacable_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы не могут быть заменены в данном формате архива." />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotWritable_Show_Text" value="Не разрешено добавить/удалить файлы" />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotWritable_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы не могут быть добавлены или удалены из данного формата архива." />
+		<lang code="WSCheckBox_Popup_DecompressArchive_Show_Text" value="Архив требует распаковки" />
+		<lang code="WSCheckBox_Popup_DecompressArchive_Show_Tooltip" value="Если архив нуждается в распаковке, попросить выделить (отмечено) или просто распаковать автоматически (не отмечено)." />
+		<lang code="WSCheckBox_Popup_Options_OptionsSaved_Show_Text" value="Настройки сохранены" />
+		<lang code="WSCheckBox_Popup_Options_OptionsSaved_Show_Tooltip" value="Показывать всплывающее сообщение, когда настройки были сохранены." />
+		<lang code="WSCheckBox_Popup_Preview_PreviewSaved_Show_Text" value="Предпросмотр сохранён" />
+		<lang code="WSCheckBox_Popup_Preview_PreviewSaved_Show_Tooltip" value="Показывать всплывающее сообщение, когда предварительный просмотр был сохранён." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpenedWithScanner_Show_Text" value="Архив, открытый сканером" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpenedWithScanner_Show_Tooltip" value="Показывать всплывающее сообщение, когда архив был отсканирован." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpened_Show_Text" value="Архив открыт" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpened_Show_Tooltip" value="Показывать всплывающее сообщение, когда архив был открыт." />
+		<lang code="WSCheckBox_Popup_ReadArchive_FileNotAnArchive_Show_Text" value="Файл не является архивом" />
+		<lang code="WSCheckBox_Popup_ReadArchive_FileNotAnArchive_Show_Tooltip" value="Показывать всплывающее сообщение, когда файл не может быть открыт, потому что он не является архивом." />
+		<lang code="WSCheckBox_Popup_ReadArchive_FilenameMissing_Show_Text" value="Нет архива для открытия" />
+		<lang code="WSCheckBox_Popup_ReadArchive_FilenameMissing_Show_Tooltip" value="Показывать всплывающее сообщение, когда нет выделенного архива для открытия." />
+		<lang code="WSCheckBox_Popup_ReadArchive_MakeNewArchive_Show_Text" value="Создан новый архив" />
+		<lang code="WSCheckBox_Popup_ReadArchive_MakeNewArchive_Show_Tooltip" value="Показывать всплывающее сообщение, когда создаётся новый архив." />
+		<lang code="WSCheckBox_Popup_ReadArchive_NoPluginsFound_Show_Text" value="Нет плагина для открытия архива" />
+		<lang code="WSCheckBox_Popup_ReadArchive_NoPluginsFound_Show_Tooltip" value="Показывать всплывающее сообщение, когда Game Extractor не смог открыть архив." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithPluginFailed_Show_Text" value="Не удалось открыть архив плагином" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithPluginFailed_Show_Tooltip" value="Показывать всплывающее сообщение, когда архив не может быть открыт с помощью данного плагина." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScannerFailed_Show_Text" value="Сканирование архива не удалось" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScannerFailed_Show_Tooltip" value="Показывать всплывающее сообщение, когда сканер не нашёл ни одного файла в архиве." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScriptFailed_Show_Text" value="Открытие архива сценарием не удалось" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScriptFailed_Show_Tooltip" value="Показывать всплывающее сообщение, когда сценарий не смог правильно открыть архив." />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesAdded_Show_Text" value="Отмена удалённых файлов" />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesAdded_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы были добавлены в архив." />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesRemoved_Show_Text" value="Файлы удалены" />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesRemoved_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы были удалены из архива." />
+		<lang code="WSCheckBox_Popup_RemoveFiles_NoFilesToRemove_Show_Text" value="Нет выделенных файлов для удаления" />
+		<lang code="WSCheckBox_Popup_RemoveFiles_NoFilesToRemove_Show_Tooltip" value="Показывать всплывающее сообщение, если не было выделено ни одного файла для удаления из архива." />
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRenamed_Show_Text" value="Файлы переименованы" />
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRenamed_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы были переименованы." />
+		
+		<lang code="WSCheckBox_Popup_TaskManager_UndoComplete_Show_Text" value="Отмена завершена" />
+		<lang code="WSCheckBox_Popup_TaskManager_UndoComplete_Show_Tooltip" value="Показывать всплывающее сообщение, когда задача отмены завершена." />
+		<lang code="WSCheckBox_Popup_TaskManager_RedoComplete_Show_Text" value="Повтор завершён" />
+		<lang code="WSCheckBox_Popup_TaskManager_RedoComplete_Show_Tooltip" value="Показывать всплывающее сообщение, когда задача повтора завершена." />
+		
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRestored_Show_Text" value="Отмена переименования файлов" />
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRestored_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы были переименованы обратно в свои изначальные имена." />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoFilesSelected_Show_Text" value="Не выделены файлы для переименования" />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoFilesSelected_Show_Tooltip" value="Показывать всплывающее сообщение, если ни один файл не был выделен для переименования." />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoRenameValue_Show_Text" value="Нет значения переименования" />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoRenameValue_Show_Tooltip" value="Показывать всплывающее сообщение, если для переименования файлов не указано новое значение." />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesReplaced_Show_Text" value="Файлы заменены" />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesReplaced_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы были заменены файлами на компьютере." />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesRestored_Show_Text" value="Отмена замены файлов" />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesRestored_Show_Tooltip" value="Показывать всплывающее сообщение, когда файлы были изменены на исходные данные." />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_NoNameSpecified_Show_Text" value="Нет имени файла сценария" />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_NoNameSpecified_Show_Tooltip" value="Показывать всплывающее сообщение, когда нет имени файла для сохранения файла сценария." />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_ScriptSaved_Show_Text" value="Сценарий сохранён" />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_ScriptSaved_Show_Tooltip" value="Показывать всплывающее сообщение, когда файл сценария был сохранён." />
+		<lang code="WSCheckBox_Popup_Search_MatchFound_Show_Text" value="Найдено поисковое совпадение" />
+		<lang code="WSCheckBox_Popup_Search_MatchFound_Show_Tooltip" value="Показывать всплывающее сообщение, когда в результате поиска будет найден результат." />
+		<lang code="WSCheckBox_Popup_Search_NoColumnsSelected_Show_Text" value="Не выделены столбцы поиска" />
+		<lang code="WSCheckBox_Popup_Search_NoColumnsSelected_Show_Tooltip" value="Показывать всплывающее сообщение, когда для поиска не выделено ни одного столбца." />
+		<lang code="WSCheckBox_Popup_Search_NoMatchFound_Show_Text" value="Не найдено поисковое совпадение" />
+		<lang code="WSCheckBox_Popup_Search_NoMatchFound_Show_Tooltip" value="Показывать всплывающее сообщение, если в результате поиска не было найдено ни одного файла." />
+		<lang code="WSCheckBox_Popup_Search_NoSearchValue_Show_Text" value="Нет значения поиска" />
+		<lang code="WSCheckBox_Popup_Search_NoSearchValue_Show_Tooltip" value="Показывать всплывающее сообщение, если не указано значение поиска." />
+		<lang code="WSCheckBox_Popup_SelectResources_All_Show_Text" value="Выделены все файлы" />
+		<lang code="WSCheckBox_Popup_SelectResources_All_Show_Tooltip" value="Показывать всплывающее сообщение, когда все файлы в списке файлов будут выделены." />
+		<lang code="WSCheckBox_Popup_SelectResources_Inverse_Show_Text" value="Обращено выделение файлов" />
+		<lang code="WSCheckBox_Popup_SelectResources_Inverse_Show_Tooltip" value="Показывать всплывающее сообщение, когда обращено выделение файлов в списке файлов." />
+		<lang code="WSCheckBox_Popup_SelectResources_None_Show_Text" value="Снято выделение файлов" />
+		<lang code="WSCheckBox_Popup_SelectResources_None_Show_Tooltip" value="Показывать всплывающее сообщение, когда для всех выделенных файлов в списке файлов было отменено выделение." />
+		<lang code="WSCheckBox_Popup_SidePanelChanged_Show_Text" value="Изменение боковой панели" />
+		<lang code="WSCheckBox_Popup_SidePanelChanged_Show_Tooltip" value="Показывать всплывающее сообщение при изменении боковой панели." />
+		<lang code="WSCheckBox_Popup_WriteArchive_ArchiveSaved_Show_Text" value="Архив сохранён" />
+		<lang code="WSCheckBox_Popup_WriteArchive_ArchiveSaved_Show_Tooltip" value="Показывать всплывающее сообщение, когда архив был сохранён." />
+		<lang code="WSCheckBox_Popup_WriteArchive_FilenameMissing_Show_Text" value="Нет имени файла для сохранения" />
+		<lang code="WSCheckBox_Popup_WriteArchive_FilenameMissing_Show_Tooltip" value="Показывать всплывающее сообщение, если для сохранённого архива нет имени файла." />
+		<lang code="WSCheckBox_PreviewOnDoubleClick_Text" value="Предпросмотр файла при двойном нажатии" />
+		<lang code="WSCheckBox_PreviewOnDoubleClick_Tooltip" value="Если дважды нажать по файлу в архиве, он будет предварительно просмотрен." />
+		<lang code="WSCheckBox_PreviewOnFileListEnter_Text" value="Предпросмотр файла при нажатии клавиши Enter" />
+		<lang code="WSCheckBox_PreviewOnFileListEnter_Tooltip" value="Если нажать Enter на файле в архиве, он будет предварительно просмотрен." />
+		<lang code="WSCheckBox_ScanFileIfOpenFailed_Text" value="Сканирование архива при неудачном чтении" />
+		<lang code="WSCheckBox_ScanFileIfOpenFailed_Tooltip" value="Если архив не удалось открыть, просканировать его на наличие файлов (отмечено) или просто показать сообщение с ошибкой (не отмечено)." />
+		<lang code="WSCheckBox_Scanner_wav_Text" value="Волновое аудио (*.WAV)" />
+		<lang code="WSCheckBox_ShowBinaryHexEditorField_Text" value="Двоичное" />
+		<lang code="WSCheckBox_ShowBinaryHexEditorField_Tooltip" value="Отображение поля двоичных чисел в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowByteHexEditorField_Text" value="Байт" />
+		<lang code="WSCheckBox_ShowByteHexEditorField_Tooltip" value="Отображение поля байтов в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowCharHexEditorField_Text" value="Строка ASCII" />
+		<lang code="WSCheckBox_ShowCharHexEditorField_Tooltip" value="Отображение поля символов в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowCustomColumns_Text" value="Показывать пользовательские столбцы таблицы" />
+		<lang code="WSCheckBox_ShowCustomColumns_Tooltip" value="Если в архиве есть колонки пользовательской таблицы, хотите ли вы показать их (отмечено) или нет (не отмечено)?" />
+		<lang code="WSCheckBox_ShowDirectoryListFileIcons_Text" value="Использовать правильные значки в папке" />
+		<lang code="WSCheckBox_ShowDirectoryListFileIcons_Tooltip" value="Показывать соответствующие значки для каждого файла в папке или просто общие значки? (медленнее, если включено)." />
+		<lang code="WSCheckBox_ShowDoubleHexEditorField_Text" value="Двойное (8 байт)" />
+		<lang code="WSCheckBox_ShowDoubleHexEditorField_Tooltip" value="Отображение поля двойных чисел в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowFloatHexEditorField_Text" value="Дробное (4 байта)" />
+		<lang code="WSCheckBox_ShowFloatHexEditorField_Tooltip" value="Отображение поля дробных чисел в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowHexHexEditorField_Text" value="Шестнадцатеричные (Hex)" />
+		<lang code="WSCheckBox_ShowHexHexEditorField_Tooltip" value="Отображение поля шестнадцатеричных (Hex) чисел в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowHexIfPreviewFailed_Text" value="Показать шестнадцатеричный просмотрщик, если предпросмотр не удался" />
+		<lang code="WSCheckBox_ShowHexIfPreviewFailed_Tooltip" value="Если выделенный файл не может быть предварительно просмотрен, отобразить его в шестнадцатеричном просмотрщике (отмечено) или просто показать сообщение с ошибкой (не отмечено)." />
+		<lang code="WSCheckBox_ShowIntHexEditorField_Text" value="Целое (4 байта)" />
+		<lang code="WSCheckBox_ShowIntHexEditorField_Tooltip" value="Отображение поля целого числа в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowLongHexEditorField_Text" value="Длинное (8 байт)" />
+		<lang code="WSCheckBox_ShowLongHexEditorField_Tooltip" value="Отображение поля длинного числа в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowShortHexEditorField_Text" value="Короткое (2 байта)" />
+		<lang code="WSCheckBox_ShowShortHexEditorField_Tooltip" value="Отображение поля короткого числа в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowSplashScreen_Text" value="Показывать заставку при запуске" />
+		<lang code="WSCheckBox_ShowSplashScreen_Tooltip" value="Показывать заставку при загрузке программы." />
+		<lang code="WSCheckBox_ShowSystemSpecificIcons_Text" value="Показывать правильные значки для файлов (медленнее)" />
+		<lang code="WSCheckBox_ShowSystemSpecificIcons_Tooltip" value="Если отмечено, значки для каждого файла будут отображаться так же, как в Windows. Однако иногда это может быть медленным. Если не отмечено, файлы будут отображаться с основными значками." />
+		<lang code="WSCheckBox_ShowTableColumn_AddedIcon_Text" value="Добавлен?" />
+		<lang code="WSCheckBox_ShowTableColumn_AddedIcon_Tooltip" value="Показывать столбец добавленных в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLengthKB_Text" value="Длина сжатия (КБ)" />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLengthKB_Tooltip" value="Длина файла, в килобайтах." />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLength_Text" value="Длина сжатия" />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLength_Tooltip" value="Длина файла, в байтах." />
+		<lang code="WSCheckBox_ShowTableColumn_Compressed_Text" value="Сжатый?" />
+		<lang code="WSCheckBox_ShowTableColumn_Compressed_Tooltip" value="Сжатый ли файл?" />
+		<lang code="WSCheckBox_ShowTableColumn_Compression_Text" value="Тип сжатия" />
+		<lang code="WSCheckBox_ShowTableColumn_Compression_Tooltip" value="Тип сжатия." />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLengthKB_Text" value="Распакованная длина (КБ)" />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLengthKB_Tooltip" value="Показывать столбец длины в распакованном виде (килобайт) в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLength_Text" value="Распакованная длина" />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLength_Tooltip" value="Длина файла, в байтах." />
+		<lang code="WSCheckBox_ShowTableColumn_Description_Text" value="Описание" />
+		<lang code="WSCheckBox_ShowTableColumn_Description_Tooltip" value="Показывать столбец описания в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_Directory_Text" value="Папка" />
+		<lang code="WSCheckBox_ShowTableColumn_Directory_Tooltip" value="Показывать столбец папки в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_Extension_Text" value="Расширение" />
+		<lang code="WSCheckBox_ShowTableColumn_Extension_Tooltip" value="Показывать столбец расширения в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_FilePath_Text" value="Путь файла" />
+		<lang code="WSCheckBox_ShowTableColumn_FilePath_Tooltip" value="Показывать столбец пути к файлу в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_Filename_Text" value="Имя файла" />
+		<lang code="WSCheckBox_ShowTableColumn_Filename_Tooltip" value="Показывать столбец имени файла в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_Icon_Text" value="Значок" />
+		<lang code="WSCheckBox_ShowTableColumn_Icon_Tooltip" value="Показывать столбец значка в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_Offset_Text" value="Смещение" />
+		<lang code="WSCheckBox_ShowTableColumn_Offset_Tooltip" value="Показывать столбец смещения в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_RenamedIcon_Text" value="Переименован?" />
+		<lang code="WSCheckBox_ShowTableColumn_RenamedIcon_Tooltip" value="Показывать столбец переименованного в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_ReplacedIcon_Text" value="Заменён?" />
+		<lang code="WSCheckBox_ShowTableColumn_ReplacedIcon_Tooltip" value="Показывать столбец заменённого в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTableColumn_Source_Text" value="Исходный путь" />
+		<lang code="WSCheckBox_ShowTableColumn_Source_Tooltip" value="Показывать столбец источника в таблице списка файлов." />
+		<lang code="WSCheckBox_ShowTimestampHexEditorField_Text" value="Метка времени" />
+		<lang code="WSCheckBox_ShowTimestampHexEditorField_Tooltip" value="Отображение поля метки времени в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSCheckBox_ShowUnicodeHexEditorField_Text" value="Строка Юникода" />
+		<lang code="WSCheckBox_ShowUnicodeHexEditorField_Tooltip" value="Отображение поля Юникода в списке полей шестнадцатеричного просмотрщика." />
+		<lang code="WSComboBox_CurrentLanguage_Tooltip" value="Язык, используемый в интерфейсе." />
+		<lang code="WSComboBox_DragDropOption_Tooltip" value="Когда вы перетаскиваете файлы из списка папок в архив, что вы хотите с ними сделать?" />
+		<lang code="WSComboBox_FileListPanel_TreeTable_GroupTypes_Label_Label" value="Фильтр типа" />
+		<lang code="WSComboBox_FileListPanel_TreeTable_GroupTypes_Tooltip" value="Как сгруппированы файлы в дереве ниже." />
+		<lang code="WSComboBox_PluginListDisplayType_Tooltip" value="Как должны отображаться плагины в выпадающих окнах?" />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ConvertPluginList_Tooltip" value="Формат, который следует использовать при преобразовании архива." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_CutLengthPresets_Tooltip" value="Количество данных, которые нужно вырезать из архива." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_CutLengthPresets_Label" value="Размер вырезания" />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ReadPluginList_Tooltip" value="Плагин, который будет использоваться при чтении архива, или выберите «Все файлы», и Game Extractor сам выберет лучший плагин." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ScriptPluginList_Tooltip" value="Сценарии, которые можно использовать для открытия архива." />
+		<lang code="WSComboBox_SidePanel_FileListExporter_ExporterPlugins_Tooltip" value="Список файлов будет сохранён в этом формате." />
+		<lang code="WSComboBox_SidePanel_Options_OptionGroups_Tooltip" value="Различные группы параметров, которые можно изменить." />
+		<lang code="WSComboBox_SidePanel_PluginList_PluginTypes_Tooltip" value="Тип плагина для отображения." />
+		<lang code="WSComboBox_SidePanel_Preview_WritePreviewPlugins_Tooltip" value="Предварительный просмотр будет сохранён в этом формате." />
+		<lang code="WSComboBox_SidePanel_RenameFile_RenamerPlugins_Tooltip" value="Тип переименования." />
+		<lang code="WSComboBox_SidePanel_ScriptBuilder_ScriptsList_Tooltip" value="Скрипты, загружаемые Game Extractor." />
+		<lang code="WSCreditsPanel_SidePanel_About_Credits_Tooltip" value="Создатели Game Extractor." />
+		<lang code="WSDirectoryListHolder_SidePanel_DirectoryList_DirectoryListHolder_Tooltip" value="Список папок, в котором отображаются файлы на компьютере." />
+		<lang code="WSEditorPane_SidePanel_Help_Display_Tooltip" value="Документ, содержащий список справок по различным темам." />
+		<lang code="WSEditorPane_SidePanel_ScriptBuilder_Script_Tooltip" value="Сценарий." />
+		<lang code="WSFileListPanelHolder_FileListPanelHolder_Tooltip" value="Список файлов, в котором отображаются все файлы в архиве." />
+		<lang code="WSLabel_AddFiles_FilesAdded_Text" value="Выделенные файлы были добавлены в архив." />
+		<lang code="WSLabel_AddFiles_FilesRemoved_Text" value="Добавленные файлы были удалены из архива." />
+		<lang code="WSLabel_AddFiles_NoFilesToAdd_Text" value="Не было выделено ни одного файла для добавления в архив." />
+		<lang code="WSLabel_BlankPreview_Text" value="Этот файл не может быть предпросмотрен." />
+		<lang code="WSLabel_BlankPreview_Tooltip" value="Ни один плагин не смог предварительно просмотреть этот файл." />
+		<lang code="WSLabel_ComponentList_About_Text" value="О программе Game Extractor" />
+		<lang code="WSLabel_ComponentList_AddResources_Text" value="Добавить файлы" />
+		<lang code="WSLabel_ComponentList_CloseProgram_Text" value="Закрыть Game Extractor" />
+		<lang code="WSLabel_ComponentList_CutArchive_Text" value="Вырезать архив" />
+		<lang code="WSLabel_ComponentList_ExtractResources_Text" value="Извлечь файлы" />
+		<lang code="WSLabel_ComponentList_ExtractSelectedResources_Text" value="Извлечь ресурсы" />
+		<lang code="WSLabel_ComponentList_FileListExporter_Text" value="Сохранить список файлов" />
+		<lang code="WSLabel_ComponentList_FileListView_Text" value="Сменить просмотр списка файлов" />
+		
+		<lang code="WSLabel_ComponentList_FileListView_Table_Text" value="Таблица списка файлов" />
+		<lang code="WSLabel_ComponentList_FileListView_Tree_Text" value="Древовидный список файлов" />
+		<lang code="WSLabel_ComponentList_FileListView_TreeTable_Text" value="Список файлов групповой таблицы" />
+		<lang code="WSLabel_ComponentList_FileListView_Thumbnails_Text" value="Список файлов миниатюр" />
+		
+		<lang code="WSLabel_ComponentList_Help_Text" value="Справка Game Extractor" />
+		<lang code="WSLabel_ComponentList_HexEditor_Text" value="Шестнадцатеричный просмотрщик (Hex)" />
+		<lang code="WSLabel_ComponentList_Information_Text" value="Информация о файле" />
+		<lang code="WSLabel_ComponentList_NewArchive_Text" value="Новый архив" />
+		<lang code="WSLabel_ComponentList_Options_Text" value="Настройки" />
+		<lang code="WSLabel_ComponentList_PluginList_Text" value="Список плагинов" />
+		<lang code="WSLabel_ComponentList_PreviewResource_Text" value="Предпросмотр файла" />
+		<lang code="WSLabel_ComponentList_ReadArchive_Normal_Text" value="Открыть архив" />
+		<lang code="WSLabel_ComponentList_RedoTaskComboButton_Text" value="Повторить изменение" />
+		<lang code="WSLabel_ComponentList_RemoveResources_Text" value="Удалить файлы" />
+		<lang code="WSLabel_ComponentList_RenameResources_Text" value="Переименовать файлы" />
+		<lang code="WSLabel_ComponentList_ReplaceResources_Text" value="Заменить файлы" />
+		<lang code="WSLabel_ComponentList_ScriptBuilder_Text" value="Конструктор сценариев" />
+
+		<lang code="WSLabel_ComponentList_SelectResources_All_Text" value="Выделить файлы" />
+		<lang code="WSLabel_ComponentList_Separator_Text" value="Разделитель" />
+		<lang code="WSLabel_ComponentList_UndoTaskComboButton_Text" value="Отмена изменения" />
+		<lang code="WSLabel_ComponentList_WriteArchive_Text" value="Сохранить архив" />
+		<lang code="WSLabel_ConvertArchive_FilenameMissing_Text" value="Вы должны указать имя файла для сохранённого архива." />
+		<lang code="WSLabel_CurrentLanguage_Text" value="Язык" />
+		<lang code="WSLabel_CutArchive_CutFailed_Text" value="При попытке вырезать этот архив возникла проблема." />
+		<lang code="WSLabel_CutArchive_FilesCut_Text" value="Вырезка архива завершена." />
+		<lang code="WSLabel_CutArchive_InvalidCutLength_Text" value="Длина выреза не является допустимым значением." />
+		<lang code="WSLabel_CutArchive_InvalidInputFile_Text" value="Входной файл недействителен или отсутствует." />
+		<lang code="WSLabel_ExportFileList_ListExported_Text" value="Сохранение списка файлов завершено." />
+		<lang code="WSLabel_ExportFileList_NoColumnsSelected_Text" value="В списке файлов нет столбцов, выделенных для сохранения." />
+		<lang code="WSLabel_ExportFiles_FilesExported_Text" value="Извлечение файлов завершено." />
+		<lang code="WSLabel_ExportFiles_NoFilesSelected_Text" value="Для экспорта не выделены файлы." />
+		<lang code="WSLabel_FileListViewChanged_Text" value="Просмотр списка файлов был изменен." />
+		<lang code="WSLabel_FullVersionOnly_Text" value="Эта функция доступна только в полной версии Game Extractor." />
+		<lang code="WSLabel_ModifyArchive_NotReplacable_Text" value="Этот формат архива не позволяет заменять файлы." />
+		<lang code="WSLabel_ModifyArchive_NotWritable_Text" value="Этот формат архива не позволяет добавлять или удалять файлы." />
+		<lang code="WSLabel_DecompressArchive_Text" value="Архив необходимо распаковать перед анализом." />
+		<lang code="WSLabel_Options_OptionsSaved_Text" value="Настройки сохранены." />
+		<lang code="WSLabel_PluginListDisplayType_Text" value="Отображение списка плагинов" />
+		<lang code="WSLabel_Preview_PreviewSaved_Text" value="Сохранение предварительного просмотра завершено." />
+		<lang code="WSLabel_ReadArchive_ArchiveOpenedWithScanner_Text" value="Открытие архива сканером завершено." />
+		<lang code="WSLabel_ReadArchive_ArchiveOpened_Text" value="Открытие архива завершено." />
+		<lang code="WSLabel_ReadArchive_FileNotAnArchive_Text" value="Выделенный файл не является архивом." />
+		<lang code="WSLabel_ReadArchive_FilenameMissing_Text" value="Для открытия не был выделен архивный файл." />
+		<lang code="WSLabel_ReadArchive_MakeNewArchive_Text" value="Создан новый архив." />
+		<lang code="WSLabel_ReadArchive_NoPluginsFound_Text" value="Ни один плагин не смог открыть архив." />
+		<lang code="WSLabel_ReadArchive_ReadWithPluginFailed_Text" value="Выбранному плагину не удалось открыть архив." />
+		<lang code="WSLabel_ReadArchive_ReadWithScannerFailed_Text" value="Сканер не обнаружил ни одного файла." />
+		<lang code="WSLabel_ReadArchive_ReadWithScriptFailed_Text" value="Выбранному сценарию не удалось открыть архив." />
+		<lang code="WSLabel_RemoveFiles_FilesAdded_Text" value="Удалённые файлы снова добавлены в архив." />
+		<lang code="WSLabel_RemoveFiles_FilesRemoved_Text" value="Выделенные файлы удалены из архива." />
+		<lang code="WSLabel_RemoveFiles_NoFilesToRemove_Text" value="Не выделен файл для удаления из архива." />
+		<lang code="WSLabel_RenameFiles_FilesRenamed_Text" value="Выделенные файлы переименованы." />
+		<lang code="WSLabel_TaskManager_UndoComplete_Text" value="Изменения отменены." />
+		<lang code="WSLabel_TaskManager_RedoComplete_Text" value="Изменения применены вновь." />
+		<lang code="WSLabel_RenameFiles_FilesRestored_Text" value="Файлам возвращены их изначальные имена." />
+		<lang code="WSLabel_RenameFiles_NoFilesSelected_Text" value="Нет выделенных файлов для переименования." />
+		<lang code="WSLabel_RenameFiles_NoRenameValue_Text" value="Нет выделенных файлов для переименования." />
+		<lang code="WSLabel_ReplaceFiles_FilesReplaced_Text" value="Файлы заменены." />
+		<lang code="WSLabel_ReplaceFiles_FilesRestored_Text" value="Заменённые файлы возвращены к исходным данным." />
+		<lang code="WSLabel_SaveChanges_Text" value="Архив изменён. Хотите ли вы сохранить изменения?" />
+		<lang code="WSLabel_ScriptBuilder_ErrorsFound_Text" value="" />
+		<lang code="WSLabel_ScriptBuilder_NoErrorsFound_Text" value="В этом сценарии нет ошибок." />
+		<lang code="WSLabel_ScriptBuilder_NoNameSpecified_Text" value="Имя нового файла не указано." />
+		<lang code="WSLabel_ScriptBuilder_ScriptSaved_Text" value="Файл сценария сохранён." />
+		<lang code="WSLabel_Search_MatchFound_Text" value="Поиск нашёл совпадение." />
+		<lang code="WSLabel_Search_NoColumnsSelected_Text" value="Нет никаких столбцов, по которым можно было бы вести поиск." />
+		<lang code="WSLabel_Search_NoMatchFound_Text" value="Поиск не выявил совпадений." />
+		<lang code="WSLabel_Search_NoSearchValue_Text" value="Значение поиска не указано." />
+		<lang code="WSLabel_SelectResources_All_Text" value="Все файлы в архиве выделены." />
+		<lang code="WSLabel_SelectResources_Inverse_Text" value="Файлы в архиве выделены в обратном порядке." />
+		<lang code="WSLabel_SelectResources_None_Text" value="Снято выделение со всех файлов в архиве." />
+		<lang code="WSLabel_SidePanelChanged_Text" value="Боковая панель изменена." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ConvertFilenameLabel_Text" value="Вывод" />
+		<lang code="WSLabel_SidePanel_DirectoryList_ConvertPanel_Basic_Text" value="В полной версии у вас есть возможность преобразовать архивы в различные типы." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ConvertPanel_Basic_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_SidePanel_DirectoryList_CutInputFilenameLabel_Text" value="Ввод" />
+		<lang code="WSLabel_SidePanel_DirectoryList_CutLengthLabel_Text" value="Длина" />
+		<lang code="WSLabel_SidePanel_DirectoryList_CutOutputFilenameLabel_Text" value="Вывод" />
+		<lang code="WSLabel_SidePanel_DirectoryList_InvalidControls_Text" value="Текущий архив нельзя изменить или сохранить." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ModifyPanel_Basic_Text" value="В полной версии у вас есть возможность изменять архивы, например, добавлять и удалять файлы." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ModifyPanel_Basic_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_SidePanel_DirectoryList_SaveNewArchiveControls_Text" value="Этот архив не сохранён ранее. Пожалуйста, используйте вместо этого преобразование архива." />
+		<lang code="WSLabel_SidePanel_DirectoryList_SaveNewArchiveControls_Tooltip" value="При сохранении нового архива воспользуйтесь элементом управления преобразования архива, который позволит вам выбрать формат архива." />
+		<lang code="WSLabel_SidePanel_DirectoryList_WriteFilenameLabel_Text" value="Вывод" />
+		<lang code="WSLabel_SidePanel_DirectoryList_WritePanel_Basic_Text" value="В полной версии у вас есть возможность сохранять архивы." />
+		<lang code="WSLabel_SidePanel_DirectoryList_WritePanel_Basic_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_SidePanel_RenameFile_FullVersionOnly_Text" value="В полной версии у вас есть возможность переименовывать файлы в архиве." />
+		<lang code="WSLabel_SidePanel_RenameFile_FullVersionOnly_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_WriteArchive_ArchiveSaved_Text" value="Сохранение архива завершено." />
+		<lang code="WSLabel_WriteArchive_FilenameMissing_Text" value="Вы должны указать имя файла для сохранённого архива." />
+		<lang code="WSList_DirectoryList_Tooltip" value="Список папок, в котором отображаются файлы на компьютере." />
+		<lang code="WSList_Option_ToolbarButtons_ChoicesList_Tooltip" value="Список кнопок, которые можно добавить на панель инструментов." />
+		<lang code="WSList_Option_ToolbarButtons_CurrentList_Tooltip" value="Список кнопок, которые уже существуют на панели инструментов." />
+		<lang code="WSList_SidePanel_PluginList_Plugins_Tooltip" value="Здесь отображаются загруженные плагины выбранного типа." />
+		<lang code="WSList_SidePanel_ScriptBuilder_CommandsList_Tooltip" value="Список команд, которые можно использовать в сценарии." />
+		<lang code="WSMenuBar_MainMenuBar_Tooltip" value="Главное меню, в котором перечислены все общие задачи." />
+		<lang code="WSMenuItem_About_Text" value="О программе Game Extractor" />
+		<lang code="WSMenuItem_About_Tooltip" value="Открытие боковой панели с информацией об Game Extractor." />
+		<lang code="WSMenuItem_AddResources_Text" value="Добавить файлы" />
+		<lang code="WSMenuItem_AddResources_Tooltip" value="Открытие боковой панели для добавления файлов в архив." />
+		<lang code="WSMenuItem_CloseProgram_Text" value="Закрыть Game Extractor" />
+		<lang code="WSMenuItem_CloseProgram_Tooltip" value="Закрытие Game Extractor." />
+		<lang code="WSMenuItem_ConvertArchive_Text" value="Преобразовать архив" />
+		<lang code="WSMenuItem_ConvertArchive_Tooltip" value="Открытие боковой панели для преобразования архива в другой формат." />
+		<lang code="WSMenuItem_CutArchive_Text" value="Вырезать архив" />
+		<lang code="WSMenuItem_CutArchive_Tooltip" value="Открытие боковую панель, которая позволяет вам вырезать архив для анализа." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_OpenDirectory_Text" value="Открыть папку" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_OpenDirectory_Tooltip" value="Изменения в папке." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ParentDirectory_Text" value="До родительской папки" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ParentDirectory_Tooltip" value="Изменения в родительской папке." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Normal_Text" value="Открыть архив" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Normal_Tooltip" value="Открытие боковой панели для открытия архива." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_OpenWith_Text" value="Открыть с помощью плагина" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_OpenWith_Tooltip" value="Открытие боковой панели для открытия архива с определённым плагином." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Scanner_Text" value="Сканировать архив" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Scanner_Tooltip" value="Открытие боковой панели для сканирования архива на наличие общих файлов." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Script_Text" value="Открыть с помощью сценария" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Script_Tooltip" value="Открытие боковой панели для открытия архива с помощью сценария." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_Refresh_Text" value="Обновить отображение" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_Refresh_Tooltip" value="Перезагрузить текущую папку." />
+		<lang code="WSMenuItem_ExtractAllResources_Text" value="Извлечь все" />
+		<lang code="WSMenuItem_ExtractAllResources_Tooltip" value="Извлечение всех файлов из архива на компьютер." />
+		<lang code="WSMenuItem_ExtractResources_Selected_Text" value="Извлечь выделенное" />
+		<lang code="WSMenuItem_ExtractResources_Selected_Tooltip" value="Извлечение выделенных файлов на компьютер." />
+		<lang code="WSMenuItem_ExtractResources_Text" value="Извлечь файлы" />
+		<lang code="WSMenuItem_ExtractResources_Tooltip" value="Извлечение файлов из архива на компьютер." />
+		<lang code="WSMenuItem_ExtractSelectedResources_Text" value="Извлечь выделенное" />
+		<lang code="WSMenuItem_ExtractSelectedResources_Tooltip" value="Извлечение выделенных файлов на компьютер." />
+		<lang code="WSMenuItem_FileListDrop_Add_Text" value="Добавить файлы" />
+		<lang code="WSMenuItem_FileListDrop_ReplaceCurrent_Text" value="Замена файла на курсоре мыши" />
+		<lang code="WSMenuItem_FileListDrop_ReplaceMatching_Text" value="Замена совпадающих файлов" />
+		<lang code="WSMenuItem_FileListExporter_Text" value="Экспортёр списка файлов" />
+		<lang code="WSMenuItem_FileListExporter_Tooltip" value="Открытие боковой панели для сохранения списка файлов в качестве документа на компьютере." />
+		<lang code="WSMenuItem_FileListView_FolderTable_Text" value="Таблица папок" />
+		<lang code="WSMenuItem_FileListView_Table_Text" value="Таблица" />
+		<lang code="WSMenuItem_FileListView_Table_Tooltip" value="Меняет список файлов, чтобы он отображался в виде таблицы." />
+		<lang code="WSMenuItem_FileListView_TreeTable_Text" value="Групповая таблица" />
+		<lang code="WSMenuItem_FileListView_TreeTable_Tooltip" value="Меняет список файлов, чтобы он отображался в виде сгруппированной таблицы." />
+		<lang code="WSMenuItem_FileListView_Tree_Text" value="Древовидная" />
+		<lang code="WSMenuItem_FileListView_Tree_Tooltip" value="Меняет список файлов, чтобы он отображался в виде дерева." />
+		<lang code="WSMenuItem_FileListView_Thumbnails_Text" value="Миниатюры" />
+		<lang code="WSMenuItem_FileListView_Thumbnails_Tooltip" value="Меняет список файлов, чтобы он отображался в виде миниатюр." />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_All_Text" value="Извлечь все" />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_All_Tooltip" value="Извлечение всех файлов из архива на компьютер." />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_Selected_Text" value="Извлечь выделенное" />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_Selected_Tooltip" value="Извлечение выделенных файлов на компьютер." />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Table_Text" value="Таблица" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Table_Tooltip" value="Меняет список файлов, чтобы он отображался в виде таблицы." />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_TreeTable_Text" value="Групповая таблица" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_TreeTable_Tooltip" value="Меняет список файлов, чтобы он отображался в виде сгруппированной таблицы." />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Tree_Text" value="Древовидная" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Tree_Tooltip" value="Меняет список файлов, чтобы он отображался в виде дерева." />
+		<lang code="WSMenuItem_FileList_RightClick_HexEditor_Text" value="Шестнадцатеричный просмотрщик (Hex)" />
+		<lang code="WSMenuItem_FileList_RightClick_HexEditor_Tooltip" value="Открытие боковой панели для отображения файлов в щестнадцатеричном просмотрщике." />
+		<lang code="WSMenuItem_FileList_RightClick_PreviewResource_Text" value="Предпросмотр файла" />
+		<lang code="WSMenuItem_FileList_RightClick_PreviewResource_Tooltip" value="Открытие боковой панели для предварительного просмотра файлов в архиве." />
+		<lang code="WSMenuItem_FileList_RightClick_RemoveResources_Text" value="Удалить файлы" />
+		<lang code="WSMenuItem_FileList_RightClick_RemoveResources_Tooltip" value="Удаление выделенных файлов из архива." />
+		<lang code="WSMenuItem_FileList_RightClick_RenameResources_Text" value="Переименовать файлы" />
+		<lang code="WSMenuItem_FileList_RightClick_RenameResources_Tooltip" value="Открытие боковой панели для переименования файлов в архиве." />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_All_Text" value="Выделить все" />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_All_Tooltip" value="Выделение всех файлов в списке файлов." />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_Inverse_Text" value="Обратить выделение" />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_Inverse_Tooltip" value="Обращение выделения файлов в списке файлов." />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_None_Text" value="Снять выделение" />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_None_Tooltip" value="Снятие выделения со всех файлов в списке файлов." />
+		<lang code="WSMenuItem_Help_Text" value="Общая справка" />
+		<lang code="WSMenuItem_Help_Tooltip" value="Открытие боковой панели со справкой по Game Extractor." />
+		<lang code="WSMenuItem_HexEditor_Text" value="Шестнадцатеричный просмотрщик (Hex)" />
+		<lang code="WSMenuItem_HexEditor_Tooltip" value="Открытие боковой панели для отображения файлов в шестнадцатеричном просмотрщике." />
+		<lang code="WSMenuItem_Information_Text" value="Информация" />
+		<lang code="WSMenuItem_Information_Tooltip" value="Открытие боковой панели с информацией о текущем архиве и файлах." />
+		<lang code="WSMenuItem_NewArchive_Text" value="Новый архив" />
+		<lang code="WSMenuItem_NewArchive_Tooltip" value="Создание нового архива." />
+		<lang code="WSMenuItem_Options_Text" value="Настройки" />
+		<lang code="WSMenuItem_Options_Tooltip" value="Открытие боковой панели для изменения настроек Game Extractor." />
+		<lang code="WSMenuItem_PluginList_Text" value="Список плагинов" />
+		<lang code="WSMenuItem_PluginList_Tooltip" value="Открытие боковой панели для отображения плагинов, загруженных в Game Extractor." />
+		<lang code="WSMenuItem_PreviewResource_Text" value="Предпросмотр файла" />
+		<lang code="WSMenuItem_PreviewResource_Tooltip" value="Открытие боковой панели для предварительного просмотра файлов в архиве." />
+		<lang code="WSMenuItem_ReadArchive_Normal_Text" value="Открыть архив" />
+		<lang code="WSMenuItem_ReadArchive_Normal_Tooltip" value="Открытие боковой панели для открытия архива." />
+		<lang code="WSMenuItem_ReadArchive_OpenWith_Text" value="Открыть с помощью плагина" />
+		<lang code="WSMenuItem_ReadArchive_OpenWith_Tooltip" value="Открытие боковой панели для открытия архива с определённым плагином." />
+		<lang code="WSMenuItem_ReadArchive_Scanner_Text" value="Сканировать архив" />
+		<lang code="WSMenuItem_ReadArchive_Scanner_Tooltip" value="Открытие боковой панели для сканирования архива на наличие общих файлов." />
+		<lang code="WSMenuItem_ReadArchive_Script_Text" value="Открыть с помощью сценария" />
+		<lang code="WSMenuItem_ReadArchive_Script_Tooltip" value="Открытие боковой панели для открытия архива с помощью сценария." />
+		<lang code="WSMenuItem_ReadArchive_Text" value="Открыть архив" />
+		<lang code="WSMenuItem_RecentFileMenu_Text" value="Последние файлы" />
+		<lang code="WSMenuItem_RemoveResources_Text" value="Удалить файлы" />
+		<lang code="WSMenuItem_RemoveResources_Tooltip" value="Открытие боковой панели для удаления файлов из архива." />
+		<lang code="WSMenuItem_RenameResources_Text" value="Переименовать файлы" />
+		<lang code="WSMenuItem_RenameResources_Tooltip" value="Открытие боковой панели для переименования файлов в архиве." />
+		<lang code="WSMenuItem_ReplaceResources_Text" value="Заменить файлы" />
+		<lang code="WSMenuItem_ReplaceResources_Tooltip" value="Открытие боковой панели для замены файлов в архиве на файлы на компьютере." />
+		<lang code="WSMenuItem_Scanner_Text" value="Сканер" />
+		<lang code="WSMenuItem_ScriptBuilder_Text" value="Конструктор сценариев" />
+		<lang code="WSMenuItem_ScriptBuilder_Tooltip" value="Отображение боковой панели для создания сценария." />
+		<lang code="WSMenuItem_SelectResources_All_Text" value="Выделить все" />
+		<lang code="WSMenuItem_SelectResources_All_Tooltip" value="Выделение всех файлов в списке файлов." />
+		<lang code="WSMenuItem_SelectResources_Inverse_Text" value="Обратить выделение" />
+		<lang code="WSMenuItem_SelectResources_Inverse_Tooltip" value="Обращение выделения файлов в списке файлов." />
+		<lang code="WSMenuItem_SelectResources_None_Text" value="Снять выделение" />
+		<lang code="WSMenuItem_SelectResources_None_Tooltip" value="Снятие выделения со всех файлов в списке файлов." />
+		<lang code="WSMenuItem_WriteArchive_Text" value="Сохранить архив" />
+		<lang code="WSMenuItem_WriteArchive_Tooltip" value="Открытие боковой панели для сохранения архива." />
+		<lang code="WSMenu_ExtractResources_Text" value="Извлечь..." />
+		<lang code="WSMenu_ExtractResources_Tooltip" value="Меню извлечения." />
+		<lang code="WSMenu_FileList_RightClick_FileListView_Text" value="Просмотр списка файлов" />
+		<lang code="WSMenu_FileList_RightClick_FileListView_Tooltip" value="Меняет способ отображения файлов в архиве." />
+		<lang code="WSMenu_FileList_RightClick_SelectResources_Text" value="Выделение файлов" />
+		<lang code="WSMenu_FileList_RightClick_SelectResources_Tooltip" value="Выделение файлов в архиве." />
+		<lang code="WSMenu_File_Text" value="Файл" />
+		<lang code="WSMenu_File_Tooltip" value="Меню файлов." />
+		<lang code="WSMenu_Help_Text" value="Справка" />
+		<lang code="WSMenu_Help_Tooltip" value="Меню справки." />
+		<lang code="WSMenu_Manipulate_Text" value="Изменение" />
+		<lang code="WSMenu_Manipulate_Tooltip" value="Меню изменения." />
+		<lang code="WSMenu_Preview_Text" value="Предпросмотр" />
+		<lang code="WSMenu_Preview_Tooltip" value="Меню предварительного просмотра." />
+		<lang code="WSMenu_ReadArchive_Text" value="Открыть архив..." />
+		<lang code="WSMenu_ReadArchive_Tooltip" value="Варианты открытия архива." />
+		<lang code="WSMenu_Select_Text" value="Выделение" />
+		<lang code="WSMenu_Select_Tooltip" value="Меню выделения." />
+		<lang code="WSMenu_Tools_Text" value="Инструменты" />
+		<lang code="WSMenu_Tools_Tooltip" value="Меню инструментов." />
+		<lang code="WSMenu_View_Text" value="Просмотр" />
+		<lang code="WSMenu_View_Tooltip" value="Меню просмотра." />
+		<lang code="WSMenu_WriteArchive_Text" value="Сохранить архив..." />
+		<lang code="WSMenu_WriteArchive_Tooltip" value="Варианты написания архива." />
+		<lang code="WSObjectPlugin_DUMMY_No_Conversion_Name" value="Без преобразования" />
+		<lang code="WSObjectPlugin_ConversionInFullVersionOnly_Name" value="Доступно только в полной версии" />
+		<lang code="WSObjectPlugin_Renamer_AddToBack_Name" value="Добавить сзади" />
+		<lang code="WSObjectPlugin_Renamer_AddToFront_Name" value="Добавить спереди" />
+		<lang code="WSObjectPlugin_Renamer_ChangeDirectory_Name" value="Сменить папку" />
+		<lang code="WSObjectPlugin_Renamer_ChangeExtension_Name" value="Сменить расширение" />
+		<lang code="WSObjectPlugin_Renamer_ChangeName_Name" value="Сменить имя" />
+		<lang code="WSObjectPlugin_Renamer_Rename_Name" value="Переименовать" />
+		<lang code="WSObjectPlugin_csv_Name" value="Электронная таблица CSV" />
+		<lang code="WSObjectPlugin_html_Name" value="Веб-страница HTML" />
+		<lang code="WSObjectPlugin_txt_Name" value="Текстовый документ" />
+		<lang code="WSObjectPlugin_xls_Name" value="Электронная таблица Excel" />
+		<lang code="WSObjectPlugin_xml_Name" value="Документ XML" />
+		<lang code="WSOptionGroupHolder_SidePanel_Options_OptionGroupHolder_Tooltip" value="Здесь отображаются настройки." />
+		<lang code="WSPanel_FileListPanel_TreeTable_Properties_Label" value="Свойства архива" />
+		<lang code="WSPanel_FileListPanel_TreeTable_Properties_Tooltip" value="Свойства и параметры архива." />
+		<lang code="WSPanel_FileListPanel_Table_Properties_Label" value="Свойства архива" />
+		<lang code="WSPanel_FileListPanel_Table_Properties_Tooltip" value="Свойства и параметры архива." />
+		<lang code="WSPanel_FileListPanel_Tree_Properties_Label" value="Свойства архива" />
+		<lang code="WSPanel_FileListPanel_Tree_Properties_Tooltip" value="Свойства и параметры архива." />
+		<lang code="WSPanel_FileListPanel_Thumbnails_Properties_Label" value="Свойства архива" />
+		<lang code="WSPanel_FileListPanel_Thumbnails_Properties_Tooltip" value="Свойства и параметры архива." />
+		<lang code="WSPanel_FileListPanel_TreeTable_GroupTypes_Wrapper_Label" value="Тип группы/фильтра" />
+		<lang code="WSPanel_FileListPanel_TreeTable_GroupTypes_Wrapper_Tooltip" value="Различные способы группировки и фильтрации отображения." />
+		
+		
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_FormatChooserLabel_Label" value="Формат данных изображения" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_FormatChooserLabel_Tooltip" value="Формат данных изображений." />
+		
+		
+		<lang code="WSPanel_Option_Appearance_CurrentLanguage_Label_Label" value="Язык" />
+		<lang code="WSPanel_Option_Appearance_CurrentLanguage_Label_Tooltip" value="" />
+		<lang code="WSPanel_Option_Appearance_PluginListDisplayType_Label_Label" value="Тип отображения списков плагинов" />
+		<lang code="WSPanel_Option_Appearance_PluginListDisplayType_Label_Tooltip" value="" />
+		<lang code="WSPanel_Option_General_DragDropOption_Label_Label" value="Действие перетаскивания по умолчанию" />
+		<lang code="WSPanel_Option_General_DragDropOption_Label_Tooltip" value="" />
+		
+		<lang code="WSPanel_SidePanel_FileListExporter_ExporterPlugins_Label_Label" value="Формат списка файлов" />
+		<lang code="WSPanel_SidePanel_FileListExporter_ExporterPlugins_Label_Tooltip" value="Формат, который следует использовать при сохранении списка файлов." />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder_Label" value="Преобразовать изображения в..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder_Tooltip" value="При извлечении файлов Game Extractor попытается преобразовать изображения в этот формат." />
+		
+		<lang code="WSPanel_SidePanel_FileListExporter_ColumnsHolder_Label_Label" value="Экспортировать подробности..." />
+		<lang code="WSPanel_SidePanel_FileListExporter_ColumnsHolder_Label_Tooltip" value="Какие подробности каждого файла Вы хотите экспортировать?" />
+		
+		<lang code="WSPanel_SidePanel_Preview_WritePreviewHolder_Label" value="Сохранить предпросмотр как..." />
+		<lang code="WSPanel_SidePanel_Preview_WritePreviewHolder_Tooltip" value="Тип файла, в котором нужно сохранить предварительный просмотр." />
+		<lang code="WSPanel_SidePanel_About_Tooltip" value="О программе Game Extractor." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ControlsHolder_Tooltip" value="Выбранные элементы управления показаны здесь. Используйте кнопки в нижней части боковой панели, чтобы изменить элементы управления." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ConvertPanel_Main_Label" value="Преобразовать архив" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ConvertPanel_Main_Tooltip" value="Элементы управления для преобразования архива в другой формат." />
+		<lang code="WSPanel_SidePanel_DirectoryList_CutPanel_Main_Label" value="Вырезать неизвестный архив" />
+		<lang code="WSPanel_SidePanel_DirectoryList_CutPanel_Main_Tooltip" value="Элементы управления для вырезания архива для анализа." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_Main_Label" value="Извлечь файлы" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_Main_Tooltip" value="Элементы управления для извлечения файлов на компьютер." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ModifyPanel_Main_Label" value="Изменить архив" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ModifyPanel_Main_Tooltip" value="Элементы управления для изменения архивов." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ReadPanel_Main_Label" value="Открыть архив" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ReadPanel_Main_Tooltip" value="Элементы управления для открытия архива." />
+		
+		<lang code="WSPanel_SidePanel_RenameFile_RenamerPluginsLabel_Label" value="Тип переименования" />
+		<lang code="WSPanel_SidePanel_RenameFile_RenamerPluginsLabel_Tooltip" value="Тип переименования для выполнения." />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ScriptPanel_Main_Label" value="Открыть архив с помощью скрипта" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ScriptPanel_Main_Tooltip" value="Элементы управления для открытия архива с помощью скрипта." />
+		<lang code="WSPanel_SidePanel_DirectoryList_WritePanel_Main_Label" value="Сохранить архив" />
+		<lang code="WSPanel_SidePanel_DirectoryList_WritePanel_Main_Tooltip" value="Элементы управления для сохранения архива." />
+		<lang code="WSPanel_SidePanel_FileListExporter_Tooltip" value="Для сохранения списка файлов на компьютере." />
+		<lang code="WSPanel_SidePanel_HexEditor_SelectedValues_Main_Tooltip" value="Отображение файлов в шестнадцатеричном просмотрщике." />
+		<lang code="WSPanel_SidePanel_Information_ArchiveTable_Label_Label" value="Текущий архив" />
+		<lang code="WSPanel_SidePanel_Information_ArchiveTable_Label_Tooltip" value="Информация о архиве." />
+		<lang code="WSPanel_SidePanel_Information_PluginTable_Label_Label" value="Совместимые плагины" />
+		<lang code="WSPanel_SidePanel_Information_PluginTable_Label_Tooltip" value="Плагины, которые могут быть использованы для открытия этого архива." />
+		<lang code="WSPanel_SidePanel_Information_ResourceTable_Label_Label" value="Выделенные файлы" />
+		<lang code="WSPanel_SidePanel_Information_ResourceTable_Label_Tooltip" value="Информация о выделенных файлах в списке файлов." />
+		<lang code="WSPanel_SidePanel_Information_Tooltip" value="Информация об архиве и файлах." />
+		<lang code="WSPanel_SidePanel_RenameFile_Tooltip" value="Переименование файлов." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_ExistingScript_Label" value="Загрузить существующий сценарий..." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_ExistingScript_Tooltip" value="Сценарий, который уже существует." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_NewScript_Label" value="Создать новый сценарий..." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_NewScript_Tooltip" value="Создайте новый сценарий." />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowByte_Text" value="Байты" />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowByte_Tooltip" value="Отображение файла в виде ряда байтов." />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowChar_Text" value="Символы" />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowChar_Tooltip" value="Отображение файла в виде ряда символов." />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowHex_Text" value="Шестнадцатеричные" />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowHex_Tooltip" value="Отображение файла в виде ряда шестнадцатеричных значений." />
+		<lang code="WSRecentFileMenu_RecentFileMenu_Text" value="Последние файлы" />
+		<lang code="WSRecentFileMenu_RecentFileMenu_Tooltip" value="Архивы, которые были недавно открыты или сохранены." />
+		<lang code="WSTaskMenuItem_Empty_Tooltip" value="Нет задач, которые можно отменить или повторить." />
+		<lang code="WSRedoTaskMenu_RedoMenu_Text" value="Повторить..." />
+		<lang code="WSRedoTaskMenu_RedoMenu_Tooltip" value="Повторно выполнить задачу, которая не была выполнена." />
+		<lang code="WSScrollPane_Option_ToolbarButtons_ChoicesLabel_Label" value="Доступные кнопки" />
+		<lang code="WSScrollPane_Option_ToolbarButtons_ChoicesLabel_Tooltip" value="" />
+		<lang code="WSScrollPane_Option_ToolbarButtons_CurrentLabel_Label" value="Текущая панель инструментов" />
+		<lang code="WSScrollPane_Option_ToolbarButtons_CurrentLabel_Tooltip" value="" />
+		<lang code="WSScrollPane_SidePanel_Options_Appearance_Label_Label" value="Внешний вид" />
+		<lang code="WSScrollPane_SidePanel_Options_Appearance_Label_Tooltip" value="Настройки визуального оформления." />
+		<lang code="WSScrollPane_SidePanel_Options_DescriptionField_Label_Label" value="Описание" />
+		<lang code="WSScrollPane_SidePanel_Options_Directories_Label_Label" value="Папки" />
+		<lang code="WSScrollPane_SidePanel_Options_Directories_Label_Tooltip" value="Папки, используемые для сохранения файлов." />
+		<lang code="WSScrollPane_SidePanel_Options_General_Label_Label" value="Общие настройки" />
+		<lang code="WSScrollPane_SidePanel_Options_General_Label_Tooltip" value="Общие настройки Game Extractor." />
+		<lang code="WSScrollPane_SidePanel_Options_HexEditorFields_Label_Label" value="Поля шестнадцатеричного просмотрщика (Hex)" />
+		<lang code="WSScrollPane_SidePanel_Options_HexEditorFields_Label_Tooltip" value="Поля подробностей, отображаемые в шестнадцатеричном просмотрщике." />
+		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Label" value="Открытие и сохранение архивов" />
+		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Tooltip" value="Параметры открытия архивов." />
+		<lang code="WSScrollPane_SidePanel_Options_OptionGroupHolder_Label_Label" value="Настройки" />
+		<lang code="WSScrollPane_SidePanel_Options_Popups_Label_Label" value="Всплывающие сообщения" />
+		<lang code="WSScrollPane_SidePanel_Options_Popups_Label_Tooltip" value="Выбор всплывающих окон, которые вы хотите отобразить." />
+		<lang code="WSScrollPane_SidePanel_Options_PreviewingFiles_Label_Label" value="Предпросмотр файлов" />
+		<lang code="WSScrollPane_SidePanel_Options_PreviewingFiles_Label_Tooltip" value="Настройки для предварительного просмотра файлов." />
+		<lang code="WSScrollPane_SidePanel_Options_Scanners_Label_Label" value="Форматные сканеры" />
+		<lang code="WSScrollPane_SidePanel_Options_Scanners_Label_Tooltip" value="Сканеры, которые будут использоваться при поиске файлов в неизвестных архивах." />
+		<lang code="WSScrollPane_SidePanel_Options_TableColumns_Label_Label" value="Столбцы таблицы списка файлов" />
+		<lang code="WSScrollPane_SidePanel_Options_TableColumns_Label_Tooltip" value="Столбцы, которые должны быть показаны в списке файлов таблицы." />
+		<lang code="WSScrollPane_SidePanel_PluginList_PluginDescription_Label_Label" value="Описание плагина" />
+		<lang code="WSScrollPane_SidePanel_PluginList_PluginDescription_Label_Tooltip" value="Описание выделенного плагина." />
+		<lang code="WSScrollPane_SidePanel_PluginList_Plugins_Label_Label" value="Плагины" />
+		<lang code="WSScrollPane_SidePanel_PluginList_Plugins_Label_Tooltip" value="Плагины выделенного типа." />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_CommandsLabel_Label" value="Команды" />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_CommandsLabel_Tooltip" value="Список команд, которые могут быть добавлены в сценарий." />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_ScriptLabel_Label" value="Редактор сценария" />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_ScriptLabel_Tooltip" value="Создаваемый или редактируемый сценарий." />
+		<lang code="WSSidePanelHolder_SidePanelHolder_Tooltip" value="Боковая панель, на которой отображаются элементы управления для чтения, записи и изменения архивов." />
+		<lang code="WSSplashDialog_Archive" value="Построение пустого архива" />
+		<lang code="WSSplashDialog_FileTypes" value="Загрузка общих типов файлов" />
+		<lang code="WSSplashDialog_Scripts" value="Загрузка сценариев" />
+		<lang code="WSStatusBar_StatusBar_Text" value="" />
+		<lang code="WSStatusBar_StatusBar_Tooltip" value="Панель состояния. Наведите курсор на окно, чтобы отобразить здесь дополнительную информацию." />
+		<lang code="WSTableColumn_AddedIcon_Text" value="Добавлен?" />
+		<lang code="WSTableColumn_CRC_Text" value="Код CRC" />
+		<lang code="WSTableColumn_CompressedLengthKB_Text" value="Сжатый размер (КБ)" />
+		<lang code="WSTableColumn_CompressedLength_Text" value="Сжатый размер" />
+		<lang code="WSTableColumn_Compressed_Text" value="Сжат" />
+		<lang code="WSTableColumn_Compression_Text" value="Тип сжатия" />
+		<lang code="WSTableColumn_DecompressedLengthKB_Text" value="Распакованный размер (КБ)" />
+		<lang code="WSTableColumn_DecompressedLength_Text" value="Распакованный размер" />
+		<lang code="WSTableColumn_Description_Text" value="Описание" />
+		<lang code="WSTableColumn_Directory_Text" value="Папка" />
+		<lang code="WSTableColumn_Extension_Text" value="Расширение файла / Тип файла" />
+		<lang code="WSTableColumn_FilePath_Text" value="Путь файла" />
+		<lang code="WSTableColumn_Filename_Text" value="Имя файла" />
+		<lang code="WSTableColumn_Icon_Text" value="Значок" />
+		<lang code="WSTableColumn_Offset_Text" value="Смещение" />
+		<lang code="WSTableColumn_Property_Text" value="Свойство" />
+		<lang code="WSTableColumn_RenamedIcon_Text" value="Переименован?" />
+		<lang code="WSTableColumn_ReplacedIcon_Text" value="Заменён?" />
+		<lang code="WSTableColumn_Source_Text" value="Источник" />
+		<lang code="WSTableColumn_Time_Text" value="Метка времени" />
+		<lang code="WSTableColumn_Value_Text" value="Значение" />
+		<lang code="WSTable_FileList_Tooltip" value="Список файлов." />
+		<lang code="WSTextArea_SidePanel_PluginList_PluginDescription_Tooltip" value="Описание текущего плагина." />
+		<lang code="WSTextArea_SidePanel_ScriptBuilder_Script_Tooltip" value="Сценарий." />
+		<lang code="WSTextField_ExtractDirectory_Label" value="Папка извлечения" />
+		<lang code="WSTextField_ExtractDirectory_Tooltip" value="Папка, в которую будут извлечены файлы." />
+		<lang code="WSTextField_HexEditorFileSizeLimit_Label" value="Предел размера файла шестнадцатеричного просмотрщика" />
+		<lang code="WSTextField_HexEditorFileSizeLimit_Tooltip" value="Количество данных для отображения в шестнадцатеричном просмотрщике." />
+		<lang code="WSTextField_InterfaceColors_Label" value="Цвета интерфейса" />
+		<lang code="WSTextField_InterfaceColors_Tooltip" value="Цвет интерфейса." />
+		<lang code="WSTextField_LanguageDirectory_Label" value="Языки" />
+		<lang code="WSTextField_LanguageDirectory_Tooltip" value="Папка, в которой находятся языки." />
+		<lang code="WSTextField_MaxAllowedScriptErrors_Label" value="Максимальное число ошибок сценария" />
+		<lang code="WSTextField_MaxAllowedScriptErrors_Tooltip" value="Максимальное количество ошибок, которое может допустить сценарий, прежде чем Game Extractor прекратит его выполнение." />
+		
+		
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Label" value="Смещение данных" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Tooltip" value="Смещение в файле до начала данных изображения." />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Label" value="Ширина" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Tooltip" value="Ширина изображения." />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Label" value="Высота" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Tooltip" value="Высота изображения." />
+		
+		
+		<lang code="WSTextField_MaxFilenameLength_Label" value="Макс. длина имени файла" />
+		<lang code="WSTextField_MaxFilenameLength_Tooltip" value="Максимально допустимая длина имени файла, для использования при автоматическом определении типа архива." />
+		<lang code="WSTextField_MaxNumberOfFiles2_Label" value="Макс. число файлов (маленькие архивы)" />
+		<lang code="WSTextField_MaxNumberOfFiles2_Tooltip" value="Максимально допустимое количество файлов для небольших архивов. Используется при автоматическом определении типа архива." />
+		<lang code="WSTextField_MaxNumberOfFiles4_Label" value="Макс. число файлов (большие архивы)" />
+		<lang code="WSTextField_MaxNumberOfFiles4_Tooltip" value="Максимально допустимое количество файлов для больших архивов. Используется при автоматическом определении типа архива." />
+		<lang code="WSTextField_NumberOfRecentFiles_Label" value="Число последних файлов" />
+		<lang code="WSTextField_NumberOfRecentFiles_Tooltip" value="Количество последних файлов для запоминания." />
+		<lang code="WSTextField_NumberOfUndoTasks_Label" value="Количество отмен" />
+		<lang code="WSTextField_NumberOfUndoTasks_Tooltip" value="Количество отмен для запоминания." />
+		<lang code="WSTextField_SavedPreviewDirectory_Label" value="Сохранённые предпросмотры" />
+		<lang code="WSTextField_SavedPreviewDirectory_Tooltip" value="Папка, в которой сохраняются предварительные просмотры." />
+		<lang code="WSTextField_ScriptsDirectory_Label" value="Папка сценариев" />
+		<lang code="WSTextField_ScriptsDirectory_Tooltip" value="Папка, в которой хранятся файлы сценариев." />
+		<lang code="WSTextField_SelectedFont_Label" value="Шрифт" />
+		<lang code="WSTextField_SelectedFont_Tooltip" value="Текущий шрифт." />
+		<lang code="WSTextField_SidePanel_DirectoryList_ConvertFilenameField_Label" value="Сохранить как... (имя файла)" />
+		<lang code="WSTextField_SidePanel_DirectoryList_ConvertFilenameField_Tooltip" value="Архив будет сохранён под этим именем." />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutInputFilenameField_Label" value="Входной файл" />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutInputFilenameField_Tooltip" value="Это архив, который будет вырезан." />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutOutputFilenameField_Label" value="Выводной файл" />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutOutputFilenameField_Tooltip" value="Это имя файла, используемое для сохранения данных о вырезании." />
+		<lang code="WSTextField_SidePanel_DirectoryList_ExportFilenameField_Label" value="Папка извлечения" />
+		<lang code="WSTextField_SidePanel_DirectoryList_ExportFilenameField_Tooltip" value="Папка, в которую будут извлечены файлы." />
+		<lang code="WSTextField_SidePanel_DirectoryList_WriteFilenameField_Label" value="Сохранить как... (имя файла)" />
+		<lang code="WSTextField_SidePanel_DirectoryList_WriteFilenameField_Tooltip" value="Архив будет сохранён под этим именем." />
+		<lang code="WSTextField_SidePanel_RenameFile_ReplaceValue_Label" value="Переименовать в..." />
+		<lang code="WSTextField_SidePanel_RenameFile_ReplaceValue_Tooltip" value="Значение, используемое для переименования." />
+		<lang code="WSTextField_SidePanel_RenameFile_SearchValue_Label" value="Поиск..." />
+		<lang code="WSTextField_SidePanel_RenameFile_SearchValue_Tooltip" value="Значение для поиска." />
+		<lang code="WSTextField_SidePanel_ScriptBuilder_ScriptName_Label" value="Имя сценария" />
+		<lang code="WSTextField_SidePanel_ScriptBuilder_ScriptName_Tooltip" value="Имя нового сценария." />
+		<lang code="WSTextField_TempDirectory_Label" value="Временная папка" />
+		<lang code="WSTextField_TempDirectory_Tooltip" value="Папка, в которой хранятся временные файлы." />
+		<lang code="WSTextField_FFMPEG_Path_Label" value="Расположение FFMPEG" />
+		<lang code="WSTextField_FFMPEG_Path_Tooltip" value="Расположение FFMPEG, если он установлен на компьютере. Используется для предварительного просмотра некоторых аудиофайлов." />
+		<lang code="WSTextField_QuickBMS_Path_Label" value="Расположение QuickBMS" />
+		<lang code="WSTextField_QuickBMS_Path_Tooltip" value="Расположение QuickBMS, если он установлен на компьютере. Используется для распаковки некоторых необычных форматов сжатия и открытия архивов с помощью сценариев QuickBMS." />
+		<lang code="WSToolBar_MainToolBar_Tooltip" value="Панель инструментов, имеющая кнопки для выполнения общих задач." />
+		<lang code="WSTree_FileList_Tooltip" value="Список файлов, отображаемый в виде дерева." />
+		<lang code="WSUndoTaskMenu_UndoMenu_Text" value="Отменить..." />
+		<lang code="WSUndoTaskMenu_UndoMenu_Tooltip" value="Отмена задачи." />
+		
+		<lang code="WSButton_UndoTaskComboButton_Tooltip" value="Отмена задачи." />
+		<lang code="WSButton_RedoTaskComboButton_Tooltip" value="Повтор задачи." />
+		<lang code="WSButton_UndoTaskComboButton_Text" value="Отменить..." />
+		<lang code="WSButton_RedoTaskComboButton_Text" value="Повторить..." />
+		
+		<lang code="WSButton_HexEditor_Name" value="Шестнадцатеричный редактор (Hex)" />
+		<lang code="WSButton_About_Name" value="О программе Game Extractor" />
+		<lang code="WSButton_AddResources_Name" value="Добавить файлы" />
+		<lang code="WSButton_CloseProgram_Name" value="Закрыть Game Extractor" />
+		<lang code="WSButton_CutArchive_Name" value="Вырезать архив" />
+		<lang code="WSButton_ExtractSelectedResources_Name" value="Извлечь выделенные файлы" />
+		<lang code="WSButton_FileListExporter_Name" value="Экспортёр списка файлов" />
+		<lang code="WSButton_FileListView_Name" value="Изменение просмотра списка файлов" />
+		<lang code="WSButton_FileListView_Table_Name" value="Таблица списка файлов" />
+		<lang code="WSButton_FileListView_Thumbnails_Name" value="Список файлов миниатюр" />
+		<lang code="WSButton_FileListView_Tree_Name" value="Древовидный список файлов" />
+		<lang code="WSButton_FileListView_TreeTable_Name" value="Список файлов групповой таблицы" />
+		<lang code="WSButton_Help_Name" value="Справка" />
+		<lang code="WSButton_Information_Name" value="Информация" />
+		<lang code="WSButton_NewArchive_Name" value="Новый архив" />
+		<lang code="WSButton_Options_Name" value="Настройки" />
+		<lang code="WSButton_PluginList_Name" value="Список плагинов" />
+		<lang code="WSButton_PreviewResource_Name" value="Предпросмотр файла" />
+		<lang code="WSButton_ReadArchive_Normal_Name" value="Прочитать архив" />
+		<lang code="WSButton_RemoveResources_Name" value="Удалить файлы" />
+		<lang code="WSButton_RenameResources_Name" value="Переименовать файлы" />
+		<lang code="WSButton_ReplaceResources_Name" value="Заменить файлы" />
+		<lang code="WSButton_ScriptBuilder_Name" value="Конструктор сценариев" />
+
+		<lang code="WSButton_SelectResources_All_Name" value="Выделить все файлы" />
+		<lang code="WSButton_WriteArchive_Name" value="Сохранить архив" />
+		<lang code="WSButton_RedoTaskComboButton_Name" value="Повторить" />
+		<lang code="WSButton_UndoTaskComboButton_Name" value="Отменить" />
+		
+		<lang code="WSButton_ParentDirectory_Name" value="Вверх в родительскую папку" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadArchiveButton_Name" value="Прочитать архив" />
+		<lang code="WSButton_SidePanel_DirectoryList_ScanArchiveButton_Name" value="Сканировать архив" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadPanelButton_Name" value="Показать элементы управления чтения архива" />
+		<lang code="WSButton_SidePanel_DirectoryList_ScriptPanelButton_Name" value="Показать элементы управления чтения сценария" />
+		<lang code="WSButton_SidePanel_DirectoryList_ModifyPanelButton_Name" value="Показать элементы управления изменением архива" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportPanelButton_Name" value="Показать элементы управления извлечением файлов" />
+		<lang code="WSButton_SidePanel_DirectoryList_WritePanelButton_Name" value="Показать элементы управления сохранением архива" />
+		<lang code="WSButton_SidePanel_DirectoryList_CutPanelButton_Name" value="Показать элементы управления вырезки архива" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadScriptArchiveButton_Name" value="Прочитать архив с помощью сценария" />
+		<lang code="WSButton_SidePanel_DirectoryList_AddFileButton_Name" value="Добавить файлы" />
+		<lang code="WSButton_SidePanel_DirectoryList_RemoveFileButton_Name" value="Удалить файлы" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileSelectedButton_Name" value="Заменить выделенные файлы" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileMatchingButton_Name" value="Заменить совпадающие файлы" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportSelectedButton_Name" value="Извлечь выделенные файлы" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportAllButton_Name" value="Извлечь все файлы" />
+		<lang code="WSButton_SidePanel_DirectoryList_ConvertArchiveButton_Name" value="Преобразовать архив" />
+		<lang code="WSButton_SidePanel_DirectoryList_WriteArchiveButton_Name" value="Сохранить архив" />
+		<lang code="WSButton_SidePanel_DirectoryList_CutArchiveButton_Name" value="Вырезать архив" />
+		<lang code="WSButton_SidePanel_Preview_WritePreviewButton_Name" value="Сохранить предпросмотр" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_OpenScript_Name" value="Открыть сценарий" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_CheckScript_Name" value="Проверить сценарий" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_TestScript_Name" value="Тестировать сценарий" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_SaveScript_Name" value="Сохранить сценарий" />
+	
+		
+		
+		<lang code="WSLabel_ZipConvertSuccess_Text" value="Преобразование ZIP завершено." />
+		
+		
+		<lang code="WSLabel_DecompressArchive_Text" value="Этот архив должен быть распакован, прежде чем его можно будет изучить. Продолжить?" />
+		
+		
+		<lang code="FileListPanel_GenericFile.png_Tooltip" value="Файл." />
+		<lang code="FileListPanel_Added.png_Tooltip" value="Да, этот файл добавлен." />
+		<lang code="FileListPanel_Renamed.png_Tooltip" value="Да, этот файл переименован." />
+		<lang code="FileListPanel_Replaced.png_Tooltip" value="Да, этот файл заменен." />
+		<lang code="FileListPanel_Unadded.png_Tooltip" value="Нет." />
+		<lang code="FileListPanel_Unrenamed.png_Tooltip" value="Нет." />
+		<lang code="FileListPanel_Unreplaced.png_Tooltip" value="Нет." />
+		
+
+<!-- New with 3.08 -->
+		<lang code="IdentifyUnknownFileTypes" value="Определение типов файлов" />
+		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Text" value="Определение неизвестных типов файлов (медленнее)." />
+		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Tooltip" value="Если имена файлов не хранятся в архиве, попытаться автоматически определить типы файлов (отмечено)." />
+		
+<!-- New with 3.09 -->
+		<lang code="Progress_SplittingArchive" value="Разделение архива" />
+		<lang code="WSMenuItem_FileListDrop_ReadArchive_Text" value="Открыть архив" />
+		<lang code="WSLabel_WriteArchive_OverwriteCurrentArchiveFile_Text" value="Вы уверены, что хотите перезаписать существующий архив?\n(Нажмите «Нет», чтобы выбрать новое имя файла)." />
+	
+<!-- New with 3.10 -->
+		<lang code="WSButton_PreviewPanel_Image_PreviousButton_Text" value="Предыдущий кадр" />
+		<lang code="WSButton_PreviewPanel_Image_PreviousButton_Tooltip" value="Показать предыдущий кадр коллекции изображений." />
+		<lang code="WSButton_PreviewPanel_Image_NextButton_Text" value="Следующий кадр" />
+		<lang code="WSButton_PreviewPanel_Image_NextButton_Tooltip" value="Показать следующий кадр коллекции изображений." />
+		
+		<lang code="WSLabel_ScriptBuilder_CantCheckQuickBMSScript_Text" value="Похоже, что это сценарий QuickBMS.\nGame Extractor не может выполнить проверку синтаксиса для этого типа сценариев." />
+		<lang code="WSCheckBox_Popup_QuickBMSMissing_Show_Text" value="QuickBMS отсутствует" />
+		<lang code="WSCheckBox_Popup_QuickBMSMissing_Show_Tooltip" value="Показывать всплывающее сообщение, когда QuickBMS нужен, но не может быть найден." />
+		
+		<lang code="WSLabel_QuickBMSMissing_Text" value="\nДля открытия этого архива требуется QuickBMS, но его не удалось найти.\nВы хотите, чтобы Game Extractor скачал его для вас?\n\n" />
+		<lang code="WSLabel_QuickBMSDownloadFailure_Text" value="\nВозникла проблема со скачиванием QuickBMS, поэтому вам придётся сделать это вручную.\nДля подробностей откройте раздел «Внешнее программное обеспечение» в справке." />
+		
+		<lang code="Progress_Downloading" value="Скачивание..." />
+		
+		<lang code="SidePanel_ImageInvestigator_SidePanel_ImageInvestigator_Text" value="Исследователь изображений" />
+		<lang code="WSButton_ImageInvestigator_Text" value="Исследователь изображений" />
+		<lang code="WSButton_ImageInvestigator_Tooltip" value="Показать панель, на которой вы можете попытаться отобразить неизвестные файлы в виде изображения." />
+		<lang code="WSLabel_ComponentList_ImageInvestigator_Text" value="Исследователь изображений" />		
+		<lang code="WSMenuItem_FileList_RightClick_ImageInvestigator_Text" value="Исследователь изображений" />
+		<lang code="WSMenuItem_FileList_RightClick_ImageInvestigator_Tooltip" value="Открытие боковой панели, которая пытается отобразить неизвестные файлы в виде изображения." />
+		<lang code="WSMenuItem_ImageInvestigator_Text" value="Исследователь изображений" />
+		<lang code="WSMenuItem_ImageInvestigator_Tooltip" value="Открытие боковой панели, которая отображает неизвестные файлы в виде изображения." />
+		<lang code="WSPanel_SidePanel_ImageInvestigator_SelectedValues_Main_Tooltip" value="Отображение неизвестных файлов в виде изображения." />
+		<lang code="WSButton_ImageInvestigator_Name" value="Исследователь изображений" />
+		<lang code="WSPanel_SidePanel_ImageInvestigator_WritePreviewHolder_Label" value="Сохранить изображение как..." />
+		<lang code="WSPanel_SidePanel_ImageInvestigator_WritePreviewHolder_Tooltip" value="Тип файла для сохранения изображения." />
+		<lang code="WSButton_SidePanel_ImageInvestigator_WritePreviewButton_Tooltip" value="Сохранение изображения на компьютере в выбранном формате." />
+		<lang code="WSCheckBox_Popup_ImageInvestigator_PreviewSaved_Show_Text" value="Изображение сохранено исследователем изображений" />
+		<lang code="WSCheckBox_Popup_ImageInvestigator_PreviewSaved_Show_Tooltip" value="Показать всплывающее сообщение, когда изображение в исследователе изображений было сохранено." />
+		<lang code="WSComboBox_SidePanel_ImageInvestigator_WritePreviewPlugins_Tooltip" value="Изображение будет сохранено в этом формате." />
+		<lang code="WSLabel_ImageInvestigator_PreviewSaved_Text" value="Сохранение изображения завершено." />
+		<lang code="WSButton_SidePanel_ImageInvestigator_WritePreviewButton_Name" value="Сохранить изображение" />
+		<lang code="WSLabel_BlankImageInvestigatorPreview_Text" value="Этот файл нельзя предпросмотреть." />
+		<lang code="WSLabel_BlankImageInvestigatorPreview_Tooltip" value="Ни один плагин не смог предварительно просмотреть этот файл." />
+		<lang code="WSComboBox_PreviewType_Tooltip" value="Какой вид предварительного просмотра должен быть показан для неизвестных файлов?" />
+		<lang code="WSLabel_PreviewType_Text" value="Неизвестный предпросмотрщик файлов" />
+		<lang code="WSPanel_Option_PreviewingFiles_PreviewType_Label_Label" value="Неизвестный предпросмотрщик файлов" />
+		<lang code="WSPanel_Option_PreviewingFiles_PreviewType_Label_Tooltip" value="" />
+		<lang code="Hex" value="Шестнадцатеричный просмотрщик (Hex)" />
+		<lang code="ImageInvestigator" value="Исследователь изображений" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleCheckbox_Text" value="Смешение" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleCheckbox_Tooltip" value="Применение смешение к изображению." />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_VerticalFlipCheckbox_Text" value="Повернуть вертикально" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_VerticalFlipCheckbox_Tooltip" value="Перевернуть изображение вертикально." />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_LittleEndianRadioButton_Text" value="Прямой" />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_LittleEndianRadioButton_Tooltip" value="Значения читаются в прямом порядке." />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_BigEndianRadioButton_Text" value="Обратный" />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_BigEndianRadioButton_Tooltip" value="Значения читаются в обратном порядке." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Label" value="Порядок" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Tooltip" value="Порядок, используемый для чтения значений из файла." />
+		
+		<lang code="WSCheckBox_Popup_AddBMSOnDoubleClick_Show_Text" value="Добавление сценария BMS по двойному нажатию" />
+		<lang code="WSCheckBox_Popup_AddBMSOnDoubleClick_Show_Tooltip" value="При двойном нажатии по файлу сценария BMS появляется всплывающее сообщение с просьбой добавить его в Game Extractor." />
+		<lang code="WSLabel_AddBMSOnDoubleClick_Text" value="Это похоже на сценарий BMS. Не хотите ли вы добавить его в список сценариев Game Extractor?" />
+		
+		<lang code="WSLabel_BasicVersionPreview_Text" value="Полная версия имеет множество дополнительных возможностей, например..." />
+		<lang code="WSLabel_BasicVersionPreview_Tooltip" value="Эта функция доступна только в полной версии." />
+		
+		<lang code="WSLabel_BasicVersionPreviewLink_Text" value="Зайдите на сайт http://www.watto.org/extract для подробностей." />
+		<lang code="WSLabel_BasicVersionPreviewLink_Tooltip" value="Нажмите, чтобы перейти на сайт Game Extractor в вашем браузере." />
+		
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature1_Text" value="Предпросмотр изображений и аудиофайлов для сотен игр" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature1_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature2_Text" value="Преобразование изображений в различные форматы, такие как JPG и PNG" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature2_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature3_Text" value="Отображение архивов в виде списка плиток с миниатюрами" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature3_Tooltip" value="Эта функция доступна только в полной версии." />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature4_Text" value="Сканирование для поиска изображений и аудиофайлов в неподдерживаемых играх" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature4_Tooltip" value="Эта функция доступна только в полной версии." />
+		
+		<lang code="WSCheckBox_PreviewPanel_Text_WordWrap_Text" value="Перенос слов" />
+		<lang code="WSCheckBox_PreviewPanel_Text_WordWrap_Tooltip" value="Должен ли текст переноситься по словам или нет." />
+		<lang code="WSCheckBox_PreviewPanel_Text_MonospacedFont_Text" value="Моноширинный" />
+		<lang code="WSCheckBox_PreviewPanel_Text_MonospacedFont_Tooltip" value="Должен ли текст отображаться моноширинным шрифтом или нет." />
+		
+		<lang code="WSCheckBox_PreviewPanel_Image_FitToPanel_Text" value="Сжать до нужного размера" />
+		<lang code="WSCheckBox_PreviewPanel_Image_FitToPanel_Tooltip" value="Можно ли уменьшить большие изображения, чтобы они поместились на панели, или просто просматривать их в обычном размере." />
+		<lang code="WSCheckBox_TiledPreviewBackground_Text" value="Шаблон прозрачности" />
+		<lang code="WSCheckBox_TiledPreviewBackground_Tooltip" value="Показывать ли за изображениями плиточный прозрачный шаблон или просто сплошной цвет." />
+
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Thumbnails_Text" value="Миниатюры" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Thumbnails_Tooltip" value="Сменить список файлов, чтобы он отображался в виде списка миниатюр." />
+		
+		<lang code="HexEditor_LittleEndian" value="Прямой порядок" />
+		<lang code="HexEditor_BigEndian" value="Обратный порядок" />
+		
+<!-- New with 3.11 -->
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesExported_Show_Text" value="Файлы не извлечены" />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesExported_Show_Tooltip" value="Показывать всплывающее сообщение, если возникла проблема, и ни один файл не может быть извлечён." />
+		<lang code="WSLabel_ExportFiles_NoFilesExported_Text" value="Возникла проблема при попытке извлечь файлы." />
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_SomeFilesExported_Show_Text" value="Некоторые файлы извлечены" />
+		<lang code="WSCheckBox_Popup_ExportFiles_SomeFilesExported_Show_Tooltip" value="Показывать всплывающее сообщение, если некоторые файлы удалось извлечь, но не все." />
+		<lang code="WSLabel_ExportFiles_SomeFilesExported_Text" value="Выполнено извлечение некоторых файлов, но не всех." />
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_DirectoryNotWritable_Show_Text" value="Извлечение папки недоступно для записи" />
+		<lang code="WSCheckBox_Popup_ExportFiles_DirectoryNotWritable_Show_Tooltip" value="Показывать всплывающее сообщение при попытке извлечь файлы в папку, которую нельзя записать, например, в папку, доступную только для чтения (CD/DVD) или без прав на запись." />
+		<lang code="WSLabel_ExportFiles_DirectoryNotWritable_Text" value="\nНевозможно извлечь файлы в папку. Пожалуйста, проверьте, что она не доступна только для чтения (например, не CD/DVD),\nчто у вас есть права на запись в эту папку, или попробуйте выбрать другую папку для извлечения.\n\n" />
+		
+		<lang code="WSLabel_ChooseCompressionType_Text" value="Пожалуйста, выберите тип сжатия, который вы хотите использовать." />
+		
+		<lang code="Progress_DecryptingArchive" value="Расшифровка архива" />
+		
+		<lang code="ResourceProperty_ColorCount" value="Число цветов" />
+		<lang code="ResourceProperty_DecompressedLength" value="Распакованная длина" />
+		<lang code="ResourceProperty_FileID" value="ИД файла" />
+		<lang code="ResourceProperty_Filename" value="Имя файла" />
+		<lang code="ResourceProperty_FrameCount" value="Число кадров" />
+		<lang code="ResourceProperty_Hash" value="Хеш-значение" />
+		<lang code="ResourceProperty_Height" value="Высота изображения" />
+		<lang code="ResourceProperty_ImageFormat" value="Формат пикселей изображения" />
+		<lang code="ResourceProperty_Length" value="Длина" />
+		<lang code="ResourceProperty_MipmapCount" value="Число MIP-текстурирований" />
+		<lang code="ResourceProperty_Offset" value="Смещение" />
+		<lang code="ResourceProperty_Version" value="Версия" />
+		<lang code="ResourceProperty_Width" value="Ширина изображения" />
+		<lang code="ResourceProperty_XOffset" value="Смещение изображения X" />
+		<lang code="ResourceProperty_YOffset" value="Смещение изображения Y" />
+		
+<!-- New with 3.12 -->
+
+		<lang code="WSCheckBox_SearchWildcardConversion_Text" value="Использовать * для подстановочных знаков в поиске/фильтре" />
+		<lang code="WSCheckBox_SearchWildcardConversion_Tooltip" value="Использование символа * в поле поиска/фильтра выполнит поиск по подстановочному знаку." />
+		<lang code="WSCheckBox_SearchRegExConversion_Text" value="Разрешить регулярные выражения (RegEx) в поиске/фильтре" />
+		<lang code="WSCheckBox_SearchRegExConversion_Tooltip" value="Окно поиска/фильтра будет анализировать регулярные выражения (RegEx)." />
+		<lang code="WSButton_SidePanel_Search_FilterButton_Text" value="Фильтр файлов" />
+		<lang code="WSButton_SidePanel_Search_FilterButton_Tooltip" value="Отфильтровывать список файлов, чтобы показать только подходящие файлы." />
+		
+		<lang code="SidePanel_Search_SidePanel_Search_Text" value="Поиск" />
+		<lang code="WSButton_Search_Name" value="Поиск" />
+		<lang code="WSButton_Search_Text" value="Поиск или фильтр" />
+		<lang code="WSButton_Search_Tooltip" value="Выполнение поиска файлов в архиве или отфильтровать файлы в списке файлов." />
+		<lang code="WSLabel_ComponentList_Search_Text" value="Поиск или фильтр" />
+		<lang code="WSMenuItem_Search_Text" value="Поиск или фильтр" />
+		<lang code="WSMenuItem_Search_Tooltip" value="Открытие боковой панели для поиска файлов в архиве или отфильтровки файлов в списке файлов." />
+		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Label" value="Поиск или фильтр столбцов" />
+		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Tooltip" value="Столбцы, по которым осуществляется поиск или фильтрация." />
+		<lang code="WSPanel_SidePanel_Search_Tooltip" value="Выполнение поиска файлов в архиве или отфильтровать файлы в списке файлов." />
+		<lang code="WSTextField_SidePanel_Search_InputText_Label" value="Значение поиска или фильтра" />
+		<lang code="WSTextField_SidePanel_Search_InputText_Tooltip" value="Значение для поиска или фильтрации." />
+		
+		<lang code="WSButton_WelcomeWizard_CloseWizard_Text" value="Закрыть мастера приветствия" />
+		<lang code="WSButton_WelcomeWizard_CloseWizard_Tooltip" value="Закрытие мастера приветствия." />
+		<lang code="WSButton_WelcomeWizard_PreviousScreen_Text" value="Назад" />
+		<lang code="WSButton_WelcomeWizard_PreviousScreen_Tooltip" value="Показать предыдущий экран в мастере приветствия." />
+		<lang code="WSButton_WelcomeWizard_NextScreen_Text" value="Далее" />
+		<lang code="WSButton_WelcomeWizard_NextScreen_Tooltip" value="Показать следующий экран в мастере приветствия." />
+		
+		<lang code="WSLabel_WelcomeWizard_WelcomeMessage_Text" value="Не знакомы с Game Extractor? Этот мастер покажет вам основы." />
+		<lang code="WelcomeWizard_Screen01_Label" value="Нажмите кнопку прочтения архива в верхней части экрана.\nСписок папок откроется справа." />
+		<lang code="WelcomeWizard_Screen02_Label" value="Дважды нажмите по архиву, который вы хотите открыть.\nФайлы в архивах отображаются в списке файлов." />
+		<lang code="WelcomeWizard_Screen03_Label" value="Если вы хотите извлечь файлы на компьютер, нажмите кнопку «Извлечь файлы»\nв верхней части экрана. Справа откроется список папок." />
+		<lang code="WelcomeWizard_Screen04_Label" value="Выберите папку, в которую вы хотите извлечь файлы. Нажмите кнопку «Извлечь все»,\n чтобы извлечь все, или, если вам нужны только определённые файлы, выделите те, которые вам нужны\nи нажмите кнопку «Извлечь выделенные»." />
+		
+		<lang code="WSCheckBox_ShowWelcomeWizard_Text" value="Показать мастера приветствия снова" />
+		<lang code="WSCheckBox_ShowWelcomeWizard_Tooltip" value="Показывать мастер приветствия при следующем запуске Game Extractor." />
+		
+		<lang code="WSCheckBox_NintendoSwitchSwizzle_Text" value="Смешение изображения Nintendo Switch" />
+		<lang code="WSCheckBox_NintendoSwitchSwizzle_Tooltip" value="Отменяет смешение изображения в архивах Nintendo Switch." />
+		
+		<lang code="Progress_AnalyzingDirectory" value="Анализ папки" />
+		<lang code="WSButton_AnalyzeDirectory_Name" value="Анализ папки" />
+		<lang code="WSButton_AnalyzeDirectory_Tooltip" value="Проанализировать папку, чтобы найти архивы и другие файлы, которые могут быть открыты программой Game Extractor." />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzeDirectoryButton_Name" value="Анализ архива" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzeDirectoryButton_Tooltip" value="Анализирует архив." />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzePanelButton_Name" value="Показать элементы управления анализом папки" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzePanelButton_Tooltip" value="Отображение элементов управления анализом папки." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_DirectoryAnalyzed_Show_Text" value="Анализ папки завершён" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_DirectoryAnalyzed_Show_Tooltip" value="Показывать всплывающее сообщение при завершении анализа папки." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FilenameMissing_Show_Text" value="Отсутствует папка анализа" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FilenameMissing_Show_Tooltip" value="Показывать всплывающее сообщение, если папка, которую вы анализируете, отсутствует или недействительна." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FileNotADirectory_Show_Text" value="Расположение анализа не является папкой" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FileNotADirectory_Show_Tooltip" value="Показывать всплывающее сообщение, если анализируемое место не является папкой." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_InvalidReportFile_Show_Text" value="Имя отчёта анализа папки отсутствует" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_InvalidReportFile_Show_Tooltip" value="Показывать всплывающее сообщение, если имя отчёта отсутствует или недействительно при анализе папки." />
+		<lang code="WSLabel_ComponentList_AnalyzeDirectory_Text" value="Анализ папки" />
+		<lang code="WSLabel_AnalyzeDirectory_DirectoryAnalyzed_Text" value="Анализирование папки завершено." />
+		<lang code="WSLabel_AnalyzeDirectory_FilenameMissing_Text" value="Входная папка недействительна или отсутствует." />
+		<lang code="WSLabel_AnalyzeDirectory_FileNotADirectory_Text" value="Выбранное местоположение не является папкой." />
+		<lang code="WSLabel_AnalyzeDirectory_InvalidReportFile_Text" value="Имя файла отчёта отсутствует или недействительно." />
+		<lang code="WSLabel_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameLabel_Text" value="Ввод" />
+		<lang code="WSMenuItem_AnalyzeDirectory_Text" value="Анализ папки" />
+		<lang code="WSMenuItem_AnalyzeDirectory_Tooltip" value="Открытие боковой панели для анализирования папкм." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzePanel_Main_Label" value="Анализ папки" />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzePanel_Main_Tooltip" value="Элементы управления для анализа папки." />
+		<lang code="WSTextField_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField_Label" value="Имя файла созданного отчёта" />
+		<lang code="WSTextField_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField_Tooltip" value="Это имя файла аналитического отчёта, который будет создан." />
+
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins_Text" value="Определение форматов предпросмотра" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins_Tooltip" value="Нужно ли определять файлы, которые можно предварительно просмотреть, например, изображения и аудиофайлы." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories_Text" value="Анализ подпапок" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories_Tooltip" value="Нужно ли анализировать файлы и в подпапках, или только текущую папку." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives_Text" value="Определение форматов в архивах" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives_Tooltip" value="Открывать ли архивы и определять все типы файлов в них, или определять только сами типы архивов." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles_Text" value="Извлечение всех файлов из архивов" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles_Tooltip" value="Извлекать файлы из всех архивов в файловую систему." />
+		
+		<lang code="WSCheckBox_ShowAdvancedControlsInDirectoryList_Text" value="Показать управление расширенными функциями в списке папок" />
+		<lang code="WSCheckBox_ShowAdvancedControlsInDirectoryList_Tooltip" value="Показывать дополнительные кнопки под списком папок для выполнения дополнительных функций." />
+
+		<lang code="WSTextField_FileListExporterDirectory_Label" value="Списки сохранённых файлов" />
+		<lang code="WSTextField_FileListExporterDirectory_Tooltip" value="Папка, в которую сохраняются списки файлов." />
+		
+		<lang code="WSTextField_AnalysisExtractDirectory_Label" value="Аналитические отчёты и извлечения" />
+		<lang code="WSTextField_AnalysisExtractDirectory_Tooltip" value="Папка, в которую инструменты анализа извлекают файлы и где создаётся отчёт об анализе." />
+		
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Tooltip" value="Отчёт об анализе будет сохранён в этом формате." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label_Label" value="Формат создаваемого отчёта" />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label_Tooltip" value="Формат, используемый при создании отчёта." />
+		
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Tooltip" value="При извлечении изображения будут преобразованы в этот формат." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label_Label" value="Преобразовать изображения в..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label_Tooltip" value="При извлечении изображения будут преобразованы в этот формат." />
+
+		<lang code="AnalyzeDirectory_Report_CSV" value="Электронная таблица CSV" />
+		<lang code="AnalyzeDirectory_Report_Tabbed" value="Текстовый документ" />
+		<lang code="AnalyzeDirectory_Report_HTML" value="Веб-страница HTML" />
+		<lang code="AnalyzeDirectory_Report_Excel" value="Электронная таблица Excel" />
+		<lang code="AnalyzeDirectory_Report_JSON" value="Документ JSON" />
+		<lang code="AnalyzeDirectory_Report_XML" value="Документ XML" />
+		
+		<lang code="WSLabel_DeleteAnalysisDirectory_Text" value="Хотите ли вы удалить содержимое папки анализа?" />
+		
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Wireframe_Text" value="Каркас" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Wireframe_Tooltip" value="Отображение модели в виде рисунка проволочного каркаса." />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Smoothing_Text" value="Сглаживание" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Smoothing_Tooltip" value="Нужно ли сгладить модель или оставить её с жёсткими краями." />
+		
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Name" value="Сохранить изменения" />
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Text" value="Сохранить изменения" />
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Tooltip" value="Сохранение всех изменений, которые вы внесли в текстовый файл." />
+		
+		<lang code="WSCheckBox_Popup_PreviewPanel_Text_ChangesSaved_Show_Text" value="Сохранение изменений текстового файла" />
+		<lang code="WSCheckBox_Popup_PreviewPanel_Text_ChangesSaved_Show_Tooltip" value="Показывать всплывающее сообщение, когда изменения в текстовом файле сохранены." />
+		<lang code="WSLabel_PreviewPanel_Text_ChangesSaved_Text" value="Изменения текстового файла сохранены." />
+		
+		<lang code="WSLabel_ImportModifiedExportFiles_Text" value="Некоторые из извлечённых или предпросмотренных файлов были изменены другими программами.\nНе хотите ли вы импортировать изменённые файлы в этот архив?" />
+		<lang code="WSCheckBox_AutoImportModifiedExportFiles_Text" value="Автоматический импорт извлечённых файлов, изменённых другими программами" />
+		<lang code="WSCheckBox_AutoImportModifiedExportFiles_Tooltip" value="Когда вы извлекаете или предпросматриваете файлы, если вы изменили их в других программах, Game Extractor может автоматически импортировать их, если они изменились." />
+		<lang code="WSCheckBox_Popup_ModifiedFilesImported_Show_Text" value="Файлы, изменённые внешними программами импортированы" />
+		<lang code="WSCheckBox_Popup_ModifiedFilesImported_Show_Tooltip" value="Показывать всплывающее сообщение, когда в архив импортированы файлы, изменённые внешними программами." />
+		<lang code="WSLabel_ModifiedFilesImported_Text" value="Изменённые файлы импортированы." />
+		
+		<lang code="WSButton_PreviewPanel_Image_PreviousPaletteButton_Text" value="Предыдущая палитра" />
+		<lang code="WSButton_PreviewPanel_Image_PreviousPaletteButton_Tooltip" value="Сменить цветовую палитру на предыдущую в коллекции." />
+		<lang code="WSButton_PreviewPanel_Image_NextPaletteButton_Text" value="Следующая палитра" />
+		<lang code="WSButton_PreviewPanel_Image_NextPaletteButton_Tooltip" value="Сменить цветовую палитру на следующую в коллекции." />
+		
+		<lang code="WSLabel_PreviewPanel_3DModel_RotateLabel_Text" value="Повернуть" />
+		<lang code="WSLabel_PreviewPanel_3DModel_RotateLabel_Tooltip" value="Поворот модели." />
+		<lang code="WSLabel_PreviewPanel_3DModel_MoveLabel_Text" value="Переместить" />
+		<lang code="WSLabel_PreviewPanel_3DModel_MoveLabel_Tooltip" value="Перемещение модели." />
+		<lang code="WSLabel_PreviewPanel_3DModel_ZoomLabel_Text" value="Приблизить" />
+		<lang code="WSLabel_PreviewPanel_3DModel_ZoomLabel_Tooltip" value="Приближение модели." />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_RotateUp_Tooltip" value="Поворот модели вверх." />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateDown_Tooltip" value="Поворот модели вниз." />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateLeft_Tooltip" value="Поворот модели влево." />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateRight_Tooltip" value="Поворот модели вправо." />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_MoveUp_Tooltip" value="Перемещение модели вверх." />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveDown_Tooltip" value="Перемещение модели вниз." />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveLeft_Tooltip" value="Перемещение модели влево." />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveRight_Tooltip" value="Перемещение модели вправо." />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_ZoomIn_Tooltip" value="Приближение масштаба модели." />
+		<lang code="WSButton_PreviewPanel_3DModel_ZoomOut_Tooltip" value="Отдаление масштаба модели." />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder_Label" value="Преобразовать модели в..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder_Tooltip" value="При извлечении файлов Game Extractor попытается преобразовать модели в этот формат." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ExportPanel_ModelConverters_Tooltip" value="При извлечении файлов Game Extractor попытается преобразовать модели в этот формат." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ExportPanel_ImageConverters_Tooltip" value="При извлечении файлов Game Extractor попытается преобразовать изображения в этот формат." />
+
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Tooltip" value="Модели будут преобразованы в этот формат при извлечении." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Label" value="Преобразовать модели в..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Tooltip" value="Модели будут преобразованы в этот формат при извлечении." />
+
+<!-- New with 3.13 -->
+
+		<lang code="WSCheckBox_PreviewPanel_3DModel_ShowTextures_Text" value="Текстуры" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_ShowTextures_Tooltip" value="Показывать ли изображения текстур (если возможно), или только обычную сетку." />
+		
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_RegenerateMeshButton_Text" value="Создать сетку" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_RegenerateMeshButton_Tooltip" value="Пересоздание сетки, используя свойства, заданные в других полях." />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_ShowStatsLogButton_Text" value="Показать статистику" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_ShowStatsLogButton_Tooltip" value="Показывает подробную статистику сетки." />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseStatsLogButton_Text" value="Закрыть журнал" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseStatsLogButton_Tooltip" value="Закрытие всплывающего окна журнала статистики." />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexOffsetField_Label" value="Смещение данных" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexOffsetField_Tooltip" value="Смещение в файле к началу вершинных данных." />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexCountField_Label" value="Кол-во" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexCountField_Tooltip" value="Количество вершин." />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexBlockSizeField_Label" value="Размер блока" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexBlockSizeField_Tooltip" value="Количество байт, используемых для хранения каждой вершины." />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceOffsetField_Label" value="Смещение данных" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceOffsetField_Tooltip" value="Смещение в файле к началу данных индексов граней." />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceCountField_Label" value="Кол-во" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceCountField_Tooltip" value="Количество индексов граней." />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceBlockSizeField_Label" value="Размер блока" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceBlockSizeField_Tooltip" value="Количество байт, используемых для хранения каждого индекса грани." />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_UVOffsetField_Label" value="Смещение УФ-текстуры (относительно)" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_UVOffsetField_Tooltip" value="Смещение в блоке вершин к значению ультрафиолетовой текстуры." />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CalculateUVButton_Text" value="Вычисление УФ" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CalculateUVButton_Tooltip" value="Вычисляет ультрафиолет изображения текстуры для сетки." />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseUVButton_Text" value="Закрыть всплывающее окно" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseUVButton_Tooltip" value="Закрытие всплывающего окна ультрафиолетовой текстуры." />
+		
+		<lang code="SidePanel_MeshInvestigator_SidePanel_MeshInvestigator_Text" value="Исследователь сетки" />
+		<lang code="WSButton_MeshInvestigator_Text" value="Исследователь сетки" />
+		<lang code="WSButton_MeshInvestigator_Tooltip" value="Показывает панель, на которой вы можете попытаться отобразить неизвестные файлы в виде 3D-сетки." />
+		<lang code="WSLabel_ComponentList_MeshInvestigator_Text" value="Исследователь сетки" />		
+		<lang code="WSMenuItem_FileList_RightClick_MeshInvestigator_Text" value="Исследователь сетки" />
+		<lang code="WSMenuItem_FileList_RightClick_MeshInvestigator_Tooltip" value="Открытие боковой панели, которая пытается отобразить неизвестные файлы в виде 3D-сетки." />
+		<lang code="WSMenuItem_MeshInvestigator_Text" value="Исследователь сетки" />
+		<lang code="WSMenuItem_MeshInvestigator_Tooltip" value="Открытие боковой панели, которая отображает неизвестные файлы в виде 3D-сетки." />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_SelectedValues_Main_Tooltip" value="Отображение неизвестных файлов в виде 3D-сетки." />
+		<lang code="WSButton_MeshInvestigator_Name" value="Исследователь сетки" />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_WritePreviewHolder_Label" value="Сохранить сетку как..." />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_WritePreviewHolder_Tooltip" value="Тип файла для сохранения сетки." />
+		<lang code="WSButton_SidePanel_MeshInvestigator_WritePreviewButton_Tooltip" value="Сохранение сетки на компьютере в выбранном формате." />
+		<lang code="WSCheckBox_Popup_MeshInvestigator_PreviewSaved_Show_Text" value="Сетка исследователя сетки сохранена" />
+		<lang code="WSCheckBox_Popup_MeshInvestigator_PreviewSaved_Show_Tooltip" value="Показывать всплывающее сообщение, когда сетка исследователя сетки сохранена." />
+		<lang code="WSComboBox_SidePanel_MeshInvestigator_WritePreviewPlugins_Tooltip" value="Сетка будет сохранена в этом формате." />
+		<lang code="WSLabel_MeshInvestigator_PreviewSaved_Text" value="Сохранение сетки завершено." />
+		<lang code="WSButton_SidePanel_MeshInvestigator_WritePreviewButton_Name" value="Сохранить сетку" />
+		<lang code="WSLabel_BlankMeshInvestigatorPreview_Text" value="Этот файл не может быть предпросмотрен." />
+		<lang code="WSLabel_BlankMeshInvestigatorPreview_Tooltip" value="Ни один плагин не смог предварительно просмотреть этот файл." />
+		<lang code="MeshInvestigator" value="Исследователь сетки" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_VertexPanelLabel_Label" value="Вершины" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_VertexPanelLabel_Tooltip" value="Информация о вершинах сетки." />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_FacePanelLabel_Label" value="Индексы граней" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_FacePanelLabel_Tooltip" value="Информация об индексах граней сетки." />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_UVPanelLabel_Label" value="Смещение УФ-текстуры (относительно)" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_UVPanelLabel_Tooltip" value="Смещение в блоке вершин к значению ультрафиолетовой текстуры." />
+		
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SettingsPanelLabel_Label" value="Настройки" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SettingsPanelLabel_Tooltip" value="Настройки, влияющие на отображение изображения." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_OffsetWidthHeightPanelLabel_Label" value="Подробности изображения" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_OffsetWidthHeightPanelLabel_Tooltip" value="Основные подробности изображения, которое вы хотите создать." />
+		
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Text" value="Смешение (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Tooltip" value="Применение смешивания PlayStation 2 к изображению." />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Text" value="Смешение (Switch)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Tooltip" value="Применение смешивания Nintendo Switch к изображению." />
+		
+		<lang code="WSLabel_CheckExportDirectory_Text" value="Пожалуйста, выберите (или проверьте) папку извлечения в правом нижнем углу, затем попробуйте извлечь снова." />
+		
+		<lang code="Description_ConvertOnReplace" value="При замене файлов в архивах такого типа некоторые файлы могут быть преобразованы в другой формат, например, из стандартного формата в собственный." />
+		<lang code="Description_AllowScanForFileTypes" value="Эти архивы могут не содержать имён файлов. В этом случае файлы могут быть отсканированы, и некоторые типы файлов могут быть определены в результате этого процесса, например, стандартные форматы изображений и аудио." />
+
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteOffsetField_Label" value="Смещение палитры" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteOffsetField_Tooltip" value="Смещение в файле к началу данных палитры." />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteNumColorsField_Label" value="Число цветов" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteNumColorsField_Tooltip" value="Число цветов в палитре." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PaletteFormatChooserLabel_Label" value="Формат" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PaletteFormatChooserLabel_Tooltip" value="Формат данных палитры." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PalettePanelLabel_Label" value="Подробности палитры" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PalettePanelLabel_Tooltip" value="Основные подробности цветовой палитры, использованной для изображения." />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Text" value="Полосатая палитра (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Tooltip" value="Полосатая цветовая палитра (PS2)." />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Text" value="Удалить альфа-фильтр" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Tooltip" value="Удаление альфа-фильтра из изображения." />
+		
+<!-- New with 3.14 -->
+
+		<lang code="WSPanel_PreviewPanel_Table_DetailsPanelHolder_Label" value="Подробности выделенного" />
+		<lang code="WSPanel_PreviewPanel_Table_DetailsPanelHolder_Tooltip" value="Все подробности выделенного в данный момент ряда." />
+		
+		<lang code="WSTableColumn_Offset_Text" value="Смещение" />
+		<lang code="WSTableColumn_Original_Text" value="Исходное значение" />
+		<lang code="WSTableColumn_Edited_Text" value="Изменённое значение" />
+		
+		<lang code="ResourceProperty_RelatedResource" value="Связанный ресурс" />
+		
+<!-- New with 3.15 -->
+
+		<lang code="WSLabel_ReloadToShowFontChanges_Text" value="Изменения шрифта вступят в силу при следующем запуске Game Extractor" />
+		
+		<lang code="WSCheckBox_CopyFilenameOnRightClick_Text" value="Копирование имени файла при правом нажатии в списке файлов" />
+		<lang code="WSCheckBox_CopyFilenameOnRightClick_Tooltip" value="Если этот флажок установлен, то когда вы нажмёте правой кнопкой мыши по записи в списке файлов, имя файла будет скопировано в буфер обмена." />
+		
+<!-- New with 3.16 -->
+
+		<lang code="WSCheckBox_UnityMeshExtendedErrorChecking_Text" value="Unity Mesh Enhanced Error Checking" />
+		<lang code="WSCheckBox_UnityMeshExtendedErrorChecking_Tooltip" value="Tick to validate Unity meshes (provides better chance of rendering meshes correctly)" />
+		
+		<lang code="" value="" />
+		
+	</texts>
+	
+</languagePack>

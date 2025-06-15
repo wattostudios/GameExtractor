@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -121,7 +122,8 @@ public class Plugin_PAK_PAK_7 extends ArchivePlugin {
       addFileTypes();
 
       ExporterPlugin exporterDefault = Exporter_Default.getInstance();
-      ExporterPlugin exporterLZO = Exporter_LZO_MiniLZO.getInstance();
+      Exporter_LZO_MiniLZO exporterLZO = Exporter_LZO_MiniLZO.getInstance();
+      exporterLZO.setCheckDecompressedLength(false); // 3.16 this is needed otherwise files with multiple compressed chunks will fail (incorrectly) to decompress
 
       // RESETTING GLOBAL VARIABLES
 
@@ -263,6 +265,7 @@ public class Plugin_PAK_PAK_7 extends ArchivePlugin {
 
           for (int c = 0; c < numChunks; c++) {
             blockExporters[c] = exporterLZO; // most chunks are compressed with LZO1X
+            //blockExporters[c] = exporterDefault; // a raw chunk
 
             // 4 - Compressed Data Length (if this is negative, this chunk isn't compressed)
             int length = fm.readInt();

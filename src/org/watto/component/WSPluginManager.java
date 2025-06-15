@@ -19,13 +19,19 @@
 package org.watto.component;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.datatype.PluginPrefix;
@@ -262,7 +268,7 @@ public class WSPluginManager {
           tag = locationNode.getAttribute("package");
 
           String packageName = "";
-          if (packageName != null) {
+          if (tag != null) {
             packageName = tag;
           }
 
@@ -272,6 +278,18 @@ public class WSPluginManager {
           boolean pathIsPackage = false;
           if (tag != null && tag.equals("true")) {
             pathIsPackage = true;
+          }
+
+          // unpackZips tag
+          tag = locationNode.getAttribute("unpackZips");
+
+          boolean unpackZips = false;
+          if (tag != null && tag.equals("true")) {
+            unpackZips = true;
+          }
+
+          if (unpackZips) {
+            unpackZips(location);
           }
 
           scanDirectory(location, packageName, traverse, pathIsPackage, prefixes);
@@ -325,7 +343,12 @@ public class WSPluginManager {
         if (file.isDirectory() && traverse) {
           String packageName = packagePrefix;
           if (pathIsPackage) {
-            packageName += "." + file.getName();
+            if (packageName == null || packageName.equals("")) {
+              packageName = file.getName();
+            }
+            else {
+              packageName += "." + file.getName();
+            }
           }
           scanDirectory(file, packageName, traverse, pathIsPackage, prefixes);
           continue;
@@ -432,6 +455,79 @@ public class WSPluginManager {
       }
 
       zipFile.close();
+
+    }
+    catch (Throwable t) {
+      //ErrorLogger.log(t);
+      if (Settings.getBoolean("DebugMode")) {
+        ErrorLogger.log(t.getMessage());
+      }
+    }
+  }
+
+  /***********************************************************************************************
+   * Scans a <code>directory</code> <code>File</code> for any ZIP files, and if it finds them, 
+   * it will unpack them into the current <code>directory</code>. It does this before scanning the 
+   * <code>directory</code> for plugins (handled by <code>scanDirectory()</code>)
+   * @param directory the directory <code>File</code> to scan for ZIP files
+   ***********************************************************************************************/
+  public static void unpackZips(File directory) {
+    try {
+
+      File[] dirFiles = directory.listFiles();
+      int numFiles = dirFiles.length;
+
+      for (int f = 0; f < numFiles; f++) {
+        File file = dirFiles[f];
+        String name = file.getName().toLowerCase();
+        if (name.endsWith(".zip") || name.endsWith(".jar")) {
+          // found a file to unzip
+
+          ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+          ZipEntry zipEntry = zis.getNextEntry();
+          while (zipEntry != null) {
+
+            String zipEntryName = zipEntry.getName();
+
+            boolean isDirectory = zipEntry.isDirectory();
+            if (zipEntryName.endsWith(File.separator)) {
+              isDirectory = true;
+            }
+            Path target = directory.toPath();
+
+            Path targetDirResolved = target.resolve(zipEntry.getName());
+            Path normalizePath = targetDirResolved.normalize();
+
+            if (isDirectory) {
+              // create the directory
+              Files.createDirectories(normalizePath);
+            }
+            else {
+              // it's a file (might still need to create the directories)
+              if (normalizePath.getParent() != null) {
+                if (Files.notExists(normalizePath.getParent())) {
+                  Files.createDirectories(normalizePath.getParent());
+                }
+              }
+
+              // copy files using nio
+              //System.out.println("Unzip file " + normalizePath + " from ZIP file " + file.getName());
+              Files.copy(zis, normalizePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            zipEntry = zis.getNextEntry();
+
+          }
+          zis.closeEntry();
+          zis.close();
+
+          // Now rename the zip so that it doesn't get unpacked every single time
+          File renamedFile = new File(file.getAbsolutePath() + ".unpacked");
+          if (!renamedFile.exists()) {
+            file.renameTo(renamedFile);
+          }
+        }
+      }
 
     }
     catch (Throwable t) {

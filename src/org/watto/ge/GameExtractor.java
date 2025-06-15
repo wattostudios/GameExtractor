@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ import javax.swing.JFrame;
 
 // FOR PACKAGING AND RELEASE...
 - Update the version numbers in the Settings file, Language file, About files, NSIS Installer, and Launcher EXE
-- Upload the Basic Version and Source Code to a new folder on SourceForge and set it as the default
+- Upload the Basic Version and Source Code to a new folder on SourceForge (and GitHub) and set it as the default
 - Update the Supported Games List on the website
 - Update the schema.org code at the bottom of the GameExtractor.html page
 - Deploy the Full Version to Google App Engine (run a localhost app engine before changing/replacing files!)
@@ -57,6 +57,7 @@ import javax.swing.JFrame;
 - Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format (AND where a file contains multiple frames) (Plugin_BIG_BIGF)
 - Archive where filenames are read from an external file list, and matched with hashes stored in the archive (RSDK_RSDK)
 - Archive where, when saving, a directory file is written, as well as multiple other files, which are all then compressed (LHD)
+- Archive where some of the files are extracted to a temporary file as part of the Read process - Plugin_STK
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
 - Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
@@ -174,8 +175,6 @@ import javax.swing.JFrame;
 - Write an FFMPEG converter, to add it to the bottom of Audio Previews, so you can convert WAV to OGG, for example
 - ETC1 and ETC2 Decompression from here --> C:\_WATTOz\____Development_Stuff\detex-master\detex-master
 - PVRTC Decoder --> https://www.javatips.net/api/NearInfinity-master/src/org/infinity/resource/graphics/PvrDecoder.java
-- Password-protected ZIP files --> https://github.com/srikanth-lingala/zip4j
-  - feed in a list of known passwords (from an external file), and ask the user to choose which game it is
 - Unreal Engine SkeletalMesh/StaticMesh Viewers
 - Use FFMPEG for more file types - eg for EA-ADPCM Audio in the SCHl archives
 - See about embedding FFPLAY in a Viewer window for displaying videos and/or audio?
@@ -242,7 +241,6 @@ import javax.swing.JFrame;
   multiple renames then redo multiple renames, the 2-n rename tasks add extra name fragments. Not sure if we can do
   anything to fix this, without finding another way to store the Resource[] changes applied by Tasks rather than
   Resource.clone() and Resource.copyFrom() as we currently use. Doesn't affect single undo/redo tasks, just multiples.
-- Need a better way of doing ColorConverter.changeColorCount() when going from 80000 colors to 256, for example.
 
 // ARCHIVE PLUGINS
 - Other CD image types
@@ -420,14 +418,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
     return instance;
   }
 
-  /**
-  **********************************************************************************************
 
-  **********************************************************************************************
-  **/
-  public static boolean isFullVersion() {
-      return false;
-  }
 
   /**
    **********************************************************************************************
@@ -1172,8 +1163,6 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **/
   public boolean promptToSave() {
 
-
-
     // Now check if the Archive was edited at all, and prompt to save
     if (ChangeMonitor.check()) {
     }
@@ -1308,18 +1297,12 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
    **********************************************************************************************
    **/
   public void showWelcomeWizard() {
-    if (!isFullVersion()) { // if you own the full version, you should have used GE before, so don't need the welcome message
       if (Settings.getBoolean("ShowWelcomeWizard")) {
         Task_Popup_WelcomeWizard popupTask = new Task_Popup_WelcomeWizard();
         popupTask.setDirection(Task.DIRECTION_REDO);
         new Thread(popupTask).start();
         //SwingUtilities.invokeLater(popupTask);
       }
-    }
-    else {
-      // IMPORTANT, so that it doesn't mess with the loading of the File List
-      Settings.set("ShowWelcomeWizard", false);
-    }
   }
 
   /**
