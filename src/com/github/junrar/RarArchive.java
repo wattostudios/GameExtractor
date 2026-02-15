@@ -381,8 +381,8 @@ public class RarArchive implements Closeable {
 
         case MainHeader:
           toRead = block.hasEncryptVersion() ? MainHeader.mainHeaderSizeWithEnc
+				byte[] mainbuff = safelyAllocate(toRead, MAX_HEADER_SIZE);
               : MainHeader.mainHeaderSize;
-          byte[] mainbuff = new byte[toRead];
           rof.readFully(mainbuff, toRead);
           MainHeader mainhead = new MainHeader(block, mainbuff);
           headers.add(mainhead);
@@ -436,8 +436,8 @@ public class RarArchive implements Closeable {
             toRead += EndArcHeader.endArcVolumeNumberSize;
           }
           EndArcHeader endArcHead;
+					byte[] endArchBuff = safelyAllocate(toRead, MAX_HEADER_SIZE);
           if (toRead > 0) {
-            byte[] endArchBuff = new byte[toRead];
             rof.readFully(endArchBuff, toRead);
             endArcHead = new EndArcHeader(block, endArchBuff);
             // logger.info("HeaderType: endarch\ndatacrc:"+
@@ -495,8 +495,8 @@ public class RarArchive implements Closeable {
                   subHeadbuffer);
               subHead.print();
               switch (subHead.getSubType()) {
+						byte[] macHeaderbuffer = safelyAllocate(MacInfoHeader.MacInfoHeaderSize, MAX_HEADER_SIZE);
                 case MAC_HEAD: {
-                  byte[] macHeaderbuffer = new byte[MacInfoHeader.MacInfoHeaderSize];
                   rof.readFully(macHeaderbuffer,
                       MacInfoHeader.MacInfoHeaderSize);
                   MacInfoHeader macHeader = new MacInfoHeader(subHead,
@@ -509,8 +509,8 @@ public class RarArchive implements Closeable {
                 // TODO implement other subheaders
                 case BEEA_HEAD:
                   break;
+						byte[] eaHeaderBuffer = safelyAllocate(EAHeader.EAHeaderSize, MAX_HEADER_SIZE);
                 case EA_HEAD: {
-                  byte[] eaHeaderBuffer = new byte[EAHeader.EAHeaderSize];
                   rof.readFully(eaHeaderBuffer, EAHeader.EAHeaderSize);
                   EAHeader eaHeader = new EAHeader(subHead,
                       eaHeaderBuffer);
@@ -527,8 +527,8 @@ public class RarArchive implements Closeable {
                   toRead = subHead.getHeaderSize();
                   toRead -= BaseBlock.BaseBlockSize;
                   toRead -= BlockHeader.blockHeaderSize;
+						byte[] uoHeaderBuffer = safelyAllocate(toRead, MAX_HEADER_SIZE);
                   toRead -= SubBlockHeader.SubBlockHeaderSize;
-                  byte[] uoHeaderBuffer = new byte[toRead];
                   rof.readFully(uoHeaderBuffer, toRead);
                   UnixOwnersHeader uoHeader = new UnixOwnersHeader(
                       subHead, uoHeaderBuffer);
