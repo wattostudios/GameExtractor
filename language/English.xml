@@ -1,6 +1,6 @@
 <languagePack>
 	<name>English</name>
-	<version>3.16.0001</version>
+	<version>3.16.0005</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -1623,6 +1623,14 @@
 <!-- New with 3.16.0002 -->
 
 		<lang code="WSLabel_JavaFXMissing_Text" value="It looks like Game Extractor is running in a version of Java that's missing the JavaFX libraries.\n\nPlease run the JavaFX version of Game Extractor instead." />
+		
+<!-- New with 3.16.0005 -->
+
+		<lang code="WSButton_PreviewPanel_3DModel_PreviousButton_Text" value="Previous Mesh" />
+		<lang code="WSButton_PreviewPanel_3DModel_PreviousButton_Tooltip" value="Shows the Previous Mesh in the Model" />
+		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Text" value="Next Mesh" />
+		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Tooltip" value="Shows the Next Mesh in the Model" />
+		<lang code="PreviewPanel_3DModel_FullModel" value="Full Model" />
 		
 		<lang code="" value="" />
 		

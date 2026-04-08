@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,9 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.Language;
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -39,7 +42,7 @@ public class Plugin_LP_KAPA extends ArchivePlugin {
     super("LP_KAPA", "LP_KAPA");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, false, true, false);
 
     setGames("Star Wars: The Force Unleashed");
     setExtensions("lp"); // MUST BE LOWER CASE
@@ -49,6 +52,8 @@ public class Plugin_LP_KAPA extends ArchivePlugin {
     //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
+
+    setTextPreviewExtensions("utf16"); // LOWER CASE
 
   }
 
@@ -227,6 +232,161 @@ public class Plugin_LP_KAPA extends ArchivePlugin {
     catch (Throwable t) {
       logError(t);
       return null;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources. The archive is written using
+   * data from the initial archive - it isn't written from scratch.
+   **********************************************************************************************
+   **/
+  @Override
+  public void replace(Resource[] resources, File path) {
+    try {
+
+      FileManipulator fm = new FileManipulator(path, true);
+      FileManipulator src = new FileManipulator(new File(Settings.getString("CurrentArchive")), false);
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      // Write Header Data
+
+      // 4 - Header (kaPA)
+      // 4 - Unknown (5)
+      // 4 - Number of Files
+      // 8 - null
+      // 4 - Unknown (-1)
+      fm.writeBytes(src.readBytes(24));
+
+      // 4 - Extra Header Length (can be null)
+      int srcExtraHeaderLength = src.readInt();
+      fm.writeInt(srcExtraHeaderLength);
+
+      // 4 - Filename Directory Length (including the header/footer and padding)
+      int srcFilenameDirLength = src.readInt();
+      fm.writeInt(srcFilenameDirLength);
+
+      // 4 - Details Directory 2 Offset
+      // 4 - File Data Offset
+      fm.writeBytes(src.readBytes(8));
+
+      int fileDataLength = 0;
+      for (int i = 0; i < numFiles; i++) {
+        int length = (int) resources[i].getDecompressedLength();
+        length += calculatePadding(length, 16);
+        fileDataLength += length;
+      }
+
+      // 4 - File Data Length
+      src.skip(4);
+      fm.writeInt(fileDataLength);
+
+      // 4 - Number of Files
+      fm.writeBytes(src.readBytes(4));
+
+      // 4 - File Data Offset
+      int srcFileDataOffset = src.readInt();
+      fm.writeInt(srcFileDataOffset);
+
+      int archiveLength = srcFileDataOffset + fileDataLength;
+
+      // 4 - Archive Length
+      src.skip(4);
+      fm.writeInt(archiveLength);
+
+      // 12 - null
+      // 4 - File Data Offset
+      fm.writeBytes(src.readBytes(16));
+
+      // 4 - Archive Length
+      src.skip(4);
+      fm.writeInt(archiveLength);
+
+      // 4 - null
+      fm.writeBytes(src.readBytes(4));
+
+      // EXTRA HEADER (optional)
+      fm.writeBytes(src.readBytes(srcExtraHeaderLength));
+
+      // FILENAME DIRECTORY
+      fm.writeBytes(src.readBytes(srcFilenameDirLength));
+
+      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
+
+      // DETAILS DIRECTORY 1
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        // 8 - Unknown
+        // 4 - null
+        // 4 - Junk
+        // 4 - Unknown
+        // 4 - Filename Offset (relative to the start of the Filename Directory)
+        // 4 - Unknown
+        // 12 - null
+        fm.writeBytes(src.readBytes(40));
+
+        // 4 - File Length
+        // 4 - File Length
+        src.skip(8);
+        fm.writeInt(length);
+        fm.writeInt(length);
+
+        // 4 - null
+        // 4 - Unknown
+        // 8 - null
+        fm.writeBytes(src.readBytes(16));
+      }
+
+      // DETAILS DIRECTORY 2
+      long offset = 0;
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        long length = resource.getDecompressedLength();
+
+        // 4 - File ID (incremental from 0)
+        fm.writeBytes(src.readBytes(4));
+
+        // 4 - File Offset (relative to the start of the File Data)
+        src.skip(4);
+        fm.writeInt(offset);
+
+        // 8 - null
+        fm.writeBytes(src.readBytes(8));
+
+        offset += length;
+        offset += calculatePadding(length, 16); // file data offset to multiples of 16 bytes
+      }
+
+      // FILE DATA
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        // X - File Data
+        write(resource, fm);
+
+        // X - null Padding to a multiple of 16? bytes
+        int padding = calculatePadding(resource.getDecompressedLength(), 16);
+        for (int p = 0; p < padding; p++) {
+          fm.writeByte(0);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
+
+      src.close();
+      fm.close();
+
+    }
+    catch (Throwable t) {
+      logError(t);
     }
   }
 

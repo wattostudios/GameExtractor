@@ -2552,8 +2552,8 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
-   * Reads an ETC1
-   // TODO UNTESTED
+   Reads an ETC1
+   [3.16.0005] fixed and working
    **********************************************************************************************
    **/
   public static ImageResource readETC1_RGB8(FileManipulator fm, int width, int height) {
@@ -2573,14 +2573,19 @@ public class ImageFormatReader {
     // X Bytes - Pixel Data
     int[] data = new int[width * height];
 
+    //int numBlocks = (width / 4 * height / 4);
+    //int currentBlock = 0;
+
     for (int y = 0; y < height; y += 4) {
-      // DXT encodes 4x4 blocks of pixels
+      // encodes 4x4 blocks of pixels
       for (int x = 0; x < width; x += 4) {
+        //System.out.println("Processing block " + currentBlock + " of " + numBlocks);
+        //currentBlock++;
 
         int[] blockIn = new int[8];
-        int[] blockOut = new int[64];
+        int[] blockOut = new int[16];
 
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 8; i++) {
           blockIn[i] = ByteConverter.unsign(fm.readByte());
         }
 
@@ -2622,7 +2627,7 @@ public class ImageFormatReader {
     int[] data = new int[width * height];
 
     for (int y = 0; y < height; y += 4) {
-      // DXT encodes 4x4 blocks of pixels
+      // encodes 4x4 blocks of pixels
       for (int x = 0; x < width; x += 4) {
 
         int[] blockIn = new int[16];

@@ -74,6 +74,14 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.16.0005
+  * [I] Small incremental version, with the intention of primarily adding more supported games.
+  * [+] Added a scanner for finding ZLib-compressed files in unknown archives
+  * [+] You can now show navigate through individual meshes in a combined model
+  * [A] The PNG scanner can now find files with a CgBI header in them
+  * [B] ETC1 image decompression now works correctly
+  * [B] Saving an archive to a parent directory by editing the filename now works correctly
+
 * Version 3.16.0004
   * [I] Small incremental version, with the intention of primarily adding more supported games.
   * [+] Added a GIF animation writer, and the ability to export animations as a single file.

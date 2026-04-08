@@ -16,6 +16,7 @@ package org.watto.ge.plugin.viewer;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -150,6 +151,7 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
         "nwa",
         "ogg",
         "ogl",
+        "opus",
         "p3d",
         "pcm",
         "pdt",

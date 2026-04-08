@@ -265,11 +265,17 @@ public class FileTypeDetector {
           else if (headerInt1 == 1836597052) {
             extension = "xml";
           }
+          else if (headerInt1 == 1019198447 && headerInt2 == 1819113535) {
+            extension = "xml"; // XML with UTF8 header
+          }
           else if (headerInt1 == 1178882085) {
             extension = "pdf";
           }
           else if (headerInt1 == 1634038339 && headerInt2 == 1702259060 && headerInt3 == 1768904224) {
             extension = "voc"; // Creative Voice File
+          }
+          else if ((headerBytes[0] == 70 && headerBytes[1] == 87 && headerBytes[2] == 83) && headerInt2 == resource.getDecompressedLength()) {
+            extension = "swf"; // Shockwave Flash
           }
           else {
             // if we didn't find any matches...

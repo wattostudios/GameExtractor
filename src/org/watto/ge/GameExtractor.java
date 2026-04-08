@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -58,6 +58,7 @@ import javax.swing.JFrame;
 - Archive where filenames are read from an external file list, and matched with hashes stored in the archive (RSDK_RSDK)
 - Archive where, when saving, a directory file is written, as well as multiple other files, which are all then compressed (LHD)
 - Archive where some of the files are extracted to a temporary file as part of the Read process - Plugin_STK
+- Archive plugin that calls the Scanner to look for ZLib files, and then runs the file type identifier on it, with customized file types that it looks for - Plugin_OBB_2 . SHOULD ONLY BE USED IN RARE CASES, AND MUST MATCH THE HEADER EXACTLY!!!
 - Image Viewer where the file is (optionally) decompressed before being viewed - Viewer_KWAD_KLEI_TEX or Viewer_UE3_Texture2D_648 / 539
 - Image Viewer where a single separate Palette file is extracted from the archive, and then used to create the image - Viewer_IFF_SPR
 - Image Viewer where you can change the color Palette to any of the ones within the Archive - Viewer_BIN_24_TEX
@@ -431,7 +432,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **********************************************************************************************
   **/
   public static boolean isFullVersion() {
-    return false;
+      return false;
   }
 
   /**

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,11 +15,13 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
@@ -34,7 +36,7 @@ public class Plugin_MJZ_MJZ0 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_MJZ_MJZ0() {
@@ -60,7 +62,7 @@ public class Plugin_MJZ_MJZ0 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -111,6 +113,8 @@ public class Plugin_MJZ_MJZ0 extends ArchivePlugin {
       addFileTypes();
 
       ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      //ExporterPlugin exporterLZMA = Exporter_LZMA.getInstance();
+      ExporterPlugin exporterLZMA = new Exporter_QuickBMS_DLL("lzma86head");
 
       // RESETTING GLOBAL VARIABLES
 
@@ -135,6 +139,7 @@ public class Plugin_MJZ_MJZ0 extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       for (int i = 0; i < numFiles; i++) {
+        //System.out.println(fm.getOffset());
         // 4 - Entry Type (1=Folder, 10=File)
         int entryType = fm.readInt();
         if (entryType == 1) {
@@ -150,7 +155,7 @@ public class Plugin_MJZ_MJZ0 extends ArchivePlugin {
           // 1 - null Filename Terminator
           fm.skip(filenameLength);
         }
-        else if (entryType == 10 || entryType == 0) {
+        else if (entryType == 10 || entryType == 6 || entryType == 0) {
           // file
 
           // 4 - File Offset
@@ -179,7 +184,16 @@ public class Plugin_MJZ_MJZ0 extends ArchivePlugin {
 
           //path,name,offset,length,decompLength,exporter
           if (decompLength != length) {
-            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+            if (entryType == 6) {
+              // lzma86head compression
+              //offset += 14;
+              //length -= 14;
+              resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporterLZMA);
+            }
+            else {
+              // Zlib
+              resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+            }
           }
           else {
             resources[realNumFiles] = new Resource(path, filename, offset, length);

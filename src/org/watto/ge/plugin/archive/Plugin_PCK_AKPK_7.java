@@ -37,7 +37,7 @@ public class Plugin_PCK_AKPK_7 extends ArchivePlugin {
   **/
   public Plugin_PCK_AKPK_7() {
 
-    super("PCK_AKPK_4", "PCK_AKPK_4");
+    super("PCK_AKPK_7", "PCK_AKPK_7");
 
     //         read write replace rename
     setProperties(true, false, false, false);

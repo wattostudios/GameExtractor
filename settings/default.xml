@@ -175,6 +175,8 @@
 		<setting code="SavedPreviewDirectory" value="previews" />
 		<setting code="ScanFileIfOpenFailed" value="true" />
 		<setting code="Scanner_bik" value="true" />
+		
+		<setting code="Scanner_zlib" value="true" />
 		<setting code="Scanner_bmp" value="true" />
 		<setting code="Scanner_dds" value="true" />
 		<setting code="Scanner_gif" value="true" />

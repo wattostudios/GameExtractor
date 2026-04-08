@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -90,6 +90,14 @@ public class Plugin_IMG_AFS extends ArchivePlugin {
       // 4 - Padding Multiple (2048)
       if (fm.readInt() == 2048) {
         rating += 5;
+      }
+
+      // 4 - null
+      if (fm.readInt() == 0) {
+        rating += 5;
+      }
+      else {
+        rating -= 10;
       }
 
       return rating;

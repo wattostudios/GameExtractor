@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -24,7 +24,7 @@ public class Scanner_PNG_PNG extends ScannerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Scanner_PNG_PNG() {
@@ -39,11 +39,36 @@ public class Scanner_PNG_PNG extends ScannerPlugin {
         return null;
       }
 
-      if (fm.readByte() != 80 || fm.readByte() != 78 || fm.readByte() != 71 || fm.readByte() != 13 || fm.readByte() != 10 || fm.readByte() != 26 || fm.readByte() != 10 || fm.readByte() != 0 || fm.readByte() != 0 || fm.readByte() != 0 || fm.readByte() != 13 || fm.readByte() != 73 || fm.readByte() != 72 || fm.readByte() != 68 || fm.readByte() != 82) {
+      if (fm.readByte() != 80 || fm.readByte() != 78 || fm.readByte() != 71 || fm.readByte() != 13 || fm.readByte() != 10 || fm.readByte() != 26 || fm.readByte() != 10 || fm.readByte() != 0 || fm.readByte() != 0 || fm.readByte() != 0) {
         return null;
       }
 
+      byte[] next5 = fm.readBytes(5);
+
+      // [3.16.0005] Add support for PNGs that have a CgBI header before the IHDR (we can't preview them, but can at least identify them and extract them)
+      boolean hasCGBI = false;
+      if (next5[0] == 4 && next5[1] == 67 && next5[2] == 103 && next5[3] == 66 && next5[4] == 73) {
+        // CgBI header before the IHDR
+        fm.skip(11);
+
+        hasCGBI = true;
+
+        next5 = fm.readBytes(5);
+      }
+
+      if (next5[0] == 13 && next5[1] == 73 && next5[2] == 72 && next5[3] == 68 && next5[4] == 82) {
+        // IHDR
+      }
+      else {
+        // ignore anything else
+        return null;
+      }
+
+      // Check for IHDR, or some kind of CgBI header before it
       long offset = (int) fm.getOffset() - 16;
+      if (hasCGBI) {
+        offset -= 16;
+      }
 
       // IHDR data
       fm.skip(17);

@@ -1921,6 +1921,10 @@ public class SidePanel_DirectoryList extends WSPanelPlugin implements WSSelectab
       // the filename already contains a full path in it... no action needed
       filenameChecked = true;
     }
+    else if (filename.indexOf(':') == 1) {
+      // the filename already contains a full path in it... (ie starting with c: or e: or something) no action needed
+      filenameChecked = true;
+    }
     else {
       // To cater for something like this, where the names are equivalent... [v3.13]
       // This PC\Downloads\extract\previews\   VS   C:\Users\User\Downloads\extract\previews\

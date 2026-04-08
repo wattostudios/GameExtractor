@@ -199,6 +199,9 @@ public class Plugin_PAK_AGAMEENGINE extends ArchivePlugin {
     else if (headerInt1 == 761541441) {
       return "a3d";
     }
+    else if (headerInt1 == 201326592) {
+      return "jp2";
+    }
 
     return null;
   }

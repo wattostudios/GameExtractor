@@ -355,8 +355,9 @@ public class Resource implements Comparable<Resource> {
         String path = FilenameSplitter.getDirectory(destination) + File.separator + FilenameSplitter.getFilename(destination);
         String extension = "." + FilenameSplitter.getExtension(destination);
 
+        // 3.16.0005 Change the naming to append " (1)" instead of just "1"
         for (int i = 1; i < 1000; i++) {
-          File testDestination = new File(path + i + extension);
+          File testDestination = new File(path + " (" + i + ")" + extension);
           if (!testDestination.exists()) {
             destination = testDestination;
             break;

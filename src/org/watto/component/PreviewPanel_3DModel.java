@@ -57,6 +57,7 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.JComponent;
 
 import org.watto.ErrorLogger;
+import org.watto.Language;
 import org.watto.Settings;
 import org.watto.event.WSClickableInterface;
 import org.watto.event.WSSelectableInterface;
@@ -316,18 +317,34 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
 
       ObservableList<Node> nodes = world.getChildren();
       int numNodes = nodes.size();
+      int currentFrameNum = Settings.getInt("PreviewPanel_3DModel_CurrentMesh");
       for (int i = 0; i < numNodes; i++) {
         Node node = nodes.get(i);
         if (node instanceof MeshView) {
           if (showTextures) {
             //((MeshView) node).setMaterial(meshView.getMaterial());
             nodes.set(i, meshView[numFound]);
+
+            if (numFound == currentFrameNum || currentFrameNum == -1) {
+              meshView[numFound].setVisible(true);
+            }
+            else {
+              meshView[numFound].setVisible(false);
+            }
+
             numFound++;
           }
           else {
             MeshView view = new MeshView(meshView[numFound].getMesh());
             view.setDrawMode(DrawMode.FILL);
             view.setCullFace(CullFace.NONE);
+
+            if (numFound == currentFrameNum || currentFrameNum == -1) {
+              view.setVisible(true);
+            }
+            else {
+              view.setVisible(false);
+            }
 
             nodes.set(i, view);
             numFound++;
@@ -381,6 +398,7 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
   
   **********************************************************************************************
   **/
+  @SuppressWarnings("unused")
   public void createInterface() {
 
     // 3.16 Added "codes" to every XML-built object, so that they're cleaned up when the object is destroyed (otherwise it was being retained in the ComponentRepository)
@@ -472,7 +490,36 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
     controlPanel.add(moveWithLabelPanel);
     controlPanel.add(zoomWithLabelPanel);
 
-    add(controlPanel, BorderLayout.SOUTH);
+    //
+    // Controls for multiple meshes/parts
+    //
+    WSPanel partControls = null;
+    if (meshView != null && meshView.length > 1) {
+      // Add buttons to move to the next mesh
+      partControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_3DModel_ManualPartsButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_3DModel_ManualPartsButtons\" layout=\"ReverseBorderLayout\" position=\"CENTER\" ><WSButton code=\"PreviewPanel_3DModel_PreviousButton\" opaque=\"true\" showText=\"true\" position=\"WEST\" /><WSLabel code=\"PreviewPanel_3DModel_MeshCountLabel\" opaque=\"true\" width=\"100\" /><WSButton code=\"PreviewPanel_3DModel_NextButton\" opaque=\"true\" showText=\"true\" position=\"EAST\" /></WSPanel></WSPanel>"));
+      //Settings.set("PreviewPanel_3DModel_CurrentMesh", 0); // reset the part position back to 0 when loading a new mesh
+      Settings.set("PreviewPanel_3DModel_CurrentMesh", -1); // -1 means "full model"
+
+      WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_3DModel_MeshCountLabel");
+      //frameCountLabel.setText("1  /  " + meshView.length);
+      frameCountLabel.setText(Language.get("PreviewPanel_3DModel_FullModel"));
+    }
+
+    WSPanel buttonPanel = null;
+
+    if (controlPanel != null && partControls != null) {
+      buttonPanel = new WSPanel(XMLReader.read("<WSPanel code=\"PreviewPanel_3DModel_ButtonPanelWrapperPanel\" obeyBackgroundColor=\"true\" layout=\"BorderLayout\" position=\"CENTER\"></WSPanel>"));
+      buttonPanel.add(controlPanel, BorderLayout.CENTER);
+      buttonPanel.add(partControls, BorderLayout.SOUTH);
+    }
+    else if (controlPanel != null) {
+      buttonPanel = controlPanel;
+    }
+    else if (partControls != null) {
+      buttonPanel = partControls;
+    }
+
+    add(buttonPanel, BorderLayout.SOUTH);
 
     reloadMesh();
 
@@ -487,6 +534,7 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
 
     Platform.setImplicitExit(false); // stop the JavaFX from dying when the thread finishes
     Platform.runLater(() -> { // FX components need to be managed by JavaFX
+
       root.getChildren().add(world);
       root.setDepthTest(DepthTest.ENABLE);
 
@@ -531,6 +579,8 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
         }
 
         int numViews = meshView.length;
+        int currentFrameNum = Settings.getInt("PreviewPanel_3DModel_CurrentMesh");
+
         for (int v = 0; v < numViews; v++) {
           if (!showTextures) {
             // if we're displaying a MeshView (which has textures on it), and the user doesn't want to see textures, just show the triangleMesh instead
@@ -538,12 +588,26 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
             view.setDrawMode(DrawMode.FILL);
             view.setCullFace(CullFace.NONE);
 
+            if (v == currentFrameNum || currentFrameNum == -1) {
+              view.setVisible(true);
+            }
+            else {
+              view.setVisible(false);
+            }
+
             world.getChildren().add(view);
           }
           else {
             // show textures
             meshView[v].setDrawMode(DrawMode.FILL);
             meshView[v].setCullFace(CullFace.NONE);
+
+            if (v == currentFrameNum || currentFrameNum == -1) {
+              meshView[v].setVisible(true);
+            }
+            else {
+              meshView[v].setVisible(false);
+            }
 
             world.getChildren().add(meshView[v]);
           }
@@ -1033,6 +1097,88 @@ public class PreviewPanel_3DModel extends PreviewPanel implements WSSelectableIn
       }
       else if (code.equals("PreviewPanel_3DModel_ZoomOut")) {
         camera.setTranslateZ(camera.getTranslateZ() - zoomAmount);
+      }
+
+      else if (((WSComponent) source).getCode().equals("PreviewPanel_3DModel_NextButton")) {
+        // show the next frame
+        if (meshView != null && meshView.length > 1) {
+          int currentFrameNum = Settings.getInt("PreviewPanel_3DModel_CurrentMesh") + 1;
+
+          int frameCount = meshView.length;
+          if (currentFrameNum >= frameCount) { // we've looped around to the beginning again
+            currentFrameNum = -1; // NOTE: -1 is valid, meaning "full mesh"
+          }
+
+          Settings.set("PreviewPanel_3DModel_CurrentMesh", currentFrameNum);
+
+          //reloadMesh();
+
+          WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_3DModel_MeshCountLabel");
+          //frameCountLabel.setText((currentFrameNum + 1) + "  /  " + frameCount);
+          if (currentFrameNum == -1) {
+            frameCountLabel.setText(Language.get("PreviewPanel_3DModel_FullModel"));
+          }
+          else {
+            frameCountLabel.setText((currentFrameNum + 1) + "  /  " + frameCount);
+          }
+          frameCountLabel.repaint();
+
+          ObservableList<Node> nodes = world.getChildren();
+          int numNodes = nodes.size();
+          for (int i = 0; i < numNodes; i++) {
+            Node node = nodes.get(i);
+            if (node instanceof MeshView) {
+              if (i == currentFrameNum || currentFrameNum == -1) {
+                ((MeshView) node).setVisible(true);
+              }
+              else {
+                ((MeshView) node).setVisible(false);
+              }
+            }
+          }
+
+        }
+      }
+      else if (((WSComponent) source).getCode().equals("PreviewPanel_3DModel_PreviousButton")) {
+        // show the previous frame
+        if (meshView != null && meshView.length > 1) {
+          int currentFrameNum = Settings.getInt("PreviewPanel_3DModel_CurrentMesh") - 1;
+
+          int frameCount = meshView.length;
+          // NOTE: -1 is valid, meaning "full mesh"
+          if (currentFrameNum < -1) { // we've looped around to the beginning again
+            currentFrameNum = frameCount - 1;
+          }
+
+          Settings.set("PreviewPanel_3DModel_CurrentMesh", currentFrameNum);
+
+          //reloadMesh();
+
+          WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_3DModel_MeshCountLabel");
+          //frameCountLabel.setText((currentFrameNum + 1) + "  /  " + frameCount);
+          if (currentFrameNum == -1) {
+            frameCountLabel.setText(Language.get("PreviewPanel_3DModel_FullModel"));
+          }
+          else {
+            frameCountLabel.setText((currentFrameNum + 1) + "  /  " + frameCount);
+          }
+          frameCountLabel.repaint();
+
+          ObservableList<Node> nodes = world.getChildren();
+          int numNodes = nodes.size();
+          for (int i = 0; i < numNodes; i++) {
+            Node node = nodes.get(i);
+            if (node instanceof MeshView) {
+              if (i == currentFrameNum || currentFrameNum == -1) {
+                ((MeshView) node).setVisible(true);
+              }
+              else {
+                ((MeshView) node).setVisible(false);
+              }
+            }
+          }
+
+        }
       }
 
       else {

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2025 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,57 +16,11 @@ package org.watto.ge.helper;
 
 /**
 **********************************************************************************************
-ETC2 Decoder
+ETC1 and ETC2 Decoder
+Ref: https://github.com/hglm/detex/blob/cab11584d9be140602a66fd9a88ef0b99f08a97a/decompress-etc.c
 **********************************************************************************************
 **/
 public class ETC2Reader {
-
-  /*
-   * Decode texture function (linear). Decode an entire texture into a single
-   * image buffer, with pixels stored row-by-row, converting into the given pixel
-   * format.
-
-  bool detexDecompressTextureLinear(const detexTexture *texture,
-  uint8_t * DETEX_RESTRICT pixel_buffer, uint32_t pixel_format) {
-      uint8_t block_buffer[DETEX_MAX_BLOCK_SIZE];
-      if (!detexFormatIsCompressed(texture->format)) {
-          return detexConvertPixels(texture->data, texture->width * texture->height,
-              detexGetPixelFormat(texture->format), pixel_buffer, pixel_format);
-      }
-      const uint8_t *data = texture->data;
-      int pixel_size = detexGetPixelSize(pixel_format);
-      bool result = true;
-      for (int y = 0; y < texture->height_in_blocks; y++) {
-          int nu_rows;
-          if (y * 4 + 3 >= texture->height)
-              nu_rows = texture->height - y * 4;
-          else
-              nu_rows = 4;
-          for (int x = 0; x < texture->width_in_blocks; x++) {
-              bool r = detexDecompressBlock(data, texture->format,
-                  DETEX_MODE_MASK_ALL, 0, block_buffer, pixel_format);
-              uint32_t block_size = detexGetPixelSize(pixel_format) * 16;
-              if (!r) {
-                  result = false;
-                  memset(block_buffer, 0, block_size);
-              }
-              uint8_t *pixelp = pixel_buffer +
-                  y * 4 * texture->width * pixel_size +
-                  + x * 4 * pixel_size;
-              int nu_columns;
-              if (x * 4 + 3  >= texture->width)
-                  nu_columns = texture->width - x * 4;
-              else
-                  nu_columns = 4;
-              for (int row = 0; row < nu_rows; row++)
-                  memcpy(pixelp + row * texture->width * pixel_size,
-                      block_buffer + row * 4 * pixel_size,
-                      nu_columns * pixel_size);
-              data += detexGetCompressedBlockSize(texture->format);
-          }
-      }
-      return result;
-  }*/
 
   int[] complement3bitshifted_table = new int[] { 0, 8, 16, 24, -32, -24, -16, -8 };
 
@@ -159,16 +113,17 @@ public class ETC2Reader {
 
   int[] punchthrough_mask_table = new int[] { 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF };
 
-  /* For compression formats that have opaque and non-opaque modes, */
-  /* return false (invalid block) when the compressed block is encoded */
-  /* using a non-opaque mode. */
+  // For compression formats that have opaque and non-opaque modes, return false (invalid block) when the compressed block is encoded using a non-opaque mode.
   int DETEX_DECOMPRESS_FLAG_OPAQUE_ONLY = 0x2;
 
-  /* For compression formats that have opaque and non-opaque modes, */
-  /* return false (invalid block) when the compressed block is encoded */
-  /* using an opaque mode. */
+  // For compression formats that have opaque and non-opaque modes, return false (invalid block) when the compressed block is encoded using an opaque mode.
   int DETEX_DECOMPRESS_FLAG_NON_OPAQUE_ONLY = 0x4;
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public int clamp1023_signed(int x) {
     if (x < -1023) {
       return -1023;
@@ -179,6 +134,11 @@ public class ETC2Reader {
     return x;
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public int clamp2047(int x) {
     if (x < 0) {
       return 0;
@@ -189,6 +149,11 @@ public class ETC2Reader {
     return x;
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public int complement3bit(int x) {
     if ((x & 4) == 4) {
       return ((x & 3) - 4);
@@ -196,28 +161,46 @@ public class ETC2Reader {
     return x;
   }
 
-  // This function calculates the 3-bit complement value in the range -4 to 3 of a three bit
-  // representation. The result is arithmetically shifted 3 places to the left before returning.
+  /**
+   **********************************************************************************************
+   This function calculates the 3-bit complement value in the range -4 to 3 of a three bit representation.
+   The result is arithmetically shifted 3 places to the left before returning.
+   **********************************************************************************************
+   **/
+
   public int complement3bitshifted(int x) {
     return complement3bitshifted_table[x];
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public int complement3bitshifted_slow(int x) {
     if ((x & 4) == 4) {
-      return ((x & 3) - 4) << 3;  // Note: shift is arithmetic.
+      return ((x & 3) - 4) << 3; // Note: shift is arithmetic.
     }
     return x << 3;
   }
 
-  /* Clamp an integer value in the range -255 to 511 to the the range 0 to 255. */
+  /**
+   **********************************************************************************************
+   Clamp an integer value in the range -255 to 511 to the the range 0 to 255.
+   **********************************************************************************************
+   **/
   public int detexClamp0To255(int x) {
     return detex_clamp0to255_table[x + 255];
   }
 
-  /* Decompress a 64-bit 4x4 pixel texture block compressed using the ETC1 */
-  /* format. */
+  /**
+   **********************************************************************************************
+   Decompress a 64-bit 4x4 pixel texture block compressed using the ETC1 format
+   **********************************************************************************************
+   **/
   public boolean detexDecompressBlockETC1(int[] bitstring, int mode_mask, int flags, int[] pixel_buffer) {
     int differential_mode = bitstring[3] & 2;
+
     //if (differential_mode) {
     if (differential_mode != 0) {
       if ((mode_mask & DETEX_MODE_MASK_ETC_DIFFERENTIAL) == 0) {
@@ -227,9 +210,12 @@ public class ETC2Reader {
     else if ((mode_mask & DETEX_MODE_MASK_ETC_INDIVIDUAL) == 0) {
       return false;
     }
+
     int flipbit = bitstring[3] & 1;
+
     int[] base_color_subblock1 = new int[3];
     int[] base_color_subblock2 = new int[3];
+
     //if (differential_mode) {
     if (differential_mode != 0) {
       base_color_subblock1[0] = (bitstring[0] & 0xF8);
@@ -238,23 +224,29 @@ public class ETC2Reader {
       base_color_subblock1[1] |= (base_color_subblock1[1] & 224) >> 5;
       base_color_subblock1[2] = (bitstring[2] & 0xF8);
       base_color_subblock1[2] |= (base_color_subblock1[2] & 224) >> 5;
-      base_color_subblock2[0] = (bitstring[0] & 0xF8);            // 5 highest order bits.
+      base_color_subblock2[0] = (bitstring[0] & 0xF8); // 5 highest order bits.
       base_color_subblock2[0] += complement3bitshifted(bitstring[0] & 7); // Add difference.
+
       if ((base_color_subblock2[0] & 0xFF07) == 0xFF07) {
         return false;
       }
-      base_color_subblock2[0] |= (base_color_subblock2[0] & 224) >> 5;    // Replicate.
+
+      base_color_subblock2[0] |= (base_color_subblock2[0] & 224) >> 5; // Replicate.
       base_color_subblock2[1] = (bitstring[1] & 0xF8);
       base_color_subblock2[1] += complement3bitshifted(bitstring[1] & 7);
+
       if ((base_color_subblock2[1] & 0xFF07) == 0xFF07) {
         return false;
       }
+
       base_color_subblock2[1] |= (base_color_subblock2[1] & 224) >> 5;
       base_color_subblock2[2] = (bitstring[2] & 0xF8);
       base_color_subblock2[2] += complement3bitshifted(bitstring[2] & 7);
+
       if ((base_color_subblock2[2] & 0xFF07) == 0xFF07) {
         return false;
       }
+
       base_color_subblock2[2] |= (base_color_subblock2[2] & 224) >> 5;
     }
     else {
@@ -271,9 +263,12 @@ public class ETC2Reader {
       base_color_subblock2[2] = (bitstring[2] & 0x0F);
       base_color_subblock2[2] |= base_color_subblock2[2] << 4;
     }
+
     int table_codeword1 = (bitstring[3] & 224) >> 5;
     int table_codeword2 = (bitstring[3] & 28) >> 2;
+
     int pixel_index_word = (bitstring[4] << 24) | (bitstring[5] << 16) | (bitstring[6] << 8) | bitstring[7];
+
     if (flipbit == 0) {
       ProcessPixelETC1(0, pixel_index_word, table_codeword1, base_color_subblock1, pixel_buffer);
       ProcessPixelETC1(1, pixel_index_word, table_codeword1, base_color_subblock1, pixel_buffer);
@@ -310,11 +305,15 @@ public class ETC2Reader {
       ProcessPixelETC1(14, pixel_index_word, table_codeword2, base_color_subblock2, pixel_buffer);
       ProcessPixelETC1(15, pixel_index_word, table_codeword2, base_color_subblock2, pixel_buffer);
     }
+
     return true;
   }
 
-  /* Decompress a 64-bit 4x4 pixel texture block compressed using the ETC2 */
-  /* format. */
+  /**
+   **********************************************************************************************
+   Decompress a 64-bit 4x4 pixel texture block compressed using the ETC2 format
+   **********************************************************************************************
+   **/
   public boolean detexDecompressBlockETC2(int[] bitstring, int mode_mask, int flags, int[] pixel_buffer) {
     // Figure out the mode.
     if ((bitstring[3] & 2) == 0) {
@@ -364,8 +363,11 @@ public class ETC2Reader {
     }
   }
 
-  /* Decompress a 64-bit 4x4 pixel texture block compressed using the */
-  /* ETC2_PUNCHTROUGH format. */
+  /**
+   **********************************************************************************************
+   Decompress a 64-bit 4x4 pixel texture block compressed using the ETC2_PUNCHTROUGH format.
+   **********************************************************************************************
+   **/
   public boolean detexDecompressBlockETC2_PUNCHTHROUGH(int[] bitstring, int mode_mask, int flags, int[] pixel_buffer) {
     int R = (bitstring[0] & 0xF8);
     R += complement3bitshifted(bitstring[0] & 7);
@@ -439,7 +441,11 @@ public class ETC2Reader {
     }
   }
 
-  /* Return the internal mode of a ETC1 block. */
+  /**
+   **********************************************************************************************
+   Return the internal mode of a ETC1 block.
+   **********************************************************************************************
+   **/
   public int detexGetModeETC1(int[] bitstring) {
     // Figure out the mode.
     if ((bitstring[3] & 2) == 0) {
@@ -451,7 +457,11 @@ public class ETC2Reader {
     }
   }
 
-  /* Return the internal mode of a ETC2 block. */
+  /**
+   **********************************************************************************************
+   Return the internal mode of a ETC2 block.
+   **********************************************************************************************
+   **/
   public int detexGetModeETC2(int[] bitstring) {
     // Figure out the mode.
     if ((bitstring[3] & 2) == 0) {
@@ -477,7 +487,11 @@ public class ETC2Reader {
     }
   }
 
-  /* Return the internal mode of a ETC2_PUNCHTROUGH block. */
+  /**
+   **********************************************************************************************
+   Return the internal mode of a ETC2_PUNCHTROUGH block.
+   **********************************************************************************************
+   **/
   public int detexGetModeETC2_PUNCHTHROUGH(int[] bitstring) {
     // Figure out the mode.
     //    int opaque = bitstring[3] & 2;
@@ -501,15 +515,30 @@ public class ETC2Reader {
     }
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public int detexPack32RGB8Alpha0xFF(int r, int g, int b) {
     return detexPack32RGBA8(r, g, b, 0xFF);
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public int detexPack32RGBA8(int r, int g, int b, int a) {
     //return r | (g << 8) | (b << 16) | (a << 24);
     return ((a << 24) | (r << 16) | (g << 8) | b);
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void detexSetModeETC1(int[] bitstring, int mode, int flags, int[] colors) {
     if (mode == 0) {
       bitstring[3] &= ~0x2;
@@ -519,6 +548,11 @@ public class ETC2Reader {
     }
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void detexSetModeETC2(int[] bitstring, int mode, int flags, int[] colors) {
     if (mode == 0) {
       // Set Individual mode.
@@ -531,6 +565,11 @@ public class ETC2Reader {
     }
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void detexSetModeETC2_PUNCHTHROUGH(int[] bitstring, int mode, int flags, int[] colors) {
     if ((flags & DETEX_DECOMPRESS_FLAG_NON_OPAQUE_ONLY) == DETEX_DECOMPRESS_FLAG_NON_OPAQUE_ONLY) {
       bitstring[3] &= ~0x2;
@@ -541,6 +580,11 @@ public class ETC2Reader {
     SetModeETC2THP(bitstring, flags);
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void ProcessBlockETC2PlanarMode(int[] bitstring, int[] pixel_buffer) {
     // Each color O, H and V is in 6-7-6 format.
     int RO = (bitstring[0] & 0x7E) >> 1;
@@ -553,7 +597,7 @@ public class ETC2Reader {
     int RV = ((bitstring[5] & 0x7) << 3) | ((bitstring[6] & 0xE0) >> 5);
     int GV = ((bitstring[6] & 0x1F) << 2) | ((bitstring[7] & 0xC0) >> 6);
     int BV = bitstring[7] & 0x3F;
-    RO = (RO << 2) | ((RO & 0x30) >> 4);    // Replicate bits.
+    RO = (RO << 2) | ((RO & 0x30) >> 4); // Replicate bits.
     GO = (GO << 1) | ((GO & 0x40) >> 6);
     BO = (BO << 2) | ((BO & 0x30) >> 4);
     RH = (RH << 2) | ((RH & 0x30) >> 4);
@@ -574,6 +618,11 @@ public class ETC2Reader {
     }
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void ProcessBlockETC2PunchthroughDifferentialMode(int[] bitstring, int[] pixel_buffer) {
     int flipbit = bitstring[3] & 1;
     int[] base_color_subblock1 = new int[3];
@@ -584,9 +633,9 @@ public class ETC2Reader {
     base_color_subblock1[1] |= (base_color_subblock1[1] & 224) >> 5;
     base_color_subblock1[2] = (bitstring[2] & 0xF8);
     base_color_subblock1[2] |= (base_color_subblock1[2] & 224) >> 5;
-    base_color_subblock2[0] = (bitstring[0] & 0xF8);                // 5 highest order bits.
+    base_color_subblock2[0] = (bitstring[0] & 0xF8); // 5 highest order bits.
     base_color_subblock2[0] += complement3bitshifted(bitstring[0] & 7); // Add difference.
-    base_color_subblock2[0] |= (base_color_subblock2[0] & 224) >> 5;        // Replicate.
+    base_color_subblock2[0] |= (base_color_subblock2[0] & 224) >> 5; // Replicate.
     base_color_subblock2[1] = (bitstring[1] & 0xF8);
     base_color_subblock2[1] += complement3bitshifted(bitstring[1] & 7);
     base_color_subblock2[1] |= (base_color_subblock2[1] & 224) >> 5;
@@ -634,6 +683,11 @@ public class ETC2Reader {
     }
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void ProcessBlockETC2PunchthroughTOrHMode(int[] bitstring, int mode, int[] pixel_buffer) {
     int base_color1_R, base_color1_G, base_color1_B;
     int base_color2_R, base_color2_G, base_color2_B;
@@ -713,8 +767,8 @@ public class ETC2Reader {
     //uint32_t *buffer = (uint32_t *)pixel_buffer;
     int[] buffer = pixel_buffer;
     for (int i = 0; i < 16; i++) {
-      int pixel_index = ((pixel_index_word & (1 << i)) >> i)          // Least significant bit.
-          | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1));    // Most significant bit.
+      int pixel_index = ((pixel_index_word & (1 << i)) >> i) // Least significant bit.
+          | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1)); // Most significant bit.
       int r = paint_color_R[pixel_index];
       int g = paint_color_G[pixel_index];
       int b = paint_color_B[pixel_index];
@@ -723,6 +777,11 @@ public class ETC2Reader {
     }
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void ProcessBlockETC2TOrHMode(int[] bitstring, int mode, int[] pixel_buffer) {
     int base_color1_R, base_color1_G, base_color1_B;
     int base_color2_R, base_color2_G, base_color2_B;
@@ -802,8 +861,8 @@ public class ETC2Reader {
     //uint32_t *buffer = (uint32_t *)pixel_buffer;
     int[] buffer = pixel_buffer;
     for (int i = 0; i < 16; i++) {
-      int pixel_index = ((pixel_index_word & (1 << i)) >> i)          // Least significant bit.
-          | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1));    // Most significant bit.
+      int pixel_index = ((pixel_index_word & (1 << i)) >> i) // Least significant bit.
+          | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1)); // Most significant bit.
       int r = paint_color_R[pixel_index];
       int g = paint_color_G[pixel_index];
       int b = paint_color_B[pixel_index];
@@ -811,39 +870,63 @@ public class ETC2Reader {
     }
   }
 
-  // Define inline function to speed up ETC1 decoding.
-  // public void ProcessPixelETC1(uint8_t i, uint32_t pixel_index_word, uint32_t table_codeword, int * DETEX_RESTRICT base_color_subblock, uint8_t * DETEX_RESTRICT pixel_buffer) {
-  public void ProcessPixelETC1(int i, int pixel_index_word, int table_codeword, int[] base_color_subblock, int[] pixel_buffer) {
-    if (pixel_index_word < 0) { // TODO check for the removal of the "sign"
-      pixel_index_word = 0 - pixel_index_word;
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
+  public void ProcessPixelETC1(int i, int pixel_index_word_in, int table_codeword, int[] base_color_subblock, int[] pixel_buffer) {
+
+    long pixel_index_word = pixel_index_word_in;
+    if (pixel_index_word < 0) {
+      pixel_index_word = 4294967296L + pixel_index_word;
     }
 
-    int pixel_index = ((pixel_index_word & (1 << i)) >> i) | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1));
+    int pixel_index = (int) (((pixel_index_word & (1 << i)) >> i) | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1)));
 
-    int r, g, b;
     int modifier = modifier_table[table_codeword][pixel_index];
-    r = detexClamp0To255(base_color_subblock[0] + modifier);
-    g = detexClamp0To255(base_color_subblock[1] + modifier);
-    b = detexClamp0To255(base_color_subblock[2] + modifier);
+
+    int r = detexClamp0To255(base_color_subblock[0] + modifier);
+    int g = detexClamp0To255(base_color_subblock[1] + modifier);
+    int b = detexClamp0To255(base_color_subblock[2] + modifier);
+
     //uint32_t *buffer = (uint32_t *)pixel_buffer;
     int[] buffer = pixel_buffer;
     buffer[(i & 3) * 4 + ((i & 12) >> 2)] = detexPack32RGB8Alpha0xFF(r, g, b);
   }
 
-  public void ProcessPixelETC2Punchthrough(int i, int pixel_index_word, int table_codeword, int[] base_color_subblock, int[] pixel_buffer) {
-    int pixel_index = ((pixel_index_word & (1 << i)) >> i)
-        | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1));
-    int r, g, b;
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
+  public void ProcessPixelETC2Punchthrough(int i, int pixel_index_word_in, int table_codeword, int[] base_color_subblock, int[] pixel_buffer) {
+
+    long pixel_index_word = pixel_index_word_in;
+    if (pixel_index_word < 0) {
+      pixel_index_word = 4294967296L + pixel_index_word;
+    }
+
+    int pixel_index = (int) (((pixel_index_word & (1 << i)) >> i) | ((pixel_index_word & (0x10000 << i)) >> (16 + i - 1)));
+
     int modifier = punchthrough_modifier_table[table_codeword][pixel_index];
-    r = detexClamp0To255(base_color_subblock[0] + modifier);
-    g = detexClamp0To255(base_color_subblock[1] + modifier);
-    b = detexClamp0To255(base_color_subblock[2] + modifier);
+
+    int r = detexClamp0To255(base_color_subblock[0] + modifier);
+    int g = detexClamp0To255(base_color_subblock[1] + modifier);
+    int b = detexClamp0To255(base_color_subblock[2] + modifier);
+
     int mask = punchthrough_mask_table[pixel_index];
+
     //uint32_t *buffer = (uint32_t *)pixel_buffer;
     int[] buffer = pixel_buffer;
     buffer[(i & 3) * 4 + ((i & 12) >> 2)] = detexPack32RGB8Alpha0xFF(r, g, b) & mask;
   }
 
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
   public void SetModeETC2THP(int[] bitstring, int mode) {
     if (mode == 2) {
       // bitstring[0] bits 0, 1, 3, 4 are used.

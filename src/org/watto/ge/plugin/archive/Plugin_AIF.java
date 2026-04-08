@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,9 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.HashMap;
+
+import org.watto.Settings;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -50,7 +53,7 @@ public class Plugin_AIF extends ArchivePlugin {
     //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
 
-    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+    setTextPreviewExtensions("h"); // LOWER CASE
 
     setCanScanForFileTypes(true);
 
@@ -107,6 +110,8 @@ public class Plugin_AIF extends ArchivePlugin {
 
   int realNumFolders = 0;
 
+  HashMap<String, String> hashMap = null;
+
   /**
    **********************************************************************************************
    * Reads an [archive] File into the Resources
@@ -147,6 +152,29 @@ public class Plugin_AIF extends ArchivePlugin {
 
       TaskProgressManager.setMaximum(numFiles);
 
+      // See if we have a file with the filenames in it, and if so, we need to read them in so the decryption works properly
+      hashMap = new HashMap<String, String>(numFiles);
+      File hashFile = new File(Settings.get("HashesDirectory") + File.separatorChar + "AIF" + File.separatorChar + "filenames.txt");
+      if (hashFile.exists()) {
+        int hashFileLength = (int) hashFile.length();
+
+        FileManipulator hashFM = new FileManipulator(hashFile, false);
+        while (hashFM.getOffset() < hashFileLength) {
+          String line = hashFM.readLine(); // 12345678=filename.dat
+
+          if (line.length() < 9) {
+            continue;
+          }
+
+          String hash = line.substring(0, 8);
+          String name = line.substring(9);
+
+          hashMap.put(hash, name);
+        }
+        hashFM.close();
+      }
+
+      // now read the directory entries
       readDirectory(path, arcSize, fm, resources, null, 1, 16, 0, 0);
 
       dirFM.close();
@@ -179,9 +207,12 @@ public class Plugin_AIF extends ArchivePlugin {
       int[] subFilesOffsets = new int[numFolders];
       short[] numSubFolders = new short[numFolders];
       short[] numSubFiles = new short[numFolders];
+      String[] folderNames = new String[numFolders];
       for (int i = 0; i < numFolders; i++) {
         // 4 - Name Hash? (null for the root entry)
-        fm.skip(4);
+        //fm.skip(4);
+        String hash = fm.readHex(4).toString();
+        folderNames[i] = hash;
 
         // 4 - Offset to Sub-Folder Entries in this Folder
         int subFoldersOffset = fm.readInt();
@@ -211,13 +242,21 @@ public class Plugin_AIF extends ArchivePlugin {
         short numSubFolder = numSubFolders[i];
         short numSubFile = numSubFiles[i];
 
+        String folderName = folderNames[i];
+        if (hashMap != null) {
+          folderName = hashMap.get(folderName);
+        }
+        if (folderName == null || hashMap == null) {
+          folderName = "Folder " + realNumFolders;
+        }
+
         String subDirName = null;
         if (dirName == null) {
-          subDirName = "Root\\";
+          subDirName = "";
         }
         else {
           realNumFolders++;
-          subDirName = dirName + "Folder " + realNumFolders + "\\";
+          subDirName = dirName + folderName + "\\";
         }
 
         readDirectory(path, arcSize, fm, resources, subDirName, numSubFolder, subFoldersOffset, numSubFile, subFilesOffset);
@@ -227,7 +266,8 @@ public class Plugin_AIF extends ArchivePlugin {
       fm.seek(filesOffset);
       for (int i = 0; i < numFiles; i++) {
         // 4 - Name Hash? (null for the root entry)
-        fm.skip(4);
+        //fm.skip(4);
+        String hash = fm.readHex(4).toString();
 
         // 4 - File Offset
         int offset = fm.readInt();
@@ -240,7 +280,15 @@ public class Plugin_AIF extends ArchivePlugin {
         // 4 - null
         fm.skip(4);
 
-        String filename = dirName + Resource.generateFilename(realNumFiles);
+        String filename = null;
+        if (hashMap != null) {
+          filename = hashMap.get(hash);
+        }
+        if (filename == null || hashMap == null) {
+          //System.out.println(hash);
+          filename = Resource.generateFilename(realNumFiles);
+        }
+        filename = dirName + filename;
 
         //path,id,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);
@@ -266,14 +314,19 @@ public class Plugin_AIF extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
+    String currentExtension = resource.getExtension();
+    if (!currentExtension.equals("")) {
+      return currentExtension;
+    }
+
     if (headerInt1 == 542332225) {
       return "aus";
     }
     else if (headerInt1 == 1196310860) {
-      return "lang";
+      return "lng"; // Verified correct extension
     }
     else if (headerInt1 == 843925844) {
-      return "tm2";
+      return "tm2"; // Verified correct extension
     }
     else if (headerInt1 == 1397768760) {
       return "8bps";

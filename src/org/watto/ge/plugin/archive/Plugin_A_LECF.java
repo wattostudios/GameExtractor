@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,8 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.Language;
 import org.watto.datatype.Archive;
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
@@ -45,7 +47,7 @@ public class Plugin_A_LECF extends ArchivePlugin {
     super("A_LECF", "A_LECF");
 
     //         read write replace rename
-    setProperties(true, false, false, false);
+    setProperties(true, true, false, false);
 
     setGames("Fatty Bear's Birthday Surprise",
         "Moonbase Commander");
@@ -161,23 +163,75 @@ public class Plugin_A_LECF extends ArchivePlugin {
   }
 
   /**
-  **********************************************************************************************
-  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
-  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
-  extensions, which will be tried before any standard extensions.
-  @return null if no extension can be determined, or the extension if one can be found
-  **********************************************************************************************
-  **/
+   **********************************************************************************************
+   * Writes an [archive] File with the contents of the Resources
+   **********************************************************************************************
+   **/
   @Override
-  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+  public void write(Resource[] resources, File path) {
+    try {
 
-    /*
-    if (headerInt1 == 2037149520) {
-      return "js";
+      FileManipulator fm = new FileManipulator(path, true);
+
+      // WHOLE ARCHIVE IS XOR WITH (byte) 105
+      fm.setBuffer(new XORBufferWrapper(fm.getBuffer(), 105));
+
+      int numFiles = resources.length;
+      TaskProgressManager.setMaximum(numFiles);
+
+      // Calculations
+      TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
+
+      long archiveSize = 8;
+      for (int i = 0; i < numFiles; i++) {
+        archiveSize += resources[i].getDecompressedLength() + 8;
+      }
+
+      // Write Header Data
+
+      // 4 - Header (LECF)
+      fm.writeString("LECF");
+
+      // 4 - Archive Size
+      fm.writeInt(IntConverter.changeFormat((int) archiveSize));
+
+      // Write Files
+      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        // 4 - File Extension (Reversed String)
+        String extension = resource.getExtension();
+        if (extension == null) {
+          extension = "    ";
+        }
+        int extensionLength = extension.length();
+        if (extensionLength > 4) {
+          extension = extension.substring(0, 4);
+        }
+        extension = StringConverter.reverse(extension);
+
+        int extensionPadding = 4 - extensionLength;
+        for (int p = 0; p < extensionPadding; p++) {
+          extension += " ";
+        }
+        fm.writeString(extension);
+
+        // 4 - File Length (including these 2 fields)
+        long decompLength = resource.getDecompressedLength() + 8;
+        fm.writeInt(IntConverter.changeFormat((int) decompLength));
+
+        // X - File Data
+        write(resource, fm);
+        TaskProgressManager.setValue(i);
+      }
+
+      fm.close();
+
     }
-    */
-
-    return null;
+    catch (Throwable t) {
+      logError(t);
+    }
   }
 
 }

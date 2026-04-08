@@ -166,6 +166,11 @@ public class Plugin_ARC_CRAS extends ArchivePlugin {
 
       // open the decompressed data for processing
       fm.close();
+
+      //fm = new FileManipulator(new File("c:\\temp.out"), true);
+      //fm.writeBytes(dirBytes);
+      //fm.close();
+
       fm = new FileManipulator(new ByteBuffer(dirBytes));
 
       Resource[] resources = new Resource[numFiles];

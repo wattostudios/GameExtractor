@@ -18,7 +18,9 @@ import java.awt.Image;
 import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.MemoryImageSource;
+
 import javax.swing.JLabel;
+
 import org.watto.datatype.Palette;
 
 public class PaletteManager {
@@ -48,8 +50,7 @@ public class PaletteManager {
   public static Palette getCurrentPalette() {
     return palettes[currentPalette];
   }
-  
-  
+
   /**
   **********************************************************************************************
   
@@ -84,6 +85,24 @@ public class PaletteManager {
   **/
   public static void addPalette(Palette palette) {
     addPalette(palette, true);
+  }
+
+  /**
+  **********************************************************************************************
+  
+  **********************************************************************************************
+  **/
+  public static void replacePalette(int paletteID, Palette palette) {
+    if (paletteID < 0 || paletteID >= palettes.length) {
+      // the palette doesn't exist, so just add it to the end
+      addPalette(palette, true);
+    }
+    else {
+      // the palette exists, so replace it with the new one
+      palettes[paletteID] = palette;
+      thumbnails[paletteID] = null;
+    }
+
   }
 
   /**

@@ -15,6 +15,7 @@
 package org.watto.task;
 
 import java.io.File;
+
 import org.watto.ChangeMonitor;
 import org.watto.ErrorLogger;
 import org.watto.Language;
@@ -27,6 +28,8 @@ import org.watto.component.WSPopup;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.GameExtractor;
+import org.watto.ge.helper.FileTypeDetector;
+import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.PluginListBuilder;
 import org.watto.ge.plugin.ScannerPlugin;
 import org.watto.io.FileManipulator;
@@ -142,6 +145,7 @@ public class Task_ScanArchive extends AbstractTask {
               // set the remaining information for the resource
               resource.setSource(path);
               resource.setName(Resource.generateFilename(numResources) + resource.getName());
+              resource.forceNotAdded(true);
 
               // add the resource into the array
               resources[numResources] = resource;
@@ -170,6 +174,39 @@ public class Task_ScanArchive extends AbstractTask {
     boolean archiveOpened = false;
     if (numResources > 0) {
       Archive.makeNewArchive();
+
+      // [3.16.0005] if we found any ZLib compressed files, scan them for a doctype>
+      if (Settings.getBoolean("IdentifyUnknownFileTypes")) {
+        ArchivePlugin readPlugin = Archive.getReadPlugin();
+
+        // build an array of ZLib Resources to scan
+        Resource[] scanArray = new Resource[numResources];
+        int numToScan = 0;
+
+        for (int i = 0; i < numResources; i++) {
+          Resource resource = resources[i];
+          if (resource.getExtension().equals("zlib")) {
+            // read the first few bytes and see if we can work out what type of file it is
+            scanArray[numToScan] = resource;
+            numToScan++;
+          }
+        }
+
+        if (numToScan > 0) {
+          TaskProgressManager.setMaximum(numToScan);
+
+          if (numToScan < numResources) {
+            Resource[] oldScanArray = scanArray;
+            scanArray = new Resource[numToScan];
+            System.arraycopy(oldScanArray, 0, scanArray, 0, numToScan);
+          }
+
+          // read the first few bytes and see if we can work out what type of file it is
+          FileTypeDetector.determineExtensions(scanArray, readPlugin);
+        }
+
+      }
+
       //if (!ArchiveModificationMonitor.setModified(true)){
       //  return;
       //  }

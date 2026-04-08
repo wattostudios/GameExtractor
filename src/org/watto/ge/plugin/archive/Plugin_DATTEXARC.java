@@ -130,7 +130,7 @@ public class Plugin_DATTEXARC extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
-        //System.out.println(fm.getOffset());
+        System.out.println(fm.getOffset());
         long offset = fm.getOffset();
 
         // 4 - Unknown
@@ -180,7 +180,7 @@ public class Plugin_DATTEXARC extends ArchivePlugin {
             width /= 2;
             height /= 2;
 
-            length += width * height / 2; // pixels
+            length += width * height; // pixels
           }
         }
         else {
