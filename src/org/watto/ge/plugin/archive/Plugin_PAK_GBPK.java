@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -147,37 +148,40 @@ public class Plugin_PAK_GBPK extends ArchivePlugin {
         // X - Filename
         String filename = fm.readString(filenameLength);
 
-        // 1 - Unknown
+        // 1 - Flags
         int flag = fm.readByte();
 
-        if (flag == 8) {
-          // 4 - Unknown
+        if ((flag & 1) == 1) {
+          // image dimensions
+          // 2 - Unknown
+          // 2 - Unknown
           fm.skip(4);
         }
-        else if (flag == 11) {
-          // 8 - Unknown
-          fm.skip(8);
+
+        if ((flag & 16) == 16) {
+          // Burger Shop 3 extra data
+          // 2 - Unknown
+          // 2 - Unknown
+          // 2 - Unknown
+          fm.skip(6);
         }
 
-        if (flag == 3) {
-          // an empty file?
-
-          // 4 - Unknown
+        if ((flag & 8) == 8) {
+          // 4 - Timestamp
           fm.skip(4);
-          continue;
+
+          // 4 - File Offset (relative to the start of the File Data)
+          int offset = fm.readInt() + relativeOffset;
+          FieldValidator.checkOffset(offset, arcSize);
+
+          // 4 - File Length
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
+          realNumFiles++;
         }
-
-        // 4 - File Offset (relative to the start of the File Data)
-        int offset = fm.readInt() + relativeOffset;
-        FieldValidator.checkOffset(offset, arcSize);
-
-        // 4 - File Length
-        int length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
-
-        //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
-        realNumFiles++;
 
         TaskProgressManager.setValue(i);
       }

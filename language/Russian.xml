@@ -1,6 +1,6 @@
 <languagePack>
 	<name>Russian (русский)</name>
-	<version>3.16.0005</version>
+	<version>3.16.0006</version>
 	<author>
 		<name>berry</name>
 		<email>igory.ygr200@gmail.com</email>
@@ -1632,6 +1632,14 @@
 		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Text" value="Next Mesh" />
 		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Tooltip" value="Shows the Next Mesh in the Model" />
 		<lang code="PreviewPanel_3DModel_FullModel" value="Full Model" />
+		
+<!-- New with 3.16.0006 -->
+
+		<lang code="WSCheckBox_PromptForModifiedExportFiles_Text" value="Prompt when Extracted Files are modified?" />
+		<lang code="WSCheckBox_PromptForModifiedExportFiles_Tooltip" value="When you extract files, if you modify them outside of Game Extractor, do you want Game Extractor to detect the changes (ticked) or ignore them (unticked)." />
+		
+		<lang code="WSCheckBox_PrependArchiveNameWhenExporting_Text" value="Prepend Archive Name on extracted files?" />
+		<lang code="WSCheckBox_PrependArchiveNameWhenExporting_Tooltip" value="When extracting files, add the archive name to the beginning of the filename (ticked) or just extract with the filename as it shows in Game Extractor (unticked)." />
 		
 		<lang code="" value="" />
 		

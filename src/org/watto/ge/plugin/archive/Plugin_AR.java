@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
+import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -43,9 +44,9 @@ public class Plugin_AR extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Street Racing Syndicate");
+    setGames("Street Racing Syndicate", "Big Mutha Truckers");
     setExtensions("ar"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "PS2", "XBox");
 
     setFileTypes(new FileType("arc", "ARC Archive", FileType.TYPE_ARCHIVE));
 
@@ -106,7 +107,7 @@ public class Plugin_AR extends ArchivePlugin {
 
       // RESETTING GLOBAL VARIABLES
 
-      long arcSize = (int) path.length();
+      long arcSize = path.length();
 
       String basePath = path.getParentFile().getAbsolutePath() + File.separatorChar;
       File dirFile = new File(basePath + "CDFILES.DAT");
@@ -117,30 +118,79 @@ public class Plugin_AR extends ArchivePlugin {
         return null; // can't find the cdfiles.dat file
       }
 
+      // Now for XBox, the files are split as archive0.ar, archive1.ar, etc.
+      // So need to find all the archive files, as well as their lengths
+      String arcFilename = path.getAbsolutePath();
+      int dotPos = arcFilename.lastIndexOf('.');
+      if (dotPos <= 1) {
+        return null;
+      }
+      String arcExtension = arcFilename.substring(dotPos);
+      arcFilename = arcFilename.substring(0, dotPos - 1);
+
+      File[] arcFiles = new File[10];
+      long[] arcSizes = new long[10];
+      int numArcFiles = 0;
+      if (new File(arcFilename + 0 + arcExtension).exists()) {
+        // multiple files
+        for (int i = 0; i < 10; i++) {
+          File arcFile = new File(arcFilename + i + arcExtension);
+          if (arcFile.exists() && arcFile.isFile()) {
+            arcFiles[numArcFiles] = arcFile;
+            arcSizes[numArcFiles] = arcFile.length();
+            numArcFiles++;
+          }
+        }
+
+      }
+      else {
+        // single file
+        numArcFiles = 1;
+        arcFiles[0] = path;
+        arcSizes[0] = arcSize;
+      }
+
       FileManipulator fm = new FileManipulator(dirFile, false);
 
       // 4 - Header (file)
-      // 4 - Unknown (3)
-      // 4 - Unknown
-      // 4 - Unknown (4)
-      // 4 - Unknown (4)
-      // 4 - null
-      // 4 - null
-      // 4 - Number of Files
-      // 4 - Unknown (12)
-      fm.skip(36);
+      fm.skip(4);
 
-      // 4 - Padding Multiple (2048)
-      int paddingMultiple = fm.readInt();
-      FieldValidator.checkLength(paddingMultiple, arcSize);
+      // 4 - Version (3)
+      int version = fm.readInt();
+
+      // 4 - Unknown
+      fm.skip(4);
+
+      // 4 - Unknown (4)
+      int unknown1 = fm.readInt();
+      // 4 - Unknown (4)
+      int unknown2 = fm.readInt();
+      // 4 - null
+      int unknown3 = fm.readInt();
+      // 4 - null
+      int unknown4 = fm.readInt();
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
+      // 4 - Unknown (12)
+      fm.skip(4);
+
+      // 4 - Padding Multiple (2048)
+      int paddingMultiple = fm.readInt();
+      FieldValidator.checkLength(paddingMultiple, arcSize);
+
+      // 4 - Number of Names
+      int numNames = fm.readInt();
+      FieldValidator.checkNumFiles(numNames);
+
       // 4 - Unknown
-      // 8 - null
-      fm.skip(12);
+      fm.skip(4);
+
+      // X - Unknown
+      int skipSize = unknown1 + unknown2 + unknown3 * 4 + unknown4;
+      fm.skip(skipSize);
 
       // 12 - Archive Filename ("\ARCHIVE.AR" + null)
       fm.readNullString();
@@ -150,17 +200,37 @@ public class Plugin_AR extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
+      //System.out.println("Offsets at " + fm.getOffset());
+
+      // Get ready at the first archive (in case there's multiple of them)
+      int currentArcFile = 0;
+      path = arcFiles[currentArcFile];
+      arcSize = arcSizes[currentArcFile];
+
       // Loop through directory
       long[] offsets = new long[numFiles];
       for (int i = 0; i < numFiles; i++) {
 
         // 4 - File Offset
-        long offset = fm.readInt() * paddingMultiple;
+        long offset = ((long) fm.readInt()) * paddingMultiple;
         FieldValidator.checkOffset(offset, arcSize);
         offsets[i] = offset;
 
+        if (i != 0 && offset == 0) {
+          currentArcFile++;
+          path = arcFiles[currentArcFile];
+          arcSize = arcSizes[currentArcFile];
+        }
+
         TaskProgressManager.setValue(i);
       }
+
+      //System.out.println("Lengths at " + fm.getOffset());
+
+      // Get ready at the first archive again, as we're storing the Resources here (in case there's multiple of them)
+      currentArcFile = 0;
+      path = arcFiles[currentArcFile];
+      arcSize = arcSizes[currentArcFile];
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
@@ -170,88 +240,170 @@ public class Plugin_AR extends ArchivePlugin {
 
         long offset = offsets[i];
 
+        if (i != 0 && offset == 0) {
+          currentArcFile++;
+          path = arcFiles[currentArcFile];
+          arcSize = arcSizes[currentArcFile];
+        }
+
         String filename = Resource.generateFilename(i);
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        Resource resource = new Resource(path, filename, offset, length);
+        resource.forceNotAdded(true);
+        resources[i] = resource;
 
         TaskProgressManager.setValue(i);
       }
 
+      //System.out.println("Recon at " + fm.getOffset());
+
       // Loop through directory
-      long[] reconstructionOffsets = new long[numFiles];
-      for (int i = 0; i < numFiles; i++) {
+      long[] reconstructionOffsets = new long[numNames];
+      for (int i = 0; i < numNames; i++) {
         // 4 - Offset into Reconstruction Directory for this file (relative to the start of the Reconstruction Directory)
         int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
         reconstructionOffsets[i] = offset;
       }
 
-      // SKIP THE FLAGS DIRECTORY
-      // SKIP THE NULLS DIRECTORY
-      fm.skip((numFiles * 4) + (numFiles * 4));
-
-      // 4 - Number of Names
-      int numNames = fm.readInt();
-      FieldValidator.checkNumFiles(numNames);
-
-      // 4 - Name Directory Length
-      int nameDirLength = fm.readInt();
-      FieldValidator.checkLength(nameDirLength, arcSize);
-
-      long relativeNameOffset = fm.getOffset() + (numNames * 4);
-      long reconstructionDirOffset = relativeNameOffset + nameDirLength;
-
-      long[] nameOffsets = new long[numNames];
+      // Read The Flags Directory
+      int[] ids = new int[numNames];
+      int[] idTypes = new int[numNames];
       for (int i = 0; i < numNames; i++) {
-        // 4 - Name Offset (relative to the start of the Names Directory)
-        nameOffsets[i] = relativeNameOffset + fm.readInt();
-      }
-
-      String[] names = new String[numNames];
-      for (int i = 0; i < numNames; i++) {
-        fm.relativeSeek(nameOffsets[i]);
-
-        // X - Partial Name
-        // 1 - null Name Terminator
-        String name = fm.readNullString();
-        names[i] = name;
-      }
-
-      // Read the name reconstructions
-      for (int i = 0; i < numFiles; i++) {
-        fm.relativeSeek(reconstructionDirOffset + reconstructionOffsets[i]);
-
-        String filename = "";
-
-        //long nameOffset = fm.getOffset();
-
-        int currentByte = ByteConverter.unsign(fm.readByte());
-        while (currentByte != 0) {
-          int nameIndex = 0;
-
-          if (currentByte >= 128) {
-            nameIndex = ((currentByte - 128) << 8) | ByteConverter.unsign(fm.readByte());
-          }
-          else {
-            nameIndex = currentByte;
-          }
-
-          nameIndex--; // name indexes actually start at 1, in this directory, because 0 means "end of entry" so can't be used as an index
-
-          filename += names[nameIndex];
-
-          // read the next byte
-          currentByte = ByteConverter.unsign(fm.readByte());
+        byte[] flagBytes = fm.readBytes(4);
+        if (flagBytes[3] == 32) {
+          continue;
         }
 
-        //System.out.println((i + 1) + "\t" + nameOffset + "\t" + filename);
-        Resource resource = resources[i];
+        if (flagBytes[3] == 0) {
+          // Unknown
+          continue;
+        }
+
+        int id = IntConverter.convertLittle(new byte[] { flagBytes[0], flagBytes[1], flagBytes[2], 0 });
+
+        if (idTypes[id] == 64) {
+          // File Overwrite
+          continue;
+        }
+
+        ids[id] = i;
+        idTypes[id] = flagBytes[3];
+      }
+
+      String[] filenames = null;
+      if (version == 1) {
+        long relativeNameOffset = fm.getOffset();
+
+        filenames = new String[numNames];
+        for (int i = 0; i < numNames; i++) {
+          fm.relativeSeek(relativeNameOffset + reconstructionOffsets[i]);
+
+          // X - Filename
+          // 1 - null Filename Terminator
+          String name = fm.readNullString();
+          filenames[i] = name;
+        }
+      }
+      else {
+        // SKIP THE NULLS DIRECTORY
+        fm.skip((numNames * 4));
+
+        //System.out.println("Names Offsets at " + fm.getOffset());
+
+        // 4 - Number of Names
+        int realNumNames = fm.readInt();
+        FieldValidator.checkNumFiles(realNumNames);
+
+        // 4 - Name Directory Length
+        int nameDirLength = fm.readInt();
+        FieldValidator.checkLength(nameDirLength, arcSize);
+
+        long relativeNameOffset = fm.getOffset() + (realNumNames * 4);
+        long reconstructionDirOffset = relativeNameOffset + nameDirLength;
+
+        long[] nameOffsets = new long[realNumNames];
+        for (int i = 0; i < realNumNames; i++) {
+          // 4 - Name Offset (relative to the start of the Names Directory)
+          nameOffsets[i] = relativeNameOffset + fm.readInt();
+        }
+
+        //System.out.println("Names at " + fm.getOffset());
+
+        String[] names = new String[realNumNames];
+        for (int i = 0; i < realNumNames; i++) {
+          fm.relativeSeek(nameOffsets[i]);
+
+          // X - Partial Name
+          // 1 - null Name Terminator
+          String name = fm.readNullString();
+          names[i] = name;
+        }
+
+        // Read the name reconstructions
+        filenames = new String[numNames];
+        for (int i = 0; i < numNames; i++) {
+          fm.relativeSeek(reconstructionDirOffset + reconstructionOffsets[i]);
+
+          String filename = "";
+
+          //long nameOffset = fm.getOffset();
+
+          int currentByte = ByteConverter.unsign(fm.readByte());
+          while (currentByte != 0) {
+            int nameIndex = 0;
+
+            if (currentByte >= 128) {
+              nameIndex = ((currentByte - 128) << 8) | ByteConverter.unsign(fm.readByte());
+            }
+            else {
+              nameIndex = currentByte;
+            }
+
+            nameIndex--; // name indexes actually start at 1, in this directory, because 0 means "end of entry" so can't be used as an index
+
+            filename += names[nameIndex];
+
+            // read the next byte
+            currentByte = ByteConverter.unsign(fm.readByte());
+          }
+
+          //Resource resource = resources[i];
+          //resource.setName(filename);
+          //resource.setOriginalName(filename);
+
+          filenames[i] = filename;
+        }
+      }
+
+      Resource[] oldResources = resources;
+      resources = new Resource[numNames];
+
+      // Assign the names to the files (and exclude all the "old" files that have been overwritten)
+      int realNumFiles = 0;
+      for (int i = 0; i < numFiles; i++) {
+        int id = ids[i];
+
+        if (idTypes[i] != 64) {
+          continue;
+        }
+
+        String filename = filenames[id];//Resource.generateFilename(realNumFiles);
+
+        Resource resource = oldResources[i];
         resource.setName(filename);
         resource.setOriginalName(filename);
+
+        resources[realNumFiles] = resource;
+        realNumFiles++;
       }
 
       fm.close();
+
+      if (realNumFiles < numNames) {
+        resources = resizeResources(resources, realNumFiles);
+      }
 
       return resources;
 

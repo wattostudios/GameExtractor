@@ -15,10 +15,12 @@
 package org.watto.ge.plugin;
 
 import org.watto.ErrorLogger;
+import org.watto.SingletonManager;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
+import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
 import org.watto.ge.helper.ImageFormatWriter;
@@ -198,6 +200,28 @@ public class _Viewer_XXX extends ViewerPlugin {
       // 4 - Image Height
       int height = fm.readInt();
       FieldValidator.checkHeight(height);
+
+      // get the width/height from the properties of the image resource, which were read by the ArchivePlugin
+      height = 0;
+      width = 0;
+
+      Object resourceObject = SingletonManager.get("CurrentResource");
+      if (resourceObject == null || !(resourceObject instanceof Resource)) {
+        return null;
+      }
+      Resource resource = (Resource) resourceObject;
+
+      try {
+        height = Integer.parseInt(resource.getProperty("Height"));
+        width = Integer.parseInt(resource.getProperty("Width"));
+      }
+      catch (Throwable t) {
+        //
+      }
+
+      if (width == 0 || height == 0) {
+        return null;
+      }
 
       // 4 - Number Of Mipmaps
       int numMipmaps = fm.readInt();

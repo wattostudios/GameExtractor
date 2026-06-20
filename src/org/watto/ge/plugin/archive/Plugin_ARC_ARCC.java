@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -47,7 +47,7 @@ public class Plugin_ARC_ARCC extends ArchivePlugin {
 
     setGames("Street Racing Syndicate");
     setExtensions("arc"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "PS2", "XBox");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("arc_tex", "Texture Image", FileType.TYPE_IMAGE),
@@ -76,7 +76,8 @@ public class Plugin_ARC_ARCC extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(4).equals("ARCC")) {
+      String header = fm.readString(4);
+      if (header.equals("ARCC") || header.equals("ARCP") || header.equals("ARCX")) { // ARCC = PC, ARCP = PS2, ARCX = XBox
         rating += 50;
       }
 
@@ -155,6 +156,7 @@ public class Plugin_ARC_ARCC extends ArchivePlugin {
       String namePrefix = "";
       int facesCount = 1;
       int vertsCount = 1;
+
       for (int i = 0; i < numFiles; i++) {
 
         // 4 - Unknown
@@ -203,6 +205,9 @@ public class Plugin_ARC_ARCC extends ArchivePlugin {
 
         if (fileType == 1) {
           filename += ".arc_tex";
+        }
+        else if (fileType == 2) {
+          filename += ".arc_mat";
         }
         else if (fileType == 15) {
           filename = "Faces " + facesCount + ".arc_faces";

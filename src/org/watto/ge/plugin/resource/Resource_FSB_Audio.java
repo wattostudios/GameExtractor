@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.resource;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FilenameSplitter;
@@ -89,6 +90,17 @@ public class Resource_FSB_Audio extends Resource {
 
   /** the CRC used to locate the Setup Header (for OGG) **/
   int setupCRC = 0;
+
+  /** for gamecube audio **/
+  byte[] extraData = null;
+
+  public byte[] getExtraData() {
+    return extraData;
+  }
+
+  public void setExtraData(byte[] extraData) {
+    this.extraData = extraData;
+  }
 
   public int getSetupCRC() {
     return setupCRC;

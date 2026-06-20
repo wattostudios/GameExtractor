@@ -32,11 +32,11 @@ public class Exporter_QuickBMS_DLL extends ExporterPlugin {
 
   static Exporter_QuickBMS_DLL instance = new Exporter_QuickBMS_DLL();
 
-  static byte[] decompBuffer = null;
+  byte[] decompBuffer = null;
 
-  static int decompPos = 0;
+  int decompPos = 0;
 
-  static int decompLength = 0;
+  int decompLength = 0;
 
   String compressionAlgorithm = "";
 

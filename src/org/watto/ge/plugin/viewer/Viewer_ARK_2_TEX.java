@@ -26,6 +26,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_ARK_2;
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
 
 /**
 **********************************************************************************************
@@ -46,7 +47,7 @@ public class Viewer_ARK_2_TEX extends ViewerPlugin {
     setGames("MotoGP: Ultimate Racing Technology",
         "MotoGP: Ultimate Racing Technology 2",
         "MotoGP: Ultimate Racing Technology 3");
-    setPlatforms("PC");
+    setPlatforms("PC", "XBox");
     setStandardFileFormat(false);
   }
 
@@ -93,16 +94,31 @@ public class Viewer_ARK_2_TEX extends ViewerPlugin {
         rating += 25;
       }
 
-      fm.skip(4);
+      try {
+        // PC
+        fm.skip(4);
 
-      // 2 - Image Width
-      if (FieldValidator.checkWidth(fm.readShort())) {
-        rating += 5;
+        // 2 - Image Width
+        if (FieldValidator.checkWidth(fm.readShort())) {
+          rating += 5;
+        }
+
+        // 2 - Image Height
+        if (FieldValidator.checkHeight(fm.readShort())) {
+          rating += 5;
+        }
       }
+      catch (Throwable t) {
+        // XBox
+        fm.relativeSeek(0);
 
-      // 2 - Image Height
-      if (FieldValidator.checkHeight(fm.readShort())) {
-        rating += 5;
+        fm.skip(4);
+
+        // 4 - File Length [+20]
+        //if (FieldValidator.checkEquals(fm.readInt() + 20, fm.getLength())) {
+        if (fm.readInt() + 20 == fm.getLength()) {
+          rating += 5;
+        }
       }
 
       return rating;
@@ -152,23 +168,113 @@ public class Viewer_ARK_2_TEX extends ViewerPlugin {
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
-      // 1 - null
-      // 1 - Unknown (0/3)
-      fm.skip(2);
+      int width = 0;
+      int height = 0;
+      int type = 0;
 
-      // 1 - Image Type? (1=DXT1,2=DXT5)
-      int type = fm.readByte();
+      // lets try for XBox straight up, because that has a good verification field
 
-      // 1 - Number of Mipmaps
-      fm.skip(1);
+      // 2 - Unknown (1)
+      // 2 - Unknown (4)
+      fm.skip(4);
 
-      // 2 - Image Width
-      short width = fm.readShort();
-      FieldValidator.checkWidth(width);
+      boolean foundFormat = false;
+      // 4 - File Length [+20]
+      if (fm.readInt() + 20 == fm.getLength()) {
+        // XBox
 
-      // 2 - Image Height
-      short height = fm.readShort();
-      FieldValidator.checkHeight(height);
+        // 4 - null
+        // 1 - Unknown
+        fm.skip(5);
+
+        // 1 - Image Type [&15] (15=DXT5, 12=DXT1)
+        type = (fm.readByte() & 15);
+        if (type == 15) { // convert the type from XBox to PC
+          type = 2;
+        }
+        else if (type == 12) {
+          type = 1;
+        }
+
+        // 1 - Image Width [>>4] (width = 1<<value)
+        width = 1 << (ByteConverter.unsign(fm.readByte()) >> 4);
+        FieldValidator.checkWidth(width);
+
+        // 1 - Image Height [&15] (height = 1<<value)
+        height = 1 << (ByteConverter.unsign(fm.readByte()) & 15);
+        FieldValidator.checkHeight(height);
+
+        // 4 - Unknown
+        fm.skip(4);
+
+        foundFormat = true;
+      }
+
+      if (!foundFormat) {
+        try {
+          // Try for PC
+          fm.relativeSeek(0);
+
+          // 1 - null
+          // 1 - Unknown (0/3)
+          fm.skip(2);
+
+          // 1 - Image Type? (1=DXT1,2=DXT5)
+          type = fm.readByte();
+
+          // 1 - Number of Mipmaps
+          fm.skip(1);
+
+          // 2 - Image Width
+          width = fm.readShort();
+          //FieldValidator.checkWidth(width);
+          FieldValidator.checkRange(width, 4, 4096);
+
+          // 2 - Image Height
+          height = fm.readShort();
+          //FieldValidator.checkHeight(height);
+          FieldValidator.checkRange(height, 4, 4096);
+        }
+        catch (Throwable t) {
+          // try for XBox
+          fm.relativeSeek(0);
+
+          // 2 - Unknown (1)
+          if (fm.readShort() != 1) {
+            return null;
+          }
+
+          // 2 - Unknown (4)
+          if (fm.readShort() != 4) {
+            return null;
+          }
+
+          // 4 - File Length [+20]
+          // 4 - null
+          // 1 - Unknown
+          fm.skip(9);
+
+          // 1 - Image Type [&15] (15=DXT5, 12=DXT1)
+          type = (fm.readByte() & 15);
+          if (type == 15) { // convert the type from XBox to PC
+            type = 2;
+          }
+          else if (type == 12) {
+            type = 1;
+          }
+
+          // 1 - Image Width [>>4] (width = 1<<value)
+          width = 1 << (ByteConverter.unsign(fm.readByte()) >> 4);
+          FieldValidator.checkWidth(width);
+
+          // 1 - Image Height [&15] (height = 1<<value)
+          height = 1 << (ByteConverter.unsign(fm.readByte()) & 15);
+          FieldValidator.checkHeight(height);
+
+          // 4 - Unknown
+          fm.skip(4);
+        }
+      }
 
       // X - Pixels
       ImageResource imageResource = null;

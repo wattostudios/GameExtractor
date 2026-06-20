@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_WAV_RawAudio;
 import org.watto.ge.plugin.exporter.Exporter_LZSS;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
@@ -172,7 +173,6 @@ public class Plugin_NoExt_8 extends ArchivePlugin {
     */
 
     if (headerShort1 == 18501) {
-
       if ((headerBytes[2] == 5 || headerBytes[2] == 6) && headerBytes[3] == 5 && headerBytes[4] == 0) {
         int decompLength = IntConverter.convertLittle(new byte[] { headerBytes[6], headerBytes[7], headerBytes[8], headerBytes[9] });
         resource.setOffset(resource.getOffset() + 10);
@@ -204,6 +204,17 @@ public class Plugin_NoExt_8 extends ArchivePlugin {
 
         if (headerBytes[9] == 67 && headerBytes[10] == 114 && headerBytes[11] == 101) {
           return "voc";
+        }
+        else {
+
+          // Game = Menzoberranzan
+          resource.setExporter(Exporter_Custom_WAV_RawAudio.getInstance());
+          resource.addProperty("AudioFrequency", 11025);
+          resource.addProperty("AudioBitRate", 8);
+          resource.addProperty("AudioChannels", 1);
+          resource.addProperty("AudioSigned", "true");
+          return "wav";
+
         }
       }
       else if ((headerBytes[2] == 6) && headerBytes[3] == 0 && headerBytes[4] == 0) {

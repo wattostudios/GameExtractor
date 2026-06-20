@@ -25,6 +25,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_BGD;
+import org.watto.ge.plugin.archive.Plugin_FS_2;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ShortConverter;
 
@@ -77,6 +78,9 @@ public class Viewer_BGD_GEO_MGGF extends ViewerPlugin {
       ArchivePlugin readPlugin = Archive.getReadPlugin();
       if (readPlugin instanceof Plugin_BGD) {
         rating += 50;
+      }
+      else if (readPlugin instanceof Plugin_FS_2) {
+        rating -= 50; // don't match
       }
 
       if (FieldValidator.checkExtension(fm, extensions)) {

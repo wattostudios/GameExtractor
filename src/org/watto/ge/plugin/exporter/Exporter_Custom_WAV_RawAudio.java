@@ -128,6 +128,49 @@ public class Exporter_Custom_WAV_RawAudio extends ExporterPlugin {
 
         extraData = audioSource.getExtraData();
       }
+      else {
+        // Try reading the details from the Resource Properties[] which might occur if it's set from the guessFileExtension()
+        String frequencyString = source.getProperty("AudioFrequency");
+        if (frequencyString != null) {
+          try {
+            frequency = Integer.parseInt(frequencyString);
+          }
+          catch (Throwable t) {
+          }
+        }
+        String bitrateString = source.getProperty("AudioBitRate");
+        if (bitrateString != null) {
+          try {
+            bitrate = Short.parseShort(bitrateString);
+          }
+          catch (Throwable t) {
+          }
+        }
+        String channelsString = source.getProperty("AudioChannels");
+        if (channelsString != null) {
+          try {
+            channels = Short.parseShort(channelsString);
+          }
+          catch (Throwable t) {
+          }
+        }
+        String signedString = source.getProperty("AudioSigned");
+        if (signedString != null) {
+          try {
+            signed = signedString.equalsIgnoreCase("true");
+          }
+          catch (Throwable t) {
+          }
+        }
+        String codecString = source.getProperty("AudioCodec");
+        if (codecString != null) {
+          try {
+            codec = Short.parseShort(codecString);
+          }
+          catch (Throwable t) {
+          }
+        }
+      }
 
       if (codec == 0x0011) {
         header = imaadpcmwav_header(frequency, channels, bitrate, audioLength, codec, samples, blockAlign, extraData);

@@ -41,10 +41,11 @@ public class Viewer_BDL_MOIK_TGA_CTNR extends ViewerPlugin {
   **********************************************************************************************
   **/
   public Viewer_BDL_MOIK_TGA_CTNR() {
-    super("BDL_MOIK_TGA_CTNR", "Worms Revolution TGA (CTNR) Image");
+    super("BDL_MOIK_TGA_CTNR", "Worms-Series TGA (CTNR) Image");
     setExtensions("tga");
 
-    setGames("Worms Revolution");
+    setGames("Worms Revolution",
+        "Worms Reloaded");
     setPlatforms("PC");
     setStandardFileFormat(false);
   }
@@ -177,28 +178,44 @@ public class Viewer_BDL_MOIK_TGA_CTNR extends ViewerPlugin {
 
       // 4 - Unknown (9=DXT1 / 11=DXT5)
       int imageFormat = fm.readShort();
-      // 4 - Unknown (1)
-      fm.skip(6);
 
-      // 1 - Unknown
-      fm.skip(1);
+      if (imageFormat == 9 || imageFormat == 11) { // Worms Revolution
+        // 4 - Unknown (1)
+        fm.skip(6);
 
-      // 1-2-3 - Unknown
-      if (ByteConverter.unsign(fm.readByte()) >= 128) {
+        // 1 - Unknown
+        fm.skip(1);
+
+        // 1-2-3 - Unknown
         if (ByteConverter.unsign(fm.readByte()) >= 128) {
           if (ByteConverter.unsign(fm.readByte()) >= 128) {
-            fm.skip(1);
+            if (ByteConverter.unsign(fm.readByte()) >= 128) {
+              fm.skip(1);
+            }
           }
         }
+      }
+      else { // Worms Reloaded
+        fm.skip(4);
       }
 
       // X - Pixels
       ImageResource imageResource = null;
-      if (imageFormat == 9) {
+      if (imageFormat == 9) {// Worms Revolution
+
         imageResource = ImageFormatReader.readDXT1(fm, width, height);
       }
-      else if (imageFormat == 11) {
+      else if (imageFormat == 11) {// Worms Revolution
         imageResource = ImageFormatReader.readDXT5(fm, width, height);
+      }
+      else if (imageFormat == 0) {// Worms Reloaded
+        imageResource = ImageFormatReader.readRGB(fm, width, height);
+      }
+      else if (imageFormat == 1) {// Worms Reloaded
+        imageResource = ImageFormatReader.readARGB(fm, width, height);
+      }
+      else if (imageFormat == 7) {// Worms Reloaded
+        imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
       }
       else {
         ErrorLogger.log("[Viewer_BDL_MOIK_TGA_CTNR] Unknown Image Format: " + imageFormat);

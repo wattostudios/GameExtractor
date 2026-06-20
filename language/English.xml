@@ -1,6 +1,6 @@
 <languagePack>
 	<name>English</name>
-	<version>3.16.0005</version>
+	<version>3.16.0006</version>
 	<author>
 		<name>WATTO</name>
 		<email>watto@watto.org</email>
@@ -238,7 +238,7 @@
 		<lang code="Options_Directories_SidePanel_Options_Directories_Main_Text" value="Directories" />
 		<lang code="Options_General_SidePanel_Options_General_Main_Text" value="General" />
 		<lang code="Options_HexEditorFields_SidePanel_Options_HexEditorFields_Main_Text" value="Hex Viewer Fields" />
-		<lang code="Options_OpeningArchives_SidePanel_Options_OpeningArchives_Main_Text" value="Opening and Saving Archives" />
+		<lang code="Options_OpeningArchives_SidePanel_Options_OpeningArchives_Main_Text" value="Opening and Saving Files" />
 		<lang code="Options_Popups_SidePanel_Options_Popups_Main_Text" value="Popups" />
 		<lang code="Options_PreviewingFiles_SidePanel_Options_PreviewingFiles_Main_Text" value="Previewing Files" />
 		<lang code="Options_Scanners_SidePanel_Options_Scanners_Main_Text" value="Scanners" />
@@ -264,7 +264,7 @@
 		<lang code="Progress_DecompressingFiles" value="Decompressing Files" />
 		<lang code="Progress_AddingFiles_Undo" value="Removing the Added Files" />
 		<lang code="Progress_CuttingArchive" value="Cutting The File" />
-		<lang code="Progress_ExportingFiles" value="Exporting Files" />
+		<lang code="Progress_ExportingFiles" value="Extracting Files" />
 		<lang code="Progress_LoadingThumbnails" value="Loading Thumbnails" />
 		<lang code="Progress_PerformingCalculations" value="Performing Calculations" />
 		<lang code="Progress_PleaseWait" value="Please Wait" />
@@ -408,7 +408,7 @@
 		<lang code="WSButton_SidePanel_DirectoryList_CutArchiveButton_Tooltip" value="Controls for cutting an archive for analysis" />
 		<lang code="WSButton_SidePanel_DirectoryList_CutPanelButton_Tooltip" value="Displays the Cut Archive controls." />
 		<lang code="WSButton_SidePanel_DirectoryList_ExportAllButton_Tooltip" value="Extracts all the files from the archive to your computer." />
-		<lang code="WSButton_SidePanel_DirectoryList_ExportPanelButton_Tooltip" value="Shows the Export Files controls" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportPanelButton_Tooltip" value="Shows the Extract Files controls" />
 		<lang code="WSButton_SidePanel_DirectoryList_ExportSelectedButton_Tooltip" value="Extracts the selected files from the archive to your computer." />
 		<lang code="WSButton_SidePanel_DirectoryList_ModifyPanelButton_Tooltip" value="Displays the Modify Archive controls." />
 		<lang code="WSButton_SidePanel_DirectoryList_ReadArchiveButton_Tooltip" value="Open the selected archive." />
@@ -455,8 +455,8 @@
 		<lang code="WSCheckBox_AutoResizeTableColumns_Tooltip" value="When resizing the table columns, they will be changed to fix the width of the table. If unticked, the table columns can be as wide as you want." />
 		<lang code="WSCheckBox_CheckScriptResourceValues_Text" value="Scripts check for invalid file properties?" />
 		<lang code="WSCheckBox_CheckScriptResourceValues_Tooltip" value="When opening with a script, files found in an archive will be checked for invalid lengths and offsets (ticked), for better error detection." />
-		<lang code="WSCheckBox_OnlyShowStandardConverters_Text" value="Only show standard converter formats when exporting files?" />
-		<lang code="WSCheckBox_OnlyShowStandardConverters_Tooltip" value="When exporting files, only show standard file formats in the converters list (ticked), or all available converters (unticked)." />
+		<lang code="WSCheckBox_OnlyShowStandardConverters_Text" value="Only show standard converter formats when extracting files?" />
+		<lang code="WSCheckBox_OnlyShowStandardConverters_Tooltip" value="When extracting files, only show standard file formats in the converters list (ticked), or all available converters (unticked)." />
 		<lang code="WSCheckBox_ColorScriptSyntax_Text" value="Color syntax in Script Builder" />
 		<lang code="WSCheckBox_ColorScriptSyntax_Tooltip" value="Color the syntax in the script builder (ticked) or no coloring (unticked)" />
 		<lang code="WSCheckBox_DebugMode_Text" value="Debug mode" />
@@ -715,7 +715,7 @@
 		<lang code="WSLabel_ExportFileList_ListExported_Text" value="The file list was saved successfully." />
 		<lang code="WSLabel_ExportFileList_NoColumnsSelected_Text" value="There are no columns selected for saving in the file list." />
 		<lang code="WSLabel_ExportFiles_FilesExported_Text" value="The files were extracted successfully." />
-		<lang code="WSLabel_ExportFiles_NoFilesSelected_Text" value="There are no files selected for exporting." />
+		<lang code="WSLabel_ExportFiles_NoFilesSelected_Text" value="There are no files selected for extracting." />
 		<lang code="WSLabel_FileListViewChanged_Text" value="The file list view has been changed." />
 		<lang code="WSLabel_FullVersionOnly_Text" value="This feature is only available in the Full Version of Game Extractor." />
 		<lang code="WSLabel_ModifyArchive_NotReplacable_Text" value="This archive format does not allow files to be replaced." />
@@ -1022,7 +1022,7 @@
 		<lang code="WSScrollPane_SidePanel_Options_General_Label_Tooltip" value="General Game Extractor settings" />
 		<lang code="WSScrollPane_SidePanel_Options_HexEditorFields_Label_Label" value="Hex Viewer Fields" />
 		<lang code="WSScrollPane_SidePanel_Options_HexEditorFields_Label_Tooltip" value="The details fields that are shown in the Hex Viewer" />
-		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Label" value="Opening and Saving Archives" />
+		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Label" value="Opening and Saving Files" />
 		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Tooltip" value="Options for opening archives." />
 		<lang code="WSScrollPane_SidePanel_Options_OptionGroupHolder_Label_Label" value="Options" />
 		<lang code="WSScrollPane_SidePanel_Options_Popups_Label_Label" value="Popup Messages" />
@@ -1631,6 +1631,14 @@
 		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Text" value="Next Mesh" />
 		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Tooltip" value="Shows the Next Mesh in the Model" />
 		<lang code="PreviewPanel_3DModel_FullModel" value="Full Model" />
+		
+<!-- New with 3.16.0006 -->
+
+		<lang code="WSCheckBox_PromptForModifiedExportFiles_Text" value="Prompt when Extracted Files are modified?" />
+		<lang code="WSCheckBox_PromptForModifiedExportFiles_Tooltip" value="When you extract files, if you modify them outside of Game Extractor, do you want Game Extractor to detect the changes (ticked) or ignore them (unticked)." />
+		
+		<lang code="WSCheckBox_PrependArchiveNameWhenExporting_Text" value="Prepend Archive Name on extracted files?" />
+		<lang code="WSCheckBox_PrependArchiveNameWhenExporting_Tooltip" value="When extracting files, add the archive name to the beginning of the filename (ticked) or just extract with the filename as it shows in Game Extractor (unticked)." />
 		
 		<lang code="" value="" />
 		

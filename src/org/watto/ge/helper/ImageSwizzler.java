@@ -1227,6 +1227,345 @@ public class ImageSwizzler {
   }*/
 
   /**
+   **********************************************************************************************
+  Swizzles/Unswizzles an image using BC swizzling (4-bit or 8-bit image data)
+  Ref: https://github.com/bartlomiejduda/ReverseBox/blob/main/reversebox/image/swizzling/swizzle_bc.py
+   **********************************************************************************************
+   **/
+  private static byte[] swizzleHandlerBC(byte[] input_data, int width, int height, int blockWidth, int blockHeight, int bpp, boolean swizzle) {
+
+    int strip_size = bpp * blockWidth / 8;// strip_size: int = bpp * block_width // 8
+
+    int imageWidth = (width + blockWidth - 1) / blockWidth * blockWidth; // _width, _height = get_storage_wh(image_width, image_height, block_width, block_height)
+    int imageHeight = (height + blockHeight - 1) / blockHeight * blockHeight;
+
+    byte[] converted_data = new byte[imageWidth * imageHeight * bpp / 8]; // unswizzled_image_data = bytearray(_width * _height * bpp // 8)
+
+    int ptr = 0;
+
+    try {
+      for (int y = 0; y < imageHeight; y += blockHeight) {
+        for (int x = 0; x < imageWidth; x += blockWidth) {
+          for (int y2 = 0; y2 < blockHeight; y2++) {
+            int idx = (((y + y2) * imageWidth) + x) * bpp / 8;
+
+            if (!swizzle) {
+              // unswizzle
+
+              // unswizzled_image_data[idx: idx + strip_size] = image_data[ptr: ptr + strip_size];
+              for (int s = 0; s < strip_size; s++) {
+                converted_data[idx + s] = input_data[ptr + s];
+              }
+
+            }
+            else {
+              // swizzle
+
+              // unswizzled_image_data[idx: idx + strip_size] = image_data[ptr: ptr + strip_size];
+              for (int s = 0; s < strip_size; s++) {
+                converted_data[ptr + s] = input_data[idx + s];
+              }
+            }
+
+            ptr += strip_size;
+          }
+        }
+      }
+    }
+    catch (Throwable t) {
+      // premature EOF
+    }
+
+    return converted_data;
+  }
+
+  /**
+   **********************************************************************************************
+  Swizzles an image using BC swizzling (8-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] swizzleBC8Bit(byte[] input, int width, int height) {
+    return swizzleHandlerBC(input, width, height, 8, 8, 8, true);
+  }
+
+  /**
+   **********************************************************************************************
+  Un-swizzles an image using BC swizzling (8-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] unswizzleBC8Bit(byte[] input, int width, int height) {
+    return swizzleHandlerBC(input, width, height, 8, 8, 8, false);
+  }
+
+  /**
+   **********************************************************************************************
+  Swizzles an image using BC swizzling (4-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] swizzleBC4Bit(byte[] input, int width, int height) {
+    return swizzleHandlerBC(input, width, height, 8, 8, 4, true);
+  }
+
+  /**
+   **********************************************************************************************
+  Un-swizzles an image using BC swizzling (4-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] unswizzleBC4Bit(byte[] input, int width, int height) {
+    return swizzleHandlerBC(input, width, height, 8, 8, 4, false);
+  }
+
+  /**
+   **********************************************************************************************
+  Swizzles/Unswizzles an image using GameCube swizzling (4-bit/8-bit/32-bit image data)
+  Ref: https://github.com/bartlomiejduda/ReverseBox/blob/61978ec4c4373010ee3af1b5489c7482b1c0c5f2/reversebox/image/swizzling/swizzle_gamecube.py#L68
+   **********************************************************************************************
+   **/
+  private static byte[] swizzleHandlerGameCube(byte[] input_data, int width, int height, int bpp, boolean swizzle) {
+
+    int destination_index = 0;
+    byte[] converted_data = new byte[input_data.length];
+
+    if (!swizzle) {
+      // unswizzle
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          int index = get_pixel_offset_gamecube(x, y, width, bpp);
+
+          if (bpp == 4) {
+            converted_data[destination_index] = input_data[index];
+            if ((x & 1) == 1) {
+              destination_index += 1;
+            }
+          }
+          else if (bpp == 8) {
+            converted_data[destination_index] = input_data[index];
+            destination_index++;
+          }
+          else if (bpp == 32) {
+            converted_data[destination_index] = input_data[index];
+            converted_data[destination_index + 1] = input_data[index + 1];
+            converted_data[destination_index + 2] = input_data[index + 32];
+            converted_data[destination_index + 3] = input_data[index + 33];
+            destination_index += 4;
+          }
+          else {
+            int bytes_per_pixel = convert_bpp_to_bytes_per_pixel(bpp);
+
+            //converted_data[destination_index: destination_index + bytes_per_pixel] = input_data[index: index + bytes_per_pixel];
+            for (int b = 0; b < bytes_per_pixel; b++) {
+              converted_data[destination_index + b] = input_data[index + b];
+            }
+
+            destination_index += bytes_per_pixel;
+          }
+        }
+      }
+    }
+    else {
+      // swizzle
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          int index = get_pixel_offset_gamecube(x, y, width, bpp);
+
+          if (bpp == 4) {
+            converted_data[index] = input_data[destination_index];
+            if ((x & 1) == 1) {
+              destination_index += 1;
+            }
+          }
+          else if (bpp == 8) {
+            converted_data[index] = input_data[destination_index];
+            destination_index++;
+          }
+          else if (bpp == 32) {
+            converted_data[index] = input_data[destination_index];
+            converted_data[index + 1] = input_data[destination_index + 1];
+            converted_data[index + 2] = input_data[destination_index + 32];
+            converted_data[index + 3] = input_data[destination_index + 33];
+            destination_index += 4;
+          }
+          else {
+            int bytes_per_pixel = convert_bpp_to_bytes_per_pixel(bpp);
+
+            //converted_data[destination_index: destination_index + bytes_per_pixel] = input_data[index: index + bytes_per_pixel];
+            for (int b = 0; b < bytes_per_pixel; b++) {
+              converted_data[index + b] = input_data[destination_index + b];
+            }
+
+            destination_index += bytes_per_pixel;
+          }
+        }
+      }
+    }
+
+    return converted_data;
+  }
+
+  /**
+   **********************************************************************************************
+  Swizzles an image using GameCube swizzling (8-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] swizzleGameCube8Bit(byte[] input, int width, int height) {
+    return swizzleHandlerGameCube(input, width, height, 8, true);
+  }
+
+  /**
+   **********************************************************************************************
+  Un-swizzles an image using GameCube swizzling (8-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] unswizzleGameCube8Bit(byte[] input, int width, int height) {
+    return swizzleHandlerGameCube(input, width, height, 8, false);
+  }
+
+  /**
+   **********************************************************************************************
+  Swizzles an image using GameCube swizzling (4-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] swizzleGameCube4Bit(byte[] input, int width, int height) {
+    return swizzleHandlerGameCube(input, width, height, 4, true);
+  }
+
+  /**
+   **********************************************************************************************
+  Un-swizzles an image using GameCube swizzling (4-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] unswizzleGameCube4Bit(byte[] input, int width, int height) {
+    return swizzleHandlerGameCube(input, width, height, 4, false);
+  }
+
+  /**
+   **********************************************************************************************
+  Swizzles an image using GameCube swizzling (32-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] swizzleGameCube32Bit(byte[] input, int width, int height) {
+    return swizzleHandlerGameCube(input, width, height, 32, true);
+  }
+
+  /**
+   **********************************************************************************************
+  Un-swizzles an image using GameCube swizzling (32-bit)
+   **********************************************************************************************
+   **/
+  public static byte[] unswizzleGameCube32Bit(byte[] input, int width, int height) {
+    return swizzleHandlerGameCube(input, width, height, 32, false);
+  }
+
+  /**
+   **********************************************************************************************
+  
+   **********************************************************************************************
+   **/
+  private static int get_pixel_offset_gamecube(int x, int y, int width, int bpp) {
+    if (bpp == 32) {
+      return get_pixel_offset_gamecube_bpp32(x, y, width);
+    }
+    else if (bpp == 15 || bpp == 16) {
+      return get_pixel_offset_gamecube_bpp16(x, y, width);
+    }
+    else if (bpp == 8) {
+      return get_pixel_offset_gamecube_bpp8(x, y, width);
+    }
+    else if (bpp == 4) {
+      return get_pixel_offset_gamecube_bpp4(x, y, width);
+    }
+    else {
+      return -1;
+    }
+  }
+
+  /**
+   **********************************************************************************************
+  
+   **********************************************************************************************
+   **/
+  private static int get_pixel_offset_gamecube_bpp32(int x, int y, int width) {
+    int number_of_blocks_x = (3 + width) >> 2;
+    int x_block = x >> 2;
+    int y_block = y >> 2;
+    int x_pix = x & 3;
+    int y_pix = y & 3;
+    int offset = ((y_block * number_of_blocks_x + x_block) << 6) + ((y_pix << 3) + (x_pix << 1));
+    return offset;
+  }
+
+  /**
+   **********************************************************************************************
+  
+   **********************************************************************************************
+   **/
+  private static int get_pixel_offset_gamecube_bpp16(int x, int y, int width) {
+    int number_of_blocks_x = (3 + width) >> 2;
+    int x_block = x >> 2;
+    int y_block = y >> 2;
+    int x_pix = x & 3;
+    int y_pix = y & 3;
+    int offset = ((y_block * number_of_blocks_x + x_block) << 5) + ((y_pix << 3) + (x_pix << 1));
+    return offset;
+  }
+
+  /**
+   **********************************************************************************************
+  
+   **********************************************************************************************
+   **/
+  private static int get_pixel_offset_gamecube_bpp8(int x, int y, int width) {
+    int number_of_blocks_x = (7 + width) >> 3;
+    int x_block = x >> 3;
+    int y_block = y >> 2;
+    int x_pix = x & 7;
+    int y_pix = y & 3;
+    int offset = ((y_block * number_of_blocks_x + x_block) << 5) + ((y_pix << 3) + x_pix);
+    return offset;
+  }
+
+  /**
+   **********************************************************************************************
+  
+   **********************************************************************************************
+   **/
+  private static int get_pixel_offset_gamecube_bpp4(int x, int y, int width) {
+    int number_of_blocks_x = (7 + width) >> 3;
+    int x_block = x >> 3;
+    int y_block = y >> 3;
+    int x_pix = x & 7;
+    int y_pix = y & 7;
+    int offset = ((y_block * number_of_blocks_x + x_block) << 5) + ((y_pix << 2) + (x_pix >> 1));
+    return offset;
+  }
+
+  /**
+   **********************************************************************************************
+  
+   **********************************************************************************************
+   **/
+  private static int convert_bpp_to_bytes_per_pixel(int bpp) {
+    if (bpp <= 0) {
+      return -1;
+    }
+    else if (bpp <= 8) {
+      return 1;
+    }
+    else if (bpp <= 16) {
+      return 2;
+    }
+    else if (bpp <= 24) {
+      return 3;
+    }
+    else if (bpp <= 32) {
+      return 4;
+    }
+    else {
+      return -1;
+    }
+  }
+
+  /**
   **********************************************************************************************
   
   **********************************************************************************************

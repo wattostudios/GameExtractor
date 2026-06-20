@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -42,7 +43,8 @@ public class Plugin_MDT_MECC extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Amazon Trail 3rd Edition");
+    setGames("Amazon Trail: 3rd Edition",
+        "The American Girls Premiere: 2nd Edition");
     setExtensions("mdt"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -148,7 +150,7 @@ public class Plugin_MDT_MECC extends ArchivePlugin {
         String fileType = fm.readNullString(8);
 
         // 4 - File ID?
-        fm.skip(4);
+        int fileID = IntConverter.changeFormat(fm.readInt());
 
         // 4 - File Length
         int length = IntConverter.changeFormat(fm.readInt());
@@ -158,7 +160,8 @@ public class Plugin_MDT_MECC extends ArchivePlugin {
         int offset = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkOffset(offset, arcSize);
 
-        String filename = Resource.generateFilename(i) + "." + fileType;
+        //String filename = Resource.generateFilename(i) + "." + fileType;
+        String filename = fileID + "." + fileType;
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

@@ -116,10 +116,17 @@ website as well.
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+Version 3.16.0006
+[I] Small incremental version, with the intention of primarily adding more supported games.
+[+] MOD, XM, and S3M audio can now be played
+[+] Added support for more console image swizzling and palette formats
+[B] GameCube audio in FSB archives can now be extracted and played using VGMStream
+[B] Fixed a bug where the BMP scanner would miss every second image in an archive
+
 Version 3.16.0005
 [I] Small incremental version, with the intention of primarily adding more supported games.
 [+] Added a scanner for finding ZLib-compressed files in unknown archives
-[+] You can now show navigate through individual meshes in a combined model
+[+] You can now navigate through individual meshes in a combined model
 [A] The PNG scanner can now find files with a CgBI header in them
 [B] ETC1 image decompression now works correctly
 [B] Saving an archive to a parent directory by editing the filename now works correctly

@@ -55,7 +55,7 @@ import javax.swing.JFrame;
 - *Archive where you can replace images in an archive, with conversion if it's not the right format (short method) - Plugin_RESOURCES_2
 - Archive where you can replace files in an archive, and if it's not the right format, it will convert the image format on replace (Plugin_POD_POD6 (audio and image) and Plugin_XAF_XAF (image) and Plugin_BNK_XBNK (audio) and Plugin_BAG_6 (image) and Plugin_BAG)
 - Archive where you can replace images in an archive, and if it's not the right format, it will convert the image format (AND where a file contains multiple frames) (Plugin_BIG_BIGF)
-- Archive where filenames are read from an external file list, and matched with hashes stored in the archive (RSDK_RSDK)
+- Archive where filenames are read from an external file list, and matched with hashes stored in the archive (PCDAT (for Integers) or FAC_FARC (for Longs) or RSDK_RSDK (for dynamic hashing))
 - Archive where, when saving, a directory file is written, as well as multiple other files, which are all then compressed (LHD)
 - Archive where some of the files are extracted to a temporary file as part of the Read process - Plugin_STK
 - Archive plugin that calls the Scanner to look for ZLib files, and then runs the file type identifier on it, with customized file types that it looks for - Plugin_OBB_2 . SHOULD ONLY BE USED IN RARE CASES, AND MUST MATCH THE HEADER EXACTLY!!!
@@ -100,6 +100,13 @@ import javax.swing.JFrame;
 - FaceCount
 - VertexCount
 - NormalCount
+- AudioFrequency
+- AudioBitRate
+- AudioChannels
+- AudioSigned
+- AudioCodec
+
+TemporarySettings.set("ForceVerticalImageFlip",true) set in an ArchivePlugin will cause Viewer_DDS_DDS to flip the images vertically when loading.
 
 
 // COMMON ARCHIVE PLUGINS (Supported Game Engines, for example)...
@@ -432,7 +439,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **********************************************************************************************
   **/
   public static boolean isFullVersion() {
-      return false;
+    return false;
   }
 
   /**
@@ -1350,7 +1357,6 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
   **********************************************************************************************
   **/
   public void javafxCheck() {
-
 
     try {
       new javafx.embed.swing.JFXPanel();

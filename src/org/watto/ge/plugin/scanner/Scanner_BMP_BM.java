@@ -74,7 +74,7 @@ public class Scanner_BMP_BM extends ScannerPlugin {
         return null;
       }
 
-      fm.skip(length - 10);
+      fm.skip(length - 34);
 
       //path,id,name,offset,length,compressed
       return new Resource(".bmp", offset, length);

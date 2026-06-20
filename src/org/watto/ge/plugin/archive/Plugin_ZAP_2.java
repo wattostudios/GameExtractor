@@ -1,31 +1,30 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Archive;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Deflate;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -52,9 +51,12 @@ public class Plugin_ZAP_2 extends ArchivePlugin {
     setExtensions("zap");
     setPlatforms("PC");
 
-    //setFileTypes("","",
-    //             "",""
-    //             );
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("texture", "Texture Image", FileType.TYPE_IMAGE));
+
+    setTextPreviewExtensions("gamestr", "feel", "set", "cginc", "hlsl", "hlslinc", "ka", "skeletonpreset", "scb", "tmpdata", "markers"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -94,8 +96,6 @@ public class Plugin_ZAP_2 extends ArchivePlugin {
       //      - Uncompressed files MUST know their LENGTH
 
       addFileTypes();
-
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
       realNumFiles = 0;
@@ -141,11 +141,11 @@ public class Plugin_ZAP_2 extends ArchivePlugin {
 
     // 2 - Number Of Sub-Folders in this Folder
     short numSubDirs = fm.readShort();
-    FieldValidator.checkNumFiles(numSubDirs);
+    FieldValidator.checkNumFiles(numSubDirs + 1); // +1 to allow zero sub-directories in this directory
 
     // 2 - Number Of Files in this Folder
     short numFilesInDir = fm.readShort();
-    FieldValidator.checkNumFiles(numFilesInDir);
+    FieldValidator.checkNumFiles(numFilesInDir + 1); // +1 to allow zero files in this directory
 
     // 4 - Offset to the FILES DIRECTORY that contains the details for the files in this folder (ignore if numFiles=0)
     long filesOffset = fm.readInt();
@@ -153,9 +153,10 @@ public class Plugin_ZAP_2 extends ArchivePlugin {
 
     // for each sub-folder in this folder
     long[] subDirOffsets = new long[numSubDirs];
+    long relativeOffset = fm.getOffset();
     for (int i = 0; i < numSubDirs; i++) {
       // 4 - Folder Name Offset (relative to the start of the first field of this loop)
-      long subDirOffset = fm.readInt();
+      long subDirOffset = fm.readInt() + relativeOffset;
       FieldValidator.checkOffset(subDirOffset, arcSize);
       subDirOffsets[i] = subDirOffset;
     }
@@ -195,13 +196,15 @@ public class Plugin_ZAP_2 extends ArchivePlugin {
   **********************************************************************************************
   **/
   public void readFiles(Resource[] resources, FileManipulator fm, String parentDirName, File path, long arcSize, int numFilesInDir) throws Exception {
-    long relOffset = fm.getOffset();
+    long relativeOffset = fm.getOffset();
+
+    ExporterPlugin exporter = Exporter_Deflate.getInstance();
 
     // for each file in this folder
     long[] fileOffsets = new long[numFilesInDir];
     for (int i = 0; i < numFilesInDir; i++) {
       // 4 - Offset to file entry (relative to the start of the first field for this folder)
-      long fileOffset = fm.readInt() + relOffset;
+      long fileOffset = fm.readInt() + relativeOffset;
       FieldValidator.checkOffset(fileOffset, arcSize);
       fileOffsets[i] = fileOffset;
     }
@@ -233,8 +236,18 @@ public class Plugin_ZAP_2 extends ArchivePlugin {
       // 4 - File Type Hash?
       fm.skip(8);
 
-      //path,name,offset,length,decompLength,exporter
-      resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength);
+      if (length == decompLength) {
+        // uncompressed
+
+        //path,name,offset,length,decompLength,exporter
+        resources[realNumFiles] = new Resource(path, filename, offset, length);
+      }
+      else {
+        // compressed
+
+        //path,name,offset,length,decompLength,exporter
+        resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+      }
 
       TaskProgressManager.setValue(realNumFiles);
       realNumFiles++;

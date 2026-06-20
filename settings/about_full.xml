@@ -5,7 +5,7 @@
 <img src="images/WSCreditsPanel/aboutLogo.gif" /><br />
 
 <font color="green">Game Extractor - Extensible Game Archive Editor</font><br />
-<font color="orange">Created and Developed by wattostudios (c) 2002-2025<br />
+<font color="orange">Created and Developed by wattostudios (c) 2002-2026<br />
 <u>https://www.watto.org/extract</u></font><br />
 
 <br /><br />
@@ -63,6 +63,7 @@
 <li>lz4-java</li>
 <li>lzo-java</li>
 <li>LZSS Compression Routines for Java</li>
+<li>micromod/ibxm</li>
 <li>noex-tools</li>
 <li>puyotools</li>
 <li>python-fsb5</li>
@@ -114,6 +115,7 @@
 <ul>
 <li>berry (Russian)</li>
 <li>Lucas Oliveira (Portugese)</li>
+<li>Michael Pilz (German)</li>
 </ul>
 
 <br />
@@ -127,7 +129,6 @@
 <ul>
 <li>The Game Developers - for making games great enough that people want to play them, modify them, and extract them.</li>
 <li>All the people who purchased this product - I hope you like it, and that you get lots of benefit from it!</li>
-<li>Sarah, Belle, and Charlie - the special people in my life, who make the memories I cherish so dearly.</li>
 <li>GitHub and SourceForge - for hosting the Basic Version and source code downloads, reducing the traffic on my website</li>
 </ul>
 

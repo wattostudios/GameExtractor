@@ -23,6 +23,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 
 /**
 **********************************************************************************************
@@ -246,8 +247,9 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
       if (paletteLength > 0) {
         // ...
         // skip over the image data, so we can read the color palettes
-
-        fm.seek(imageDataOffset + imageDataLength);
+        //fm.seek(imageDataOffset + imageDataLength);
+        fm.seek(imageDataOffset);
+        byte[] imageBytes = fm.readBytes(imageDataLength);
 
         int numberOfPalettes = paletteLength / (colorEntries * colorSize);
         int singlePaletteSize = paletteLength / numberOfPalettes;
@@ -301,6 +303,10 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
           }
         }
 
+        fm.close();
+        fm = new FileManipulator(new ByteBuffer(imageBytes));
+        imageDataOffset = 0;
+
       }
 
       // ...
@@ -313,6 +319,7 @@ public class Viewer_TM2_TIM2_4 extends ViewerPlugin {
         imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
         imageResource.addProperty("ImageFormat", "8BitPaletted");
         imageResource = ImageFormatReader.doubleAlpha(imageResource);
+        //imageResource.setPixels(ImageSwizzler.swizzlePS28BitSuba(imageResource.getImagePixels(), width, height));
       }
       else if (bitsPerPixel == 4) {
         // Indexed

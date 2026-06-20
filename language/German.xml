@@ -1,0 +1,1647 @@
+<languagePack>
+	<name>German</name>
+	<version>3.16.0006</version>
+	<author>
+		<name>Michael Pilz</name>
+		<email>pilzmichael2014@gmail.com</email>
+		<website>http://www.watto.org/extract</website>
+	</author>
+	
+	<texts>
+	
+	
+		<!-- REQUIRED -->
+		
+		
+		<lang code="ProgramName" value="Game Extractor" />
+		<lang code="ProgramName_Free" value="Game Extractor (Basisversion)" />
+		
+		<lang code="Welcome" value="Willkommen bei Game Extractor!" />
+		
+		<lang code="PopupDialog_Error_Title" value="Fehler" />
+		<lang code="PopupDialog_Confirm_Title" value="Bestätigen" />
+		<lang code="PopupDialog_Message_Title" value="Nachricht" />
+		<lang code="WSPopupDialogWrapLabel_ShowLanguagePackOutdatedError_Text" value="Das Sprachpaket ist veraltet - bitte laden Sie ein neues herunter!" />
+		<lang code="PopupDialog_HidableCheckBox_Message" value="Diese Nachricht erneut anzeigen?" />
+		
+		<lang code="WSButton_OK_Text" value="OK" />
+		<lang code="WSButton_OK_Text_Small" value="OK" />
+		<lang code="WSButton_OK_Tooltip" value="OK" />
+		<lang code="WSButton_Yes_Text" value="Ja" />
+		<lang code="WSButton_Yes_Text_Small" value="Ja" />
+		<lang code="WSButton_Yes_Tooltip" value="Ja" />
+		<lang code="WSButton_No_Text" value="Nein" />
+		<lang code="WSButton_No_Text_Small" value="Nein" />
+		<lang code="WSButton_No_Tooltip" value="Nein" />
+		
+		<lang code="WSSplashDialog_Plugins" value="Plugins werden geladen" />
+		<lang code="WSSplashDialog_ConstructInterface" value="Benutzeroberfläche wird erstellt" />
+		
+		
+		<!-- WSProgressDialog -->
+		
+		
+		<lang code="WSButton_CloseProgress_Text" value="Popup schließen" />
+		
+		
+		<!-- WSComboButton -->
+		
+		
+		<lang code="WSButton_WSComboButtonArrow_Text" value="" />
+		
+	
+		<!-- WSFontChooser -->
+		
+		
+		<lang code="WSCheckBox_FontAllCaps_Text" value="Großbuchstaben" />
+		<lang code="WSCheckBox_FontDoubleStrikethrough_Text" value="Doppelt durchgestrichen" />
+		<lang code="WSCheckBox_FontEmboss_Text" value="Prägen" />
+		<lang code="WSCheckBox_FontEngrave_Text" value="Eingravieren" />
+		<lang code="WSCheckBox_FontHidden_Text" value="Ausgeblendet" />
+		<lang code="WSCheckBox_FontOutline_Text" value="Kontur" />
+		<lang code="WSCheckBox_FontShadow_Text" value="Schatten" />
+		<lang code="WSCheckBox_FontSmallCaps_Text" value="Kapitälchen" />
+		<lang code="WSCheckBox_FontStrikethrough_Text" value="Durchgestrichen" />
+		<lang code="WSCheckBox_FontSubscript_Text" value="Tiefgestellt" />
+		<lang code="WSCheckBox_FontSuperscript_Text" value="Hochgestellt" />
+		<lang code="WSLabel_FontColorLabel_Text" value="Farbe" />
+		<lang code="WSLabel_FontNameLabel_Text" value="Schriftart" />
+		<lang code="WSLabel_FontPreview_Text" value="Vorschau Schriftstil" />
+		<lang code="WSLabel_FontSizeLabel_Text" value="Größe" />
+		<lang code="WSLabel_FontStyleLabel_Text" value="Stil" />
+		<lang code="WSLabel_FontUnderlineColorLabel_Text" value="Unterstreichungsfarbe" />
+		<lang code="WSLabel_FontUnderlineStyleLabel_Text" value="Unterstreichungsstil" />
+		<lang code="WSFontChooser_FontStyle_Bold" value="Fett" />
+		<lang code="WSFontChooser_FontStyle_BoldItalic" value="Fett Kursiv" />
+		<lang code="WSFontChooser_FontStyle_Italic" value="Kursiv" />
+		<lang code="WSFontChooser_FontStyle_Plain" value="Standard" />
+		<lang code="WSFontChooser_FontStyle_Bold Italic" value="Fett Kursiv" />
+		
+		
+		<!-- WSSmallColorChooser -->
+		
+
+		<lang code="WSButton_ColorMoreColors_Text" value="Mehr Farben..." />
+		
+		<lang code="WSColorChooser_Color_0,0,0" value="Schwarz" />
+		<lang code="WSColorChooser_Color_128,0,0" value="Dunkelrot" />
+		<lang code="WSColorChooser_Color_255,0,0" value="Rot" />
+		<lang code="WSColorChooser_Color_255,0,255" value="Magenta" />
+		<lang code="WSColorChooser_Color_255,153,204" value="Rosa" />
+		<lang code="WSColorChooser_Color_153,51,0" value="Dunkelorange" />
+		<lang code="WSColorChooser_Color_255,102,0" value="Orange" />
+		<lang code="WSColorChooser_Color_255,153,0" value="Hellorange" />
+		<lang code="WSColorChooser_Color_255,204,0" value="Pfirsich" />
+		<lang code="WSColorChooser_Color_255,204,153" value="Aprikose" />
+		<lang code="WSColorChooser_Color_51,51,0" value="Dunkeloliv" />
+		<lang code="WSColorChooser_Color_128,128,0" value="Oliv" />
+		<lang code="WSColorChooser_Color_153,204,0" value="Helloliv" />
+		<lang code="WSColorChooser_Color_255,255,0" value="Gelb" />
+		<lang code="WSColorChooser_Color_255,255,153" value="Hellgelb" />
+		<lang code="WSColorChooser_Color_0,51,0" value="Dunkelaqua" />
+		<lang code="WSColorChooser_Color_0,128,0" value="Dunkelgrün" />
+		<lang code="WSColorChooser_Color_51,153,102" value="Aqua" />
+		<lang code="WSColorChooser_Color_0,255,0" value="Grün" />
+		<lang code="WSColorChooser_Color_204,255,204" value="Hellgrün" />
+		<lang code="WSColorChooser_Color_0,51,102" value="Dunkelozean" />
+		<lang code="WSColorChooser_Color_0,128,128" value="Ozean" />
+		<lang code="WSColorChooser_Color_51,204,204" value="Hellozean" />
+		<lang code="WSColorChooser_Color_0,255,255" value="Cyan" />
+		<lang code="WSColorChooser_Color_204,255,204" value="Hellcyan" />
+		<lang code="WSColorChooser_Color_0,0,128" value="Dunkelblau" />
+		<lang code="WSColorChooser_Color_0,0,255" value="Blau" />
+		<lang code="WSColorChooser_Color_51,102,255" value="Hellblau" />
+		<lang code="WSColorChooser_Color_0,204,255" value="Himmelblau" />
+		<lang code="WSColorChooser_Color_153,204,255" value="Helles Himmelblau" />
+		<lang code="WSColorChooser_Color_51,51,153" value="Violett" />
+		<lang code="WSColorChooser_Color_102,102,153" value="Hellviolett" />
+		<lang code="WSColorChooser_Color_128,0,128" value="Lila" />
+		<lang code="WSColorChooser_Color_153,51,102" value="Kastanienbraun" />
+		<lang code="WSColorChooser_Color_204,153,255" value="Helllila" />
+		<lang code="WSColorChooser_Color_51,51,51" value="Nachtgrau" />
+		<lang code="WSColorChooser_Color_128,128,128" value="Dunkelgrau" />
+		<lang code="WSColorChooser_Color_153,153,153" value="Grau" />
+		<lang code="WSColorChooser_Color_192,192,192" value="Hellgrau" />
+		<lang code="WSColorChooser_Color_255,255,255" value="Weiß" />
+		
+		<lang code="WSButton_ColorChooserClosePopup_Text" value="Farbe ändern" />
+		<lang code="WSLabel_ColorInfoPanelName_Text" value="" />
+
+		
+		<!-- WSMonthCalendar -->
+		
+		
+		<lang code="WSButton_NextMonth_Text" value=">" />
+		<lang code="WSButton_PreviousMonth_Text" value="<" />
+		
+		<lang code="WSButton_NextYear_Text" value=">>" />
+		<lang code="WSButton_PreviousYear_Text" value="<<" />
+		
+		<lang code="WSLabel_MondayHeaderSmall_Text" value="M" />
+		<lang code="WSLabel_TuesdayHeaderSmall_Text" value="D" />
+		<lang code="WSLabel_WednesdayHeaderSmall_Text" value="M" />
+		<lang code="WSLabel_ThursdayHeaderSmall_Text" value="D" />
+		<lang code="WSLabel_FridayHeaderSmall_Text" value="F" />
+		<lang code="WSLabel_SaturdayHeaderSmall_Text" value="S" />
+		<lang code="WSLabel_SundayHeaderSmall_Text" value="S" />
+		
+		<lang code="MonthJanuary" value="Januar" />
+		<lang code="MonthFebruary" value="Februar" />
+		<lang code="MonthMarch" value="März" />
+		<lang code="MonthApril" value="April" />
+		<lang code="MonthMay" value="Mai" />
+		<lang code="MonthJune" value="Juni" />
+		<lang code="MonthJuly" value="Juli" />
+		<lang code="MonthAugust" value="August" />
+		<lang code="MonthSeptember" value="September" />
+		<lang code="MonthOctober" value="Oktober" />
+		<lang code="MonthNovember" value="November" />
+		<lang code="MonthDecember" value="Dezember" />
+		
+		
+		<!-- WSGradientColorChooser -->
+		
+		
+		<lang code="WSTextField_GradientColorChooserBlueValue_Label" value="Blau" />
+		<lang code="WSTextField_GradientColorChooserGreenValue_Label" value="Grün" />
+		<lang code="WSTextField_GradientColorChooserRedValue_Label" value="Rot" />
+		<lang code="WSTextField_GradientColorChooserHexValue_Label" value="Hex" />
+		
+		
+		<!-- CUSTOM -->
+		
+		<lang code="" value="" />
+		
+		<lang code="AllFiles" value="Alle Dateien" />
+		<lang code="ColumnValue" value="Spaltenwert" />
+		<lang code="Description_ArchivePlugin" value="Ein Archiv-Plugin kann Archive lesen und schreiben." />
+		<lang code="Description_Author" value="Dieses Skript wurde geschrieben von " />
+		<lang code="Description_DefaultExtensions" value="Die von diesem Plugin unterstützten Dateiendungen sind: " />
+		<lang code="Description_DefaultGames" value="Die Spiele, für die dieses Plugin verwendet wird, sind: " />
+		<lang code="Description_DefaultPlatforms" value="Die Plattformen, die dieses Plugin analysieren kann, sind: " />
+		<lang code="Description_DirectoryListPanel" value="Verzeichnislisten zeigen dem Benutzer Dateien und Ordner an, um das Suchen und Auswählen von Dateien zu ermöglichen." />
+		<lang code="Description_ExporterPlugin" value="Exporter sind für das Lesen und Schreiben einzelner Dateien eines Archivs zuständig. Jegliche Komprimierung und Verschlüsselung wird von diesen Plugins durchgeführt." />
+		<lang code="Description_FileListExporterPlugin" value="Dateilisten-Exporter können eine Liste der im Archiv enthaltenen Dateien speichern." />
+		<lang code="Description_FileListPanel" value="Dateilisten regeln die Art und Weise, wie Dateien in einem Archiv angezeigt werden." />
+		<lang code="Description_ImplicitReplaceOperation" value="Automatisches Ersetzen" />
+		<lang code="Description_NoDefaultExtensions" value="Dieses Plugin unterstützt standardmäßig keine bestimmten Dateiendungen." />
+		<lang code="Description_NoDefaultGames" value="Dieses Plugin ist universell einsetzbar und kann für eine Reihe verschiedener Spiele verwendet werden." />
+		<lang code="Description_NoDefaultPlatforms" value="Dieses Plugin unterstützt standardmäßig keine bestimmten Plattformen." />
+		<lang code="Description_OptionsPlugin" value="Optionengruppen sind Plugins, die eine Gruppe konfigurierbarer Einstellungen enthalten." />
+		<lang code="Description_PluginDisabled" value="Dieses Plugin ist deaktiviert." />
+		<lang code="Description_PluginEnabled" value="Dieses Plugin ist aktiviert." />
+		<lang code="Description_StandardFileFormat" value="Das von diesem Plugin gelesene Dateiformat ist ein Standard- oder allgemein gebräuchliches Format." />
+		<lang code="Description_NonStandardFileFormat" value="Das von diesem Plugin gelesene Dateiformat ist ein proprietäres Format." />
+		<lang code="Description_ReadOperation" value="Lesen" />
+		<lang code="Description_RenameOperation" value="Umbenennen" />
+		<lang code="Description_RenamerPlugin" value="Renamer-Plugins können den Namen einer Datei in einem Archiv ändern." />
+		<lang code="Description_ReplaceOperation" value="Ersetzen" />
+		<lang code="Description_ScannerPlugin" value="Scanner können ein Archiv durchsuchen und grundlegende Dateien wie Sounds und Bilder lokalisieren." />
+		<lang code="Description_Script" value="Ein Skript ist eine Datei, die beschreibt, wie ein Archiv zu lesen ist." />
+		<lang code="Description_ScriptArchivePlugin" value="Ein Skript-Reader kann ein Archiv mithilfe einer Skriptdatei lesen." />
+		<lang code="Description_SidePanel" value="Seitenleisten sind die Bedienfelder, die auf der rechten Seite von Game Extractor erscheinen und die ausführbaren Aufgaben steuern." />
+		<lang code="Description_SupportedOperations" value="Die folgenden Operationen werden unterstützt: " />
+		<lang code="Description_Version" value="Das Skript hat die Version " />
+		<lang code="Description_ViewerPlugin" value="Vorschau-Plugins können eine Vorschau einer Datei in einem Archiv anzeigen. Einige Vorschau-Plugins werden auch zum Konvertieren von Bildern in andere Formate und zum Erstellen von Vorschaubildern (Thumbnails) verwendet." />
+		<lang code="Description_WriteOperation" value="Speichern" />
+		<lang code="DragDrop_Add" value="Dateien hinzufügen" />
+		<lang code="DragDrop_Ask" value="Menü anzeigen" />
+		<lang code="DragDrop_ReplaceCurrent" value="Datei am Cursor ersetzen" />
+		<lang code="DragDrop_ReplaceMatching" value="Übereinstimmende Dateien ersetzen" />
+		<lang code="Extension" value="Dateiendung" />
+		<lang code="FileListTree_RootNodeLabel" value="Archiv" />
+		<lang code="Game" value="Spiel" />
+		<lang code="HexEditor_BinaryValue" value="Binär" />
+		<lang code="HexEditor_ByteValue" value="Byte" />
+		<lang code="HexEditor_CharValue" value="ASCII-String" />
+		<lang code="HexEditor_DoubleValue" value="Double (8 Bytes)" />
+		<lang code="HexEditor_FloatValue" value="Float (4 Bytes)" />
+		<lang code="HexEditor_HexValue" value="Hex" />
+		<lang code="HexEditor_IntValue" value="Integer (4 Bytes)" />
+		<lang code="HexEditor_LongValue" value="Long (8 Bytes)" />
+		<lang code="HexEditor_ShortValue" value="Short (2 Bytes)" />
+		<lang code="HexEditor_TimestampValue" value="Zeitstempel" />
+		<lang code="HexEditor_UnicodeValue" value="Unicode-String" />
+		<lang code="Information_AllowedFunctions" value="Operationen" />
+		<lang code="Information_ArchiveSize" value="Archivgröße" />
+		<lang code="Information_BasePath" value="Basispfad" />
+		<lang code="Information_NumSelectedFiles" value="Anzahl ausgewählt" />
+		<lang code="Information_NumberOfFiles" value="Anzahl der Dateien" />
+		<lang code="Information_PluginClass" value="Plugin-Typ" />
+		<lang code="Information_PluginName" value="Plugin-Name" />
+		<lang code="Information_SupportedExtensions" value="Dateiendungen" />
+		<lang code="Information_SupportedGames" value="Spiele" />
+		<lang code="Information_SupportedPlatforms" value="Plattformen" />
+		<lang code="Name" value="Plugin-Name" />
+		<lang code="PluginsOnlyInFullVersion" value="Diese Plugins sind nur in Game Extractor (Vollversion) verfügbar. Für weitere Informationen besuchen Sie die Website unter http://www.watto.org/extract" />
+		<lang code="Options_Appearance_SidePanel_Options_Appearance_Main_Text" value="Erscheinungsbild" />
+		<lang code="Options_Directories_SidePanel_Options_Directories_Main_Text" value="Verzeichnisse" />
+		<lang code="Options_General_SidePanel_Options_General_Main_Text" value="Allgemein" />
+		<lang code="Options_HexEditorFields_SidePanel_Options_HexEditorFields_Main_Text" value="Hex-Viewer-Felder" />
+		<lang code="Options_OpeningArchives_SidePanel_Options_OpeningArchives_Main_Text" value="Archive öffnen und speichern" />
+		<lang code="Options_Popups_SidePanel_Options_Popups_Main_Text" value="Popups" />
+		<lang code="Options_PreviewingFiles_SidePanel_Options_PreviewingFiles_Main_Text" value="Dateivorschau" />
+		<lang code="Options_Scanners_SidePanel_Options_Scanners_Main_Text" value="Scanner" />
+		<lang code="Options_TableColumns_SidePanel_Options_TableColumns_Main_Text" value="Tabellenspalten" />
+		<lang code="Options_ToolbarButtons_SidePanel_Options_ToolbarButtons_Main_Text" value="Symbolleisten-Schaltflächen" />
+		<lang code="Plugin_Archive_Name" value="Archive" />
+		<lang code="Plugin_DirectoryList_Name" value="Verzeichnislisten" />
+		<lang code="Plugin_Exporter_Name" value="Datei-Exporter" />
+		<lang code="Plugin_FileListExporter_Name" value="Dateilisten-Exporter" />
+		<lang code="Plugin_FileList_Name" value="Dateilisten" />
+		<lang code="Plugin_OptionGroup_Name" value="Optionengruppen" />
+		<lang code="Plugin_Renamer_Name" value="Renamer" />
+		<lang code="Plugin_Scanner_Name" value="Scanner" />
+		<lang code="Plugin_ScriptArchive_Name" value="Skript-Reader" />
+		<lang code="Plugin_Script_Name" value="Skripte" />
+		<lang code="Plugin_SidePanel_Name" value="Seitenleisten" />
+		<lang code="Plugin_Viewer_Name" value="Vorschau-Plugins" />
+		<lang code="PopupDialog_Error_Title" value="Fehler" />
+		<lang code="PopupDialog_Message_Title" value="Nachricht" />
+		<lang code="Progress_AddingFiles" value="Dateien werden hinzugefügt" />
+		<lang code="Progress_ConvertingFiles" value="Dateien werden konvertiert" />
+		<lang code="Progress_DecompressingArchive" value="Archiv wird entpackt" />
+		<lang code="Progress_DecompressingFiles" value="Dateien werden entpackt" />
+		<lang code="Progress_AddingFiles_Undo" value="Hinzugefügte Dateien werden entfernt" />
+		<lang code="Progress_CuttingArchive" value="Datei wird geschnitten" />
+		<lang code="Progress_ExportingFiles" value="Dateien werden exportiert" />
+		<lang code="Progress_LoadingThumbnails" value="Vorschaubilder werden geladen" />
+		<lang code="Progress_PerformingCalculations" value="Berechnungen werden durchgeführt" />
+		<lang code="Progress_PleaseWait" value="Bitte warten" />
+		<lang code="Progress_ReadingArchive" value="Archiv wird gelesen" />
+		<lang code="Progress_RemovingFiles" value="Dateien werden entfernt" />
+		<lang code="Progress_RemovingFiles_Undo" value="Entfernte Dateien werden wieder hinzugefügt" />
+		<lang code="Progress_RenamingFiles" value="Dateien werden umbenannt" />
+		<lang code="Progress_RenamingFiles_Undo" value="Namensänderung wird rückgängig gemacht" />
+		<lang code="Progress_ReplacingFiles" value="Dateien werden ersetzt" />
+		<lang code="Progress_ReplacingFiles_Undo" value="Ersetzung wird rückgängig gemacht" />
+		<lang code="Progress_ScanningArchive" value="Nach Dateien wird gescannt" />
+		<lang code="Progress_SearchingFiles" value="Nach Dateien wird gesucht" />
+		<lang code="Progress_WritingArchive" value="Archiv wird gespeichert" />
+		<lang code="Progress_WritingDirectory" value="Verzeichnis wird geschrieben" />
+		<lang code="Progress_WritingFiles" value="Dateien werden gespeichert" />
+		<lang code="ScriptError_BlankLineNotAllowed" value="Leerzeilen sind nicht erlaubt." />
+		<lang code="ScriptError_ClosingXMLNotAtEnd" value="Der schließende Tag </BMS> darf nur in der letzten Zeile stehen." />
+		<lang code="ScriptError_CommandUnknown" value="Der Befehl ist unbekannt." />
+		<lang code="ScriptError_DoNotMatching" value="Mindestens ein WHILE-Befehl fehlt." />
+		<lang code="ScriptError_ElseWithoutIf" value="Es gibt keinen passenden IF-Befehl für diesen ELSE-Befehl." />
+		<lang code="ScriptError_EndIfWithoutIf" value="Es gibt keinen passenden IF-Befehl für diesen ENDIF-Befehl." />
+		<lang code="ScriptError_EndMarkerNotAtEnd" value="Das Endzeichen ';' ist nur am Ende der Zeile erlaubt." />
+		<lang code="ScriptError_EndMarkerUsedInLine" value="Das Endzeichen ';' ist nur am Ende der Zeile erlaubt." />
+		<lang code="ScriptError_FileNotOpened" value="Die Datei ist nicht geöffnet." />
+		<lang code="ScriptError_ForNotMatching" value="Mindestens ein NEXT-Befehl fehlt." />
+		<lang code="ScriptError_IfNotMatching" value="Mindestens ein ENDIF-Befehl fehlt." />
+		<lang code="ScriptError_MissingEndMarker" value="Das Endzeichen ';' fehlt in dieser Zeile." />
+		<lang code="ScriptError_MissingVariablesInLine" value="Es sind nicht genügend Parameter in dieser Zeile vorhanden." />
+		<lang code="ScriptError_MultipleSpaces" value="Mehrere Leerzeichen zwischen Wörtern sind nicht erlaubt." />
+		<lang code="ScriptError_NextWithoutFor" value="Es gibt keinen passenden FOR-Befehl für diesen NEXT-Befehl." />
+		<lang code="ScriptError_NoSpaceBeforeEndMarker" value="Es darf kein Leerzeichen vor dem Endzeichen ';' stehen." />
+		<lang code="ScriptError_OpeningXMLNotAtStart" value="Der öffnende Tag <BMS ... > darf nur in der ersten Zeile stehen." />
+		<lang code="ScriptError_SpaceAtStart" value="Leerzeichen am Zeilenanfang sind nicht erlaubt." />
+		<lang code="ScriptError_TooManyVariablesInLine" value="Es sind zu viele Parameter in dieser Zeile vorhanden." />
+		<lang code="ScriptError_ValueNotAllowed" value="Der Parameter entspricht keinem der erlaubten Werte." />
+		<lang code="ScriptError_VariableExpected" value="Die Variable existiert nicht." />
+		<lang code="ScriptError_VariableOrNumberExpected" value="Die Variable existiert nicht oder der Wert ist keine Zahl." />
+		<lang code="ScriptError_WhileWithoutDo" value="Es gibt keinen passenden DO-Befehl für diesen WHILE-Befehl." />
+		<lang code="ScriptError_XMLNotMatching" value="Sie müssen entweder beide oder keine der Tags <BMS ... > und </BMS> angeben." />
+		<lang code="SidePanel_DirectoryList_SidePanel_DirectoryList_Text" value="Archiv-Steuerung (Verzeichnisliste)" />
+		<lang code="SidePanel_RenameFile_SidePanel_RenameFile_Text" value="Datei-Umbenenner" />
+		<lang code="SidePanel_About_SidePanel_About_Text" value="Über Game Extractor" />
+		<lang code="SidePanel_FileListExporter_SidePanel_FileListExporter_Text" value="Dateiliste exportieren" />
+		<lang code="SidePanel_Help_SidePanel_Help_Text" value="Hilfe" />
+		<lang code="SidePanel_HexEditor_SidePanel_HexEditor_Text" value="Hex-Editor" />
+		<lang code="SidePanel_Information_SidePanel_Information_Text" value="Archiv-Informationen" />
+		<lang code="SidePanel_Options_SidePanel_Options_Text" value="Programmoptionen und Einstellungen" />
+		<lang code="SidePanel_PluginList_SidePanel_PluginList_Text" value="Liste der Plugins" />
+		<lang code="SidePanel_Preview_SidePanel_Preview_Text" value="Dateivorschau" />
+		<lang code="SidePanel_ScriptBuilder_SidePanel_ScriptBuilder_Text" value="Skript-Builder" />
+		
+		<lang code="Task_AddFiles" value="&number& Dateien hinzugefügt" />
+		<lang code="Task_RemoveFiles" value="&number& Dateien entfernt" />
+		<lang code="Task_RenameFiles_NoSearch" value="&number& Dateien umbenannt mit Wert &value&" />
+		<lang code="Task_RenameFiles_WithSearch" value="&number& Dateien umbenannt mit Suche &search& und Wert &value&" />
+		<lang code="Task_ReplaceMatchingFiles" value="&number& Dateien ersetzt" />
+		<lang code="Task_ReplaceSelectedFiles" value="&number& Dateien ersetzt" />
+		<lang code="Unknown" value="Unbekannt" />
+		<lang code="File" value="Datei" />
+		<lang code="WSButton_About_Text" value="Über" />
+		<lang code="WSButton_About_Tooltip" value="Über Game Extractor und seinen Autor." />
+		<lang code="WSButton_AddResources_Text" value="Dateien hinzufügen" />
+		<lang code="WSButton_AddResources_Tooltip" value="Fügen Sie Dateien von Ihrem Computer in das Archiv ein." />
+		<lang code="WSButton_AudioPreview_Pause_Text" value="Pause" />
+		<lang code="WSButton_AudioPreview_Play_Text" value="Wiedergabe" />
+		<lang code="WSButton_AudioPreview_Stop_Text" value="Stopp" />
+		<lang code="WSButton_Choose_Text" value="Auswählen" />
+		<lang code="WSButton_Choose_Tooltip" value="Auswählen..." />
+		<lang code="WSButton_CloseProgram_Text" value="Programm schließen" />
+		<lang code="WSButton_CloseProgram_Tooltip" value="Schließt Game Extractor." />
+		<lang code="WSButton_ComboArrowButton_Text" value="" />
+		<lang code="WSButton_ComboArrowButton_Tooltip" value="Auswählen..." />
+		<lang code="WSButton_CurrentFont_Text" value="Auswählen" />
+		<lang code="WSButton_CurrentFont_Tooltip" value="Die vom Programm verwendete Schriftart." />
+		<lang code="WSButton_CutArchive_Tooltip" value="Kopiert bestimmte Informationen aus einer Datei auf Ihrem Computer und packt sie als Zip-Datei für die Analyse." />
+		<lang code="WSButton_ExtractResources_Selected_Text" value="Dateien entpacken" />
+		<lang code="WSButton_ExtractResources_Selected_Tooltip" value="Entpackt die ausgewählten Dateien aus dem Archiv auf Ihren Computer." />
+		<lang code="WSButton_ExtractResources_Text" value="Dateien entpacken" />
+		<lang code="WSButton_ExtractResources_Tooltip" value="Entpackt Dateien aus dem Archiv auf Ihren Computer." />
+		<lang code="WSButton_ExtractSelectedResources_Tooltip" value="Zeigt die Seitenleiste zum Entpacken von Dateien aus dem Archiv auf Ihren Computer an." />
+		<lang code="WSButton_FileListExporter_Text" value="Dateilisten-Exporter" />
+		<lang code="WSButton_FileListExporter_Tooltip" value="Speichert ein Dokument, das alle Dateien im Archiv auflistet." />
+		<lang code="WSButton_FileListView_Text" value="Dateilisten-Ansicht" />
+		<lang code="WSButton_FileListView_Tooltip" value="Ändert die Art und Weise, wie Dateien in einem Archiv angezeigt werden." />
+		
+		<lang code="WSButton_FileListView_Table_Text" value="Tabellen-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_Table_Tooltip" value="Zeigt die Dateiliste als Tabelle an" />
+		<lang code="WSButton_FileListView_Tree_Text" value="Baum-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_Tree_Tooltip" value="Zeigt die Dateiliste als Baumstruktur an" />
+		<lang code="WSButton_FileListView_TreeTable_Text" value="Gruppierte Tabellen-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_TreeTable_Tooltip" value="Zeigt die Dateiliste als gruppierte Tabelle an" />
+		<lang code="WSButton_FileListView_Thumbnails_Text" value="Miniaturbild-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_Thumbnails_Tooltip" value="Zeigt die Dateiliste als Liste von Vorschaubildern an" />
+		
+		<lang code="WSButton_FontChooserClosePopup_Text" value="Schriftart ändern" />
+		<lang code="WSButton_Help_Text" value="Hilfe" />
+		<lang code="WSButton_Help_Tooltip" value="Zeigt die Hilfedokumente an." />
+		<lang code="WSButton_HexEditor_Text" value="Hex-Viewer" />
+		<lang code="WSButton_HexEditor_Tooltip" value="Zeigt einen Hex-Viewer an, um den Inhalt von Dateien in einem Archiv darzustellen." />
+		<lang code="WSButton_Information_Text" value="Information" />
+		<lang code="WSButton_Information_Tooltip" value="Zeigt Informationen über das aktuelle Archiv und seine Dateien an." />
+		<lang code="WSButton_NewArchive_Text" value="Neues Archiv" />
+		<lang code="WSButton_NewArchive_Tooltip" value="Erstellt ein neues, leeres Archiv." />
+		<lang code="WSButton_Option_ToolbarButtons_AddButton_Small" value="Hinzufügen \/" />
+		<lang code="WSButton_Option_ToolbarButtons_AddButton_Text" value="Zur Symbolleiste hinzufügen \/" />
+		<lang code="WSButton_Option_ToolbarButtons_AddButton_Tooltip" value="Fügt die ausgewählte Schaltfläche zur Symbolleiste hinzu." />
+		<lang code="WSButton_Option_ToolbarButtons_MoveDown_Text" value="Schaltfläche nach unten verschieben" />
+		<lang code="WSButton_Option_ToolbarButtons_MoveDown_Tooltip" value="Verschiebt die ausgewählte Schaltfläche nach unten (tauscht sie mit der Schaltfläche darunter)." />
+		<lang code="WSButton_Option_ToolbarButtons_MoveUp_Text" value="Schaltfläche nach oben verschieben" />
+		<lang code="WSButton_Option_ToolbarButtons_MoveUp_Tooltip" value="Verschiebt die ausgewählte Schaltfläche nach oben (tauscht sie mit der Schaltfläche darüber)." />
+		<lang code="WSButton_Option_ToolbarButtons_RemoveButton_Small" value="Entfernen /\" />
+		<lang code="WSButton_Option_ToolbarButtons_RemoveButton_Text" value="Aus Symbolleiste entfernen /\" />
+		<lang code="WSButton_Option_ToolbarButtons_RemoveButton_Tooltip" value="Entfernt die ausgewählte Schaltfläche aus der Symbolleiste." />
+		<lang code="WSButton_Options_Text" value="Optionen" />
+		<lang code="WSButton_Options_Tooltip" value="Ändert das Aussehen und die Funktionsweise von Game Extractor." />
+		<lang code="WSButton_ParentDirectory_Tooltip" value="Wechselt in das vorherige (übergeordnete) Verzeichnis." />
+		<lang code="WSButton_PluginList_Text" value="Plugin-Liste" />
+		<lang code="WSButton_PluginList_Tooltip" value="Zeigt eine Liste der geladenen Plugins an." />
+		<lang code="WSButton_PreviewResource_Text" value="Dateivorschau" />
+		<lang code="WSButton_PreviewResource_Tooltip" value="Ermöglicht das Betrachten der Dateien in einem Archiv." />
+		<lang code="WSButton_ReadArchive_Normal_Tooltip" value="Öffnet ein Archiv auf Ihrem Computer." />
+		<lang code="WSButton_ReadArchive_Text" value="Archiv öffnen" />
+		<lang code="WSButton_RedoTaskComboButton_Tooltip" value="Wendet eine Änderung erneut an, die rückgängig gemacht wurde." />
+		<lang code="WSButton_RemoveResources_Text" value="Dateien entfernen" />
+		<lang code="WSButton_RemoveResources_Tooltip" value="Entfernt die ausgewählten Dateien aus dem Archiv." />
+		<lang code="WSButton_RenameResources_Text" value="Dateien umbenennen" />
+		<lang code="WSButton_RenameResources_Tooltip" value="Benennt die ausgewählten Dateien im Archiv um." />
+		
+		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Text" value="Generieren" />
+		<lang code="WSButton_PreviewPanel_ImageInvestigator_RegenerateImageButton_Tooltip" value="Generiert das Bild neu unter Verwendung der in den anderen Feldern festgelegten Eigenschaften" />
+		
+		<lang code="WSButton_ReplaceResources_Text" value="Dateien ersetzen" />
+		<lang code="WSButton_ReplaceResources_Tooltip" value="Ersetzt Dateien im Archiv durch Dateien auf Ihrem Computer." />
+		<lang code="WSButton_ScriptBuilder_Tooltip" value="Zeigt die Seitenleiste zum Erstellen von Skripten an." />
+		<lang code="WSButton_SelectResources_All_Text" value="Alle auswählen" />
+		<lang code="WSButton_SelectResources_All_Tooltip" value="Wählt Dateien im Archiv aus." />
+		<lang code="WSButton_Separator_Tooltip" value="Fügt einen Abstandshalter zwischen den Schaltflächen in der Symbolleiste ein." />
+		<lang code="WSButton_SidePanel_DirectoryList_AddFileButton_Tooltip" value="Fügt die Dateien zum Archiv hinzu." />
+		<lang code="WSButton_SidePanel_DirectoryList_ConvertArchiveButton_Tooltip" value="Speichert das Archiv im gewählten Format." />
+		<lang code="WSButton_SidePanel_DirectoryList_ConvertPanelButton_Tooltip" value="Zeigt die Steuerelemente zum Konvertieren des Archivs an." />
+		<lang code="WSButton_SidePanel_DirectoryList_CutArchiveButton_Tooltip" value="Steuerelemente zum Schneiden eines Archivs für die Analyse" />
+		<lang code="WSButton_SidePanel_DirectoryList_CutPanelButton_Tooltip" value="Zeigt die Steuerelemente zum Schneiden des Archivs an." />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportAllButton_Tooltip" value="Entpackt alle Dateien aus dem Archiv auf Ihren Computer." />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportPanelButton_Tooltip" value="Zeigt die Steuerelemente zum Exportieren von Dateien an." />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportSelectedButton_Tooltip" value="Entpackt die ausgewählten Dateien aus dem Archiv auf Ihren Computer." />
+		<lang code="WSButton_SidePanel_DirectoryList_ModifyPanelButton_Tooltip" value="Zeigt die Steuerelemente zum Bearbeiten des Archivs an." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadArchiveButton_Tooltip" value="Öffnet das ausgewählte Archiv." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadPanelButton_Tooltip" value="Zeigt die Steuerelemente zum Öffnen von Archiven an." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadScriptArchiveButton_Tooltip" value="Öffnet das Archiv unter Verwendung des ausgewählten Skripts." />
+		<lang code="WSButton_SidePanel_DirectoryList_RemoveFileButton_Tooltip" value="Entfernt die Dateien aus dem Archiv." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileMatchingButton_Tooltip" value="Ersetzt die Dateien im Archiv durch die übereinstimmenden Dateien auf dem Computer." />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileSelectedButton_Tooltip" value="Ersetzt die ausgewählten Dateien im Archiv durch eine Datei auf dem Computer." />
+		<lang code="WSButton_SidePanel_DirectoryList_ScanArchiveButton_Tooltip" value="Scannt das Archiv nach Dateien." />
+		<lang code="WSButton_SidePanel_DirectoryList_ScriptPanelButton_Tooltip" value="Öffnet ein Archiv mithilfe eines Skripts." />
+		<lang code="WSButton_SidePanel_DirectoryList_WriteArchiveButton_Tooltip" value="Speichert das Archiv." />
+		<lang code="WSButton_SidePanel_DirectoryList_WritePanelButton_Tooltip" value="Zeigt die Steuerelemente zum Speichern von Archiven an." />
+		<lang code="WSButton_SidePanel_FileListExporter_ExportButton_Text" value="Liste exportieren" />
+		<lang code="WSButton_SidePanel_FileListExporter_ExportButton_Tooltip" value="Speichert die Dateiliste auf dem Computer." />
+		<lang code="WSButton_SidePanel_Options_SaveOptionsButton_Text" value="Optionen speichern" />
+		<lang code="WSButton_SidePanel_Options_SaveOptionsButton_Tooltip" value="Speichert die Optionen." />
+		<lang code="WSButton_SidePanel_Preview_WritePreviewButton_Tooltip" value="Speichert die Vorschau im gewählten Format auf dem Computer." />
+		<lang code="WSButton_SidePanel_RenameFile_RenameSelectedButton_Text" value="Ausgewählte Dateien umbenennen" />\
+		<lang code="WSButton_SidePanel_RenameFile_RenameSelectedButton_Tooltip" value="Benennt die ausgewählten Dateien um." />\
+		<lang code="WSButton_SidePanel_RenameFile_RenameAllButton_Text" value="Alle Dateien umbenennen" />
+		<lang code="WSButton_SidePanel_RenameFile_RenameAllButton_Tooltip" value="Benennt alle Dateien um." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_CheckScript_Tooltip" value="Überprüft das Skript auf Fehler." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_OpenScript_Tooltip" value="Öffnet ein vorhandenes Skript zur Bearbeitung." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_SaveScript_Tooltip" value="Speichert das Skript in einer Datei." />
+		<lang code="WSButton_SidePanel_ScriptBuilder_TestScript_Tooltip" value="Testet das Skript an einem Archiv." />
+		<lang code="WSButton_SidePanel_Search_FindNextButton_Text" value="Weitersuchen" />
+		<lang code="WSButton_SidePanel_Search_FindNextButton_Tooltip" value="Findet die nächste übereinstimmende Datei." />
+		<lang code="WSButton_SidePanel_Search_SelectAllButton_Text" value="Treffer auswählen" />
+		<lang code="WSButton_SidePanel_Search_SelectAllButton_Tooltip" value="Wählt alle Dateien aus, die der Suche entsprechen." />
+		<lang code="WSButton_UndoTaskComboButton_Tooltip" value="Macht eine am Archiv vorgenommene Änderung rückgängig." />
+		<lang code="WSButton_WriteArchive_Text" value="Archiv speichern" />
+		<lang code="WSButton_WriteArchive_Tooltip" value="Speichert das Archiv auf Ihrem Computer." />
+		<lang code="WSCheckBox_AllowInlineFileListEditing_Text" value="Direktes Umbenennen von Dateien erlauben" />
+		<lang code="WSCheckBox_AllowInlineFileListEditing_Tooltip" value="Ein Doppelklick auf den Namen einer Datei in der Dateiliste ermöglicht es Ihnen, diese direkt in der Tabelle umzubenennen." />
+		<lang code="WSCheckBox_RemoveImageAfterThumbnailGeneration_Text" value="Temporäre Bilddaten nach Erstellung von Vorschaubildern verwerfen?" />
+		<lang code="WSCheckBox_RemoveImageAfterThumbnailGeneration_Tooltip" value="Möchten Sie die ursprünglichen Bilddaten nach der Erstellung eines Vorschaubildes aus dem Speicher entfernen (ausgewählt) oder behalten (nicht ausgewählt)? Nicht ausgewählt verbraucht mehr Speicher." />
+		<lang code="WSCheckBox_HighQualityThumbnails_Text" value="Vorschaubilder in hoher Qualität anzeigen (slower)" />
+		<lang code="WSCheckBox_HighQualityThumbnails_Tooltip" value="Auswählen, um Vorschaubilder in hoher Qualität anzuzeigen (langsamer); nicht auswählen für eine schnelle Erstellung von Vorschaubildern in geringerer Qualität" />
+		<lang code="WSCheckBox_UpscaleSmallThumbnails_Text" value="Vorschaubilder von kleinen Bildern vergrößern?" />
+		<lang code="WSCheckBox_UpscaleSmallThumbnails_Tooltip" value="Wenn ein Bild kleiner als das Vorschaubild ist, möchten Sie es vergrößern (ausgewählt) oder in der tatsächlichen Größe anzeigen (nicht ausgewählt)" />
+		<lang code="WSCheckBox_AlwaysShowHexEditorSelectedTable_Text" value="Wertetabelle des Hex-Viewers immer anzeigen" />
+		<lang code="WSCheckBox_AlwaysShowHexEditorSelectedTable_Tooltip" value="Zeigt die Tabelle der ausgewählten Werte im Hex-Viewer immer an (ausgewählt) oder blendet sie aus, wenn keine Zelle ausgewählt ist (nicht ausgewählt)" />
+		<lang code="WSCheckBox_AutoResizeTableColumns_Text" value="Tabellenspalten automatisch anpassen" />
+		<lang code="WSCheckBox_AutoResizeTableColumns_Tooltip" value="Beim Ändern der Spaltengröße werden diese so angepasst, dass sie genau in die Breite der Tabelle passen. Wenn nicht ausgewählt, können die Tabellenspalten so breit sein, wie Sie möchten." />
+		<lang code="WSCheckBox_CheckScriptResourceValues_Text" value="Skripte auf ungültige Dateieigenschaften prüfen?" />
+		<lang code="WSCheckBox_CheckScriptResourceValues_Tooltip" value="Beim Öffnen mit einem Skript werden die im Archiv gefundenen Dateien auf ungültige Längen und Offsets überprüft (ausgewählt), um eine bessere Fehlererkennung zu ermöglichen." />
+		<lang code="WSCheckBox_OnlyShowStandardConverters_Text" value="Beim Exportieren von Dateien nur Standard-Konverterformate anzeigen?" />
+		<lang code="WSCheckBox_OnlyShowStandardConverters_Tooltip" value="Beim Exportieren von Dateien werden in der Konverterliste nur Standard-Dateiformate angezeigt (ausgewählt) oder alle verfügbaren Konverter (nicht ausgewählt)." />
+		<lang code="WSCheckBox_ColorScriptSyntax_Text" value="Syntaxhervorhebung im Skript-Builder" />
+		<lang code="WSCheckBox_ColorScriptSyntax_Tooltip" value="Hebt die Syntax im Skript-Builder farblich hervor (ausgewählt) oder keine farbliche Hervorhebung (nicht ausgewählt)." />
+		<lang code="WSCheckBox_DebugMode_Text" value="Debug-Modus" />
+		<lang code="WSCheckBox_DebugMode_Tooltip" value="Schreibt alle Fehlermeldungen auf den Bildschirm (ausgewählt) oder nur in die Fehlerprotokolldatei (nicht ausgewählt)." />
+		<lang code="WSCheckBox_DoubleClickInFileListDoesPreview_Text" value="Doppelklick zeigt Vorschau" />
+		<lang code="WSCheckBox_DoubleClickInFileListDoesPreview_Tooltip" value="Ein Doppelklick auf eine Datei in der Dateiliste zeigt die Vorschau dieser Datei an." />
+		<lang code="WSCheckBox_LargeButtonIcons_Text" value="Große Schaltflächen (erfordert Neustart)" />
+		<lang code="WSCheckBox_LargeButtonIcons_Tooltip" value="Schaltflächen haben große (ausgewählt) oder kleine (nicht ausgewählt) Symbole." />
+		<lang code="WSCheckBox_LoadScriptsAtStartup_Text" value="Skripte beim Starten laden" />
+		<lang code="WSCheckBox_LoadScriptsAtStartup_Tooltip" value="Lädt die Skripte direkt beim Start von Game Extractor (ausgewählt) oder lädt die Skripte erst dann, wenn sie benötigt werden (nicht ausgewählt)." />
+		<lang code="WSCheckBox_OpenArchiveOnDoubleClick_Text" value="Archiv per Doppelklick öffnen" />
+		<lang code="WSCheckBox_OpenArchiveOnDoubleClick_Tooltip" value="Bei einem Doppelklick auf eine Datei in der Verzeichnisliste wird diese geöffnet." />
+		<lang code="WSCheckBox_LoadAllThumbnailsWhenOpeningArchive_Text" value="Alle Vorschaubilder beim Öffnen eines Archivs laden (langsamer)" />
+		<lang code="WSCheckBox_LoadAllThumbnailsWhenOpeningArchive_Tooltip" value="Lädt beim Öffnen eines Archivs alle Vorschaubilder auf einmal (ausgewählt, langsamer) oder lädt die Vorschaubilder erst beim Durchscrollen (nicht ausgewählt, schneller)." />
+		<lang code="WSCheckBox_PlayAudioOnLoad_Text" value="Audio bei Vorschau automatisch abspielen" />
+		<lang code="WSCheckBox_PlayAudioOnLoad_Tooltip" value="Startet die Audiowiedergabe bei der Vorschau einer Audiodatei, sobald die Vorschau geladen ist (ausgewählt), oder wartet, bis Sie auf Wiedergabe drücken (nicht ausgewählt)." />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesAdded_Show_Text" value="Dateien hinzugefügt" />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesAdded_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien zum Archiv hinzugefügt werden." />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesRemoved_Show_Text" value="Rückgängig: Dateien hinzugefügt" />
+		<lang code="WSCheckBox_Popup_AddFiles_FilesRemoved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien aus dem Archiv entfernt werden." />
+		<lang code="WSCheckBox_Popup_AddFiles_NoFilesToAdd_Show_Text" value="Keine Dateien zum Hinzufügen ausgewählt" />
+		<lang code="WSCheckBox_Popup_AddFiles_NoFilesToAdd_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Dateien zum Hinzufügen zum Archiv ausgewählt wurden." />
+		<lang code="WSCheckBox_Popup_ConvertArchive_FilenameMissing_Show_Text" value="Kein Dateiname zum Konvertieren" />
+		<lang code="WSCheckBox_Popup_ConvertArchive_FilenameMissing_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn kein Dateiname für das konvertierte Archiv vorhanden ist." />
+		<lang code="WSCheckBox_Popup_CutArchive_CutFailed_Show_Text" value="Archivschneiden fehlgeschlagen" />
+		<lang code="WSCheckBox_Popup_CutArchive_CutFailed_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn das Schneiden eines Archivs fehlgeschlagen ist." />
+		<lang code="WSCheckBox_Popup_CutArchive_FilesCut_Show_Text" value="Archivschneiden erfolgreich" />
+		<lang code="WSCheckBox_Popup_CutArchive_FilesCut_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine Datei erfolgreich geschnitten wurde." />
+		<lang code="WSCheckBox_Popup_CutArchive_InvalidInputFile_Show_Text" value="Ungültige Eingabedatei zum Schneiden" />
+		<lang code="WSCheckBox_Popup_CutArchive_InvalidInputFile_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine ungültige Eingabedatei zum Schneiden vorliegt." />
+		<lang code="WSCheckBox_Popup_ExportFileList_ListExported_Show_Text" value="Dateiliste gespeichert" />
+		<lang code="WSCheckBox_Popup_ExportFileList_ListExported_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Dateiliste gespeichert wurde." />
+		<lang code="WSCheckBox_Popup_ExportFileList_NoColumnsSelected_Show_Text" value="Keine Spalten für Dateiliste ausgewählt" />
+		<lang code="WSCheckBox_Popup_ExportFileList_NoColumnsSelected_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Spalten zum Speichern der Dateiliste ausgewählt sind." />
+		<lang code="WSCheckBox_Popup_ExportFiles_FilesExported_Show_Text" value="Dateien entpackt" />
+		<lang code="WSCheckBox_Popup_ExportFiles_FilesExported_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Dateien entpackt wurden." />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesSelected_Show_Text" value="Keine Dateien zum Entpacken ausgewählt" />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesSelected_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Dateien zum Entpacken vorhanden sind." />
+		<lang code="WSCheckBox_Popup_FileListViewChanged_Show_Text" value="Dateilisten-Ansicht geändert" />
+		<lang code="WSCheckBox_Popup_FileListViewChanged_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Sie die Ansicht der Dateiliste ändern." />
+		<lang code="WSCheckBox_Popup_FullVersionOnly_Show_Text" value="Nur in der Vollversion" />
+		<lang code="WSCheckBox_Popup_FullVersionOnly_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine Aufgabe nur in der Vollversion verfügbar ist." />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotReplacable_Show_Text" value="Ersetzen von Dateien nicht erlaubt" />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotReplacable_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien in diesem Archivformat nicht ersetzt werden können." />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotWritable_Show_Text" value="Hinzufügen/Entfernen von Dateien nicht erlaubt" />
+		<lang code="WSCheckBox_Popup_ModifyArchive_NotWritable_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien in diesem Archivformat nicht hinzugefügt oder entfernt werden können." />
+		<lang code="WSCheckBox_Popup_DecompressArchive_Show_Text" value="Archiv erfordert Entpacken" />
+		<lang code="WSCheckBox_Popup_DecompressArchive_Show_Tooltip" value="Fragt nach einer Auswahl, wenn ein Archiv entpackt werden muss (ausgewählt), oder entpackt es einfach automatisch (nicht ausgewählt)." />
+		<lang code="WSCheckBox_Popup_Options_OptionsSaved_Show_Text" value="Optionen gespeichert" />
+		<lang code="WSCheckBox_Popup_Options_OptionsSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Optionen gespeichert wurden." />
+		<lang code="WSCheckBox_Popup_Preview_PreviewSaved_Show_Text" value="Vorschau gespeichert" />
+		<lang code="WSCheckBox_Popup_Preview_PreviewSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Vorschau gespeichert wurde." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpenedWithScanner_Show_Text" value="Archiv mit Scanner geöffnet" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpenedWithScanner_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Archiv gescannt wurde." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpened_Show_Text" value="Archiv geöffnet" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ArchiveOpened_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Archiv geöffnet wurde." />
+		<lang code="WSCheckBox_Popup_ReadArchive_FileNotAnArchive_Show_Text" value="Datei ist kein Archiv" />
+		<lang code="WSCheckBox_Popup_ReadArchive_FileNotAnArchive_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine Datei nicht geöffnet werden kann, weil sie kein Archiv ist." />
+		<lang code="WSCheckBox_Popup_ReadArchive_FilenameMissing_Show_Text" value="Kein Archiv zum Öffnen vorhanden" />
+		<lang code="WSCheckBox_Popup_ReadArchive_FilenameMissing_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn kein Archiv zum Öffnen ausgewählt ist." />
+		<lang code="WSCheckBox_Popup_ReadArchive_MakeNewArchive_Show_Text" value="Neues Archiv erstellt" />
+		<lang code="WSCheckBox_Popup_ReadArchive_MakeNewArchive_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein neues Archiv erstellt wurde." />
+		<lang code="WSCheckBox_Popup_ReadArchive_NoPluginsFound_Show_Text" value="Kein Plugin zum Öffnen des Archivs" />
+		<lang code="WSCheckBox_Popup_ReadArchive_NoPluginsFound_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Game Extractor ein Archiv nicht öffnen konnte." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithPluginFailed_Show_Text" value="Öffnen des Archivs mit Plugin fehlgeschlagen" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithPluginFailed_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Archiv mit einem bestimmten Plugin nicht geöffnet werden konnte." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScannerFailed_Show_Text" value="Archivscan fehlgeschlagen" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScannerFailed_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn der Scanner keine Dateien im Archiv gefunden hat." />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScriptFailed_Show_Text" value="Öffnen des Archivs mit Skript fehlgeschlagen" />
+		<lang code="WSCheckBox_Popup_ReadArchive_ReadWithScriptFailed_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn das Skript das Archiv nicht korrekt geöffnet hat." />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesAdded_Show_Text" value="Rückgängig: Dateien entfernt" />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesAdded_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien wieder zum Archiv hinzugefügt wurden." />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesRemoved_Show_Text" value="Dateien entfernt" />
+		<lang code="WSCheckBox_Popup_RemoveFiles_FilesRemoved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien aus dem Archiv entfernt wurden." />
+		<lang code="WSCheckBox_Popup_RemoveFiles_NoFilesToRemove_Show_Text" value="Keine Dateien zum Entfernen ausgewählt" />
+		<lang code="WSCheckBox_Popup_RemoveFiles_NoFilesToRemove_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Dateien zum Entfernen aus dem Archiv ausgewählt wurden." />
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRenamed_Show_Text" value="Dateien umbenannt" />
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRenamed_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien umbenannt wurden." />
+		
+		<lang code="WSCheckBox_Popup_TaskManager_UndoComplete_Show_Text" value="Rückgängig machen abgeschlossen" />
+		<lang code="WSCheckBox_Popup_TaskManager_UndoComplete_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine Aktion erfolgreich rückgängig gemacht wurde." />
+		<lang code="WSCheckBox_Popup_TaskManager_RedoComplete_Show_Text" value="Wiederholen abgeschlossen" />
+		<lang code="WSCheckBox_Popup_TaskManager_RedoComplete_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine Aktion erfolgreich wiederholt wurde." />
+		
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRestored_Show_Text" value="Rückgängig: Dateien umbenannt" />
+		<lang code="WSCheckBox_Popup_RenameFiles_FilesRestored_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien wieder auf ihren ursprünglichen Namen zurückgesetzt wurden." />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoFilesSelected_Show_Text" value="Keine Dateien zum Umbenennen ausgewählt" />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoFilesSelected_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Dateien zum Umbenennen ausgewählt wurden." />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoRenameValue_Show_Text" value="Kein Name zum Umbenennen angegeben" />
+		<lang code="WSCheckBox_Popup_RenameFiles_NoRenameValue_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn kein neuer Name für das Umbenennen der Dateien festgelegt wurde." />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesReplaced_Show_Text" value="Dateien ersetzt" />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesReplaced_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien durch eine Datei auf Ihrem Computer ersetzt wurden." />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesRestored_Show_Text" value="Rückgängig: Dateien ersetzt" />
+		<lang code="WSCheckBox_Popup_ReplaceFiles_FilesRestored_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien wieder auf ihre ursprünglichen Daten zurückgesetzt wurden." />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_NoNameSpecified_Show_Text" value="Kein Skript-Dateiname" />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_NoNameSpecified_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn kein Dateiname zum Speichern einer Skriptdatei angegeben wurde." />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_ScriptSaved_Show_Text" value="Skript gespeichert" />
+		<lang code="WSCheckBox_Popup_ScriptBuilder_ScriptSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn eine Skriptdatei gespeichert wurde." />
+		<lang code="WSCheckBox_Popup_Search_MatchFound_Show_Text" value="Suchtreffer gefunden" />
+		<lang code="WSCheckBox_Popup_Search_MatchFound_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Ergebnis durch die Suche gefunden wurde." />
+		<lang code="WSCheckBox_Popup_Search_NoColumnsSelected_Show_Text" value="Keine Spalten für Suche ausgewählt" />
+		<lang code="WSCheckBox_Popup_Search_NoColumnsSelected_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Spalten für die Durchführung der Suche ausgewählt sind." />
+		<lang code="WSCheckBox_Popup_Search_NoMatchFound_Show_Text" value="Keine Suchtreffer gefunden" />
+		<lang code="WSCheckBox_Popup_Search_NoMatchFound_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn keine Dateien durch die Suche gefunden wurden." />
+		<lang code="WSCheckBox_Popup_Search_NoSearchValue_Show_Text" value="Kein Suchbegriff angegeben" />
+		<lang code="WSCheckBox_Popup_Search_NoSearchValue_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn kein Suchbegriff festgelegt wurde." />
+		<lang code="WSCheckBox_Popup_SelectResources_All_Show_Text" value="Alle Dateien ausgewählt" />
+		<lang code="WSCheckBox_Popup_SelectResources_All_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn alle Dateien in der Dateiliste ausgewählt wurden." />
+		<lang code="WSCheckBox_Popup_SelectResources_Inverse_Show_Text" value="Auswahl umgekehrt" />
+		<lang code="WSCheckBox_Popup_SelectResources_Inverse_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Auswahl der Dateien in der Dateiliste umgekehrt wurde." />
+		<lang code="WSCheckBox_Popup_SelectResources_None_Show_Text" value="Keine Dateien ausgewählt" />
+		<lang code="WSCheckBox_Popup_SelectResources_None_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Auswahl aller Dateien in der Dateiliste aufgehoben wurde." />
+		<lang code="WSCheckBox_Popup_SidePanelChanged_Show_Text" value="Seitenleiste geändert" />
+		<lang code="WSCheckBox_Popup_SidePanelChanged_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn die Seitenleiste gewechselt wird." />
+		<lang code="WSCheckBox_Popup_WriteArchive_ArchiveSaved_Show_Text" value="Archiv gespeichert" />
+		<lang code="WSCheckBox_Popup_WriteArchive_ArchiveSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Archiv erfolgreich gespeichert wurde." />
+		<lang code="WSCheckBox_Popup_WriteArchive_FilenameMissing_Show_Text" value="Kein Dateiname zum Speichern" />
+		<lang code="WSCheckBox_Popup_WriteArchive_FilenameMissing_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn kein Dateiname für das zu speichernde Archiv vorhanden ist." />
+		<lang code="WSCheckBox_PreviewOnDoubleClick_Text" value="Dateivorschau per Doppelklick" />
+		<lang code="WSCheckBox_PreviewOnDoubleClick_Tooltip" value="Bei einem Doppelklick auf eine Datei im Archiv wird deren Vorschau angezeigt." />
+		<lang code="WSCheckBox_PreviewOnFileListEnter_Text" value="Dateivorschau mit Eingabetaste" />
+		<lang code="WSCheckBox_PreviewOnFileListEnter_Tooltip" value="Beim Drücken der Eingabetaste (Enter) auf einer Datei im Archiv wird deren Vorschau angezeigt." />
+		<lang code="WSCheckBox_ScanFileIfOpenFailed_Text" value="Archiv scannen, falls Lesen fehlschlägt" />
+		<lang code="WSCheckBox_ScanFileIfOpenFailed_Tooltip" value="Wenn ein Archiv nicht geöffnet werden konnte, wird nach enthaltenen Dateien gescannt (ausgewählt) oder einfach ein Fehler angezeigt (nicht ausgewählt)." />
+		<lang code="WSCheckBox_Scanner_wav_Text" value="Wave-Audio (*.WAV)" />
+		<lang code="WSCheckBox_ShowBinaryHexEditorField_Text" value="Binär" />
+		<lang code="WSCheckBox_ShowBinaryHexEditorField_Tooltip" value="Zeigt das Binär-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowByteHexEditorField_Text" value="Byte" />
+		<lang code="WSCheckBox_ShowByteHexEditorField_Tooltip" value="Zeigt das Byte-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowCharHexEditorField_Text" value="ASCII-String" />
+		<lang code="WSCheckBox_ShowCharHexEditorField_Tooltip" value="Zeigt das Zeichen-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowCustomColumns_Text" value="Benutzerdefinierte Tabellenspalten anzeigen" />
+		<lang code="WSCheckBox_ShowCustomColumns_Tooltip" value="Wenn benutzerdefinierte Tabellenspalten für ein Archiv existieren, möchten Sie diese anzeigen (ausgewählt) oder nicht (nicht ausgewählt)?" />
+		<lang code="WSCheckBox_ShowDirectoryListFileIcons_Text" value="Richtige Symbole im Verzeichnis verwenden" />
+		<lang code="WSCheckBox_ShowDirectoryListFileIcons_Tooltip" value="Zeigt die korrekten Symbole für jede Datei im Verzeichnis an oder nur generische Symbole? (Langsamer, wenn aktiviert)" />
+		<lang code="WSCheckBox_ShowDoubleHexEditorField_Text" value="Double (8 Bytes)" />
+		<lang code="WSCheckBox_ShowDoubleHexEditorField_Tooltip" value="Zeigt das Double-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowFloatHexEditorField_Text" value="Float (4 Bytes)" />
+		<lang code="WSCheckBox_ShowFloatHexEditorField_Tooltip" value="Zeigt das Float-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowHexHexEditorField_Text" value="Hex" />
+		<lang code="WSCheckBox_ShowHexHexEditorField_Tooltip" value="Zeigt das Hex-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowHexIfPreviewFailed_Text" value="Hex-Viewer anzeigen, wenn Vorschau fehlschlägt" />
+		<lang code="WSCheckBox_ShowHexIfPreviewFailed_Tooltip" value="Wenn die ausgewählte Datei nicht in der Vorschau angezeigt werden kann, wird die Datei im Hex-Viewer dargestellt (ausgewählt) oder es wird nur eine Fehlermeldung angezeigt (nicht ausgewählt)." />
+		<lang code="WSCheckBox_ShowIntHexEditorField_Text" value="Integer (4 Bytes)" />
+		<lang code="WSCheckBox_ShowIntHexEditorField_Tooltip" value="Zeigt das Integer-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowLongHexEditorField_Text" value="Long (8 Bytes)" />
+		<lang code="WSCheckBox_ShowLongHexEditorField_Tooltip" value="Zeigt das Long-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowShortHexEditorField_Text" value="Short (2 Bytes)" />
+		<lang code="WSCheckBox_ShowShortHexEditorField_Tooltip" value="Zeigt das Short-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowSplashScreen_Text" value="Startbildschirm beim Hochfahren anzeigen" />
+		<lang code="WSCheckBox_ShowSplashScreen_Tooltip" value="Zeigt den Startbildschirm (Splash Screen) beim Laden des Programms an." />
+		<lang code="WSCheckBox_ShowSystemSpecificIcons_Text" value="Richtige Symbole für Dateien anzeigen (langsamer)" />
+		<lang code="WSCheckBox_ShowSystemSpecificIcons_Tooltip" value="Wenn ausgewählt, werden die Symbole für jede Datei genauso angezeigt wie in Windows. Dies kann jedoch manchmal langsam sein. Wenn nicht ausgewählt, werden die Dateien mit einfachen Symbolen angezeigt." />
+		<lang code="WSCheckBox_ShowTableColumn_AddedIcon_Text" value="Hinzugefügt?" />
+		<lang code="WSCheckBox_ShowTableColumn_AddedIcon_Tooltip" value="Zeigt die Spalte 'Hinzugefügt' in der Dateilistentabelle (FileListTable) an." />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLengthKB_Text" value="Komprimierte Länge (KBs)" />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLengthKB_Tooltip" value="Die Länge der Datei in KBs" />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLength_Text" value="Komprimierte Länge" />
+		<lang code="WSCheckBox_ShowTableColumn_CompressedLength_Tooltip" value="Die Länge der Datei in Bytes" />
+		<lang code="WSCheckBox_ShowTableColumn_Compressed_Text" value="Komprimiert?" />
+		<lang code="WSCheckBox_ShowTableColumn_Compressed_Tooltip" value="Ist die Datei komprimiert?" />
+		<lang code="WSCheckBox_ShowTableColumn_Compression_Text" value="Komprimierungstyp" />
+		<lang code="WSCheckBox_ShowTableColumn_Compression_Tooltip" value="Die Art der Komprimierung" />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLengthKB_Text" value="Entpackte Länge (KBs)" />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLengthKB_Tooltip" value="Zeigt die Spalte 'Entpackte Länge (kBs)' in der Dateilistentabelle (FileListTable) an." />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLength_Text" value="Entpackte Länge" />
+		<lang code="WSCheckBox_ShowTableColumn_DecompressedLength_Tooltip" value="Die Länge der Datei in Bytes" />
+		<lang code="WSCheckBox_ShowTableColumn_Description_Text" value="Beschreibung" />
+		<lang code="WSCheckBox_ShowTableColumn_Description_Tooltip" value="Zeigt die Spalte 'Beschreibung' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_Directory_Text" value="Verzeichnis" />
+		<lang code="WSCheckBox_ShowTableColumn_Directory_Tooltip" value="Zeigt die Spalte 'Verzeichnis' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_Extension_Text" value="Dateiendung" />
+		<lang code="WSCheckBox_ShowTableColumn_Extension_Tooltip" value="Zeigt die Spalte 'Dateiendung' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_FilePath_Text" value="Dateipfad" />
+		<lang code="WSCheckBox_ShowTableColumn_FilePath_Tooltip" value="Zeigt die Spalte 'Dateipfad' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_Filename_Text" value="Dateiname" />
+		<lang code="WSCheckBox_ShowTableColumn_Filename_Tooltip" value="Zeigt die Spalte 'Dateiname' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_Icon_Text" value="Symbol" />
+		<lang code="WSCheckBox_ShowTableColumn_Icon_Tooltip" value="Zeigt die Spalte 'Symbol' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_Offset_Text" value="Offset" />
+		<lang code="WSCheckBox_ShowTableColumn_Offset_Tooltip" value="Zeigt die Spalte 'Offset' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_RenamedIcon_Text" value="Umbenannt?" />
+		<lang code="WSCheckBox_ShowTableColumn_RenamedIcon_Tooltip" value="Zeigt die Spalte 'Umbenannt' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_ReplacedIcon_Text" value="Ersetzt?" />
+		<lang code="WSCheckBox_ShowTableColumn_ReplacedIcon_Tooltip" value="Zeigt die Spalte 'Ersetzt' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTableColumn_Source_Text" value="Quellpfad" />
+		<lang code="WSCheckBox_ShowTableColumn_Source_Tooltip" value="Zeigt die Spalte 'Quelle' in der Dateilistentabelle an." />
+		<lang code="WSCheckBox_ShowTimestampHexEditorField_Text" value="Zeitstempel" />
+		<lang code="WSCheckBox_ShowTimestampHexEditorField_Tooltip" value="Zeigt das Zeitstempel-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSCheckBox_ShowUnicodeHexEditorField_Text" value="Unicode-String" />
+		<lang code="WSCheckBox_ShowUnicodeHexEditorField_Tooltip" value="Zeigt das Unicode-Feld in der Feldliste des Hex-Viewers an." />
+		<lang code="WSComboBox_CurrentLanguage_Tooltip" value="Die für die Benutzeroberfläche zu verwendende Sprache." />
+		<lang code="WSComboBox_DragDropOption_Tooltip" value="Was möchten Sie mit den Dateien tun, wenn Sie diese aus der Verzeichnisliste (DirectoryList) in das Archiv ziehen?" />
+		<lang code="WSComboBox_FileListPanel_TreeTable_GroupTypes_Label_Label" value="Filtertyp" />
+		<lang code="WSComboBox_FileListPanel_TreeTable_GroupTypes_Tooltip" value="Die Art und Weise, wie die Dateien in der untenstehenden Baumstruktur gruppiert werden." />
+		<lang code="WSComboBox_PluginListDisplayType_Tooltip" value="Wie sollen die Plugins in den Dropdown-Boxen angezeigt werden?" />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ConvertPluginList_Tooltip" value="Das Format, das beim Konvertieren eines Archivs verwendet werden soll." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_CutLengthPresets_Tooltip" value="Die Datenmenge, die aus dem Archiv geschnitten werden soll." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_CutLengthPresets_Label" value="Schnittgröße" />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ReadPluginList_Tooltip" value="Das Plugin, das zum Lesen eines Archivs verwendet werden soll, oder wählen Sie 'Alle Dateien' und GameExtractor wählt das beste Plugin." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ScriptPluginList_Tooltip" value="Die Skripte, die zum Öffnen eines Archivs verwendet werden können." />
+		<lang code="WSComboBox_SidePanel_FileListExporter_ExporterPlugins_Tooltip" value="Die Dateiliste wird in diesem Format gespeichert." />
+		<lang code="WSComboBox_SidePanel_Options_OptionGroups_Tooltip" value="Die verschiedenen Gruppen von Optionen, die geändert werden können." />
+		<lang code="WSComboBox_SidePanel_PluginList_PluginTypes_Tooltip" value="Der anzuzeigende Plugin-Typ." />
+		<lang code="WSComboBox_SidePanel_Preview_WritePreviewPlugins_Tooltip" value="Die Vorschau wird in diesem Format gespeichert." />
+		<lang code="WSComboBox_SidePanel_RenameFile_RenamerPlugins_Tooltip" value="Art der Umbenennung" />
+		<lang code="WSComboBox_SidePanel_ScriptBuilder_ScriptsList_Tooltip" value="Die von Game Extractor geladenen Skripte." />
+		<lang code="WSCreditsPanel_SidePanel_About_Credits_Tooltip" value="Die Danksagungen und Mitwirkenden von Game Extractor." />
+		<lang code="WSDirectoryListHolder_SidePanel_DirectoryList_DirectoryListHolder_Tooltip" value="Die Verzeichnisliste, die die Dateien auf dem Computer anzeigt." />
+		<lang code="WSEditorPane_SidePanel_Help_Display_Tooltip" value="Das Dokument, das die Hilfe für eine Vielzahl von Themen auflistet." />
+		<lang code="WSEditorPane_SidePanel_ScriptBuilder_Script_Tooltip" value="Das Skript." />
+		<lang code="WSFileListPanelHolder_FileListPanelHolder_Tooltip" value="Die Dateiliste, die alle Dateien in einem Archiv anzeigt." />
+		<lang code="WSLabel_AddFiles_FilesAdded_Text" value="Die ausgewählten Dateien wurden zum Archiv hinzugefügt." />
+		<lang code="WSLabel_AddFiles_FilesRemoved_Text" value="Die hinzugefügten Dateien wurden aus dem Archiv entfernt." />
+		<lang code="WSLabel_AddFiles_NoFilesToAdd_Text" value="Es wurden keine Dateien zum Hinzufügen zum Archiv ausgewählt." />
+		<lang code="WSLabel_BlankPreview_Text" value="Für diese Datei kann keine Vorschau angezeigt werden." />
+		<lang code="WSLabel_BlankPreview_Tooltip" value="Kein Plugin konnte eine Vorschau dieser Datei erstellen." />
+		<lang code="WSLabel_ComponentList_About_Text" value="Über Game Extractor" />
+		<lang code="WSLabel_ComponentList_AddResources_Text" value="Dateien hinzufügen" />
+		<lang code="WSLabel_ComponentList_CloseProgram_Text" value="Game Extractor schließen" />
+		<lang code="WSLabel_ComponentList_CutArchive_Text" value="Archiv schneiden" />
+		<lang code="WSLabel_ComponentList_ExtractResources_Text" value="Dateien entpacken" />
+		<lang code="WSLabel_ComponentList_ExtractSelectedResources_Text" value="Ressourcen entpacken" />
+		<lang code="WSLabel_ComponentList_FileListExporter_Text" value="Dateiliste speichern" />
+		<lang code="WSLabel_ComponentList_FileListView_Text" value="Dateilisten-Ansicht ändern" />
+		
+		<lang code="WSLabel_ComponentList_FileListView_Table_Text" value="Tabellen-Dateilistenansicht" />
+		<lang code="WSLabel_ComponentList_FileListView_Tree_Text" value="Baum-Dateilistenansicht" />
+		<lang code="WSLabel_ComponentList_FileListView_TreeTable_Text" value="Gruppierte Tabellen-Dateilistenansicht" />
+		<lang code="WSLabel_ComponentList_FileListView_Thumbnails_Text" value="Miniaturbild-Dateilistenansicht" />
+		
+		<lang code="WSLabel_ComponentList_Help_Text" value="Game Extractor-Hilfe" />
+		<lang code="WSLabel_ComponentList_HexEditor_Text" value="Hex-Viewer" />
+		<lang code="WSLabel_ComponentList_Information_Text" value="Datei-Informationen" />
+		<lang code="WSLabel_ComponentList_NewArchive_Text" value="Neues Archiv" />
+		<lang code="WSLabel_ComponentList_Options_Text" value="Optionen" />
+		<lang code="WSLabel_ComponentList_PluginList_Text" value="Plugin-Liste" />
+		<lang code="WSLabel_ComponentList_PreviewResource_Text" value="Dateivorschau" />
+		<lang code="WSLabel_ComponentList_ReadArchive_Normal_Text" value="Archiv öffnen" />
+		<lang code="WSLabel_ComponentList_RedoTaskComboButton_Text" value="Änderung wiederholen" />
+		<lang code="WSLabel_ComponentList_RemoveResources_Text" value="Dateien entfernen" />
+		<lang code="WSLabel_ComponentList_RenameResources_Text" value="Dateien umbenennen" />
+		<lang code="WSLabel_ComponentList_ReplaceResources_Text" value="Dateien ersetzen" />
+		<lang code="WSLabel_ComponentList_ScriptBuilder_Text" value="Skript-Builder" />
+
+		<lang code="WSLabel_ComponentList_SelectResources_All_Text" value="Dateien auswählen" />
+		<lang code="WSLabel_ComponentList_Separator_Text" value="Trennlinie" />
+		<lang code="WSLabel_ComponentList_UndoTaskComboButton_Text" value="Änderung rückgängig machen" />
+		<lang code="WSLabel_ComponentList_WriteArchive_Text" value="Archiv speichern" />
+		<lang code="WSLabel_ConvertArchive_FilenameMissing_Text" value="Sie müssen einen Dateinamen für das gespeicherte Archiv angeben." />
+		<lang code="WSLabel_CurrentLanguage_Text" value="Sprache" />
+		<lang code="WSLabel_CutArchive_CutFailed_Text" value="Es gab ein Problem beim Versuch, dieses Archiv zu schneiden." />
+		<lang code="WSLabel_CutArchive_FilesCut_Text" value="Das Archiv wurde erfolgreich geschnitten." />
+		<lang code="WSLabel_CutArchive_InvalidCutLength_Text" value="Die Schnittlänge ist kein gültiger Wert." />
+		<lang code="WSLabel_CutArchive_InvalidInputFile_Text" value="Die Eingabedatei ist ungültig oder fehlt." />
+		<lang code="WSLabel_ExportFileList_ListExported_Text" value="Die Dateiliste wurde erfolgreich gespeichert." />
+		<lang code="WSLabel_ExportFileList_NoColumnsSelected_Text" value="Es sind keine Spalten zum Speichern in der Dateiliste ausgewählt." />
+		<lang code="WSLabel_ExportFiles_FilesExported_Text" value="Die Dateien wurden erfolgreich entpackt." />
+		<lang code="WSLabel_ExportFiles_NoFilesSelected_Text" value="Es sind keine Dateien zum Exportieren ausgewählt." />
+		<lang code="WSLabel_FileListViewChanged_Text" value="Die Dateilistenansicht wurde geändert." />
+		<lang code="WSLabel_FullVersionOnly_Text" value="Diese Funktion ist nur in der Vollversion von Game Extractor verfügbar." />
+		<lang code="WSLabel_ModifyArchive_NotReplacable_Text" value="Dieses Archivformat erlaubt kein Ersetzen von Dateien." />
+		<lang code="WSLabel_ModifyArchive_NotWritable_Text" value="Dieses Archivformat erlaubt kein Hinzufügen oder Entfernen von Dateien." />
+		<lang code="WSLabel_DecompressArchive_Text" value="Das Archiv muss vor der Analyse entpackt werden." />
+		<lang code="WSLabel_Options_OptionsSaved_Text" value="Die Optionen wurden gespeichert." />
+		<lang code="WSLabel_PluginListDisplayType_Text" value="Anzeige der Plugin-Liste" />
+		<lang code="WSLabel_Preview_PreviewSaved_Text" value="Die Vorschau wurde erfolgreich im Verzeichnis 'Previews' gespeichert." />
+		<lang code="WSLabel_ReadArchive_ArchiveOpenedWithScanner_Text" value="Der Scanner hat das Archiv erfolgreich geöffnet." />
+		<lang code="WSLabel_ReadArchive_ArchiveOpened_Text" value="Das Archiv wurde erfolgreich geöffnet." />
+		<lang code="WSLabel_ReadArchive_FileNotAnArchive_Text" value="Die ausgewählte Datei ist kein Archiv." />
+		<lang code="WSLabel_ReadArchive_FilenameMissing_Text" value="Es wurde keine Archivdatei zum Öffnen ausgewählt." />
+		<lang code="WSLabel_ReadArchive_MakeNewArchive_Text" value="Ein neues Archiv wurde erstellt." />
+		<lang code="WSLabel_ReadArchive_NoPluginsFound_Text" value="Keine Plugins konnten das Archiv öffnen." />
+		<lang code="WSLabel_ReadArchive_ReadWithPluginFailed_Text" value="Das ausgewählte Plugin konnte das Archiv nicht öffnen." />
+		<lang code="WSLabel_ReadArchive_ReadWithScannerFailed_Text" value="Es wurden keine Dateien vom Scanner gefunden." />
+		<lang code="WSLabel_ReadArchive_ReadWithScriptFailed_Text" value="Das ausgewählte Skript konnte das Archiv nicht öffnen." />
+		<lang code="WSLabel_RemoveFiles_FilesAdded_Text" value="Die entfernten Dateien wurden wieder zum Archiv hinzugefügt." />
+		<lang code="WSLabel_RemoveFiles_FilesRemoved_Text" value="Die ausgewählten Dateien wurden aus dem Archiv entfernt." />
+		<lang code="WSLabel_RemoveFiles_NoFilesToRemove_Text" value="Es wurden keine Dateien zum Entfernen aus dem Archiv ausgewählt." />
+		<lang code="WSLabel_RenameFiles_FilesRenamed_Text" value="Die ausgewählten Dateien wurden umbenannt." />
+		<lang code="WSLabel_TaskManager_UndoComplete_Text" value="Die Änderungen wurden rückgängig gemacht." />
+		<lang code="WSLabel_TaskManager_RedoComplete_Text" value="Die Änderungen wurden wieder angewendet." />
+		<lang code="WSLabel_RenameFiles_FilesRestored_Text" value="Die Dateien wurden auf ihre ursprünglichen Namen zurückgesetzt." />
+		<lang code="WSLabel_RenameFiles_NoFilesSelected_Text" value="Es sind keine Dateien zum Umbenennen ausgewählt." />
+		<lang code="WSLabel_RenameFiles_NoRenameValue_Text" value="Es wurde kein Name zum Umbenennen der Dateien angegeben." />
+		<lang code="WSLabel_ReplaceFiles_FilesReplaced_Text" value="Die Dateien wurden ersetzt." />
+		<lang code="WSLabel_ReplaceFiles_FilesRestored_Text" value="Die ersetzten Dateien wurden auf ihre ursprünglichen Daten zurückgesetzt." />
+		<lang code="WSLabel_SaveChanges_Text" value="Das Archiv wurde geändert. Möchten Sie die Änderungen speichern?" />
+		<lang code="WSLabel_ScriptBuilder_ErrorsFound_Text" value="" />
+		<lang code="WSLabel_ScriptBuilder_NoErrorsFound_Text" value="Dieses Skript enthält keine Fehler." />
+		<lang code="WSLabel_ScriptBuilder_NoNameSpecified_Text" value="Es wurde kein Name für die neue Datei angegeben." />
+		<lang code="WSLabel_ScriptBuilder_ScriptSaved_Text" value="Die Skriptdatei wurde gespeichert." />
+		<lang code="WSLabel_Search_MatchFound_Text" value="Die Suche hat einen Treffer gefunden." />
+		<lang code="WSLabel_Search_NoColumnsSelected_Text" value="Es wurden keine Spalten für die Suche ausgewählt." />
+		<lang code="WSLabel_Search_NoMatchFound_Text" value="Die Suche hat keine Treffer gefunden." />
+		<lang code="WSLabel_Search_NoSearchValue_Text" value="Es wurde kein Suchbegriff angegeben." />
+		<lang code="WSLabel_SelectResources_All_Text" value="Alle Dateien im Archiv sind ausgewählt." />
+		<lang code="WSLabel_SelectResources_Inverse_Text" value="Die Auswahl der Dateien im Archiv wurde umgekehrt." />
+		<lang code="WSLabel_SelectResources_None_Text" value="Die Auswahl aller Dateien im Archiv wurde aufgehoben." />
+		<lang code="WSLabel_SidePanelChanged_Text" value="Die Seitenleiste wurde geändert." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ConvertFilenameLabel_Text" value="Ausgabe" />
+		<lang code="WSLabel_SidePanel_DirectoryList_ConvertPanel_Basic_Text" value="In der Vollversion haben Sie die Möglichkeit, Archive in andere Formate zu konvertieren." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ConvertPanel_Basic_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_SidePanel_DirectoryList_CutInputFilenameLabel_Text" value="Eingabe" />
+		<lang code="WSLabel_SidePanel_DirectoryList_CutLengthLabel_Text" value="Länge" />
+		<lang code="WSLabel_SidePanel_DirectoryList_CutOutputFilenameLabel_Text" value="Ausgabe" />
+		<lang code="WSLabel_SidePanel_DirectoryList_InvalidControls_Text" value="Das aktuelle Archiv kann nicht bearbeitet oder gespeichert werden." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ModifyPanel_Basic_Text" value="In der Vollversion haben Sie die Möglichkeit, Archive zu bearbeiten, wie zum Beispiel Dateien hinzuzufügen und zu entfernen." />
+		<lang code="WSLabel_SidePanel_DirectoryList_ModifyPanel_Basic_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_SidePanel_DirectoryList_SaveNewArchiveControls_Text" value="Dieses Archiv wurde noch nicht gespeichert. Bitte nutzen Sie stattdessen 'Archiv konvertieren'." />
+		<lang code="WSLabel_SidePanel_DirectoryList_SaveNewArchiveControls_Tooltip" value="Verwenden Sie beim Speichern eines neuen Archivs stattdessen die Steuerelemente von 'Archiv konvertieren', da Sie dort das Format für das Archiv auswählen können." />
+		<lang code="WSLabel_SidePanel_DirectoryList_WriteFilenameLabel_Text" value="Ausgabe" />
+		<lang code="WSLabel_SidePanel_DirectoryList_WritePanel_Basic_Text" value="In der Vollversion haben Sie die Möglichkeit, Archive zu speichern." />
+		<lang code="WSLabel_SidePanel_DirectoryList_WritePanel_Basic_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_SidePanel_RenameFile_FullVersionOnly_Text" value="In der Vollversion haben Sie die Möglichkeit, Dateien in einem Archiv umzubenennen." />
+		<lang code="WSLabel_SidePanel_RenameFile_FullVersionOnly_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_WriteArchive_ArchiveSaved_Text" value="Das Archiv wurde erfolgreich gespeichert." />
+		<lang code="WSLabel_WriteArchive_FilenameMissing_Text" value="Sie müssen einen Dateinamen für das gespeicherte Archiv angeben." />
+		<lang code="WSList_DirectoryList_Tooltip" value="Die Verzeichnisliste, die die Dateien auf dem Computer anzeigt." />
+		<lang code="WSList_Option_ToolbarButtons_ChoicesList_Tooltip" value="Listet die Schaltflächen auf, die zur Symbolleiste hinzugefügt werden können." />
+		<lang code="WSList_Option_ToolbarButtons_CurrentList_Tooltip" value="Listet die Schaltflächen auf, die bereits in der Symbolleiste vorhanden sind." />
+		<lang code="WSList_SidePanel_PluginList_Plugins_Tooltip" value="Die geladenen Plugins des ausgewählten Typs werden hier angezeigt." />
+		<lang code="WSList_SidePanel_ScriptBuilder_CommandsList_Tooltip" value="Die Liste der Befehle, die in einem Skript verwendet werden können." />
+		<lang code="WSMenuBar_MainMenuBar_Tooltip" value="Das Hauptmenü, das alle gängigen Aufgaben auflistet." />
+		<lang code="WSMenuItem_About_Text" value="Über Game Extractor" />
+		<lang code="WSMenuItem_About_Tooltip" value="Öffnet die Seitenleiste, die Informationen über Game Extractor bereitstellt." />
+		<lang code="WSMenuItem_AddResources_Text" value="Dateien hinzufügen" />
+		<lang code="WSMenuItem_AddResources_Tooltip" value="Öffnet die Seitenleiste zum Hinzufügen von Dateien zum Archiv." />
+		<lang code="WSMenuItem_CloseProgram_Text" value="Game Extractor schließen" />
+		<lang code="WSMenuItem_CloseProgram_Tooltip" value="Schließt Game Extractor." />
+		<lang code="WSMenuItem_ConvertArchive_Text" value="Archiv konvertieren" />
+		<lang code="WSMenuItem_ConvertArchive_Tooltip" value="Öffnet die Seitenleiste, um ein Archiv in ein anderes Format zu konvertieren." />
+		<lang code="WSMenuItem_CutArchive_Text" value="Archiv schneiden" />
+		<lang code="WSMenuItem_CutArchive_Tooltip" value="Öffnet die Seitenleiste, mit der Sie ein Archiv für die Analyse schneiden können." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_OpenDirectory_Text" value="Verzeichnis öffnen" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_OpenDirectory_Tooltip" value="Wechselt in das Verzeichnis." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ParentDirectory_Text" value="Hauf zum übergeordneten Verzeichnis" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ParentDirectory_Tooltip" value="Wechselt in das übergeordnete Verzeichnis." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Normal_Text" value="Archiv öffnen" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Normal_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv öffnen können." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_OpenWith_Text" value="Mit Plugin öffnen" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_OpenWith_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv mit einem bestimmten Plugin öffnen können." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Scanner_Text" value="Archiv scannen" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Scanner_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv nach gängigen Dateien scannen können." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Script_Text" value="Mit Skript öffnen" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_ReadArchive_Script_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv mithilfe eines Skripts öffnen können." />
+		<lang code="WSMenuItem_DirectoryList_RightClick_Refresh_Text" value="Ansicht aktualisieren" />
+		<lang code="WSMenuItem_DirectoryList_RightClick_Refresh_Tooltip" value="Lädt das aktuelle Verzeichnis neu." />
+		<lang code="WSMenuItem_ExtractAllResources_Text" value="Alles entpacken" />
+		<lang code="WSMenuItem_ExtractAllResources_Tooltip" value="Entpackt alle Dateien im Archiv auf Ihren Computer." />
+		<lang code="WSMenuItem_ExtractResources_Selected_Text" value="Ausgewählte entpacken" />
+		<lang code="WSMenuItem_ExtractResources_Selected_Tooltip" value="Entpackt die ausgewählten Dateien auf Ihren Computer." />
+		<lang code="WSMenuItem_ExtractResources_Text" value="Dateien entpacken" />
+		<lang code="WSMenuItem_ExtractResources_Tooltip" value="Entpackt Dateien aus dem Archiv auf Ihren Computer." />
+		<lang code="WSMenuItem_ExtractSelectedResources_Text" value="Ausgewählte entpacken" />
+		<lang code="WSMenuItem_ExtractSelectedResources_Tooltip" value="Entpackt die ausgewählten Dateien auf Ihren Computer." />
+		<lang code="WSMenuItem_FileListDrop_Add_Text" value="Dateien hinzufügen" />
+		<lang code="WSMenuItem_FileListDrop_ReplaceCurrent_Text" value="Datei am Mauszeiger ersetzen" />
+		<lang code="WSMenuItem_FileListDrop_ReplaceMatching_Text" value="Übereinstimmende Dateien ersetzen" />
+		<lang code="WSMenuItem_FileListExporter_Text" value="Dateilisten-Exporter" />
+		<lang code="WSMenuItem_FileListExporter_Tooltip" value="Öffnet die Seitenleiste, über die Sie die Dateiliste als Dokument auf Ihrem Computer speichern können." />
+		<lang code="WSMenuItem_FileListView_FolderTable_Text" value="Ordner-Tabellenansicht" />
+		<lang code="WSMenuItem_FileListView_Table_Text" value="Tabellenansicht" />
+		<lang code="WSMenuItem_FileListView_Table_Tooltip" value="Ändert die Dateiliste zur Anzeige als Tabelle." />
+		<lang code="WSMenuItem_FileListView_TreeTable_Text" value="Gruppierte Tabelle" />
+		<lang code="WSMenuItem_FileListView_TreeTable_Tooltip" value="Ändert die Dateiliste zur Anzeige als gruppierte Tabelle." />
+		<lang code="WSMenuItem_FileListView_Tree_Text" value="Baumansicht" />
+		<lang code="WSMenuItem_FileListView_Tree_Tooltip" value="Ändert die Dateiliste zur Anzeige als Baumstruktur." />
+		<lang code="WSMenuItem_FileListView_Thumbnails_Text" value="Miniaturbildansicht" />
+		<lang code="WSMenuItem_FileListView_Thumbnails_Tooltip" value="Ändert die Dateiliste zur Anzeige als Vorschaubilder." />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_All_Text" value="Alles entpacken" />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_All_Tooltip" value="Entpackt alle Dateien im Archiv auf Ihren Computer." />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_Selected_Text" value="Ausgewählte entpacken" />
+		<lang code="WSMenuItem_FileList_RightClick_ExtractResources_Selected_Tooltip" value="Entpackt die ausgewählten Dateien auf Ihren Computer." />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Table_Text" value="Tabellenansicht" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Table_Tooltip" value="Ändert die Dateiliste zur Anzeige als Tabelle." />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_TreeTable_Text" value="Gruppierte Tabelle" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_TreeTable_Tooltip" value="Ändert die Dateiliste zur Anzeige als Tabelle von Gruppen." />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Tree_Text" value="Baumansicht" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Tree_Tooltip" value="Ändert die Dateiliste zur Anzeige als Baumstruktur." />
+		<lang code="WSMenuItem_FileList_RightClick_HexEditor_Text" value="Hex-Viewer" />
+		<lang code="WSMenuItem_FileList_RightClick_HexEditor_Tooltip" value="Öffnet die Seitenleiste, die Dateien in einem Hex-Viewer anzeigt." />
+		<lang code="WSMenuItem_FileList_RightClick_PreviewResource_Text" value="Dateivorschau" />
+		<lang code="WSMenuItem_FileList_RightClick_PreviewResource_Tooltip" value="Öffnet die Seitenleiste, die eine Vorschau von Dateien in einem Archiv anzeigt." />
+		<lang code="WSMenuItem_FileList_RightClick_RemoveResources_Text" value="Dateien entfernen" />
+		<lang code="WSMenuItem_FileList_RightClick_RemoveResources_Tooltip" value="Entfernt die ausgewählten Dateien aus dem Archiv." />
+		<lang code="WSMenuItem_FileList_RightClick_RenameResources_Text" value="Dateien umbenennen" />
+		<lang code="WSMenuItem_FileList_RightClick_RenameResources_Tooltip" value="Öffnet die Seitenleiste, in der Sie Dateien im Archiv umbenennen können." />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_All_Text" value="Alle auswählen" />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_All_Tooltip" value="Wählt alle Dateien in der Dateiliste aus." />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_Inverse_Text" value="Auswahl umkehren" />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_Inverse_Tooltip" value="Wählt die jeweils anderen Dateien in der Dateiliste aus." />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_None_Text" value="Auswahl aufheben" />
+		<lang code="WSMenuItem_FileList_RightClick_SelectResources_None_Tooltip" value="Hebt die Auswahl aller Dateien in der Dateiliste auf." />
+		<lang code="WSMenuItem_Help_Text" value="Allgemeine Hilfe" />
+		<lang code="WSMenuItem_Help_Tooltip" value="Öffnet die Seitenleiste mit der Game Extractor-Hilfe." />
+		<lang code="WSMenuItem_HexEditor_Text" value="Hex-Viewer" />
+		<lang code="WSMenuItem_HexEditor_Tooltip" value="Öffnet die Seitenleiste, die Dateien in einem Hex-Viewer anzeigt." />
+		<lang code="WSMenuItem_Information_Text" value="Information" />
+		<lang code="WSMenuItem_Information_Tooltip" value="Öffnet die Seitenleiste, die Informationen über das aktuelle Archiv und die Dateien anzeigt." />
+		<lang code="WSMenuItem_NewArchive_Text" value="Neues Archiv" />
+		<lang code="WSMenuItem_NewArchive_Tooltip" value="Erstellt ein neues Archiv." />
+		<lang code="WSMenuItem_Options_Text" value="Optionen" />
+		<lang code="WSMenuItem_Options_Tooltip" value="Öffnet die Seitenleiste zum Ändern der Game Extractor-Einstellungen." />
+		<lang code="WSMenuItem_PluginList_Text" value="Plugin-Liste" />
+		<lang code="WSMenuItem_PluginList_Tooltip" value="Öffnet die Seitenleiste, die die von Game Extractor geladenen Plugins anzeigt." />
+		<lang code="WSMenuItem_PreviewResource_Text" value="Dateivorschau" />
+		<lang code="WSMenuItem_PreviewResource_Tooltip" value="Öffnet die Seitenleiste, die eine Vorschau von Dateien in einem Archiv anzeigt." />
+		<lang code="WSMenuItem_ReadArchive_Normal_Text" value="Archiv öffnen" />
+		<lang code="WSMenuItem_ReadArchive_Normal_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv öffnen können." />
+		<lang code="WSMenuItem_ReadArchive_OpenWith_Text" value="Mit Plugin öffnen" />
+		<lang code="WSMenuItem_ReadArchive_OpenWith_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv mit einem bestimmten Plugin öffnen können." />
+		<lang code="WSMenuItem_ReadArchive_Scanner_Text" value="Archiv scannen" />
+		<lang code="WSMenuItem_ReadArchive_Scanner_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv nach gängigen Dateien scannen können." />
+		<lang code="WSMenuItem_ReadArchive_Script_Text" value="Mit Skript öffnen" />
+		<lang code="WSMenuItem_ReadArchive_Script_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv mithilfe eines Skripts öffnen können." />
+		<lang code="WSMenuItem_ReadArchive_Text" value="Archiv öffnen" />
+		<lang code="WSMenuItem_RecentFileMenu_Text" value="Zuletzt geöffnete Dateien" />
+		<lang code="WSMenuItem_RemoveResources_Text" value="Dateien entfernen" />
+		<lang code="WSMenuItem_RemoveResources_Tooltip" value="Öffnet die Seitenleiste, in der Sie Dateien aus dem Archiv entfernen können." />
+		<lang code="WSMenuItem_RenameResources_Text" value="Dateien umbenennen" />
+		<lang code="WSMenuItem_RenameResources_Tooltip" value="Öffnet die Seitenleiste, in der Sie Dateien im Archiv umbenennen können." />
+		<lang code="WSMenuItem_ReplaceResources_Text" value="Dateien ersetzen" />
+		<lang code="WSMenuItem_ReplaceResources_Tooltip" value="Öffnet die Seitenleiste, in der Sie Dateien im Archiv durch Dateien auf Ihrem Computer ersetzen können." />
+		<lang code="WSMenuItem_Scanner_Text" value="Scanner" />
+		<lang code="WSMenuItem_ScriptBuilder_Text" value="Skript-Builder" />
+		<lang code="WSMenuItem_ScriptBuilder_Tooltip" value="Zeigt die Seitenleiste an, mit der Sie ein Skript erstellen können." />
+		<lang code="WSMenuItem_SelectResources_All_Text" value="Alle auswählen" />
+		<lang code="WSMenuItem_SelectResources_All_Tooltip" value="Wählt alle Dateien in der Dateiliste aus." />
+		<lang code="WSMenuItem_SelectResources_Inverse_Text" value="Auswahl umkehren" />
+		<lang code="WSMenuItem_SelectResources_Inverse_Tooltip" value="Wählt die jeweils entgegengesetzten Dateien in der Dateiliste aus." />
+		<lang code="WSMenuItem_SelectResources_None_Text" value="Auswahl aufheben" />
+		<lang code="WSMenuItem_SelectResources_None_Tooltip" value="Hebt die Auswahl aller Dateien in der Dateiliste auf." />
+		<lang code="WSMenuItem_WriteArchive_Text" value="Archiv speichern" />
+		<lang code="WSMenuItem_WriteArchive_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Archiv speichern können." />
+		<lang code="WSMenu_ExtractResources_Text" value="Entpacken..." />
+		<lang code="WSMenu_ExtractResources_Tooltip" value="Entpacken-Menü" />
+		<lang code="WSMenu_FileList_RightClick_FileListView_Text" value="Dateilisten-Ansicht" />
+		<lang code="WSMenu_FileList_RightClick_FileListView_Tooltip" value="Ändert die Art und Weise, wie Dateien in einem Archiv angezeigt werden." />
+		<lang code="WSMenu_FileList_RightClick_SelectResources_Text" value="Dateien auswählen" />
+		<lang code="WSMenu_FileList_RightClick_SelectResources_Tooltip" value="Wählt Dateien im Archiv aus." />
+		<lang code="WSMenu_File_Text" value="Datei" />
+		<lang code="WSMenu_File_Tooltip" value="Datei-Menü" />
+		<lang code="WSMenu_Help_Text" value="Hilfe" />
+		<lang code="WSMenu_Help_Tooltip" value="Hilfe-Menü" />
+		<lang code="WSMenu_Manipulate_Text" value="Bearbeiten" />
+		<lang code="WSMenu_Manipulate_Tooltip" value="Bearbeiten-Menü" />
+		<lang code="WSMenu_Preview_Text" value="Vorschau" />
+		<lang code="WSMenu_Preview_Tooltip" value="Vorschau-Menü" />
+		<lang code="WSMenu_ReadArchive_Text" value="Archiv öffnen..." />
+		<lang code="WSMenu_ReadArchive_Tooltip" value="Optionen zum Öffnen eines Archivs" />
+		<lang code="WSMenu_Select_Text" value="Auswählen" />
+		<lang code="WSMenu_Select_Tooltip" value="Auswahl-Menü" />
+		<lang code="WSMenu_Tools_Text" value="Werkzeuge" />
+		<lang code="WSMenu_Tools_Tooltip" value="Werkzeuge-Menü" />
+		<lang code="WSMenu_View_Text" value="Ansicht" />
+		<lang code="WSMenu_View_Tooltip" value="Ansicht-Menü" />
+		<lang code="WSMenu_WriteArchive_Text" value="Archiv speichern..." />
+		<lang code="WSMenu_WriteArchive_Tooltip" value="Optionen zum Schreiben eines Archivs" />
+		<lang code="WSObjectPlugin_DUMMY_No_Conversion_Name" value="Keine Konvertierung" />
+		<lang code="WSObjectPlugin_ConversionInFullVersionOnly_Name" value="Nur in der Vollversion verfügbar" />
+		<lang code="WSObjectPlugin_Renamer_AddToBack_Name" value="Hinten hinzufügen" />
+		<lang code="WSObjectPlugin_Renamer_AddToFront_Name" value="Vorne hinzufügen" />
+		<lang code="WSObjectPlugin_Renamer_ChangeDirectory_Name" value="Verzeichnis ändern" />
+		<lang code="WSObjectPlugin_Renamer_ChangeExtension_Name" value="Dateiendung ändern" />
+		<lang code="WSObjectPlugin_Renamer_ChangeName_Name" value="Namen ändern" />
+		<lang code="WSObjectPlugin_Renamer_Rename_Name" value="Umbenennen" />
+		<lang code="WSObjectPlugin_csv_Name" value="Kommagetrennte Werte (CSV)" />
+		<lang code="WSObjectPlugin_html_Name" value="HTML-Webseite" />
+		<lang code="WSObjectPlugin_txt_Name" value="Textdokument" />
+		<lang code="WSObjectPlugin_xls_Name" value="Excel-Tabellenblatt" />
+		<lang code="WSObjectPlugin_xml_Name" value="XML-Dokument" />
+		<lang code="WSOptionGroupHolder_SidePanel_Options_OptionGroupHolder_Tooltip" value="Hier werden die Optionen angezeigt." />
+		<lang code="WSPanel_FileListPanel_TreeTable_Properties_Label" value="Archiveigenschaften" />
+		<lang code="WSPanel_FileListPanel_TreeTable_Properties_Tooltip" value="Eigenschaften und Einstellungen des Archivs." />
+		<lang code="WSPanel_FileListPanel_Table_Properties_Label" value="Archiveigenschaften" />
+		<lang code="WSPanel_FileListPanel_Table_Properties_Tooltip" value="Eigenschaften und Einstellungen des Archivs." />
+		<lang code="WSPanel_FileListPanel_Tree_Properties_Label" value="Archiveigenschaften" />
+		<lang code="WSPanel_FileListPanel_Tree_Properties_Tooltip" value="Eigenschaften und Einstellungen des Archivs." />
+		<lang code="WSPanel_FileListPanel_Thumbnails_Properties_Label" value="Archiveigenschaften" />
+		<lang code="WSPanel_FileListPanel_Thumbnails_Properties_Tooltip" value="Eigenschaften und Einstellungen des Archivs." />
+		<lang code="WSPanel_FileListPanel_TreeTable_GroupTypes_Wrapper_Label" value="Gruppen-/Filtertyp" />
+		<lang code="WSPanel_FileListPanel_TreeTable_GroupTypes_Wrapper_Tooltip" value="Verschiedene Möglichkeiten, die Anzeige zu gruppieren und zu filtern" />
+		
+		
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_FormatChooserLabel_Label" value="Bilddatenformat" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_FormatChooserLabel_Tooltip" value="Das Format der Bilddaten" />
+		
+		
+		<lang code="WSPanel_Option_Appearance_CurrentLanguage_Label_Label" value="Aktuelle Sprache" />
+		<lang code="WSPanel_Option_Appearance_CurrentLanguage_Label_Tooltip" value="" />
+		<lang code="WSPanel_Option_Appearance_PluginListDisplayType_Label_Label" value="Anzeigetyp der Plugin-Listen" />
+		<lang code="WSPanel_Option_Appearance_PluginListDisplayType_Label_Tooltip" value="" />
+		<lang code="WSPanel_Option_General_DragDropOption_Label_Label" value="Standard Drag-and-Drop-Aktion" />
+		<lang code="WSPanel_Option_General_DragDropOption_Label_Tooltip" value="" />
+		
+		<lang code="WSPanel_SidePanel_FileListExporter_ExporterPlugins_Label_Label" value="Dateilistenformat" />
+		<lang code="WSPanel_SidePanel_FileListExporter_ExporterPlugins_Label_Tooltip" value="Das beim Speichern der Dateiliste zu verwendende Format" />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder_Label" value="Bilder konvertieren in..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ImageConvertersHolder_Tooltip" value="Beim Entpacken von Dateien versucht Game Extractor, Bilder in dieses Format zu konvertieren." />
+		
+		<lang code="WSPanel_SidePanel_FileListExporter_ColumnsHolder_Label_Label" value="Zu exportierende Details..." />
+		<lang code="WSPanel_SidePanel_FileListExporter_ColumnsHolder_Label_Tooltip" value="Welche Details zu jeder Datei möchten Sie exportieren?" />
+		
+		<lang code="WSPanel_SidePanel_Preview_WritePreviewHolder_Label" value="Vorschau speichern unter..." />
+		<lang code="WSPanel_SidePanel_Preview_WritePreviewHolder_Tooltip" value="Der Dateityp, als der die Vorschau gespeichert werden soll." />
+		<lang code="WSPanel_SidePanel_About_Tooltip" value="Über Game Extractor." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ControlsHolder_Tooltip" value="Die ausgewählten Steuerelemente werden hier angezeigt. Nutzen Sie die Schaltflächen unten in der Seitenleiste, um die Steuerelemente zu wechseln." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ConvertPanel_Main_Label" value="Archiv konvertieren" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ConvertPanel_Main_Tooltip" value="Die Steuerelemente, um ein Archiv in ein anderes Format zu konvertieren." />
+		<lang code="WSPanel_SidePanel_DirectoryList_CutPanel_Main_Label" value="Unbekanntes Archiv schneiden" />
+		<lang code="WSPanel_SidePanel_DirectoryList_CutPanel_Main_Tooltip" value="Die Steuerelemente zum Schneiden eines Archivs für die Analyse." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_Main_Label" value="Dateien entpacken" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_Main_Tooltip" value="Steuerelemente zum Entpacken von Dateien auf Ihren Computer." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ModifyPanel_Main_Label" value="Archiv bearbeiten" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ModifyPanel_Main_Tooltip" value="Steuerelemente zum Bearbeiten von Archiven." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ReadPanel_Main_Label" value="Archiv öffnen" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ReadPanel_Main_Tooltip" value="Die Steuerelemente zum Öffnen eines Archivs." />
+		
+		<lang code="WSPanel_SidePanel_RenameFile_RenamerPluginsLabel_Label" value="Umbenennungstyp" />
+		<lang code="WSPanel_SidePanel_RenameFile_RenamerPluginsLabel_Tooltip" value="Die Art der durchzuführenden Umbenennung" />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ScriptPanel_Main_Label" value="Archiv mit Skript öffnen" />
+		<lang code="WSPanel_SidePanel_DirectoryList_ScriptPanel_Main_Tooltip" value="Die Steuerelemente zum Öffnen eines Archivs mithilfe eines Skripts." />
+		<lang code="WSPanel_SidePanel_DirectoryList_WritePanel_Main_Label" value="Archiv speichern" />
+		<lang code="WSPanel_SidePanel_DirectoryList_WritePanel_Main_Tooltip" value="Die Steuerelemente zum Speichern eines Archivs." />
+		<lang code="WSPanel_SidePanel_FileListExporter_Tooltip" value="Ermöglicht das Speichern der Dateiliste auf dem Computer." />
+		<lang code="WSPanel_SidePanel_HexEditor_SelectedValues_Main_Tooltip" value="Zeigt Dateien in einem Hex-Viewer an." />
+		<lang code="WSPanel_SidePanel_Information_ArchiveTable_Label_Label" value="Aktuelles Archiv" />
+		<lang code="WSPanel_SidePanel_Information_ArchiveTable_Label_Tooltip" value="Informationen über das aktuelle Archiv." />
+		<lang code="WSPanel_SidePanel_Information_PluginTable_Label_Label" value="Kompatible Plugins" />
+		<lang code="WSPanel_SidePanel_Information_PluginTable_Label_Tooltip" value="Die Plugins, die zum Öffnen dieses Archivs verwendet werden könnten." />
+		<lang code="WSPanel_SidePanel_Information_ResourceTable_Label_Label" value="Ausgewählte Dateien" />
+		<lang code="WSPanel_SidePanel_Information_ResourceTable_Label_Tooltip" value="Informationen über die ausgewählten Dateien in der Dateiliste." />
+		<lang code="WSPanel_SidePanel_Information_Tooltip" value="Informationen über das aktuelle Archiv und die Dateien." />
+		<lang code="WSPanel_SidePanel_RenameFile_Tooltip" value="Dateien umbenennen" />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_ExistingScript_Label" value="Ein vorhandenes Skript laden..." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_ExistingScript_Tooltip" value="Ein bereits vorhandenes Skript." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_NewScript_Label" value="Ein neues Skript erstellen..." />
+		<lang code="WSPanel_SidePanel_ScriptBuilder_NewScript_Tooltip" value="Ein neues Skript erstellen." />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowByte_Text" value="Bytes" />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowByte_Tooltip" value="Zeigt die Datei als eine Folge von Bytes an." />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowChar_Text" value="Zeichen" />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowChar_Tooltip" value="Zeigt die Datei als eine Folge von Zeichen an." />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowHex_Text" value="Hex" />
+		<lang code="WSRadioButton_SidePanel_HexEditor_ShowHex_Tooltip" value="Zeigt die Datei als eine Folge von Hex-Werten an." />
+		<lang code="WSRecentFileMenu_RecentFileMenu_Text" value="Zuletzt geöffnete Dateien" />
+		<lang code="WSRecentFileMenu_RecentFileMenu_Tooltip" value="Archive, die kürzlich geöffnet oder gespeichert wurden." />
+		<lang code="WSTaskMenuItem_Empty_Tooltip" value="Es sind keine Aktionen vorhanden, die rückgängig gemacht oder wiederholt werden können." />
+		<lang code="WSRedoTaskMenu_RedoMenu_Text" value="Wiederholen..." />
+		<lang code="WSRedoTaskMenu_RedoMenu_Tooltip" value="Wiederholt eine Aktion, die rückgängig gemacht wurde." />
+		<lang code="WSScrollPane_Option_ToolbarButtons_ChoicesLabel_Label" value="Verfügbare Schaltflächen" />
+		<lang code="WSScrollPane_Option_ToolbarButtons_ChoicesLabel_Tooltip" value="" />
+		<lang code="WSScrollPane_Option_ToolbarButtons_CurrentLabel_Label" value="Aktuelle Symbolleiste" />
+		<lang code="WSScrollPane_Option_ToolbarButtons_CurrentLabel_Tooltip" value="" />
+		<lang code="WSScrollPane_SidePanel_Options_Appearance_Label_Label" value="Erscheinungsbild" />
+		<lang code="WSScrollPane_SidePanel_Options_Appearance_Label_Tooltip" value="Einstellungen für das visuelle Erscheinungsbild" />
+		<lang code="WSScrollPane_SidePanel_Options_DescriptionField_Label_Label" value="Beschreibung" />
+		<lang code="WSScrollPane_SidePanel_Options_Directories_Label_Label" value="Verzeichnisse" />
+		<lang code="WSScrollPane_SidePanel_Options_Directories_Label_Tooltip" value="Die zum Speichern von Dateien verwendeten Verzeichnisse." />
+		<lang code="WSScrollPane_SidePanel_Options_General_Label_Label" value="Allgemeine Einstellungen" />
+		<lang code="WSScrollPane_SidePanel_Options_General_Label_Tooltip" value="Allgemeine Einstellungen für Game Extractor" />
+		<lang code="WSScrollPane_SidePanel_Options_HexEditorFields_Label_Label" value="Hex-Viewer-Felder" />
+		<lang code="WSScrollPane_SidePanel_Options_HexEditorFields_Label_Tooltip" value="Die Detailfelder, die im Hex-Viewer angezeigt werden" />
+		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Label" value="Archive öffnen und speichern" />
+		<lang code="WSScrollPane_SidePanel_Options_OpeningArchives_Label_Tooltip" value="Optionen für das Öffnen von Archiven." />
+		<lang code="WSScrollPane_SidePanel_Options_OptionGroupHolder_Label_Label" value="Optionen" />
+		<lang code="WSScrollPane_SidePanel_Options_Popups_Label_Label" value="Popup-Meldungen" />
+		<lang code="WSScrollPane_SidePanel_Options_Popups_Label_Tooltip" value="Wählen Sie die Popups aus, die Sie anzeigen möchten." />
+		<lang code="WSScrollPane_SidePanel_Options_PreviewingFiles_Label_Label" value="Dateivorschau" />
+		<lang code="WSScrollPane_SidePanel_Options_PreviewingFiles_Label_Tooltip" value="Optionen für die Dateivorschau." />
+		<lang code="WSScrollPane_SidePanel_Options_Scanners_Label_Label" value="Format-Scanner" />
+		<lang code="WSScrollPane_SidePanel_Options_Scanners_Label_Tooltip" value="Die Scanner, die bei der Suche nach Dateien in unbekannten Archiven verwendet werden" />
+		<lang code="WSScrollPane_SidePanel_Options_TableColumns_Label_Label" value="Spalten der Dateilistentabelle" />
+		<lang code="WSScrollPane_SidePanel_Options_TableColumns_Label_Tooltip" value="Die Spalten, die in der Tabellen-Dateiliste angezeigt werden sollen" />
+		<lang code="WSScrollPane_SidePanel_PluginList_PluginDescription_Label_Label" value="Plugin-Beschreibung" />
+		<lang code="WSScrollPane_SidePanel_PluginList_PluginDescription_Label_Tooltip" value="Die Beschreibung des ausgewählten Plugins." />
+		<lang code="WSScrollPane_SidePanel_PluginList_Plugins_Label_Label" value="Plugins" />
+		<lang code="WSScrollPane_SidePanel_PluginList_Plugins_Label_Tooltip" value="Die Plugins des ausgewählten Typs." />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_CommandsLabel_Label" value="Befehle" />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_CommandsLabel_Tooltip" value="Die Liste der Befehle, die zum Skript hinzugefügt werden können" />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_ScriptLabel_Label" value="Skript-Editor" />
+		<lang code="WSScrollPane_SidePanel_ScriptBuilder_ScriptLabel_Tooltip" value="Das Skript, das gerade erstellt oder bearbeitet wird" />
+		<lang code="WSSidePanelHolder_SidePanelHolder_Tooltip" value="Die Seitenleiste, die die Steuerelemente zum Lesen, Schreiben und Bearbeiten von Archiven anzeigt." />
+		<lang code="WSSplashDialog_Archive" value="Leeres Archiv wird erstellt" />
+		<lang code="WSSplashDialog_FileTypes" value="Generische Dateitypen werden geladen" />
+		<lang code="WSSplashDialog_Scripts" value="Skripte werden geladen" />
+		<lang code="WSStatusBar_StatusBar_Text" value="" />
+		<lang code="WSStatusBar_StatusBar_Tooltip" value="Die Statusleiste. Bewegen Sie die Maus über das Fenster, um hier weitere Informationen anzuzeigen." />
+		<lang code="WSTableColumn_AddedIcon_Text" value="Hinzugefügt?" />
+		<lang code="WSTableColumn_CRC_Text" value="CRC-Code" />
+		<lang code="WSTableColumn_CompressedLengthKB_Text" value="Komprimierte Größe (KBs)" />
+		<lang code="WSTableColumn_CompressedLength_Text" value="Komprimierte Größe" />
+		<lang code="WSTableColumn_Compressed_Text" value="Komprimiert" />
+		<lang code="WSTableColumn_Compression_Text" value="Komprimierungstyp" />
+		<lang code="WSTableColumn_DecompressedLengthKB_Text" value="Entpackte Größe (KBs)" />
+		<lang code="WSTableColumn_DecompressedLength_Text" value="Entpackte Größe" />
+		<lang code="WSTableColumn_Description_Text" value="Beschreibung" />
+		<lang code="WSTableColumn_Directory_Text" value="Verzeichnis" />
+		<lang code="WSTableColumn_Extension_Text" value="Dateiendung / Dateityp" />
+		<lang code="WSTableColumn_FilePath_Text" value="Dateipfad" />
+		<lang code="WSTableColumn_Filename_Text" value="Dateiname" />
+		<lang code="WSTableColumn_Icon_Text" value="Symbol" />
+		<lang code="WSTableColumn_Offset_Text" value="Offset" />
+		<lang code="WSTableColumn_Property_Text" value="Eigenschaft" />
+		<lang code="WSTableColumn_RenamedIcon_Text" value="Umbenannt?" />
+		<lang code="WSTableColumn_ReplacedIcon_Text" value="Ersetzt?" />
+		<lang code="WSTableColumn_Source_Text" value="Quelle" />
+		<lang code="WSTableColumn_Time_Text" value="Zeitstempel" />
+		<lang code="WSTableColumn_Value_Text" value="Wert" />
+		<lang code="WSTable_FileList_Tooltip" value="Dateiliste" />
+		<lang code="WSTextArea_SidePanel_PluginList_PluginDescription_Tooltip" value="Die Beschreibung des aktuellen Plugins" />
+		<lang code="WSTextArea_SidePanel_ScriptBuilder_Script_Tooltip" value="Das Skript." />
+		<lang code="WSTextField_ExtractDirectory_Label" value="Entpackungsverzeichnis" />
+		<lang code="WSTextField_ExtractDirectory_Tooltip" value="Das Verzeichnis, in das Dateien entpackt werden." />
+		<lang code="WSTextField_HexEditorFileSizeLimit_Label" value="Dateigrößenlimit für Hex-Viewer" />
+		<lang code="WSTextField_HexEditorFileSizeLimit_Tooltip" value="Die Datenmenge, die im Hex-Viewer angezeigt werden soll." />
+		<lang code="WSTextField_InterfaceColors_Label" value="Oberflächenfarben" />
+		<lang code="WSTextField_InterfaceColors_Tooltip" value="Die Farbe der Benutzeroberfläche." />
+		<lang code="WSTextField_LanguageDirectory_Label" value="Sprachen" />
+		<lang code="WSTextField_LanguageDirectory_Tooltip" value="Das Verzeichnis, in dem die Sprachen zu finden sind." />
+		<lang code="WSTextField_MaxAllowedScriptErrors_Label" value="Maximale Anzahl an Skriptfehlern" />
+		<lang code="WSTextField_MaxAllowedScriptErrors_Tooltip" value="Die maximale Anzahl an Fehlern, die ein Skript verursachen darf, bevor GameExtractor die Ausführung stoppt." />
+		
+		
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Label" value="Bilddaten-Offset" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_OffsetField_Tooltip" value="Der Offset in der Datei bis zum Beginn der Bilddaten" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Label" value="Breite" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_WidthField_Tooltip" value="Die Breite des Bildes" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Label" value="Höhe" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_HeightField_Tooltip" value="Die Höhe des Bildes" />
+		
+		
+		<lang code="WSTextField_MaxFilenameLength_Label" value="Maximale Dateinamenlänge" />
+		<lang code="WSTextField_MaxFilenameLength_Tooltip" value="Die maximal erlaubte Länge eines Dateinamens zur Verwendung bei der automatischen Erkennung des Archivtyps." />
+		<lang code="WSTextField_MaxNumberOfFiles2_Label" value="Maximale Anzahl an Dateien (kleine Archive)" />
+		<lang code="WSTextField_MaxNumberOfFiles2_Tooltip" value="Die maximal erlaubte Anzahl an Dateien für kleine Archive. Wird bei der automatischen Erkennung des Archivtyps verwendet." />
+		<lang code="WSTextField_MaxNumberOfFiles4_Label" value="Maximale Anzahl an Dateien (große Archive)" />
+		<lang code="WSTextField_MaxNumberOfFiles4_Tooltip" value="Die maximal erlaubte Anzahl an Dateien für große Archive. Wird bei der automatischen Erkennung des Archivtyps verwendet." />
+		<lang code="WSTextField_NumberOfRecentFiles_Label" value="Anzahl der zuletzt geöffneten Dateien" />
+		<lang code="WSTextField_NumberOfRecentFiles_Tooltip" value="Die Anzahl der zuletzt geöffneten Dateien, die gemerkt werden sollen." />
+		<lang code="WSTextField_NumberOfUndoTasks_Label" value="Anzahl der Rückgängig-Schritte" />
+		<lang code="WSTextField_NumberOfUndoTasks_Tooltip" value="Die Anzahl der Rückgängig-Schritte, die gemerkt werden sollen" />
+		<lang code="WSTextField_SavedPreviewDirectory_Label" value="Gespeicherte Vorschauen" />
+		<lang code="WSTextField_SavedPreviewDirectory_Tooltip" value="Das Verzeichnis, in dem Vorschauen gespeichert werden." />
+		<lang code="WSTextField_ScriptsDirectory_Label" value="Skriptverzeichnis" />
+		<lang code="WSTextField_ScriptsDirectory_Tooltip" value="Das Verzeichnis, in dem Skriptdateien gespeichert sind." />
+		<lang code="WSTextField_SelectedFont_Label" value="Aktuelle Schriftart" />
+		<lang code="WSTextField_SelectedFont_Tooltip" value="Die aktuelle Schriftart." />
+		<lang code="WSTextField_SidePanel_DirectoryList_ConvertFilenameField_Label" value="Speichern unter... (Dateiname)" />
+		<lang code="WSTextField_SidePanel_DirectoryList_ConvertFilenameField_Tooltip" value="Das Archiv wird unter diesem Namen gespeichert." />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutInputFilenameField_Label" value="Eingabedatei" />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutInputFilenameField_Tooltip" value="Dies ist das Archiv, das geschnitten wird." />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutOutputFilenameField_Label" value="Ausgabedatei" />
+		<lang code="WSTextField_SidePanel_DirectoryList_CutOutputFilenameField_Tooltip" value="Dies ist der Dateiname, unter dem die geschnittenen Daten gespeichert werden." />
+		<lang code="WSTextField_SidePanel_DirectoryList_ExportFilenameField_Label" value="Entpackungsverzeichnis" />
+		<lang code="WSTextField_SidePanel_DirectoryList_ExportFilenameField_Tooltip" value="Das Verzeichnis, in das die Dateien entpackt werden." />
+		<lang code="WSTextField_SidePanel_DirectoryList_WriteFilenameField_Label" value="Speichern unter... (Dateiname)" />
+		<lang code="WSTextField_SidePanel_DirectoryList_WriteFilenameField_Tooltip" value="Das Archiv wird unter diesem Namen gespeichert." />
+		<lang code="WSTextField_SidePanel_RenameFile_ReplaceValue_Label" value="Umbenennen in..." />
+		<lang code="WSTextField_SidePanel_RenameFile_ReplaceValue_Tooltip" value="Der Wert, der für die Umbenennung verwendet werden soll" />
+		<lang code="WSTextField_SidePanel_RenameFile_SearchValue_Label" value="Suchen nach..." />
+		<lang code="WSTextField_SidePanel_RenameFile_SearchValue_Tooltip" value="Der Wert, nach dem gesucht werden soll" />
+		<lang code="WSTextField_SidePanel_ScriptBuilder_ScriptName_Label" value="Skriptname" />
+		<lang code="WSTextField_SidePanel_ScriptBuilder_ScriptName_Tooltip" value="Der Name des neuen Skripts." />
+		<lang code="WSTextField_TempDirectory_Label" value="Temporäres Verzeichnis" />
+		<lang code="WSTextField_TempDirectory_Tooltip" value="Das Verzeichnis, in dem temporäre Dateien gespeichert werden." />
+		<lang code="WSTextField_FFMPEG_Path_Label" value="Pfad zu FFMPEG" />
+		<lang code="WSTextField_FFMPEG_Path_Tooltip" value="Der Pfad zu FFMPEG, falls es auf Ihrem PC installiert ist. Wird für die Vorschau einiger Audiodateien verwendet." />
+		<lang code="WSTextField_QuickBMS_Path_Label" value="Pfad zu QuickBMS" />
+		<lang code="WSTextField_QuickBMS_Path_Tooltip" value="Der Pfad zu QuickBMS, falls es auf Ihrem PC installiert ist. Wird zum Entpacken einiger ungewöhnlicher Komprimierungsformate und zum Öffnen von Archiven mithilfe von QuickBMS-Skripten verwendet." />
+		<lang code="WSToolBar_MainToolBar_Tooltip" value="Die Symbolleiste mit Schaltflächen zur Ausführung gängiger Aufgaben." />
+		<lang code="WSTree_FileList_Tooltip" value="Die Dateiliste, dargestellt als Baumstruktur." />
+		<lang code="WSUndoTaskMenu_UndoMenu_Text" value="Rückgängig..." />
+		<lang code="WSUndoTaskMenu_UndoMenu_Tooltip" value="Macht eine Aktion rückgängig." />
+		
+		<lang code="WSButton_UndoTaskComboButton_Tooltip" value="Macht eine Aktion rückgängig." />
+		<lang code="WSButton_RedoTaskComboButton_Tooltip" value="Wiederholt eine Aktion." />
+		<lang code="WSButton_UndoTaskComboButton_Text" value="Rückgängig..." />
+		<lang code="WSButton_RedoTaskComboButton_Text" value="Wiederholen..." />
+		
+		<lang code="WSButton_HexEditor_Name" value="Hex-Editor" />
+		<lang code="WSButton_About_Name" value="Über Game Extractor" />
+		<lang code="WSButton_AddResources_Name" value="Dateien hinzufügen" />
+		<lang code="WSButton_CloseProgram_Name" value="Game Extractor schließen" />
+		<lang code="WSButton_CutArchive_Name" value="Ein Archiv schneiden" />
+		<lang code="WSButton_ExtractSelectedResources_Name" value="Ausgewählte Dateien entpacken" />
+		<lang code="WSButton_FileListExporter_Name" value="Dateilisten-Exporter" />
+		<lang code="WSButton_FileListView_Name" value="Die Dateilisten-Ansicht ändern" />
+		<lang code="WSButton_FileListView_Table_Name" value="Tabellen-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_Thumbnails_Name" value="Miniaturbild-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_Tree_Name" value="Baum-Dateilistenansicht" />
+		<lang code="WSButton_FileListView_TreeTable_Name" value="Gruppierte Tabellen-Dateilistenansicht" />
+		<lang code="WSButton_Help_Name" value="Hilfe" />
+		<lang code="WSButton_Information_Name" value="Information" />
+		<lang code="WSButton_NewArchive_Name" value="Neues Archiv" />
+		<lang code="WSButton_Options_Name" value="Optionen" />
+		<lang code="WSButton_PluginList_Name" value="Plugin-Liste" />
+		<lang code="WSButton_PreviewResource_Name" value="Dateivorschau anzeigen" />
+		<lang code="WSButton_ReadArchive_Normal_Name" value="Ein Archiv lesen" />
+		<lang code="WSButton_RemoveResources_Name" value="Dateien entfernen" />
+		<lang code="WSButton_RenameResources_Name" value="Dateien umbenennen" />
+		<lang code="WSButton_ReplaceResources_Name" value="Dateien ersetzen" />
+		<lang code="WSButton_ScriptBuilder_Name" value="Skript-Builder" />
+
+		<lang code="WSButton_SelectResources_All_Name" value="Alle Dateien auswählen" />
+		<lang code="WSButton_WriteArchive_Name" value="Archiv speichern" />
+		<lang code="WSButton_RedoTaskComboButton_Name" value="Wiederholen" />
+		<lang code="WSButton_UndoTaskComboButton_Name" value="Rückgängig" />
+		
+		<lang code="WSButton_ParentDirectory_Name" value="Gehe aufwärts in das übergeordnete Verzeichnis" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadArchiveButton_Name" value="Ein Archiv lesen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ScanArchiveButton_Name" value="Ein Archiv scannen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadPanelButton_Name" value="Die Steuerelemente zum Öffnen von Archiven anzeigen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ScriptPluginList_Tooltip" value="Die Skripte, die zum Öffnen eines Archivs verwendet werden können." />
+		<lang code="WSButton_SidePanel_DirectoryList_ModifyPanelButton_Name" value="Die Steuerelemente zum Bearbeiten des Archivs anzeigen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportPanelButton_Name" value="Die Steuerelemente zum Entpacken von Dateien anzeigen" />
+		<lang code="WSButton_SidePanel_DirectoryList_WritePanelButton_Name" value="Die Steuerelemente zum Speichern von Archiven anzeigen" />
+		<lang code="WSButton_SidePanel_DirectoryList_CutPanelButton_Name" value="Die Steuerelemente zum Schneiden von Archiven anzeigen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReadScriptArchiveButton_Name" value="Ein Archiv mithilfe eines Skripts lesen" />
+		<lang code="WSButton_SidePanel_DirectoryList_AddFileButton_Name" value="Dateien hinzufügen" />
+		<lang code="WSButton_SidePanel_DirectoryList_RemoveFileButton_Name" value="Dateien entfernen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileSelectedButton_Name" value="Ausgewählte Dateien ersetzen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ReplaceFileMatchingButton_Name" value="Übereinstimmende Dateien ersetzen" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportSelectedButton_Name" value="Ausgewählte Dateien entpacken" />
+		<lang code="WSButton_SidePanel_DirectoryList_ExportAllButton_Name" value="Alle Dateien entpacken" />
+		<lang code="WSButton_SidePanel_DirectoryList_ConvertArchiveButton_Name" value="Das Archiv konvertieren" />
+		<lang code="WSButton_SidePanel_DirectoryList_WriteArchiveButton_Name" value="Das Archiv speichern" />
+		<lang code="WSButton_SidePanel_DirectoryList_CutArchiveButton_Name" value="Das Archiv schneiden" />
+		<lang code="WSButton_SidePanel_Preview_WritePreviewButton_Name" value="Die Vorschau speichern" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_OpenScript_Name" value="Ein Skript öffnen" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_CheckScript_Name" value="Das Skript überprüfen" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_TestScript_Name" value="Das Skript testen" />
+		<lang code="WSButton_SidePanel_ScriptBuilder_SaveScript_Name" value="Das Skript speichern" />
+	
+		
+		
+		<lang code="WSLabel_ZipConvertSuccess_Text" value="Die ZIP-Konvertierung war erfolgreich." />
+		
+		
+		<lang code="WSLabel_DecompressArchive_Text" value="Dieses Archiv muss vor der Untersuchung entpackt werden. Fortfahren?" />
+		
+		
+		<lang code="FileListPanel_GenericFile.png_Tooltip" value="Eine Datei" />
+		<lang code="FileListPanel_Added.png_Tooltip" value="Ja, diese Datei wurde hinzugefügt" />
+		<lang code="FileListPanel_Renamed.png_Tooltip" value="Ja, diese Datei wurde umbenannt" />
+		<lang code="FileListPanel_Replaced.png_Tooltip" value="Ja, diese Datei wurde ersetzt" />
+		<lang code="FileListPanel_Unadded.png_Tooltip" value="Nein" />
+		<lang code="FileListPanel_Unrenamed.png_Tooltip" value="Nein" />
+		<lang code="FileListPanel_Unreplaced.png_Tooltip" value="Nein" />
+		
+
+<!-- New with 3.08 -->
+		<lang code="IdentifyUnknownFileTypes" value="Dateitypen werden identifiziert" />
+		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Text" value="Unbekannte Dateitypen identifizieren (langsamer)" />
+		<lang code="WSCheckBox_IdentifyUnknownFileTypes_Tooltip" value="Wenn Dateinamen nicht in einem Archiv gespeichert sind, wird versucht, die Dateitypen automatisch zu identifizieren (ausgewählt)" />
+		
+<!-- New with 3.09 -->
+		<lang code="Progress_SplittingArchive" value="Archiv wird aufgeteilt" />
+		<lang code="WSMenuItem_FileListDrop_ReadArchive_Text" value="Archiv öffnen" />
+		<lang code="WSLabel_WriteArchive_OverwriteCurrentArchiveFile_Text" value="Sind Sie sicher, dass Sie das bestehende Archiv überschreiben möchten?\n(Drücken Sie 'Nein', um einen neuen Dateinamen zu wählen)" />
+	
+<!-- New with 3.10 -->
+		<lang code="WSButton_PreviewPanel_Image_PreviousButton_Text" value="Vorheriger Frame" />
+		<lang code="WSButton_PreviewPanel_Image_PreviousButton_Tooltip" value="Zeigt den vorherigen Frame der Bildersammlung an" />
+		<lang code="WSButton_PreviewPanel_Image_NextButton_Text" value="Nächster Frame" />
+		<lang code="WSButton_PreviewPanel_Image_NextButton_Tooltip" value="Zeigt den nächsten Frame der Bildersammlung an" />
+		
+		<lang code="WSLabel_ScriptBuilder_CantCheckQuickBMSScript_Text" value="Dies scheint ein QuickBMS-Skript zu sein.\nGame Extractor kann bei dieser Art von Skript keine Syntaxprüfung durchführen." />
+		<lang code="WSCheckBox_Popup_QuickBMSMissing_Show_Text" value="QuickBMS fehlt" />
+		<lang code="WSCheckBox_Popup_QuickBMSMissing_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn QuickBMS benötigt wird, aber nicht gefunden werden kann." />
+		
+		<lang code="WSLabel_QuickBMSMissing_Text" value="\nDieses Archiv muss QuickBMS verwenden, um das Öffnen zu unterstützen, aber es konnte nicht gefunden werden.\nMöchten Sie, dass Game Extractor es für Sie herunterlädt?\n\n" />
+		<lang code="WSLabel_QuickBMSDownloadFailure_Text" value="\nEs gab ein Problem beim Herunterladen von QuickBMS, daher müssen Sie es manuell tun.\nWeitere Informationen finden Sie im Abschnitt 'Externe Software' der Hilfe." />
+		
+		<lang code="Progress_Downloading" value="Wird heruntergeladen..." />
+		
+		<lang code="SidePanel_ImageInvestigator_SidePanel_ImageInvestigator_Text" value="Bild-Ermittler" />
+		<lang code="WSButton_ImageInvestigator_Text" value="Bild-Ermittler" />
+		<lang code="WSButton_ImageInvestigator_Tooltip" value="Zeigt ein Bedienfeld an, in dem Sie versuchen können, unbekannte Dateien als Bild darzustellen" />
+		<lang code="WSLabel_ComponentList_ImageInvestigator_Text" value="Bild-Ermittler" />		
+		<lang code="WSMenuItem_FileList_RightClick_ImageInvestigator_Text" value="Bild-Ermittler" />
+		<lang code="WSMenuItem_FileList_RightClick_ImageInvestigator_Tooltip" value="Öffnet die Seitenleiste, die versucht, unbekannte Dateien als Bild darzustellen" />
+		<lang code="WSMenuItem_ImageInvestigator_Text" value="Bild-Ermittler" />
+		<lang code="WSMenuItem_ImageInvestigator_Tooltip" value="Öffnet die Seitenleiste, die unbekannte Dateien als Bild anzeigt" />
+		<lang code="WSPanel_SidePanel_ImageInvestigator_SelectedValues_Main_Tooltip" value="Zeigt unbekannte Dateien als Bild an" />
+		<lang code="WSButton_ImageInvestigator_Name" value="Bild-Ermittler" />
+		<lang code="WSPanel_SidePanel_ImageInvestigator_WritePreviewHolder_Label" value="Bild speichern unter..." />
+		<lang code="WSPanel_SidePanel_ImageInvestigator_WritePreviewHolder_Tooltip" value="Der Dateityp, als der das Bild gespeichert werden soll." />
+		<lang code="WSButton_SidePanel_ImageInvestigator_WritePreviewButton_Tooltip" value="Speichert das Bild im gewählten Format auf dem Computer." />
+		<lang code="WSCheckBox_Popup_ImageInvestigator_PreviewSaved_Show_Text" value="Bild-Ermittler-Bild gespeichert" />
+		<lang code="WSCheckBox_Popup_ImageInvestigator_PreviewSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn das Bild aus dem Bild-Ermittler gespeichert wurde." />
+		<lang code="WSComboBox_SidePanel_ImageInvestigator_WritePreviewPlugins_Tooltip" value="Das Bild wird in diesem Format gespeichert." />
+		<lang code="WSLabel_ImageInvestigator_PreviewSaved_Text" value="Das Bild wurde erfolgreich gespeichert." />
+		<lang code="WSButton_SidePanel_ImageInvestigator_WritePreviewButton_Name" value="Bild speichern" />
+		<lang code="WSLabel_BlankImageInvestigatorPreview_Text" value="Für diese Datei kann keine Vorschau angezeigt werden." />
+		<lang code="WSLabel_BlankImageInvestigatorPreview_Tooltip" value="Kein Plugin konnte eine Vorschau dieser Datei erstellen." />
+		<lang code="WSComboBox_PreviewType_Tooltip" value="Welche Art von Vorschau soll für unbekannte Dateien angezeigt werden?" />
+		<lang code="WSLabel_PreviewType_Text" value="Vorschau-Plugin für unbekannte Dateien" />
+		<lang code="WSPanel_Option_PreviewingFiles_PreviewType_Label_Label" value="Vorschau-Plugin für unbekannte Dateien" />
+		<lang code="WSPanel_Option_PreviewingFiles_PreviewType_Label_Tooltip" value="" />
+		<lang code="Hex" value="Hex-Viewer" />
+		<lang code="ImageInvestigator" value="Bild-Ermittler" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleCheckbox_Text" value="Swizzle" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleCheckbox_Tooltip" value="Swizzling auf das Bild anwenden" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_VerticalFlipCheckbox_Text" value="Vertikal spiegeln" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_VerticalFlipCheckbox_Tooltip" value="Das Bild vertikal spiegeln" />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_LittleEndianRadioButton_Text" value="Little" />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_LittleEndianRadioButton_Tooltip" value="Werte werden in Little-Endian-Reihenfolge gelesen" />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_BigEndianRadioButton_Text" value="Big" />
+		<lang code="WSRadioButton_PreviewPanel_ImageInvestigator_BigEndianRadioButton_Tooltip" value="Werte werden in Big-Endian-Reihenfolge gelesen" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Label" value="Endian" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_EndianGroup_Tooltip" value="Die Endian-Reihenfolge, die zum Lesen der Werte aus der Datei verwendet wird" />
+		
+		<lang code="WSCheckBox_Popup_AddBMSOnDoubleClick_Show_Text" value="BMS-Skript per Doppelklick hinzufügen" />
+		<lang code="WSCheckBox_Popup_AddBMSOnDoubleClick_Show_Tooltip" value="Zeigt bei einem Doppelklick auf eine BMS-Skriptdatei eine Popup-Meldung an, in der gefragt wird, ob sie zu Game Extractor hinzugefügt werden soll." />
+		<lang code="WSLabel_AddBMSOnDoubleClick_Text" value="Dies scheint ein BMS-Skript zu sein. Möchten Sie es der Skriptliste von Game Extractor hinzufügen?" />
+		
+		<lang code="WSLabel_BasicVersionPreview_Text" value="Die Vollversion bietet viele zusätzliche Funktionen, wie diese..." />
+		<lang code="WSLabel_BasicVersionPreview_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		
+		<lang code="WSLabel_BasicVersionPreviewLink_Text" value="Besuchen Sie http://www.watto.org/extract für weitere Informationen." />
+		<lang code="WSLabel_BasicVersionPreviewLink_Tooltip" value="Klicken Sie hier, um die Game Extractor-Website in Ihrem Browser zu öffnen." />
+		
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature1_Text" value="Vorschau von Bildern und Audiodateien für Hunderte von Spielen" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature1_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature2_Text" value="Bilder in verschiedene Formate wie JPG und PNG konvertieren" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature2_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature3_Text" value="Archive als eine Liste von Kacheln mit Vorschaubildern (Thumbnails) anzeigen" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature3_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature4_Text" value="Nach Bild- und Audiodateien in nicht unterstützten Spielen scannen" />
+		<lang code="WSLabel_BasicVersionPreview_FullVersionFeature4_Tooltip" value="Diese Funktion ist nur in der Vollversion verfügbar." />
+		
+		<lang code="WSCheckBox_PreviewPanel_Text_WordWrap_Text" value="Zeilenumbruch" />
+		<lang code="WSCheckBox_PreviewPanel_Text_WordWrap_Tooltip" value="Gibt an, ob der Text automatisch umgebrochen werden soll oder nicht." />
+		<lang code="WSCheckBox_PreviewPanel_Text_MonospacedFont_Text" value="Monospace-Schrift" />
+		<lang code="WSCheckBox_PreviewPanel_Text_MonospacedFont_Tooltip" value="Gibt an, ob der Text in einer dicktengleichen Schriftart (Monospace) angezeigt werden soll oder nicht." />
+		
+		<lang code="WSCheckBox_PreviewPanel_Image_FitToPanel_Text" value="Anpassen" />
+		<lang code="WSCheckBox_PreviewPanel_Image_FitToPanel_Tooltip" value="Gibt an, ob große Bilder verkleinert werden sollen, damit sie in das Bedienfeld passen, oder ob sie in ihrer normalen Größe angezeigt werden sollen." />
+		<lang code="WSCheckBox_TiledPreviewBackground_Text" value="Transparenzmuster" />
+		<lang code="WSCheckBox_TiledPreviewBackground_Tooltip" value="Gibt an, ob ein gekacheltes Transparenzmuster hinter Bildern angezeigt werden soll oder nur eine solide Farbe." />
+
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Thumbnails_Text" value="Miniaturbildansicht" />
+		<lang code="WSMenuItem_FileList_RightClick_FileListView_Thumbnails_Tooltip" value="Ändert die Dateiliste zur Anzeige als eine Liste von Vorschaubildern." />
+		
+		<lang code="HexEditor_LittleEndian" value="Little Endian" />
+		<lang code="HexEditor_BigEndian" value="Big Endian" />
+		
+<!-- New with 3.11 -->
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesExported_Show_Text" value="Keine Dateien entpackt" />
+		<lang code="WSCheckBox_Popup_ExportFiles_NoFilesExported_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Problem aufgetreten ist und keine Dateien entpackt werden konnten." />
+		<lang code="WSLabel_ExportFiles_NoFilesExported_Text" value="Es gab ein Problem beim Versuch, die Dateien zu entpacken." />
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_SomeFilesExported_Show_Text" value="Einige Dateien entpackt" />
+		<lang code="WSCheckBox_Popup_ExportFiles_SomeFilesExported_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Teil der Dateien entpackt werden konnte, aber nicht alle." />
+		<lang code="WSLabel_ExportFiles_SomeFilesExported_Text" value="Einige Dateien wurden erfolgreich entpackt, aber nicht alle." />
+		
+		<lang code="WSCheckBox_Popup_ExportFiles_DirectoryNotWritable_Show_Text" value="Entpackungsverzeichnis nicht beschreibbar" />
+		<lang code="WSCheckBox_Popup_ExportFiles_DirectoryNotWritable_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn versucht wird, Dateien in ein Verzeichnis zu entpacken, das nicht beschreibbar ist, wie z. B. ein schreibgeschütztes Verzeichnis (eine CD/DVD) oder ohne ausreichende Schreibrechte." />
+		<lang code="WSLabel_ExportFiles_DirectoryNotWritable_Text" value="\nDateien können nicht in das Verzeichnis entpackt werden. Bitte prüfen Sie, ob es sich nicht um ein schreibgeschütztes Medium handelt (z. B. eine CD/DVD),\nob Sie die Rechte besitzen, in dieses Verzeichnis zu schreiben, oder wählen Sie ein anderes Zielverzeichnis aus.\n\n " />
+		
+		<lang code="WSLabel_ChooseCompressionType_Text" value="Bitte wählen Sie die Komprimierungsart aus, die Sie verwenden möchten." />
+		
+		<lang code="Progress_DecryptingArchive" value="Archiv wird entschlüsselt" />
+		
+		<lang code="ResourceProperty_ColorCount" value="Anzahl der Farben" />
+		<lang code="ResourceProperty_DecompressedLength" value="Entpackte Länge" />
+		<lang code="ResourceProperty_FileID" value="Datei-ID" />
+		<lang code="ResourceProperty_Filename" value="Dateiname" />
+		<lang code="ResourceProperty_FrameCount" value="Anzahl der Frames" />
+		<lang code="ResourceProperty_Hash" value="Hash-Wert" />
+		<lang code="ResourceProperty_Height" value="Bildhöhe" />
+		<lang code="ResourceProperty_ImageFormat" value="Bildpixelformat" />
+		<lang code="ResourceProperty_Length" value="Länge" />
+		<lang code="ResourceProperty_MipmapCount" value="Anzahl der Mipmaps" />
+		<lang code="ResourceProperty_Offset" value="Offset" />
+		<lang code="ResourceProperty_Version" value="Version" />
+		<lang code="ResourceProperty_Width" value="Bildbreite" />
+		<lang code="ResourceProperty_XOffset" value="Bild X-Offset" />
+		<lang code="ResourceProperty_YOffset" value="Bild Y-Offset" />
+		
+<!-- New with 3.12 -->
+
+		<lang code="WSCheckBox_SearchWildcardConversion_Text" value="* für Platzhalter in Suche/Filter verwenden" />
+		<lang code="WSCheckBox_SearchWildcardConversion_Tooltip" value="Die Verwendung des Zeichens * im Feld 'Suche/Filter' führt eine Platzhaltersuche (Wildcard) aus" />
+		<lang code="WSCheckBox_SearchRegExConversion_Text" value="Reguläre Ausdrücke (RegEx) in Suche/Filter erlauben" />
+		<lang code="WSCheckBox_SearchRegExConversion_Tooltip" value="Das Feld 'Suche/Filter' wertet reguläre Ausdrücke (RegEx) aus" />
+		<lang code="WSButton_SidePanel_Search_FilterButton_Text" value="Dateien filtern" />
+		<lang code="WSButton_SidePanel_Search_FilterButton_Tooltip" value="Filtert die Dateiliste, um nur übereinstimmende Dateien anzuzeigen" />
+		
+		<lang code="SidePanel_Search_SidePanel_Search_Text" value="Suche" />
+		<lang code="WSButton_Search_Name" value="Suche" />
+		<lang code="WSButton_Search_Text" value="Suchen oder Filtern" />
+		<lang code="WSButton_Search_Tooltip" value="Nach Dateien im Archiv suchen oder die Dateien in der Dateiliste filtern" />
+		<lang code="WSLabel_ComponentList_Search_Text" value="Suchen oder Filtern" />
+		<lang code="WSMenuItem_Search_Text" value="Suchen oder Filtern" />
+		<lang code="WSMenuItem_Search_Tooltip" value="Öffnet die Seitenleiste, in der Sie nach Dateien im Archiv suchen oder die Dateien in der Dateiliste filtern können" />
+		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Label" value="Spalten suchen oder filtern" />
+		<lang code="WSPanel_SidePanel_Search_ColumnsHolder_Label_Tooltip" value="Die Spalten, die durchsucht oder gefiltert werden." />
+		<lang code="WSPanel_SidePanel_Search_Tooltip" value="Nach Dateien im Archiv suchen oder die Dateien in der Dateiliste filtern" />
+		<lang code="WSTextField_SidePanel_Search_InputText_Label" value="Such- oder Filterwert" />
+		<lang code="WSTextField_SidePanel_Search_InputText_Tooltip" value="Der Wert, nach dem gesucht oder gefiltert werden soll" />
+		
+		<lang code="WSButton_WelcomeWizard_CloseWizard_Text" value="Willkommens-Assistenten schließen" />
+		<lang code="WSButton_WelcomeWizard_CloseWizard_Tooltip" value="Schließt den Willkommens-Assistenten." />
+		<lang code="WSButton_WelcomeWizard_PreviousScreen_Text" value="Zurück" />
+		<lang code="WSButton_WelcomeWizard_PreviousScreen_Tooltip" value="Zeigt den vorherigen Bildschirm im Willkommens-Assistenten an." />
+		<lang code="WSButton_WelcomeWizard_NextScreen_Text" value="Weiter" />
+		<lang code="WSButton_WelcomeWizard_NextScreen_Tooltip" value="Zeigt den nächsten Bildschirm im Willkommens-Assistenten an." />
+		
+		<lang code="WSLabel_WelcomeWizard_WelcomeMessage_Text" value="Neu bei Game Extractor? Dieser Assistent zeigt Ihnen die Grundlagen." />
+		<lang code="WelcomeWizard_Screen01_Label" value="Klicken Sie oben auf dem Bildschirm auf die Schaltfläche 'Archiv öffnen'.\nDie Verzeichnisliste öffnet sich auf der rechten Seite." />
+		<lang code="WelcomeWizard_Screen02_Label" value="Doppelklicken Sie auf das Archiv, das Sie öffnen möchten.\nDie Dateien in den Archiven werden in der Dateiliste angezeigt." />
+		<lang code="WelcomeWizard_Screen03_Label" value="Wenn Sie Dateien auf Ihren Computer entpacken möchten, klicken Sie oben auf dem\nBildschirm auf die Schaltfläche 'Dateien entpacken'. Die Verzeichnisliste öffnet sich rechts." />
+		<lang code="WelcomeWizard_Screen04_Label" value="Wählen Sie das Verzeichnis, in das Sie die Dateien entpacken möchten. Klicken Sie auf\ndie Schaltfläche 'Alles entpacken', um alles zu entpacken. Wenn Sie nur bestimmte Dateien\nmöchten, wählen Sie diese aus und klicken Sie auf 'Ausgewählte entpacken'." />
+		
+		<lang code="WSCheckBox_ShowWelcomeWizard_Text" value="Den Willkommens-Assistenten wieder anzeigen" />
+		<lang code="WSCheckBox_ShowWelcomeWizard_Tooltip" value="Zeigt den Willkommens-Assistenten beim nächsten Start von Game Extractor an." />
+		
+		<lang code="WSCheckBox_NintendoSwitchSwizzle_Text" value="Nintendo Switch Bild-Swizzle" />
+		<lang code="WSCheckBox_NintendoSwitchSwizzle_Tooltip" value="Macht das Swizzling von Bildern in Nintendo Switch-Archiven rückgängig (Unswizzle)" />
+		
+		<lang code="Progress_AnalyzingDirectory" value="Verzeichnis wird analysiert" />
+		<lang code="WSButton_AnalyzeDirectory_Name" value="Ein Verzeichnis analysieren" />
+		<lang code="WSButton_AnalyzeDirectory_Tooltip" value="Analysiert ein Verzeichnis, um Archive und andere Dateien zu finden, die von Game Extractor geöffnet werden können." />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzeDirectoryButton_Name" value="Das Archiv analysieren" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzeDirectoryButton_Tooltip" value="Analysiert ein Verzeichnis" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzePanelButton_Name" value="Die Steuerelemente zur Verzeichnisanalyse anzeigen" />
+		<lang code="WSButton_SidePanel_DirectoryList_AnalyzePanelButton_Tooltip" value="Zeigt die Steuerelemente zur Verzeichnisanalyse an." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_DirectoryAnalyzed_Show_Text" value="Verzeichnisanalyse erfolgreich" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_DirectoryAnalyzed_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn ein Verzeichnis erfolgreich analysiert wurde." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FilenameMissing_Show_Text" value="Analyse-Verzeichnis fehlt" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FilenameMissing_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn das zu analysierende Verzeichnis fehlt oder ungültig ist." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FileNotADirectory_Show_Text" value="Analyse-Ort ist kein Verzeichnis" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_FileNotADirectory_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn der zu analysierende Ort kein Verzeichnis ist." />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_InvalidReportFile_Show_Text" value="Berichtsname für Verzeichnisanalyse fehlt" />
+		<lang code="WSCheckBox_Popup_AnalyzeDirectory_InvalidReportFile_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn der Berichtsname bei der Analyse eines Verzeichnisses fehlt oder ungültig ist." />
+		<lang code="WSLabel_ComponentList_AnalyzeDirectory_Text" value="Verzeichnis analysieren" />
+		<lang code="WSLabel_AnalyzeDirectory_DirectoryAnalyzed_Text" value="Das Verzeichnis wurde erfolgreich analysiert." />
+		<lang code="WSLabel_AnalyzeDirectory_FilenameMissing_Text" value="Das Eingabeverzeichnis ist ungültig oder fehlt." />
+		<lang code="WSLabel_AnalyzeDirectory_FileNotADirectory_Text" value="Der ausgewählte Ort ist kein Verzeichnis." />
+		<lang code="WSLabel_AnalyzeDirectory_InvalidReportFile_Text" value="Der Dateiname des Berichts fehlt oder ist ungültig." />
+		<lang code="WSLabel_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameLabel_Text" value="Eingabe" />
+		<lang code="WSMenuItem_AnalyzeDirectory_Text" value="Verzeichnis analysieren" />
+		<lang code="WSMenuItem_AnalyzeDirectory_Tooltip" value="Öffnet die Seitenleiste, über die Sie ein Verzeichnis analysieren können." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzePanel_Main_Label" value="Ein Verzeichnis analysieren" />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzePanel_Main_Tooltip" value="Die Steuerelemente zum Analysieren eines Verzeichnisses." />
+		<lang code="WSTextField_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField_Label" value="Generierter Berichtsdateiname" />
+		<lang code="WSTextField_SidePanel_DirectoryList_AnalyzeDirectoryOutputFilenameField_Tooltip" value="Dies ist der Dateiname des Analyseberichts, der generiert wird." />
+
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins_Text" value="Vorschaufähige Formate identifizieren" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins_Tooltip" value="Gibt an, ob Dateien identifiziert werden sollen, die vorschaufähig sind, wie z. B. Bilder und Audiodateien." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories_Text" value="Unterverzeichnisse analysieren" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories_Tooltip" value="Gibt an, ob auch Dateien in Unterverzeichnissen analysiert werden sollen oder nur das aktuelle Verzeichnis." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives_Text" value="Formate innerhalb von Archiven identifizieren" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives_Tooltip" value="Gibt an, ob Archive geöffnet und alle darin enthaltenen Dateitypen identifiziert werden sollen oder nur die Archivtypen selbst." />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles_Text" value="Alle Dateien aus Archiven entpacken" />
+		<lang code="WSCheckBox_SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles_Tooltip" value="Entpackt die Dateien in allen Archiven in das Dateisystem." />
+		
+		<lang code="WSCheckBox_ShowAdvancedControlsInDirectoryList_Text" value="Erweiterte Funktionssteuerung unter der Verzeichnisliste anzeigen" />
+		<lang code="WSCheckBox_ShowAdvancedControlsInDirectoryList_Tooltip" value="Zeigt zusätzliche Schaltflächen unter der Verzeichnisliste an, um erweiterte Funktionen auszuführen" />
+
+		<lang code="WSTextField_FileListExporterDirectory_Label" value="Gespeicherte Dateilisten" />
+		<lang code="WSTextField_FileListExporterDirectory_Tooltip" value="Das Verzeichnis, in dem Dateilisten gespeichert werden." />
+		
+		<lang code="WSTextField_AnalysisExtractDirectory_Label" value="Analyseberichte und Entpackungen" />
+		<lang code="WSTextField_AnalysisExtractDirectory_Tooltip" value="Das Verzeichnis, in das Dateien vom Analysewerkzeug entpackt werden und in dem der Analysebericht generiert wird." />
+		
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Tooltip" value="Der Analysebericht wird in diesem Format gespeichert." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label_Label" value="Generiertes Berichtsformat" />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_Label_Tooltip" value="Das beim Generieren des Berichts zu verwendende Format" />
+		
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Tooltip" value="Bilder werden beim Entpacken in dieses Format konvertiert." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label_Label" value="Bilder konvertieren in..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ConverterPlugins_Label_Tooltip" value="Bilder werden beim Entpacken in dieses Format konvertiert." />
+
+		<lang code="AnalyzeDirectory_Report_CSV" value="Kommagetrennte Werte (CSV)" />
+		<lang code="AnalyzeDirectory_Report_Tabbed" value="Textdokument" />
+		<lang code="AnalyzeDirectory_Report_HTML" value="HTML-Webseite" />
+		<lang code="AnalyzeDirectory_Report_Excel" value="Excel-Tabellenblatt" />
+		<lang code="AnalyzeDirectory_Report_JSON" value="JSON-Dokument" />
+		<lang code="AnalyzeDirectory_Report_XML" value="XML-Dokument" />
+		
+		<lang code="WSLabel_DeleteAnalysisDirectory_Text" value="Möchten Sie den Inhalt des Analyse-Verzeichnisses löschen?" />
+		
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Wireframe_Text" value="Drahtgitter" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Wireframe_Tooltip" value="Zeigt das Modell als Drahtgitterzeichnung an." />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Smoothing_Text" value="Glättung" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_Smoothing_Tooltip" value="Gibt an, ob das Modell geglättet werden soll oder ob es harte Kanten behalten soll." />
+		
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Name" value="Änderungen speichern" />
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Text" value="Änderungen speichern" />
+		<lang code="WSButton_PreviewPanel_Text_SaveChanges_Tooltip" value="Speichert alle Änderungen, die Sie an der Textdatei vorgenommen haben." />
+		
+		<lang code="WSCheckBox_Popup_PreviewPanel_Text_ChangesSaved_Show_Text" value="Änderungen an Textdatei gespeichert" />
+		<lang code="WSCheckBox_Popup_PreviewPanel_Text_ChangesSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Änderungen an einer Textdatei gespeichert wurden." />
+		<lang code="WSLabel_PreviewPanel_Text_ChangesSaved_Text" value="Die Änderungen an der Textdatei wurden gespeichert." />
+		
+		<lang code="WSLabel_ImportModifiedExportFiles_Text" value="Einige der entpackten oder in der Vorschau angezeigten Dateien wurden von anderen Programmen geändert.\nMöchten Sie die geänderten Dateien in dieses Archiv importieren?" />
+		<lang code="WSCheckBox_AutoImportModifiedExportFiles_Text" value="Entpackte Dateien, die von anderen Programmen geändert wurden, automatisch importieren" />
+		<lang code="WSCheckBox_AutoImportModifiedExportFiles_Tooltip" value="Wenn Sie Dateien entpacken oder in der Vorschau anzeigen und diese in anderen Programmen bearbeiten, kann Game Extractor sie automatisch importieren, sobald sie sich ändern." />
+		<lang code="WSCheckBox_Popup_ModifiedFilesImported_Show_Text" value="Von externen Programmen geänderte Dateien wurden importiert" />
+		<lang code="WSCheckBox_Popup_ModifiedFilesImported_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn Dateien, die von externen Programmen geändert wurden, in das Archiv importiert wurden." />
+		<lang code="WSLabel_ModifiedFilesImported_Text" value="Die geänderten Dateien wurden importiert." />
+		
+		<lang code="WSButton_PreviewPanel_Image_PreviousPaletteButton_Text" value="Vorherige Palette" />
+		<lang code="WSButton_PreviewPanel_Image_PreviousPaletteButton_Tooltip" value="Wechselt zur vorherigen Farbpalette in der Sammlung." />
+		<lang code="WSButton_PreviewPanel_Image_NextPaletteButton_Text" value="Nächste Palette" />
+		<lang code="WSButton_PreviewPanel_Image_NextPaletteButton_Tooltip" value="Wechselt zur nächsten Farbpalette in der Sammlung." />
+		
+		<lang code="WSLabel_PreviewPanel_3DModel_RotateLabel_Text" value="Drehen" />
+		<lang code="WSLabel_PreviewPanel_3DModel_RotateLabel_Tooltip" value="Das Modell drehen" />
+		<lang code="WSLabel_PreviewPanel_3DModel_MoveLabel_Text" value="Bewegen" />
+		<lang code="WSLabel_PreviewPanel_3DModel_MoveLabel_Tooltip" value="Das Modell bewegen" />
+		<lang code="WSLabel_PreviewPanel_3DModel_ZoomLabel_Text" value="Zoom" />
+		<lang code="WSLabel_PreviewPanel_3DModel_ZoomLabel_Tooltip" value="Das Modell zoomen" />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_RotateUp_Tooltip" value="Dreht das Modell nach oben" />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateDown_Tooltip" value="Dreht das Modell nach unten" />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateLeft_Tooltip" value="Dreht das Modell nach links" />
+		<lang code="WSButton_PreviewPanel_3DModel_RotateRight_Tooltip" value="Dreht das Modell nach rechts" />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_MoveUp_Tooltip" value="Bewegt das Modell nach oben" />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveDown_Tooltip" value="Bewegt das Modell nach unten" />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveLeft_Tooltip" value="Bewegt das Modell nach links" />
+		<lang code="WSButton_PreviewPanel_3DModel_MoveRight_Tooltip" value="Bewegt das Modell nach rechts" />
+		
+		<lang code="WSButton_PreviewPanel_3DModel_ZoomIn_Tooltip" value="Zoomt in das Modell hinein" />
+		<lang code="WSButton_PreviewPanel_3DModel_ZoomOut_Tooltip" value="Zoomt aus dem Modell heraus" />
+		
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder_Label" value="Modelle konvertieren in..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_ExportPanel_ModelConvertersHolder_Tooltip" value="Beim Entpacken von Dateien versucht Game Extractor, Modelle in dieses Format zu konvertieren." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ExportPanel_ModelConverters_Tooltip" value="Beim Entpacken von Dateien versucht Game Extractor, Modelle in dieses Format zu konvertieren." />
+		<lang code="WSComboBox_SidePanel_DirectoryList_ExportPanel_ImageConverters_Tooltip" value="Beim Entpacken von Dateien versucht Game Extractor, Bilder in dieses Format zu konvertieren." />
+
+		<lang code="WSComboBox_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Tooltip" value="Modelle werden beim Entpacken in dieses Format konvertiert." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Label" value="Modelle konvertieren in..." />
+		<lang code="WSPanel_SidePanel_DirectoryList_AnalyzeDirectory_ModelConverterPlugins_Label_Tooltip" value="Modelle werden beim Entpacken in dieses Format konvertiert." />
+
+<!-- New with 3.13 -->
+
+		<lang code="WSCheckBox_PreviewPanel_3DModel_ShowTextures_Text" value="Texturen" />
+		<lang code="WSCheckBox_PreviewPanel_3DModel_ShowTextures_Tooltip" value="Gibt an, ob Texturbilder angezeigt werden sollen (falls zutreffend) oder nur das reine Gittermodell" />
+		
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_RegenerateMeshButton_Text" value="Gittermodell generieren" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_RegenerateMeshButton_Tooltip" value="Generiert das Gittermodell (Mesh) unter Verwendung der in den anderen Feldern festgelegten Eigenschaften neu" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_ShowStatsLogButton_Text" value="Statistiken anzeigen" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_ShowStatsLogButton_Tooltip" value="Zeigt detaillierte Statistiken des Gittermodells an" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseStatsLogButton_Text" value="Protokoll schließen" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseStatsLogButton_Tooltip" value="Schließt das Popup-Fenster des Statistikprotokolls" />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexOffsetField_Label" value="Daten-Offset" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexOffsetField_Tooltip" value="Der Offset in der Datei bis zum Beginn der Vertex-Daten" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexCountField_Label" value="Anzahl" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexCountField_Tooltip" value="Die Anzahl der Vertices" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexBlockSizeField_Label" value="Blockgröße" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_VertexBlockSizeField_Tooltip" value="Die Anzahl der Bytes, die zum Speichern jedes Vertex verwendet werden" />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceOffsetField_Label" value="Daten-Offset" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceOffsetField_Tooltip" value="Der Offset in der Datei bis zum Beginn der Face-Index-Daten" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceCountField_Label" value="Anzahl" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceCountField_Tooltip" value="Die Anzahl der Face-Indizes" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceBlockSizeField_Label" value="Blockgröße" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_FaceBlockSizeField_Tooltip" value="Die Anzahl der Bytes, die zum Speichern jedes Face-Index verwendet werden" />
+		
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_UVOffsetField_Label" value="Textur-UV-Offset (relativ)" />
+		<lang code="WSTextField_PreviewPanel_MeshInvestigator_UVOffsetField_Tooltip" value="Der Offset im Vertex-Block zum Textur-UV-Wert" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CalculateUVButton_Text" value="UV berechnen" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CalculateUVButton_Tooltip" value="Berechnet das Textur-UV-Bild für das Gittermodell" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseUVButton_Text" value="Popup schließen" />
+		<lang code="WSButton_PreviewPanel_MeshInvestigator_CloseUVButton_Tooltip" value="Schließt das UV-Textur-Popup-Fenster" />
+		
+		<lang code="SidePanel_MeshInvestigator_SidePanel_MeshInvestigator_Text" value="Gittermodell-Ermittler" />
+		<lang code="WSButton_MeshInvestigator_Text" value="Gittermodell-Ermittler" />
+		<lang code="WSButton_MeshInvestigator_Tooltip" value="Zeigt ein Bedienfeld an, in dem Sie versuchen können, unbekannte Dateien als 3D-Gittermodell darzustellen" />
+		<lang code="WSLabel_ComponentList_MeshInvestigator_Text" value="Gittermodell-Ermittler" />		
+		<lang code="WSMenuItem_FileList_RightClick_MeshInvestigator_Text" value="Gittermodell-Ermittler" />
+		<lang code="WSMenuItem_FileList_RightClick_MeshInvestigator_Tooltip" value="Öffnet die Seitenleiste, die versucht, unbekannte Dateien als 3D-Gittermodell darzustellen" />
+		<lang code="WSMenuItem_MeshInvestigator_Text" value="Gittermodell-Ermittler" />
+		<lang code="WSMenuItem_MeshInvestigator_Tooltip" value="Öffnet die Seitenleiste, die unbekannte Dateien als 3D-Gittermodell anzeigt" />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_SelectedValues_Main_Tooltip" value="Zeigt unbekannte Dateien als 3D-Gittermodell an" />
+		<lang code="WSButton_MeshInvestigator_Name" value="Gittermodell-Ermittler" />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_WritePreviewHolder_Label" value="Gittermodell speichern unter..." />
+		<lang code="WSPanel_SidePanel_MeshInvestigator_WritePreviewHolder_Tooltip" value="Der Dateityp, als der das Gittermodell gespeichert werden soll." />
+		<lang code="WSButton_SidePanel_MeshInvestigator_WritePreviewButton_Tooltip" value="Speichert das Gittermodell im gewählten Format auf dem Computer." />
+		<lang code="WSCheckBox_Popup_MeshInvestigator_PreviewSaved_Show_Text" value="Gittermodell aus Gittermodell-Ermittler gespeichert" />
+		<lang code="WSCheckBox_Popup_MeshInvestigator_PreviewSaved_Show_Tooltip" value="Zeigt eine Popup-Meldung an, wenn das Gittermodell aus dem Gittermodell-Ermittler gespeichert wurde." />
+		<lang code="WSComboBox_SidePanel_MeshInvestigator_WritePreviewPlugins_Tooltip" value="Das Gittermodell wird in diesem Format gespeichert." />
+		<lang code="WSLabel_MeshInvestigator_PreviewSaved_Text" value="Das Gittermodell wurde erfolgreich gespeichert." />
+		<lang code="WSButton_SidePanel_MeshInvestigator_WritePreviewButton_Name" value="Gittermodell speichern" />
+		<lang code="WSLabel_BlankMeshInvestigatorPreview_Text" value="Für diese Datei kann keine Vorschau angezeigt werden." />
+		<lang code="WSLabel_BlankMeshInvestigatorPreview_Tooltip" value="Kein Plugin konnte eine Vorschau dieser Datei erstellen." />
+		<lang code="MeshInvestigator" value="Gittermodell-Ermittler" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_VertexPanelLabel_Label" value="Vertices" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_VertexPanelLabel_Tooltip" value="Informationen über die Vertices im Gittermodell" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_FacePanelLabel_Label" value="Face-Indizes" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_FacePanelLabel_Tooltip" value="Informationen über die Face-Indizes im Gittermodell" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_UVPanelLabel_Label" value="Textur-UV-Offset (relativ)" />
+		<lang code="WSPanel_PreviewPanel_MeshInvestigator_UVPanelLabel_Tooltip" value="Der Offset im Vertex-Block zum Textur-UV-Wert" />
+		
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SettingsPanelLabel_Label" value="Einstellungen" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SettingsPanelLabel_Tooltip" value="Einstellungen, die das Rendern des Bildes beeinflussen." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_OffsetWidthHeightPanelLabel_Label" value="Bilddetails" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_OffsetWidthHeightPanelLabel_Tooltip" value="Die Hauptdetails des Bildes, das Sie generieren möchten." />
+		
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Text" value="Swizzle (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzlePS2Checkbox_Tooltip" value="PlayStation 2 Swizzling auf das Bild anwenden" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Text" value="Swizzle (Switch)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_SwizzleSwitchCheckbox_Tooltip" value="Nintendo Switch Swizzling auf das Bild anwenden" />
+		
+		<lang code="WSLabel_CheckExportDirectory_Text" value="Bitte wählen (oder überprüfen) Sie das Entpackungsverzeichnis unten rechts und versuchen Sie dann erneut zu entpacken." />
+		
+		<lang code="Description_ConvertOnReplace" value="Beim Ersetzen von Dateien in Archiven dieses Typs werden einige Dateien möglicherweise in ein anderes Format konvertiert, beispielsweise von einem Standardformat in ein herstellerspezifisches Format." />
+		<lang code="Description_AllowScanForFileTypes" value="Diese Archive enthalten möglicherweise keine Dateinamen. In diesem Fall können die Dateien gescannt werden, wobei einige Dateitypen aus diesem Prozess identifiziert werden können, wie beispielsweise Standard-Bild- und Audioformate." />
+
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteOffsetField_Label" value="Paletten-Offset" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteOffsetField_Tooltip" value="Der Offset in der Datei bis zum Beginn der Palettendaten" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteNumColorsField_Label" value="Farbanzahl" />
+		<lang code="WSTextField_PreviewPanel_ImageInvestigator_PaletteNumColorsField_Tooltip" value="Die Anzahl der Farben in der Palette." />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PaletteFormatChooserLabel_Label" value="Format" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PaletteFormatChooserLabel_Tooltip" value="Das Format der Palettendaten" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PalettePanelLabel_Label" value="Palettendetails" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_PalettePanelLabel_Tooltip" value="Die Hauptdetails der für das Bild verwendeten Farbpalette." />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Text" value="Palette streifen (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_StripePalettePS2Checkbox_Tooltip" value="Die Farbpalette streifen (PS2)" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Text" value="Alpha entfernen" />
+		<lang code="WSCheckBox_PreviewPanel_ImageInvestigator_RemoveAlphaCheckbox_Tooltip" value="Den Alphakanal aus dem Bild entfernen" />
+		
+<!-- New with 3.14 -->
+
+		<lang code="WSPanel_PreviewPanel_Table_DetailsPanelHolder_Label" value="Ausgewählte Details" />
+		<lang code="WSPanel_PreviewPanel_Table_DetailsPanelHolder_Tooltip" value="Alle Details der aktuell ausgewählten Zeile." />
+		
+		<lang code="WSTableColumn_Offset_Text" value="Offset" />
+		<lang code="WSTableColumn_Original_Text" value="Ursprünglicher Wert" />
+		<lang code="WSTableColumn_Edited_Text" value="Bearbeiteter Wert" />
+		
+		<lang code="ResourceProperty_RelatedResource" value="Zugehörige Ressource" />
+		
+<!-- New with 3.15 -->
+
+		<lang code="WSLabel_ReloadToShowFontChanges_Text" value="Schriftartänderungen werden beim nächsten Start von Game Extractor wirksam" />
+		
+		<lang code="WSCheckBox_CopyFilenameOnRightClick_Text" value="Dateiname bei Rechtsklick in der Dateiliste kopieren" />
+		<lang code="WSCheckBox_CopyFilenameOnRightClick_Tooltip" value="Wenn dieses Kontrollkästchen aktiviert ist, wird der Dateiname beim Rechtsklick auf einen Eintrag in der Dateiliste in die Zwischenablage kopiert." />
+		
+<!-- New with 3.16 -->
+
+		<lang code="WSCheckBox_UnityMeshExtendedErrorChecking_Text" value="Erweiterte Fehlerprüfung für Unity-Meshes" />
+		<lang code="WSCheckBox_UnityMeshExtendedErrorChecking_Tooltip" value="Aktivieren, um Unity-Meshes zu validieren (erhöht die Chance auf eine korrekte Darstellung der Meshes)" />
+		
+<!-- New with 3.16.0001 -->
+
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SwizzleFormatChooserLabel_Label" value="Swizzle" />
+		<lang code="WSPanel_PreviewPanel_ImageInvestigator_SwizzleFormatChooserLabel_Tooltip" value="Die Art des Swizzlings, das auf die Bilddaten angewendet werden soll" />
+		<lang code="ResourceProperty_BitsPerPixel" value="Bits pro Pixel" />
+		
+		<lang code="WSCheckBox_PreviewPanel_MeshInvestigator_TriangleStripCheckbox_Text" value="Strip" />
+		<lang code="WSCheckBox_PreviewPanel_MeshInvestigator_TriangleStripCheckbox_Tooltip" value="Gibt an, ob Face-Indizes als Triangle Strip (ausgewählt) oder als einzelne Dreiecke (nicht ausgewählt) gelesen werden sollen" />
+		
+<!-- New with 3.16.0002 -->
+
+		<lang code="WSLabel_JavaFXMissing_Text" value="Es sieht so aus, als ob Game Extractor in einer Java-Version ausgeführt wird, der die JavaFX-Bibliotheken fehlen.\n\nBitte führen Sie stattdessen die JavaFX-Version von Game Extractor aus." />
+		
+<!-- New with 3.16.0005 -->
+
+		<lang code="WSButton_PreviewPanel_3DModel_PreviousButton_Text" value="Vorheriges Mesh" />
+		<lang code="WSButton_PreviewPanel_3DModel_PreviousButton_Tooltip" value="Zeigt das vorherige Mesh im Modell an" />
+		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Text" value="Nächstes Mesh" />
+		<lang code="WSButton_PreviewPanel_3DModel_NextButton_Tooltip" value="Zeigt das nächste Mesh im Modell an" />
+		<lang code="PreviewPanel_3DModel_FullModel" value="Vollständiges Modell" />
+		
+<!-- New with 3.16.0006 -->
+
+		<lang code="WSCheckBox_PromptForModifiedExportFiles_Text" value="Prompt when Extracted Files are modified?" />
+		<lang code="WSCheckBox_PromptForModifiedExportFiles_Tooltip" value="When you extract files, if you modify them outside of Game Extractor, do you want Game Extractor to detect the changes (ticked) or ignore them (unticked)." />
+		
+		<lang code="WSCheckBox_PrependArchiveNameWhenExporting_Text" value="Prepend Archive Name on extracted files?" />
+		<lang code="WSCheckBox_PrependArchiveNameWhenExporting_Tooltip" value="When extracting files, add the archive name to the beginning of the filename (ticked) or just extract with the filename as it shows in Game Extractor (unticked)." />
+		
+		<lang code="" value="" />
+		
+	</texts>
+	
+</languagePack>

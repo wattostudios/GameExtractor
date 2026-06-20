@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.viewer;
 
 import org.watto.ErrorLogger;
+import org.watto.TemporarySettings;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
@@ -926,6 +927,10 @@ public class Viewer_DDS_DDS extends ViewerPlugin {
             throw new Exception();
           }
         }
+      }
+
+      if (TemporarySettings.getBoolean("ForceVerticalImageFlip")) {
+        imageResource = ImageFormatReader.flipVertically(imageResource);
       }
 
       imageResource.addProperty("MipmapCount", "" + mipMapCount);

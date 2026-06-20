@@ -88,14 +88,15 @@ public class Exporter_Custom_FSB_Audio extends ExporterPlugin {
   
   **********************************************************************************************
   **/
-  public byte[] buildGenHHeader(int freq, short chans, int rawlen) {
+  public byte[] buildGenHHeader(int freq, short chans, int rawlen, byte[] extraData) {
     int genhsz = 0x80; // in case of future additions to the format
 
     ByteBuffer byteBuffer = new ByteBuffer(genhsz);
     FileManipulator fm = new FileManipulator(byteBuffer);
 
     // 4 - Magic Number (0x47454e48)
-    fm.writeInt(0x47454e48);
+    //fm.writeInt(0x47454e48);
+    fm.writeString("GENH");
 
     // 4 - Channel Count
     fm.writeInt(chans);
@@ -140,16 +141,33 @@ public class Exporter_Custom_FSB_Audio extends ExporterPlugin {
     fm.writeInt(genhsz + 32);
 
     // Fill the header to the right size
-    for (int i = (int) fm.getOffset(); i < genhsz; i++) {
+    for (int i = 60; i < genhsz; i++) {
       fm.writeByte(0);
     }
 
     // Add the channel padding info
-    for (int i = 0; i < chans; i++) {
-      for (int j = 0; j < 16; j++) {
-        fm.writeShort(0);
-      }
+    // [3.16.0006] Fixed and working for GameCube games in FSB3
+    int extraDataSize = 0;
+    if (extraData != null) {
+      extraDataSize = extraData.length;
+    }
+    int extraDataPos = 0;
 
+    for (int i = 0; i < chans; i++) {
+      //if (coeff != 0 && (coeffsz >= 0x2e)) {
+      if ((extraDataSize - extraDataPos) >= 46) {
+        for (int e = 0; e < 32; e++) {
+          fm.writeByte(extraData[extraDataPos + e]);
+        }
+        extraDataPos += 46;
+        //coeff += 0x2e;
+        //coeffsz -= 0x2e;
+      }
+      else {
+        for (int j = 0; j < 16; j++) {
+          fm.writeShort(0);
+        }
+      }
     }
 
     // return the pointer to the beginning of the buffer, ready for grabbing the buffer contents
@@ -178,7 +196,7 @@ public class Exporter_Custom_FSB_Audio extends ExporterPlugin {
   public byte[] buildITSHeader(String fname, short chans, short bits, int rawlen) {
 
     /* note that doesn't seem possible to know if the sample has been encoded with 2.14 or 2.15 */
-    int flags = 1 | 8;  // 8 for compression
+    int flags = 1 | 8; // 8 for compression
     if (bits == 16) {
       flags |= 2;
     }
@@ -286,7 +304,8 @@ public class Exporter_Custom_FSB_Audio extends ExporterPlugin {
         int codec = resource.getCodec();
 
         if (codec == Resource_FSB_Audio.CODEC_GCADPCM) { // untested
-          header = buildGenHHeader(frequency, channels, (int) readLength);
+          byte[] extraData = resource.getExtraData();
+          header = buildGenHHeader(frequency, channels, (int) readLength, extraData);
         }
         else if (codec == Resource_FSB_Audio.CODEC_IMAADPCM) { // TESTED AND WORKING!
           header = buildXBoxIMAHeader(frequency, channels, (int) readLength, samplesLength);
@@ -468,7 +487,7 @@ public class Exporter_Custom_FSB_Audio extends ExporterPlugin {
     fm.writeInt(chans);
 
     // 4 - Interleave
-    fm.writeInt(rawlen / chans);  // seems to be the correct interleave value
+    fm.writeInt(rawlen / chans); // seems to be the correct interleave value
 
     // 4 - Unknown
     fm.writeInt(0);

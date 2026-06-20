@@ -125,7 +125,7 @@ public class _Plugin_XXX_DirFile extends ArchivePlugin {
 
       // RESETTING GLOBAL VARIABLES
 
-      long arcSize = (int) path.length();
+      long arcSize = path.length();
 
       File sourcePath = getDirectoryFile(path, "idx");
       FileManipulator fm = new FileManipulator(sourcePath, false);

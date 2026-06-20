@@ -341,6 +341,7 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
    * Reads an [archive] File into the Resources
    **********************************************************************************************
    **/
+  @SuppressWarnings("unused")
   @Override
   public Resource[] read(File path) {
     try {
@@ -587,6 +588,8 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
             furthestSectionLength = currentLength;
           }
 
+          System.out.println("Section " + sectionName + " with offset " + currentOffset + " and length " + currentLength);
+
           // 4 - Offset To Relocations
           // 4 - Offset To Line Numbers
           // 2 - Number Of Relocations
@@ -749,7 +752,8 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           //furthestOffset += 2; // there's a 2-null byte between directory and file data
 
           // the furthest offset needs to be padded to a multiple of 16 bytes
-          furthestOffset += calculatePadding(furthestOffset, 16);
+          // [3.16.0006] Removed, as GOG installer EXE shows this is incorrect 
+          //furthestOffset += calculatePadding(furthestOffset, 16);
 
           long difference = earliestOffset - furthestOffset; // yeah i know, the naming makes it seem the wrong way around, but this is right!
 
@@ -772,13 +776,141 @@ public class Plugin_DLL_MZ extends ArchivePlugin {
           }
         }
 
+      }
+
+      // Now analyze InnoSetup installers (eg GOG)
+      for (int i = 0; i < realNumFiles; i++) {
+        Resource resource = resources[i];
+        if (resource.getName().equals("Raw Data/11111/0")) {
+          fm.seek(resource.getOffset());
+
+          // Ref: https://github.com/dscharrer/innoextract/blob/master/src/loader/offsets.cpp#L112
+
+          // 12 - InnoSetup Header
+          int version1 = fm.readInt();
+          int version2 = fm.readInt();
+          int version3 = fm.readInt();
+
+          if (version1 == 1349272690) { // rDlP
+            if (version2 == 842027892 && version3 == 2018928007) { // { { 'r', 'D', 'l', 'P', 't', 'S', '0', '2', 0x87, 'e', 'V', 'x' },    INNO_VERSION(1, 2, 10) },
+              version1 = 1;
+              version2 = 2;
+              version3 = 10;
+            }
+            else if (version2 == 875582324 && version3 == 2018928007) { // { { 'r', 'D', 'l', 'P', 't', 'S', '0', '4', 0x87, 'e', 'V', 'x' },    INNO_VERSION(4, 0,  0) },
+              version1 = 4;
+              version2 = 0;
+              version3 = 0;
+            }
+            else if (version2 == 892359540 && version3 == 2018928007) { // { { 'r', 'D', 'l', 'P', 't', 'S', '0', '5', 0x87, 'e', 'V', 'x' },    INNO_VERSION(4, 0,  3) },
+              version1 = 4;
+              version2 = 0;
+              version3 = 3;
+            }
+            else if (version2 == 909136756 && version3 == 2018928007) { // { { 'r', 'D', 'l', 'P', 't', 'S', '0', '6', 0x87, 'e', 'V', 'x' },    INNO_VERSION(4, 0, 10) },
+              version1 = 4;
+              version2 = 0;
+              version3 = 10;
+            }
+            else if (version2 == 925913972 && version3 == 2018928007) { // { { 'r', 'D', 'l', 'P', 't', 'S', '0', '7', 0x87, 'e', 'V', 'x' },    INNO_VERSION(4, 1,  6) },
+              version1 = 4;
+              version2 = 1;
+              version3 = 6;
+            }
+            else if (version2 == -422751372 && version3 == 705395671) { // { { 'r', 'D', 'l', 'P', 't', 'S', 0xcd, 0xe6, 0xd7, '{', 0x0b, '*' }, INNO_VERSION(5, 1,  5) },
+              version1 = 5;
+              version2 = 1;
+              version3 = 5;
+            }
+            else { // unknown
+              version1 = 0;
+              version2 = 0;
+              version3 = 0;
+            }
+          }
+          else if (version1 == 1463112558 && version2 == -2091621321 && version3 == 1779375018) { // { { 'n', 'S', '5', 'W', '7', 'd', 'T', 0x83, 0xaa, 0x1b, 0x0f, 'j' }, INNO_VERSION(5, 1,  5) },
+            version1 = 5;
+            version2 = 1;
+            version3 = 5;
+          }
+          else { // unknown
+            version1 = 0;
+            version2 = 0;
+            version3 = 0;
+          }
+
+          if (version1 == 0 && version2 == 0 && version3 == 0) {
+            ErrorLogger.log("[DLL_MZ] Unsupported InnoSetup Version");
+            break; // unsupported version
+          }
+
+          if (version1 == 5 && version2 == 1 && version3 == 5) {
+            // 4 - Revision (1)
+            fm.skip(4);
+          }
+
+          // 4 - Unknown
+          fm.skip(4);
+
+          // 4 - EXE Offset
+          int exeOffset = fm.readInt();
+
+          int exeCompressedSize = 0;
+          if (version1 == 4 && version2 == 1 && version3 == 6) {
+            exeCompressedSize = 0;
+          }
+          else {
+            // 4 - Compressed EXE Length
+            exeCompressedSize = fm.readInt();
+          }
+
+          // 4 - Uncompressed EXE Length
+          int exeDecompressedSize = fm.readInt();
+
+          if (version1 == 4 && version2 == 0 && version3 == 3) {
+            //exe_checksum.type = crypto::CRC32;
+            // 4 - CRC
+            fm.skip(4);
+          }
+          else {
+            // exe_checksum.type = crypto::Adler32;
+            // 4 - Adler32
+            fm.skip(4);
+          }
+
+          /*
+          int messageOffset = 0;
+          if (version1 == 4 && version2 == 0 && version3 == 0) {
+            messageOffset = 0;
+          }
+          else {
+            // 4 - Message Offset
+            messageOffset = fm.readInt();
+          }
+          */
+
+          // 4 - Header Offset
+          int headerOffset = fm.readInt();
+
+          // 4 - Data Offset
+          int dataOffset = fm.readInt();
+
+          // don't actually do anything more with InnoSetup at this point, too complicated, happy for someone else to write support for it.
+          // Ref: https://github.com/dscharrer/innoextract/
+
+          break;
+        }
+
+      }
+
+      // shrink to the right size
+      if (realNumFiles < numFiles) {
         resources = resizeResources(resources, realNumFiles);
-        return resources;
       }
 
       fm.close();
 
-      return null;
+      return resources;
 
     }
     catch (

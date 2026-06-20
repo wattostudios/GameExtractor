@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -1241,11 +1241,51 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
           }
 
           if (((int) checkRadiusX) >= 0 && ((int) checkRadiusX) <= 1 && ((int) checkRadiusY) >= 0 && ((int) checkRadiusY) <= 1 && ((int) checkRadiusZ) >= 0 && ((int) checkRadiusZ) <= 1) {
-            // the radius checks out, so this was probably the right vertex block size
+            // the radius checks out, so this was probably the right vertex block size, on a CENTERED object
             tripleZeroCount = 0;
           }
           else {
-            tripleZeroCount = 999;
+            // allow for non-centered objects [3.16.0006]
+
+            checkCenterX *= 100;
+            checkCenterY *= 100;
+            checkCenterZ *= 100;
+
+            if (checkCenterX < 0) {
+              checkCenterX = 0 - checkCenterX;
+            }
+            if (checkCenterY < 0) {
+              checkCenterY = 0 - checkCenterY;
+            }
+            if (checkCenterZ < 0) {
+              checkCenterZ = 0 - checkCenterZ;
+            }
+
+            checkRadiusX -= checkCenterX;
+            checkRadiusY -= checkCenterY;
+            checkRadiusZ -= checkCenterZ;
+
+            int checkCount = 0;
+            if (((int) checkRadiusX) >= 0 && ((int) checkRadiusX) <= 2) {
+              checkCount++;
+            }
+            if (((int) checkRadiusY) >= 0 && ((int) checkRadiusY) <= 2) {
+              checkCount++;
+            }
+            if (((int) checkRadiusZ) >= 0 && ((int) checkRadiusZ) <= 2) {
+              checkCount++;
+            }
+
+            if (checkCount >= 2) {
+              // the radius checks out, so this was probably the right vertex block size on a NON-CENTERED object
+              if (Settings.getBoolean("DebugMode")) {
+                System.out.println("[Viewer_Unity3D_MESH]: Passed with non-centered bounds: Radius:\t" + checkRadiusX + "\t" + checkRadiusY + "\t" + checkRadiusZ + "\tCenter:\t" + checkCenterX + "\t" + checkCenterY + "\t" + checkCenterZ + "\t");
+              }
+              tripleZeroCount = 0;
+            }
+            else {
+              tripleZeroCount = 999;
+            }
           }
         }
 
@@ -1338,11 +1378,51 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
         }
 
         if (((int) checkRadiusX) >= 0 && ((int) checkRadiusX) <= 1 && ((int) checkRadiusY) >= 0 && ((int) checkRadiusY) <= 1 && ((int) checkRadiusZ) >= 0 && ((int) checkRadiusZ) <= 1) {
-          // the radius checks out, so this was probably the right vertex block size
+          // the radius checks out, so this was probably the right vertex block size on a CENTERED object
           tripleZeroCount = 0;
         }
         else {
-          tripleZeroCount = 999;
+          // allow for non-centered objects [3.16.0006]
+
+          checkCenterX *= 100;
+          checkCenterY *= 100;
+          checkCenterZ *= 100;
+
+          if (checkCenterX < 0) {
+            checkCenterX = 0 - checkCenterX;
+          }
+          if (checkCenterY < 0) {
+            checkCenterY = 0 - checkCenterY;
+          }
+          if (checkCenterZ < 0) {
+            checkCenterZ = 0 - checkCenterZ;
+          }
+
+          checkRadiusX -= checkCenterX;
+          checkRadiusY -= checkCenterY;
+          checkRadiusZ -= checkCenterZ;
+
+          int checkCount = 0;
+          if (((int) checkRadiusX) >= 0 && ((int) checkRadiusX) <= 2) {
+            checkCount++;
+          }
+          if (((int) checkRadiusY) >= 0 && ((int) checkRadiusY) <= 2) {
+            checkCount++;
+          }
+          if (((int) checkRadiusZ) >= 0 && ((int) checkRadiusZ) <= 2) {
+            checkCount++;
+          }
+
+          if (checkCount >= 2) {
+            // the radius checks out, so this was probably the right vertex block size on a NON-CENTERED object
+            if (Settings.getBoolean("DebugMode")) {
+              System.out.println("[Viewer_Unity3D_MESH]: Passed with non-centered bounds: Radius:\t" + checkRadiusX + "\t" + checkRadiusY + "\t" + checkRadiusZ + "\tCenter:\t" + checkCenterX + "\t" + checkCenterY + "\t" + checkCenterZ + "\t");
+            }
+            tripleZeroCount = 0;
+          }
+          else {
+            tripleZeroCount = 999;
+          }
         }
 
       }
@@ -1495,7 +1575,9 @@ public class Viewer_Unity3D_MESH extends ViewerPlugin {
 
       return preview;
     }
-    catch (Throwable t) {
+    catch (
+
+    Throwable t) {
       ErrorLogger.log(t);
       return null;
     }

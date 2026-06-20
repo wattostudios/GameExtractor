@@ -343,10 +343,36 @@ public class PreviewPanel_Image extends PreviewPanel implements WSClickableInter
       // Add buttons to move to the next frame
       //frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"GridLayout\" position=\"CENTER\" rows=\"1\" columns=\"2\"><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" /></WSPanel></WSPanel>"));
       frameControls = new WSPanel(XMLReader.read("<WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtonsHolder\" layout=\"BorderLayout\"><WSPanel obeyBackgroundColor=\"true\" code=\"PreviewPanel_Image_ManualFrameButtons\" layout=\"ReverseBorderLayout\" position=\"CENTER\" ><WSButton code=\"PreviewPanel_Image_PreviousButton\" opaque=\"true\" showText=\"true\" position=\"WEST\" /><WSLabel code=\"PreviewPanel_Image_FrameCountLabel\" opaque=\"true\" width=\"100\" /><WSButton code=\"PreviewPanel_Image_NextButton\" opaque=\"true\" showText=\"true\" position=\"EAST\" /></WSPanel></WSPanel>"));
-      Settings.set("PreviewPanel_Image_CurrentFrame", 0); // reset the frame position back to 0 when loading a new image
 
-      WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_FrameCountLabel");
-      frameCountLabel.setText("1  /  " + imageResource.getFrameCount());
+      int numFrames = imageResource.getFrameCount();
+
+      boolean retainCurrentFrame = TemporarySettings.getBoolean("PreviewPanel_Image_RetainCurrentFrame");
+      if (retainCurrentFrame) {
+        int frameNumber = Settings.getInt("PreviewPanel_Image_CurrentFrame");
+        if (frameNumber < 0 || frameNumber >= numFrames) {
+          frameNumber = 0;
+          Settings.set("PreviewPanel_Image_CurrentFrame", 0); // had to change it, as it was out-of-bounds,
+        }
+
+        // Move the actual imageResource to the frame that was selected
+        for (int f = 0; f < frameNumber; f++) {
+          imageResource = imageResource.getNextFrame();
+        }
+
+        // set the actual image that will be displayed
+        image = imageResource.getImage();
+        zoomImage = image;
+
+        // set the label
+        WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_FrameCountLabel");
+        frameCountLabel.setText((frameNumber + 1) + "  /  " + numFrames);
+      }
+      else {
+        Settings.set("PreviewPanel_Image_CurrentFrame", 0); // reset the frame position back to 0 when loading a new image
+
+        WSLabel frameCountLabel = (WSLabel) ComponentRepository.get("PreviewPanel_Image_FrameCountLabel");
+        frameCountLabel.setText("1  /  " + imageResource.getFrameCount());
+      }
     }
     WSPanel paletteControls = null;
     if (imageResource != null && imageResource instanceof PalettedImageResource && PaletteManager.getNumPalettes() > 1) {

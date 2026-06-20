@@ -378,7 +378,8 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
         "BGR565",
         "RGBA5551",
         "ARGB1555",
-        "BGRA5551"
+        "BGRA5551",
+        "RGB5A3Wii"
     };
 
     paletteFormatChooser.setModel(new DefaultComboBoxModel(paletteFormats));
@@ -402,7 +403,12 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
         "PSP 4bit",
         "PSP 8bit",
         "PSP 32bit",
-        "Switch"
+        "Switch",
+        "BC 4bit",
+        "BC 8bit",
+        "GameCube 4bit",
+        "GameCube 8bit",
+        "GameCube 32bit"
     };
 
     swizzleFormatChooser.setModel(new DefaultComboBoxModel(swizzleFormats));
@@ -726,6 +732,14 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
           palette = ImageFormatReader.readBGRA5551(fm, 1, paletteNumColors).getImagePixels();
         }
       }
+      else if (paletteFormat.equals("RGB5A3Wii")) {
+        //if (bigEndian) {
+        //  palette = ImageFormatReader.readPaletteRGB5A3WiiBigEndian(fm, paletteNumColors);
+        //}
+        //else {
+        palette = ImageFormatReader.readPaletteRGB5A3Wii(fm, paletteNumColors);
+        //}
+      }
 
       if (doStripePalettePS2) {
         palette = ImageSwizzler.stripePalettePS2(palette);
@@ -782,6 +796,46 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       int dataLength = imageWidth * imageHeight * 4;
       byte[] rawBytes = fm.readBytes(dataLength);
       byte[] bytes = ImageSwizzler.unswizzlePSP32Bit(rawBytes, imageWidth, imageHeight);
+
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(bytes));
+    }
+    else if (swizzleFormat.equals("BC 4bit")) {
+      int dataLength = imageWidth * imageHeight / 2;
+      byte[] rawBytes = fm.readBytes(dataLength);
+      byte[] bytes = ImageSwizzler.unswizzleBC4Bit(rawBytes, imageWidth, imageHeight);
+
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(bytes));
+    }
+    else if (swizzleFormat.equals("BC 8bit")) {
+      int dataLength = imageWidth * imageHeight;
+      byte[] rawBytes = fm.readBytes(dataLength);
+      byte[] bytes = ImageSwizzler.unswizzleBC8Bit(rawBytes, imageWidth, imageHeight);
+
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(bytes));
+    }
+    else if (swizzleFormat.equals("GameCube 4bit")) {
+      int dataLength = imageWidth * imageHeight / 2;
+      byte[] rawBytes = fm.readBytes(dataLength);
+      byte[] bytes = ImageSwizzler.unswizzleGameCube4Bit(rawBytes, imageWidth, imageHeight);
+
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(bytes));
+    }
+    else if (swizzleFormat.equals("GameCube 8bit")) {
+      int dataLength = imageWidth * imageHeight;
+      byte[] rawBytes = fm.readBytes(dataLength);
+      byte[] bytes = ImageSwizzler.unswizzleGameCube8Bit(rawBytes, imageWidth, imageHeight);
+
+      fm.close();
+      fm = new FileManipulator(new ByteBuffer(bytes));
+    }
+    else if (swizzleFormat.equals("GameCube 32bit")) {
+      int dataLength = imageWidth * imageHeight * 4;
+      byte[] rawBytes = fm.readBytes(dataLength);
+      byte[] bytes = ImageSwizzler.unswizzleGameCube32Bit(rawBytes, imageWidth, imageHeight);
 
       fm.close();
       fm = new FileManipulator(new ByteBuffer(bytes));

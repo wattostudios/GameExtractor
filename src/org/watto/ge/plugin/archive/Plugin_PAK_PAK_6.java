@@ -145,6 +145,7 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       TaskProgressManager.setMaximum(arcSize);
 
       // Loop through directory
+      unknownEntryTypeCount = 0;
       while (fm.getOffset() < dataOffset - 4) {
         readDirectory(fm, path, resources, "", dataOffset, arcSize);
       }
@@ -152,7 +153,7 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       //
       // THIS CODE IS ONLY TO STOP FALSE POSITIVES IN THE AUTODETECT
       //
-      if (realNumFiles <= 3) {
+      if (realNumFiles <= 3 || unknownEntryTypeCount > 10) {
         return null; // to try and stop false positives
       }
       else {
@@ -181,6 +182,8 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       return null;
     }
   }
+
+  int unknownEntryTypeCount = 0;
 
   /**
    **********************************************************************************************
@@ -239,6 +242,7 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       }
       else {
         ErrorLogger.log("[PAK_PAK_6] Unknown entry type: " + entryType);
+        unknownEntryTypeCount++;
       }
 
     }

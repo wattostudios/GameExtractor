@@ -136,6 +136,10 @@ public class Exploder {
   };
 
   public static int pkexplode(byte[] pInBuffer, byte[] pOutBuffer) {
+    return pkexplode(pInBuffer, pOutBuffer, false);
+  }
+
+  public static int pkexplode(byte[] pInBuffer, byte[] pOutBuffer, boolean inputSizeOnly) {
     // Compressed data cannot be less than 4 bytes;
     // this is not possible in any case whatsoever
     if (pInBuffer.length < 4) {
@@ -189,6 +193,10 @@ public class Exploder {
         if (pInPos >= pInBuffer.length) {
           // Store the current size of output
           // nOutSize = pOutPos - pOutBuffer;
+          if (inputSizeOnly) {
+            // we only know the compLength, not the decompLength, so return successfully.
+            return pOutPos;
+          }
           throw new IllegalArgumentException("PK_ERR_INCOMPLETE_INPUT: Incomplete input");
         }
 

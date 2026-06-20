@@ -98,6 +98,7 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
         "gcm",
         "gcsw",
         "gcw",
+        "genh",
         "gms",
         "gsp",
         "hca",
@@ -259,6 +260,7 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
         "xmu",
         "xss",
         "xvas",
+        //"xvag", // use FFMPEG instead, not that it really matters, they both seem to handle the same ones (and fail on the same ones)
         "xwav",
         "xwb",
         "ydsp",
@@ -426,6 +428,7 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
     }
 
     return new Viewer_WAV_RIFF().read(convertedFile);
+    //return new Viewer_FFMPEG_Audio_WAV().read(convertedFile); (for files with more then 2 channels - eg some GameCube audio)
 
   }
 

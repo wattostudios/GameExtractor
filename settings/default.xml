@@ -4,6 +4,10 @@
 		<setting code="Version" value="3.16" changable="false" />
 		
 		<setting code="CopyFilenameOnRightClick" value="false" />
+		
+		<setting code="PrependArchiveNameWhenExporting" value="false" />
+		
+		<setting code="PromptForModifiedExportFiles" value="true" />
 		<setting code="AboutFile" value="settings/about.xml" />
 		
 		<setting code="MaxImageDimension" value="4096" />

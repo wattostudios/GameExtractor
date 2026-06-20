@@ -192,6 +192,18 @@ public class Exporter_Custom_VAG_Audio extends ExporterPlugin {
           if (channelsString != null && channelsString.length() > 0) {
             channels = Short.parseShort(channelsString);
           }
+
+          /*
+          String signedString = source.getProperty("AudioSigned");
+          if (signedString != null) {
+            if (signedString.equalsIgnoreCase("true")) {
+              signed = true;
+            }
+            else {
+              signed = false;
+            }
+          }
+          */
         }
         catch (Throwable t) {
         }
@@ -370,9 +382,9 @@ public class Exporter_Custom_VAG_Audio extends ExporterPlugin {
       { -98.0 / 64.0, 55.0 / 64.0 },
       { -122.0 / 64.0, 60.0 / 64.0 } };
 
-  double _s_1 = 0.0;                            // s[t-1]
+  double _s_1 = 0.0; // s[t-1]
 
-  double _s_2 = 0.0;                            // s[t-2]
+  double _s_2 = 0.0; // s[t-2]
 
   /**
   **********************************************************************************************
@@ -399,7 +411,7 @@ public class Exporter_Custom_VAG_Audio extends ExporterPlugin {
       s_2 = _s_2;
       for (j = 0; j < 28; j++) {
         //s_0 = (double) ShortConverter.unsign(samples[j]);                      // s[t-0]
-        s_0 = (double) samples[j];                      // s[t-0]
+        s_0 = (double) samples[j]; // s[t-0]
         if (s_0 > 30719.0)
           s_0 = 30719.0;
         if (s_0 < -30720.0)
@@ -409,8 +421,8 @@ public class Exporter_Custom_VAG_Audio extends ExporterPlugin {
         if (Math.abs(ds) > max[i])
           max[i] = Math.abs(ds);
         //printf( "%+5.2f\n", s2 );
-        s_2 = s_1;                                  // new s[t-2]
-        s_1 = s_0;                                  // new s[t-1]
+        s_2 = s_1; // new s[t-2]
+        s_1 = s_0; // new s[t-1]
       }
 
       if (max[i] < min) {

@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.FileType;
@@ -23,6 +24,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteArrayConverter;
+import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
@@ -84,7 +86,9 @@ public class Plugin_VIV extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(2).equals(new String(new byte[] { (byte) 192, (byte) 251 }))) {
+      //if (fm.readString(2).equals(new String(new byte[] { (byte) 192, (byte) 251 }))) {
+      byte[] headerBytes = fm.readBytes(2);
+      if (ByteConverter.unsign(headerBytes[0]) == 192 && ByteConverter.unsign(headerBytes[1]) == 251) {
         rating += 50;
       }
 
@@ -104,7 +108,9 @@ public class Plugin_VIV extends ArchivePlugin {
       return rating;
 
     }
-    catch (Throwable t) {
+    catch (
+
+    Throwable t) {
       return 0;
     }
   }

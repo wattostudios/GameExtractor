@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2022 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.component.PreviewPanel;
@@ -25,6 +26,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.PluginFinder;
 import org.watto.ge.plugin.RatedPlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.ge.plugin.viewer.Viewer_SDU_SRSC_SDUTEX;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
@@ -51,6 +53,7 @@ public class Plugin_SDU_SRSC extends ArchivePlugin {
 
     setGames("The Suffering",
         "The Suffering: Ties That Bind",
+        "The Suffering: Prison is Hell",
         "Drakan: Order Of The Flame");
     setExtensions("sdu", "tdu", "mdu");
     setPlatforms("PC");
@@ -147,6 +150,7 @@ public class Plugin_SDU_SRSC extends ArchivePlugin {
       fm.skip(14);
 
       // Loop through directory
+      int[] types = new int[numFiles];
       for (int i = 0; i < numFiles; i++) {
         // 2 - Type ID?
         int typeID = fm.readShort();
@@ -170,9 +174,20 @@ public class Plugin_SDU_SRSC extends ArchivePlugin {
         else if (typeID == 516) {
           typeString = ".sdu_mdl";
         }
+        else if (typeID == 770) {
+          typeString = ".audio_head";
+        }
+        else if (typeID == 771) {
+          typeString = ".wav";
+        }
+        else if (typeID == 773) {
+          typeString = ".audio_prop";
+        }
         else {
           typeString = "." + typeID;
         }
+
+        types[i] = typeID;
 
         String filename = Resource.generateFilename(i) + typeString;
 
@@ -180,6 +195,50 @@ public class Plugin_SDU_SRSC extends ArchivePlugin {
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
+      }
+
+      fm.getBuffer().setBufferSize(8); // small quick reads
+
+      // Go through all the audio files, read their headers, and convert to WAV audio...
+      for (int i = 0; i < numFiles; i++) {
+
+        if (types[i] == 771) {
+          // Audio file
+          if (i == 0) {
+            continue; // no files before this one
+          }
+
+          if (types[i - 1] == 770) {
+            // Audio header
+            Resource headerResource = resources[i - 1];
+            fm.seek(headerResource.getOffset() + 44);
+
+            // 2 - Number of Channels
+            short numChannels = fm.readShort();
+            if (numChannels < 1 || numChannels > 2) {
+              continue;
+            }
+
+            // 2 - Bitrate
+            short bitrate = fm.readShort();
+            if (bitrate < 8 || bitrate > 32) {
+              continue;
+            }
+
+            // 2 - Frequency
+            int frequency = fm.readInt();
+            if (frequency < 8000 || frequency > 45000) {
+              continue;
+            }
+
+            Resource oldResource = resources[i];
+            Resource_WAV_RawAudio wavResource = new Resource_WAV_RawAudio(path, oldResource.getName(), oldResource.getOffset(), oldResource.getDecompressedLength());
+            wavResource.setAudioProperties(frequency, bitrate, numChannels);
+            resources[i] = wavResource;
+
+          }
+        }
+
       }
 
       fm.close();

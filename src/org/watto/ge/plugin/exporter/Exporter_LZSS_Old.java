@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.exporter;
 
 import java.io.BufferedInputStream;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
@@ -29,6 +30,14 @@ public class Exporter_LZSS_Old extends ExporterPlugin {
 
   static LZSSInputStream readSource;
   static byte[] singleBuffer = new byte[1];
+
+  static boolean updateDecompLength = false;
+  static int bytesRead = 0;
+  static Resource readingResource = null;
+
+  public void updateDecompLengthAfterDecompression(boolean update) {
+    updateDecompLength = update;
+  }
 
   /**
   **********************************************************************************************
@@ -58,6 +67,7 @@ public class Exporter_LZSS_Old extends ExporterPlugin {
     try {
       int numAvailable = readSource.read(singleBuffer);
       if (numAvailable > 0) {
+        bytesRead++;
         return true;
       }
       return false;
@@ -77,9 +87,17 @@ public class Exporter_LZSS_Old extends ExporterPlugin {
     try {
       readSource.close();
       readSource = null;
+
+      if (updateDecompLength) {
+        readingResource.setDecompressedLength(bytesRead);
+        bytesRead = 0;
+      }
+
+      readingResource = null;
     }
     catch (Throwable t) {
       readSource = null;
+      readingResource = null;
     }
   }
 
@@ -99,6 +117,14 @@ public class Exporter_LZSS_Old extends ExporterPlugin {
       is.setFakeLength(source.getLength() - 4);
 
       readSource = new LZSSInputStream(new BufferedInputStream(is));
+
+      bytesRead = 0;
+
+      if (updateDecompLength) {
+        // remember the Resource, if we're going to update it after decompression
+        readingResource = source;
+
+      }
     }
     catch (Throwable t) {
     }

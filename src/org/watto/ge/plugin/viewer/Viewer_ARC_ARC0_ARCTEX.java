@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2022 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -26,8 +26,9 @@ import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_ARC_ARC0;
+import org.watto.ge.plugin.archive.Plugin_ARC_ARCC;
 import org.watto.io.FileManipulator;
-import org.watto.io.converter.ByteConverter;
+import org.watto.io.buffer.ByteBuffer;
 
 /**
 **********************************************************************************************
@@ -45,7 +46,8 @@ public class Viewer_ARC_ARC0_ARCTEX extends ViewerPlugin {
     super("ARC_ARC0_ARCTEX", "ARC_TEX Image");
     setExtensions("arc_tex");
 
-    setGames("Big Mutha Truckers");
+    setGames("Big Mutha Truckers",
+        "Street Racing Syndicate");
     setPlatforms("PS2");
     setStandardFileFormat(false);
   }
@@ -74,6 +76,9 @@ public class Viewer_ARC_ARC0_ARCTEX extends ViewerPlugin {
       ArchivePlugin plugin = Archive.getReadPlugin();
       if (plugin instanceof Plugin_ARC_ARC0) {
         rating += 50;
+      }
+      else if (plugin instanceof Plugin_ARC_ARCC) {
+        rating += 25;
       }
       else if (!(plugin instanceof AllFilesPlugin)) {
         return 0;
@@ -134,7 +139,20 @@ public class Viewer_ARC_ARC0_ARCTEX extends ViewerPlugin {
     try {
 
       // 4 - Unknown
-      // 1 - Unknown (128)
+      fm.skip(4);
+
+      // 2 - Height
+      int height = fm.readShort();
+
+      // 2 - Unknown
+      // 2 - Unknown
+      // 2 - Unknown
+      // 2 - Unknown
+      fm.skip(8);
+
+      // 2 - Width [*2]
+      int width = fm.readShort() * 2;
+
       // 1 - Unknown (0/16)
       // 2 - null
       // 4 - Unknown
@@ -166,22 +184,27 @@ public class Viewer_ARC_ARC0_ARCTEX extends ViewerPlugin {
       // 4 - Unknown (83)
       // 4 - null
 
-      fm.skip(120);
+      fm.skip(104);
 
-      // 4 - Number of Colors [*4]
-      int numColors = fm.readInt() * 4;
+      // 4 - Number of Colors
+      int numColors = fm.readInt();
       FieldValidator.checkNumColors(numColors);
-
-      if (numColors != 256) {
-        return null; // only support 256-color images at the moment, not sure how to support 64-color images
-      }
 
       // 4 - Unknown
       // 8 - null
       fm.skip(12);
 
       int[] palette = ImageFormatReader.readPaletteRGBA(fm, numColors);
-      palette = ImageSwizzler.unstripePalettePS2(palette); // PS2 Striped Palette
+
+      if (numColors == 16) {
+        // no striping
+
+        // palette is padded to length 256 though (256 bytes, NOT 256 colors)
+        fm.skip(192);
+      }
+      else {
+        palette = ImageSwizzler.unstripePalettePS2(palette); // PS2 Striped Palette
+      }
 
       // 4 - Unknown (3)
       // 4 - Unknown
@@ -192,13 +215,21 @@ public class Viewer_ARC_ARC0_ARCTEX extends ViewerPlugin {
       // 4 - null
       fm.skip(32);
 
+      /*
       // 4 - Image Width [*2]
       int width = fm.readInt() * 2;
       FieldValidator.checkWidth(width);
-
+      
       // 4 - Image Height [*2]
       int height = fm.readInt() * 2;
       FieldValidator.checkHeight(height);
+      
+      if (numColors == 16) {
+        // 4-bit colors
+        height *= 2; // another *2 here
+      }
+      */
+      fm.skip(8);
 
       // 4 - Unknown (82)
       // 12 - null
@@ -212,44 +243,33 @@ public class Viewer_ARC_ARC0_ARCTEX extends ViewerPlugin {
 
       // X - Pixels
       ImageResource imageResource = null;
-      if (numColors == 256) {
-        imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
+      if (numColors == 16) {
+        // 4-bit swizzled
+        int numBytes = width * height / 2;
+
+        byte[] pixelBytes = fm.readBytes(numBytes);
+        pixelBytes = ImageSwizzler.unswizzlePS24BitSuba(pixelBytes, width, height);
+
+        fm.close();
+        fm = new FileManipulator(new ByteBuffer(pixelBytes));
+
+        imageResource = ImageFormatReader.read4BitPaletted(fm, width, height, palette);
+
       }
-      else if (numColors == 64) { // not working - not sure what the actual format is here
-        int numPixels = width * height;
-        int[] pixels = new int[numPixels];
-
-        for (int i = 0; i < numPixels; i += 4) {
-          int byte1 = ByteConverter.unsign(fm.readByte());
-          int byte2 = ByteConverter.unsign(fm.readByte());
-          int byte3 = ByteConverter.unsign(fm.readByte());
-
-          // 11111122 22223333 33444444
-          int palette1 = byte1 >> 2;
-          int palette2 = (byte1 & 3) << 4 | byte2 >> 4;
-          int palette3 = (byte2 & 15) << 2 | byte3 >> 6;
-          int palette4 = (byte3 & 63) >> 2;
-
-          System.out.println(palette1);
-          System.out.println(palette2);
-          System.out.println(palette3);
-          System.out.println(palette4);
-
-          pixels[i] = palette[palette1];
-          pixels[i + 1] = palette[palette2];
-          pixels[i + 2] = palette[palette3];
-          pixels[i + 3] = palette[palette4];
-        }
-
-        imageResource = new ImageResource(pixels, width, height);
-
+      else if (numColors == 256) {
+        // 8-bit swizzled
+        imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
+        imageResource.setPixels(ImageSwizzler.unswizzlePS2(imageResource.getPixels(), width, height)); // PS2 swizzled images
+      }
+      else if (numColors == 1024) {
+        // RGBA
+        imageResource = ImageFormatReader.readRGBA(fm, width, height);
       }
       else {
         ErrorLogger.log("[Viewer_ARC_ARC0_ARCTEX] Unknown Number of Colors: " + numColors);
       }
 
       if (imageResource != null) {
-        imageResource.setPixels(ImageSwizzler.unswizzlePS2(imageResource.getPixels(), width, height)); // PS2 swizzled images
         imageResource = ImageFormatReader.doubleAlpha(imageResource);
       }
 

@@ -16,8 +16,10 @@ package org.watto.ge.plugin;
 
 import java.io.File;
 import java.util.Arrays;
+
 import javax.swing.Icon;
 import javax.swing.filechooser.FileSystemView;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
@@ -184,6 +186,36 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
 
   /**
   **********************************************************************************************
+  Writes the <i>resources</i> into the <i>destination</i> archive, using the <i>exporter</i> for
+  formatting the output. Each compressed file data is padded to a multiple of the <i>paddingMultiple</i>
+  @param exporter the exporter that converts a file for writing
+  @param resources the files to write
+  @param destination the archive to write to
+  @param paddingMultiple the size to pad the file data to
+  **********************************************************************************************
+  **/
+  public static long[] write(ExporterPlugin exporter, Resource[] resources, FileManipulator destination, int paddingMultiple) {
+    long[] compLengths = new long[resources.length];
+    for (int i = 0; i < resources.length; i++) {
+      // write the file
+      long length = write(exporter, resources[i], destination);
+
+      // write the padding
+      int padding = calculatePadding(length, paddingMultiple);
+      for (int p = 0; p < padding; p++) {
+        destination.writeByte(0);
+      }
+
+      TaskProgressManager.setValue(i);
+
+      // store the lengths for returning back to the caller
+      compLengths[i] = length;
+    }
+    return compLengths;
+  }
+
+  /**
+  **********************************************************************************************
   Writes the <i>resource</i> into the <i>destination</i> archive
   @param resource the file to write
   @param destination the archive to write to.
@@ -204,6 +236,33 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
   public static void write(Resource[] resources, FileManipulator destination) {
     for (int i = 0; i < resources.length; i++) {
       write(resources[i], destination);
+      TaskProgressManager.setValue(i);
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  Writes the <i>resources</i> into the <i>destination</i> archive. Each file data is padded to
+  a multiple of the <i>paddingMultiple</i>
+  @param resources the files to write
+  @param destination the archive to write to.
+  @param paddingMultiple the size to pad the file data to
+  **********************************************************************************************
+  **/
+  public static void write(Resource[] resources, FileManipulator destination, int paddingMultiple) {
+    int numResources = resources.length;
+    for (int i = 0; i < numResources; i++) {
+      Resource resource = resources[i];
+
+      // Write the file
+      write(resource, destination);
+
+      // write the padding
+      int padding = calculatePadding(resource.getDecompressedLength(), paddingMultiple);
+      for (int p = 0; p < padding; p++) {
+        destination.writeByte(0);
+      }
+
       TaskProgressManager.setValue(i);
     }
   }
@@ -517,8 +576,7 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
   public boolean canWrite() {
     return canWrite;
   }
-  
-  
+
   /**
   **********************************************************************************************
   For use in convertOnReplace() when overwritten by plugins.
@@ -526,43 +584,40 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
   will return the PreviewPanel so you can feed it into an appropriate conversion plugin.
   **********************************************************************************************
   **/
-  public PreviewPanel loadFileForConversion(Resource resourceBeingReplaced, File fileToReplaceWith, String ... extensions) {
+  public PreviewPanel loadFileForConversion(Resource resourceBeingReplaced, File fileToReplaceWith, String... extensions) {
     try {
-    
-      int numExtensions = extensions.length;
-      
-   // check if this type of file can be converted or not
-      String beingReplacedExtension = resourceBeingReplaced.getExtension();
-      
-      boolean found = false;
-    for (int i=0;i<numExtensions;i++) {
-      if (beingReplacedExtension.equalsIgnoreCase(extensions[i])) {
-        found = true;
-      }
-    }
-    
-    if (!found) {
-      // this resource isn't one with a converter attached to it - no conversion needed
-      return null;
-    }
-      
-      
-   // check if the file is already the right format
-    String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
-    
-    found = false;
-    for (int i=0;i<numExtensions;i++) {
-      if (toReplaceWithExtension.equalsIgnoreCase(extensions[i])) {
-        found = true;
-      }
-    }
-    
-    if (found) {
-      // already the right format - no conversion needed
-      return null;
-    }
 
-      
+      int numExtensions = extensions.length;
+
+      // check if this type of file can be converted or not
+      String beingReplacedExtension = resourceBeingReplaced.getExtension();
+
+      boolean found = false;
+      for (int i = 0; i < numExtensions; i++) {
+        if (beingReplacedExtension.equalsIgnoreCase(extensions[i])) {
+          found = true;
+        }
+      }
+
+      if (!found) {
+        // this resource isn't one with a converter attached to it - no conversion needed
+        return null;
+      }
+
+      // check if the file is already the right format
+      String toReplaceWithExtension = FilenameSplitter.getExtension(fileToReplaceWith);
+
+      found = false;
+      for (int i = 0; i < numExtensions; i++) {
+        if (toReplaceWithExtension.equalsIgnoreCase(extensions[i])) {
+          found = true;
+        }
+      }
+
+      if (found) {
+        // already the right format - no conversion needed
+        return null;
+      }
 
       //
       //
@@ -614,7 +669,7 @@ public abstract class ArchivePlugin extends WSObjectPlugin {
 
     }
     catch (Throwable t) {
-     ErrorLogger.log(t);
+      ErrorLogger.log(t);
       return null;
     }
   }

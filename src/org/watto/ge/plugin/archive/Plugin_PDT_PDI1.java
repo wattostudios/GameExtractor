@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,9 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_TEA_LZSS8;
+import org.watto.ge.plugin.exporter.Exporter_Encryption_TEA;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -41,10 +44,15 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Rally Masters",
+        "Michelin Rally Masters: Race of Champions",
         "Swedish Touring Car Championship 2",
         "Test Drive Rally");
     setExtensions("pdt");
     setPlatforms("PC");
+
+    setTextPreviewExtensions("lws", "mot"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -268,8 +276,13 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
 
       resources = resizeResources(resources, realNumFiles);
 
-      // Now go through and work out if files are compressed...
+      // Now go through and work out if files are compressed and/or encrypted...
       fm.getBuffer().setBufferSize(10); // small and quick
+
+      String key = "THEEVENTHORIZONS"; // Swedish Touring Car Championship 2
+
+      Exporter_Encryption_TEA exporterTea = new Exporter_Encryption_TEA(key.getBytes());
+      Exporter_Custom_TEA_LZSS8 exporterTeaLZSS8 = new Exporter_Custom_TEA_LZSS8(key.getBytes());
 
       for (int i = 0; i < realNumFiles; i++) {
         Resource resource = resources[i];
@@ -282,18 +295,28 @@ public class Plugin_PDT_PDI1 extends ArchivePlugin {
           continue;
         }
 
-        // 4 - Compression Flag? (1114112)
+        // 4 - Compression and Encryption Flags
         int empty = fm.readShort();
-        fm.skip(2);
+        int flags = fm.readShort();
         if (empty != 0) {
           continue;
         }
 
+        if ((flags & 17) == 17) {
+          // TEA Encryption and Compression
+          resource.setExporter(exporterTeaLZSS8);
+        }
+        else if ((flags & 16) == 16) {
+          // TEA Encryption only
+          resource.setExporter(exporterTea);
+        }
+        else if ((flags & 1) == 1) {
+          // Compression only 
+        }
+
         // X - Compressed Data
-        // 1 - null
-        // 4 - Footer (CDI1)
         resource.setOffset(fm.getOffset());
-        resource.setLength(resource.getLength() - 13);
+        resource.setLength(resource.getLength() - 12);
         resource.setDecompressedLength(decompLength);
 
         TaskProgressManager.setValue(i);

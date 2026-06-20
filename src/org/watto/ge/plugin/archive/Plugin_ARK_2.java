@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -134,7 +134,8 @@ public class Plugin_ARK_2 extends ArchivePlugin {
       //      - Uncompressed files MUST know their LENGTH
 
       addFileTypes();
-      ExporterPlugin exporter = Exporter_LZSS_Old.getInstance();
+      Exporter_LZSS_Old exporter = Exporter_LZSS_Old.getInstance();
+      //exporter.updateDecompLengthAfterDecompression(true);
 
       // RESETTING THE GLOBAL VARIABLES
 

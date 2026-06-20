@@ -23,10 +23,12 @@ import org.watto.datatype.Palette;
 import org.watto.datatype.PalettedImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageSwizzler;
 import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
+import org.watto.ge.plugin.archive.Plugin_ARC_ARC0;
 import org.watto.ge.plugin.archive.Plugin_ARC_ARCC;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
@@ -46,11 +48,12 @@ public class Viewer_ARC_ARCC_ARCTEX extends ViewerPlugin {
   **********************************************************************************************
   **/
   public Viewer_ARC_ARCC_ARCTEX() {
-    super("ARC_ARCC_ARCTEX", "Street Racing Syndicate ARC_TEX Image");
+    super("ARC_ARCC_ARCTEX", "ARC_ARCC_ARCTEX Image");
     setExtensions("arc_tex");
 
-    setGames("Street Racing Syndicate");
-    setPlatforms("PC");
+    setGames("Street Racing Syndicate",
+        "Big Mutha Truckers");
+    setPlatforms("PC", "XBox");
     setStandardFileFormat(false);
   }
 
@@ -79,6 +82,9 @@ public class Viewer_ARC_ARCC_ARCTEX extends ViewerPlugin {
       if (plugin instanceof Plugin_ARC_ARCC) {
         rating += 50;
       }
+      else if (plugin instanceof Plugin_ARC_ARC0) {
+        rating += 25;
+      }
       else if (!(plugin instanceof AllFilesPlugin)) {
         return 0;
       }
@@ -90,15 +96,17 @@ public class Viewer_ARC_ARCC_ARCTEX extends ViewerPlugin {
         return 0;
       }
 
-      // 4 - Image Width
-      if (FieldValidator.checkWidth(fm.readInt())) {
+      // 2 - Image Width
+      if (FieldValidator.checkWidth(fm.readShort())) {
         rating += 5;
       }
+      fm.skip(2);
 
-      // 4 - Image Height
-      if (FieldValidator.checkHeight(fm.readInt())) {
+      // 2 - Image Height
+      if (FieldValidator.checkHeight(fm.readShort())) {
         rating += 5;
       }
+      fm.skip(2);
 
       // 4 - Mipmap Count
       if (FieldValidator.checkRange(fm.readInt(), 0, 20)) {
@@ -152,22 +160,67 @@ public class Viewer_ARC_ARCC_ARCTEX extends ViewerPlugin {
   public ImageResource readThumbnail(FileManipulator fm) {
     try {
 
-      // 4 - Image Width
-      int width = fm.readInt();
-      FieldValidator.checkWidth(width);
+      int width = 0;
+      int height = 0;
 
-      // 4 - Image Height
-      int height = fm.readInt();
-      FieldValidator.checkHeight(height);
+      int imageFormatInt = 0;
+      String imageFormatString = "";
 
-      // 4 - Number of Mipmaps?
-      // 4 - Hash?
-      fm.skip(8);
+      try {
+        // PC
 
-      // 4 - Image Format (26=ARGB4444, 41=8bitPaletted, "DXT3"=DXT3)
-      byte[] imageFormatBytes = fm.readBytes(4);
-      int imageFormatInt = IntConverter.convertLittle(imageFormatBytes);
-      String imageFormatString = StringConverter.convertLittle(imageFormatBytes);
+        // 4 - Image Width
+        width = fm.readInt();
+        FieldValidator.checkWidth(width);
+
+        // 4 - Image Height
+        height = fm.readInt();
+        FieldValidator.checkHeight(height);
+
+        // 4 - Number of Mipmaps?
+        fm.skip(4);
+
+        // 4 - Hash?
+        int hash = fm.readInt();
+
+        // 4 - Image Format (26=ARGB4444, 41=8bitPaletted, "DXT3"=DXT3)
+        byte[] imageFormatBytes = fm.readBytes(4);
+        imageFormatInt = IntConverter.convertLittle(imageFormatBytes);
+        imageFormatString = StringConverter.convertLittle(imageFormatBytes);
+
+        if (imageFormatInt < 0 || imageFormatInt >= 64) {
+          imageFormatInt = hash; // Big Mutha Truckers
+        }
+      }
+      catch (Throwable t) {
+        fm.relativeSeek(0);
+
+        // XBox
+
+        // 2 - Image Width
+        width = fm.readShort();
+        FieldValidator.checkWidth(width);
+
+        // 2 - Image Height
+        height = fm.readShort();
+        FieldValidator.checkHeight(height);
+
+        // 2 - Image Width
+        // 2 - Image Height
+        fm.skip(4);
+
+        // 4 - Number of Mipmaps?
+        fm.skip(4);
+
+        // 4 - Image Format?
+        byte[] imageFormatBytes = fm.readBytes(4);
+        imageFormatInt = IntConverter.convertLittle(imageFormatBytes);
+        imageFormatString = StringConverter.convertLittle(imageFormatBytes);
+
+        // 4 - Number of Pixels
+        fm.skip(4);
+
+      }
 
       // X - Pixels
       ImageResource imageResource = null;
@@ -203,10 +256,25 @@ public class Viewer_ARC_ARCC_ARCTEX extends ViewerPlugin {
       else if (imageFormatInt == 26) {
         imageResource = ImageFormatReader.readARGB4444(fm, width, height);
       }
-      else if (imageFormatString.equals("DXT3")) {
+      else if (imageFormatInt == 25) {
+        // 8-bit Grayscale + Swizzle
+        imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
+        imageResource.setPixels(ImageSwizzler.unswizzle(imageResource.getPixels(), width, height, 1));
+      }
+      else if (imageFormatInt == 6) {
+        // RGBA + Swizzle
+        imageResource = ImageFormatReader.readRGBA(fm, width, height);
+        imageResource.setPixels(ImageSwizzler.unswizzle(imageResource.getPixels(), width, height, 1));
+      }
+      else if (imageFormatInt == 2) {
+        // RGB555 + Swizzle
+        imageResource = ImageFormatReader.readRGB555(fm, width, height);
+        imageResource.setPixels(ImageSwizzler.unswizzle(imageResource.getPixels(), width, height, 1));
+      }
+      else if (imageFormatString.equals("DXT3") || imageFormatInt == 14) {
         imageResource = ImageFormatReader.readDXT3(fm, width, height);
       }
-      else if (imageFormatString.equals("DXT1")) {
+      else if (imageFormatString.equals("DXT1") || imageFormatInt == 12) {
         imageResource = ImageFormatReader.readDXT1(fm, width, height);
       }
       else {

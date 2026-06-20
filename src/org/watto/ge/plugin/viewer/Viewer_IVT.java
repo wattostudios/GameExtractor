@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -49,7 +49,8 @@ public class Viewer_IVT extends ViewerPlugin {
     super("IVT", "IVT Image");
     setExtensions("ivt");
 
-    setGames("International Volleyball 2009");
+    setGames("International Volleyball 2009",
+        "Dominet Bank Ekstraliga");
     setPlatforms("PC");
     setStandardFileFormat(false);
 
@@ -182,7 +183,12 @@ public class Viewer_IVT extends ViewerPlugin {
       int width = 256;
       int height = 256;
       int bytes = 4;
-      if (numPixels == 1048576) {
+      if (numPixels == 3145728) {
+        width = 1024;
+        height = 1024;
+        bytes = 3;
+      }
+      else if (numPixels == 1048576) {
         width = 512;
         height = 512;
         bytes = 4;
@@ -265,6 +271,11 @@ public class Viewer_IVT extends ViewerPlugin {
         height = 64;
         bytes = 4;
       }
+      else if (numPixels == 24576) {
+        width = 128;
+        height = 64;
+        bytes = 3;
+      }
       else if (numPixels == 16384) {
         width = 64;
         height = 64;
@@ -304,6 +315,11 @@ public class Viewer_IVT extends ViewerPlugin {
       else if (numPixels == 1024) {
         width = 16;
         height = 16;
+        bytes = 4;
+      }
+      else if (numPixels == 256) {
+        width = 8;
+        height = 8;
         bytes = 4;
       }
       else {
@@ -427,7 +443,10 @@ public class Viewer_IVT extends ViewerPlugin {
 
       // guess the bytes
       int bytes = 4;
-      if (numPixels == 1048576) {
+      if (numPixels == 3145728) {
+        bytes = 3;
+      }
+      else if (numPixels == 1048576) {
         bytes = 4;
       }
       else if (numPixels == 786432) {
@@ -460,6 +479,9 @@ public class Viewer_IVT extends ViewerPlugin {
       else if (numPixels == 32768) {
         bytes = 4;
       }
+      else if (numPixels == 24576) {
+        bytes = 3;
+      }
       else if (numPixels == 16384) {
         bytes = 4;
       }
@@ -479,6 +501,9 @@ public class Viewer_IVT extends ViewerPlugin {
         bytes = 4;
       }
       else if (numPixels == 1024) {
+        bytes = 4;
+      }
+      else if (numPixels == 256) {
         bytes = 4;
       }
       else {

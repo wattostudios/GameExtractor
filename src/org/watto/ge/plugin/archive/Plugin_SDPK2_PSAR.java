@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,14 +15,18 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import java.util.Arrays;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_ZLib_CompressedSizeOnly;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.LongConverter;
 import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
 
@@ -35,7 +39,7 @@ public class Plugin_SDPK2_PSAR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_SDPK2_PSAR() {
@@ -45,20 +49,21 @@ public class Plugin_SDPK2_PSAR extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Brink");
+    setGames("Brink",
+        "God of War: Ascension");
     setExtensions("sdpk2"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "PS3");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("xvag", "PlayStation XVAG Audio", FileType.TYPE_AUDIO));
+
+    //setCanScanForFileTypes(true);
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -120,7 +125,8 @@ public class Plugin_SDPK2_PSAR extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = Exporter_ZLib_CompressedSizeOnly.getInstance();
+      //ExporterPlugin exporter = Exporter_ZLib_DecompressedSizeOnlyInBlocks.getInstance();
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -132,7 +138,7 @@ public class Plugin_SDPK2_PSAR extends ArchivePlugin {
       // 2 - Version Major? (1)
       // 2 - Version Minor? (4)
       // 4 - Compression Algorithm (zlib)
-      // 4 - Unknown
+      // 4 - File Data Offset
       // 4 - Directory Entry Size (30)
       fm.skip(20);
 
@@ -140,75 +146,142 @@ public class Plugin_SDPK2_PSAR extends ArchivePlugin {
       int numFiles = IntConverter.changeFormat(fm.readInt());
       FieldValidator.checkNumFiles(numFiles);
 
-      // 4 - Unknown
-      // 4 - Unknown (2)
-      fm.skip(8);
+      // 4 - Decompressed Block Size (65536)
+      int decompBlockSize = IntConverter.changeFormat(fm.readInt());
 
-      // Skip the first (blank) entry
-      fm.skip(30);
-      numFiles--;
+      // 4 - Unknown (1/2)
+      fm.skip(4);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
-      long[] offsets = new long[numFiles];
+      //long[] offsets = new long[numFiles];
+      int[] compBlockStarts = new int[numFiles];
       for (int i = 0; i < numFiles; i++) {
         // 16 - Hash?
         fm.skip(16);
 
-        /*
-        // 4 - Decompressed Length?
-        int decompLength = IntConverter.changeFormat(fm.readInt());
+        // 4 - Index to the First Block in the Compression Directory
+        int compBlockStart = IntConverter.changeFormat(fm.readInt());
+        compBlockStarts[i] = compBlockStart;
+
+        // 5 - Decompressed Length
+        //fm.skip(1);
+        //int decompLength = IntConverter.changeFormat(fm.readInt());
+        byte[] decompLengthBytes = new byte[] { 0, 0, 0, fm.readByte(), fm.readByte(), fm.readByte(), fm.readByte(), fm.readByte() };
+        long decompLength = LongConverter.convertBig(decompLengthBytes);
         FieldValidator.checkLength(decompLength);
 
-        // 4 - Compressed Length?
-        int length = IntConverter.changeFormat(fm.readInt());
-        FieldValidator.checkLength(length, arcSize);
-        */
-        fm.skip(8);
-
-        // 2 - Unknown
-        fm.skip(2);
-
-        // 4 - File Offset
-        long offset = IntConverter.unsign(IntConverter.changeFormat(fm.readInt()));
+        // 5 - File Offset
+        //fm.skip(1);
+        //long offset = IntConverter.unsign(IntConverter.changeFormat(fm.readInt()));
+        byte[] offsetBytes = new byte[] { 0, 0, 0, fm.readByte(), fm.readByte(), fm.readByte(), fm.readByte(), fm.readByte() };
+        long offset = LongConverter.convertBig(offsetBytes);
         FieldValidator.checkOffset(offset, arcSize);
-        offsets[i] = offset;
+        //offsets[i] = offset;
 
         String filename = Resource.generateFilename(i);
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
-        resources[i].setExporter(exporter);
+        resources[i] = new Resource(path, filename, offset, decompLength, decompLength, exporter);
 
         TaskProgressManager.setValue(i);
       }
 
-      Arrays.sort(offsets);
-
+      // now go through and read the compressed block sizes
       for (int i = 0; i < numFiles; i++) {
         Resource resource = resources[i];
 
+        int decompLength = (int) resource.getDecompressedLength();
+
+        int numBlocks = decompLength / decompBlockSize;
+        int lastBlock = decompLength % decompBlockSize;
+        if (lastBlock != 0) {
+          numBlocks++;
+        }
+
+        long offset = resource.getOffset();
+        long totalCompLength = 0;
+
+        long[] blockOffsets = new long[numBlocks];
+        long[] blockLengths = new long[numBlocks];
+        long[] blockDecompLengths = new long[numBlocks];
+
+        for (int b = 0; b < numBlocks; b++) {
+          // 2 - Compressed Block Length
+          int compLength = ShortConverter.unsign(ShortConverter.changeFormat(fm.readShort()));
+
+          blockOffsets[b] = offset;
+          blockLengths[b] = compLength;
+          blockDecompLengths[b] = decompBlockSize;
+
+          if (b == numBlocks - 1) {
+            if (lastBlock != 0) {
+              blockDecompLengths[b] = lastBlock;
+            }
+          }
+
+          offset += compLength;
+
+          totalCompLength += compLength;
+        }
+
+        BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+        resource.setLength(totalCompLength);
+        resource.setExporter(blockExporter);
+      }
+
+      fm.close();
+
+      // Now lets read the first file, which is the file list, and set the proper filenames
+      Resource firstFile = resources[0];
+      byte[] decompBytes = new byte[(int) firstFile.getDecompressedLength()];
+      fm = new FileManipulator(new ByteBuffer(decompBytes));
+      firstFile.extract(fm);
+      fm.close(); // force it to write out all the buffered content
+
+      fm = new FileManipulator(new ByteBuffer(decompBytes));
+      for (int i = 1; i < numFiles; i++) { // start at file #1
+        Resource resource = resources[i];
+
+        // X - Filename
+        // 1 - End of Line (byte (10));
+        String filename = fm.readLine();
+        FieldValidator.checkFilename(filename);
+
+        resource.setName(filename);
+        resource.setOriginalName(filename);
+      }
+
+      String firstName = "filelist.txt";
+      firstFile.setName(firstName);
+      firstFile.setOriginalName(firstName);
+
+      /*
+      Arrays.sort(offsets);
+      
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+      
         long thisOffset = resource.getOffset();
         int arrayPos = Arrays.binarySearch(offsets, thisOffset);
-
+      
         if (arrayPos == numFiles - 1) {
           long length = arcSize - thisOffset;
           resource.setLength(length);
-          resource.setDecompressedLength(length);
+          //resource.setDecompressedLength(length);
         }
         else {
           long length = offsets[arrayPos + 1] - offsets[arrayPos];
           resource.setLength(length);
-          resource.setDecompressedLength(length);
+          //resource.setDecompressedLength(length);
         }
-
+      
       }
-
+      
       //calculateFileSizes(resources, arcSize);
-
-      fm.close();
+       */
 
       return resources;
 
@@ -217,6 +290,27 @@ public class Plugin_SDPK2_PSAR extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 1195464280) {
+      return "xvag";
+    }
+    else if (headerInt1 == 1684558925) {
+      return "mid";
+    }
+
+    return null;
   }
 
 }

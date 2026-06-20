@@ -75,6 +75,8 @@ public class Scanner_TIM_TIM2 extends ScannerPlugin {
 
       length += 16;
 
+      //TemporarySettings.set("ForcePaletteStriping", true);
+
       //path,id,name,offset,length,compressed
       return new Resource(".tim", offset, length);
 

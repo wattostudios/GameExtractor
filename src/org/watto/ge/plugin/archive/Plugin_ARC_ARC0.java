@@ -16,6 +16,7 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 import java.util.Arrays;
+
 import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -45,7 +46,7 @@ public class Plugin_ARC_ARC0 extends ArchivePlugin {
 
     setGames("Big Mutha Truckers");
     setExtensions("arc"); // MUST BE LOWER CASE
-    setPlatforms("PS2");
+    setPlatforms("PS2", "XBox");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("arc_tex", "Texture Image", FileType.TYPE_IMAGE));

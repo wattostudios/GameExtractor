@@ -47,7 +47,7 @@ public class Plugin_SCH_SND extends ArchivePlugin {
     setGames("Conflict: Desert Storm",
         "The Great Escape");
     setExtensions("sch"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "PS2");
 
     // MUST BE LOWER CASE !!!
     //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
@@ -76,7 +76,8 @@ public class Plugin_SCH_SND extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(3).equals("SND")) {
+      String header = fm.readString(3);
+      if (header.equals("SND") || header.equals("SCH")) {
         rating += 50;
       }
       fm.skip(1);

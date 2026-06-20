@@ -15,6 +15,7 @@
 package org.watto.ge.helper;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.watto.ErrorLogger;
 import org.watto.Settings;
@@ -34,6 +35,74 @@ Reads image data from a FileManipulator using a number of different image format
 **********************************************************************************************
 **/
 public class ImageFormatReader {
+
+  /**
+  **********************************************************************************************
+  Given an array of ImageResources, it will set the previous/next frames of them, so they transition
+  **********************************************************************************************
+  **/
+  public static void createFrameTransitions(ImageResource[] images) {
+    int numImages = images.length;
+    if (numImages <= 1) {
+      return;
+    }
+
+    for (int i = 0; i < numImages; i++) {
+      ImageResource image = images[i];
+      if (i == 0) {
+        image.setNextFrame(images[i + 1]);
+        image.setPreviousFrame(images[numImages - 1]);
+      }
+      else if (i == numImages - 1) {
+        image.setNextFrame(images[0]);
+        image.setPreviousFrame(images[i - 1]);
+      }
+      else {
+        image.setNextFrame(images[i + 1]);
+        image.setPreviousFrame(images[i - 1]);
+      }
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  Creates a stage of stageWidth*stageHeight, then puts the image on to it at the xOffset:yOffset
+  **********************************************************************************************
+  **/
+  public static ImageResource placeOnStage(ImageResource image, int stageWidth, int stageHeight, int xOffset, int yOffset, int stageColor) {
+    int width = image.getWidth();
+    int height = image.getHeight();
+
+    if (xOffset < 0 || yOffset < 0 || xOffset + width > stageWidth || yOffset + height > stageHeight) {
+      // image would go outside the bounds of the stage
+      return image;
+    }
+
+    int numPixels = stageWidth * stageHeight;
+    int[] pixels = new int[numPixels];
+
+    if (stageColor != 0) {
+      Arrays.fill(pixels, stageColor);
+    }
+
+    int[] imagePixels = image.getImagePixels();
+
+    int inPos = 0;
+    int outPos = (yOffset * stageWidth) + xOffset;
+    for (int h = 0; h < height; h++) {
+      // copy the line to the stage
+      System.arraycopy(imagePixels, inPos, pixels, outPos, width);
+
+      inPos += width;
+      outPos += stageWidth;
+    }
+
+    image.setPixels(pixels);
+    image.setWidth(stageWidth);
+    image.setHeight(stageHeight);
+
+    return image;
+  }
 
   /**
   **********************************************************************************************
@@ -138,6 +207,26 @@ public class ImageFormatReader {
 
     image.setPixels(interlacedPixels);
     return image;
+  }
+
+  /**
+   **********************************************************************************************
+  Applies XBox 360 Byte Swapping (the order of every 2 bytes is swapped)
+   **********************************************************************************************
+   **/
+  public static byte[] byteSwapXbox360(byte[] bytes) {
+    int numPixels = bytes.length;
+    for (int p = 0; p < numPixels; p += 2) {
+      // read 2 bytes
+      byte firstByte = bytes[p];
+      byte secondByte = bytes[p + 1];
+
+      // put them back in the opposite order
+      bytes[p] = secondByte;
+      bytes[p + 1] = firstByte;
+    }
+
+    return bytes;
   }
 
   /**
@@ -3406,6 +3495,53 @@ public class ImageFormatReader {
     }
 
     return new ImageResource(pixels, width, height);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads a color palette in RGB format (from Wii/N64/GameCube)
+   * (either 0AAARRRRGGGGBBBB or 1RRRRRGGGGGBBBBB depending on the top bit)
+   **********************************************************************************************
+   **/
+  public static int[] readPaletteRGB5A3Wii(FileManipulator fm, int numColors) {
+
+    int[] palette = new int[numColors];
+
+    for (int i = 0; i < numColors; i++) {
+
+      int byte1 = ByteConverter.unsign(fm.readByte());
+      int byte2 = ByteConverter.unsign(fm.readByte());
+
+      int topBit = byte1 >> 7;
+
+      if (topBit == 0) {
+        // 0AAARRRRGGGGBBBB
+
+        int a = ((byte1 >> 4) & 7) * 32;
+        int r = (byte1 & 15) * 16;
+        int g = ((byte2 >> 4) & 15) * 16;
+        int b = (byte2 & 15) * 16;
+
+        // OUTPUT = ARGB
+        palette[i] = ((r << 16) | (g << 8) | b | (a << 24));
+
+      }
+      else { // topBit == 1
+        // 1RRRRRGG GGGBBBBB
+
+        int a = 255;
+        int r = ((byte1 >> 2) & 31) * 8;
+        int g = (((byte2 >> 5) & 7) | ((byte1 & 3) << 3)) * 8;
+        int b = (byte2 & 31) * 8;
+
+        // OUTPUT = ARGB
+        palette[i] = ((r << 16) | (g << 8) | b | (a << 24));
+      }
+
+    }
+
+    return palette;
+
   }
 
   /**

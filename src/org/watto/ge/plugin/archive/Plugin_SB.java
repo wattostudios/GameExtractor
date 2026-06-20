@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
@@ -22,6 +23,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameSplitter;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
 import org.watto.task.TaskProgressManager;
 
@@ -110,19 +112,59 @@ public class Plugin_SB extends ArchivePlugin {
 
       long sourceSize = fm.getLength();
 
-      // 8 - Unknown
-      // 548 - Hash? (nulls to fill)
-      // 4 - Unknown
-      // 1 - Property ID (1)
-      // 7 - Bundle Header ("bundles")
-      // 1 - null Bundle Header Terminator
-      // 2 - Unknown
-      // 1 - Number of Bundles (1)
-      fm.skip(569);
-      while (ByteConverter.unsign(fm.readByte()) != 130) {
-        // repeat
+      // 8 - Encryption Header
+      int header = fm.readInt();
+      if (header == 13553920 || header == 30331136) {
+        // encrypted file
+        // ref: https://github.com/NicknineTheEagle/Frostbite-Scripts/blob/master/frostbite2/dbo.py#L8
+
+        fm.seek(296); //skip the signature
+        int[] key = new int[260];
+        for (int i = 0; i < 260; i++) {
+          key[i] = ByteConverter.unsign(fm.readByte()) ^ 0x7b; //bytes 257 258 259 are not used
+        }
+
+        int remainingLength = (int) fm.getRemainingLength();
+        byte[] decryptedBytes = new byte[remainingLength];
+        for (int i = 0; i < remainingLength; i++) {
+          decryptedBytes[i] = (byte) (ByteConverter.unsign(fm.readByte()) ^ key[i % 257]);
+        }
+
+        fm.close();
+
+        //fm = new FileManipulator(new File("c:\\out.tmp"), true);
+        //fm.writeBytes(decryptedBytes);
+        //fm.close();
+
+        fm = new FileManipulator(new ByteBuffer(decryptedBytes));
+
+        // 4 - Unknown
+        // 1 - Property ID (1)
+        // 7 - Bundle Header ("bundles")
+        // 1 - null Bundle Header Terminator
+        // 2 - Unknown
+        // 1 - Number of Bundles (1)
+        fm.seek(15);
+        while (ByteConverter.unsign(fm.readByte()) != 130 && fm.getRemainingLength() > 0) {
+          // repeat
+        }
+        fm.seek(fm.getOffset() - 1);
+
       }
-      fm.seek(fm.getOffset() - 1);
+      else {
+        // 548 - Hash? (nulls to fill)
+        // 4 - Unknown
+        // 1 - Property ID (1)
+        // 7 - Bundle Header ("bundles")
+        // 1 - null Bundle Header Terminator
+        // 2 - Unknown
+        // 1 - Number of Bundles (1)
+        fm.seek(569);
+        while (ByteConverter.unsign(fm.readByte()) != 130) {
+          // repeat
+        }
+        fm.seek(fm.getOffset() - 1);
+      }
 
       int numFiles = Archive.getMaxFiles();
 
@@ -161,6 +203,18 @@ public class Plugin_SB extends ArchivePlugin {
             filename = fm.readNullString();
             FieldValidator.checkFilename(filename);
           }
+          else if (propertyByte == 15) {
+            // 2 - ID Header ("id")
+            // 1 - null ID Header Terminator
+            // 16 - Unknown
+            fm.skip(19);
+          }
+          else if (propertyByte == 16) {
+            // 4 - ID Header ("sha1")
+            // 1 - null ID Header Terminator
+            // 20 - SHA1 Hash
+            fm.skip(25);
+          }
           else if (propertyByte == 9) {
             // 6 - Offset Header ("offset")
             // 1 - null Offset Header Terminator
@@ -186,9 +240,11 @@ public class Plugin_SB extends ArchivePlugin {
           propertyByte = fm.readByte();
         }
 
-        System.out.println(fm.getOffset() + "\t" + filename);
-        resources[realNumFiles] = new Resource(path, filename, offset, length);
-        realNumFiles++;
+        if (offset != -1 && length != -1) {
+          //System.out.println(fm.getOffset() + "\t" + filename);
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
+          realNumFiles++;
+        }
 
         TaskProgressManager.setValue(fm.getOffset());
       }

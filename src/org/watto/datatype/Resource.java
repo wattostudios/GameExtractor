@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import javax.swing.Icon;
 
 import org.watto.ErrorLogger;
+import org.watto.Settings;
 import org.watto.TemporarySettings;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
@@ -70,6 +71,37 @@ public class Resource implements Comparable<Resource> {
   **/
   public static String generateFilename(int fileNum) {
     fileNum++;
+
+    /*
+    String filenamePrefix = Settings.get("UnnamedFilenamePrefix");
+    if (filenamePrefix == null || filenamePrefix.equals("")) {
+      //filenamePrefix = "Unnamed File";
+      filenamePrefix = "%ARCHIVE_NAME% Unnamed File";
+    }
+    filenamePrefix += ' ';
+    
+    // THIS DOESN'T WORK BECAUSE, WHEN THIS IS CALLED, THE ARCHIVE HASN'T ACTUALLY BEEN OPENED YET, SO THE NAME ISN'T KNOWN 
+    filenamePrefix = filenamePrefix.replaceAll("%ARCHIVE_NAME%", Archive.getArchiveName());
+    
+    if (fileNum < 10) {
+      return filenamePrefix + "00000" + fileNum;
+    }
+    else if (fileNum < 100) {
+      return filenamePrefix + "0000" + fileNum;
+    }
+    else if (fileNum < 1000) {
+      return filenamePrefix + "000" + fileNum;
+    }
+    else if (fileNum < 10000) {
+      return filenamePrefix + "00" + fileNum;
+    }
+    else if (fileNum < 100000) {
+      return filenamePrefix + "0" + fileNum;
+    }
+    else {
+      return filenamePrefix + fileNum;
+    }
+    */
 
     if (fileNum < 10) {
       return "Unnamed File 00000" + fileNum;
@@ -343,7 +375,12 @@ public class Resource implements Comparable<Resource> {
   public File extract(File destination) {
     try {
       if (destination.isDirectory()) {
-        destination = new File(destination.getAbsolutePath() + File.separator + name);
+        if (Settings.getBoolean("PrependArchiveNameWhenExporting")) {
+          destination = new File(destination.getAbsolutePath() + File.separator + "[" + Archive.getArchiveName() + "] " + name);
+        }
+        else {
+          destination = new File(destination.getAbsolutePath() + File.separator + name);
+        }
       }
 
       destination = FilenameChecker.correctFilename(destination, '_');

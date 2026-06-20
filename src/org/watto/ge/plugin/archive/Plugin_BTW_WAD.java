@@ -20,6 +20,8 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -52,7 +54,7 @@ public class Plugin_BTW_WAD extends ArchivePlugin {
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
-    setCanScanForFileTypes(true);
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -118,11 +120,18 @@ public class Plugin_BTW_WAD extends ArchivePlugin {
 
       // 4 - Directories Offset
       // 4 - Directories Length (not including Padding in the Footer)
+      fm.skip(160);
 
       // 4 - Number of Entries in Directory 1
+      int numDirMaps = fm.readInt();
+      FieldValidator.checkNumFiles(numDirMaps);
+
       // 4 - Directory 1 Offset
+      int dirMapOffset = fm.readInt();
+      FieldValidator.checkOffset(dirMapOffset, arcSize);
+
       // 4 - null
-      fm.skip(172);
+      fm.skip(4);
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
@@ -133,17 +142,197 @@ public class Plugin_BTW_WAD extends ArchivePlugin {
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       // 4 - Number of Entries in Directory 3
+      int numNames = fm.readInt();
+      FieldValidator.checkNumFiles(numNames);
+
       // 4 - Directory 3 Offset
+      int nameDirOffset = fm.readInt();
+      FieldValidator.checkOffset(nameDirOffset, arcSize);
 
       // 4 - Unknown
+      fm.skip(4);
+
       // 4 - Directory 4 Offset
+      int extensionDirOffset = fm.readInt();
+      FieldValidator.checkOffset(extensionDirOffset, arcSize);
+
       // 4 - Number of Extensions
+      int numExtensions = fm.readInt();
+      FieldValidator.checkNumFiles(numExtensions);
 
       // 4 - Directory 5 Offset
+      int numberedNamesDirOffset = fm.readInt();
+      FieldValidator.checkOffset(numberedNamesDirOffset, arcSize);
+
       // 4 - Number of Entries in Directory 5
+      int numNumberedNames = fm.readInt();
+      FieldValidator.checkNumFiles(numNumberedNames);
 
       // 4 - Filename Directory Offset
+      int filenameDirOffset = fm.readInt();
+      FieldValidator.checkOffset(filenameDirOffset, arcSize);
+
       // 4 - Filename Directory Length
+      int filenameDirLength = fm.readInt();
+      FieldValidator.checkLength(filenameDirLength, arcSize);
+
+      // Filenames added thanks to:
+      // https://reshax.com/topic/649-starsky-hutch-btw/
+      // https://github.com/smiRaphi/UniPyX/commit/de873ac23b61142e5b95b04244ef408afe747db0
+
+      // process the extensions
+      fm.seek(extensionDirOffset);
+
+      String[] extensions = new String[numExtensions];
+      for (int i = 0; i < numExtensions; i++) {
+        // 3 - File Extension (eg "tga", "png", ...)
+        // 1 - null File Extension Terminator
+        extensions[i] = fm.readNullString(4);
+      }
+
+      // Process the names
+      fm.seek(filenameDirOffset);
+
+      byte[] nameBytes = fm.readBytes(filenameDirLength);
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+
+      // first the numbered names
+      fm.seek(numberedNamesDirOffset);
+
+      String[] numberedNames = new String[numNumberedNames];
+      for (int i = 0; i < numNumberedNames; i++) {
+        // 4 - Packed Name Details (OOOOOOOOOOOOOOOOOLLLLLLLLEEEEEEE) (E=Extension, L=Name Length, O=Name Offset)
+        long packedName = IntConverter.unsign(fm.readInt());
+
+        int extension = (int) ((packedName) & 127);
+        int length = (int) ((packedName >> 7) & 255);
+        int offset = (int) ((packedName >> 15) & 131071);
+
+        String name = null;
+
+        if (extension == 127) {
+          // no extension
+          nameFM.seek(offset);
+          name = nameFM.readString(length);
+        }
+        else if (extension == 126) {
+          // invalid extension
+          nameFM.seek(offset);
+          name = nameFM.readString(length);
+        }
+        else if (extension >= 121 && extension <= 125) {
+          // ordinal string of (0x7E - n) length
+
+          // shouldn't happen
+          nameFM.seek(offset);
+          name = nameFM.readString(length);
+        }
+        else if (extension >= 119 && extension <= 120) {
+          // ordinal string with separator
+
+          // shouldn't happen
+          nameFM.seek(offset);
+          name = nameFM.readString(length);
+        }
+        else {
+          // extension
+          nameFM.seek(offset);
+          name = nameFM.readString(length) + "." + extensions[extension];
+        }
+
+        numberedNames[i] = name;
+
+        //System.out.println(name);
+      }
+
+      // now the normal names
+      fm.seek(nameDirOffset);
+
+      String[] names = new String[numNames];
+
+      for (int i = 0; i < numNames; i++) {
+        // 4 - Packed Name Details (OOOOOOOOOOOOOOOOOLLLLLLLLEEEEEEE) (E=Extension, L=Name Length, O=Name Offset)
+        long packedName = IntConverter.unsign(fm.readInt());
+
+        int extension = (int) ((packedName) & 127);
+        int length = (int) ((packedName >> 7) & 255);
+        int offset = (int) ((packedName >> 15) & 131071);
+
+        String name = null;
+
+        if (extension == 127) {
+          // no extension
+          nameFM.seek(offset);
+          name = nameFM.readString(length);
+        }
+        else if (extension == 126) {
+          // invalid extension
+          nameFM.seek(offset);
+          name = nameFM.readString(length);
+        }
+        else if (extension >= 121 && extension <= 125) {
+          // ordinal string of (0x7E - n) length
+
+          name = numberedNames[length];
+
+          int number = 125 - extension;
+          name = name.replaceAll("#", "" + number);
+        }
+        else if (extension == 119) {
+          // ordinal string with separator (-)
+          name = numberedNames[length];
+
+          int number = 125 - extension;
+          name = name.replaceAll("#", "-" + number);
+        }
+        else if (extension == 120) {
+          // ordinal string with separator (_)
+          name = numberedNames[length];
+
+          int number = 125 - extension;
+          name = name.replaceAll("#", "_" + number);
+        }
+        else {
+          // extension
+          nameFM.seek(offset);
+          name = nameFM.readString(length) + "." + extensions[extension];
+        }
+
+        names[i] = name;
+        //System.out.println(name);
+      }
+      nameFM.close();
+
+      // Join the directory names and filenames
+      fm.seek(dirMapOffset);
+
+      String[] filenames = new String[numFiles];
+      int numNamesFound = 0;
+      for (int m = 0; m < numDirMaps; m++) {
+        // 2 - Directory Name Count
+        int dirNameCount = fm.readShort();
+
+        // 2 - Directory Name Offset
+        int dirNameOffset = fm.readShort();
+
+        // 2 - Filename Count
+        int filenameCount = fm.readShort();
+
+        // 2 - Filename Offset
+        int filenameOffset = fm.readShort();
+
+        String dirName = "";
+        for (int i = dirNameOffset; i < dirNameOffset + dirNameCount; i++) {
+          dirName += names[i] + "\\";
+        }
+
+        for (int i = filenameOffset; i < filenameOffset + filenameCount; i++) {
+          filenames[numNamesFound] = dirName + names[i];
+          numNamesFound++;
+        }
+      }
+
+      // Process the files
       fm.seek(dirOffset);
 
       Resource[] resources = new Resource[numFiles];
@@ -163,7 +352,8 @@ public class Plugin_BTW_WAD extends ArchivePlugin {
         }
         FieldValidator.checkOffset(offset, arcSize);
 
-        String filename = Resource.generateFilename(i);
+        //String filename = Resource.generateFilename(i);
+        String filename = filenames[i];
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

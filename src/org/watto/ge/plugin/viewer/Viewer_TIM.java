@@ -156,7 +156,8 @@ public class Viewer_TIM extends ViewerPlugin {
       ImageResource firstImage = null;
       ImageResource previousImage = null;
 
-      while (fm.getOffset() < arcSize) {
+      while (fm.getOffset() < arcSize - 20) { // -20 to allow for a bit of padding at the end
+        //System.out.println(fm.getOffset() + " vs " + arcSize);
         ImageResource image = readSingleImage(fm, arcSize);
 
         if (firstImage == null) {

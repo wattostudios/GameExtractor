@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,22 +15,23 @@
 package org.watto.ge.plugin.viewer;
 
 import org.watto.ErrorLogger;
+import org.watto.SingletonManager;
+import org.watto.TemporarySettings;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
 import org.watto.datatype.Palette;
-import org.watto.datatype.PalettedImageResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageSwizzler;
 import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_LZ;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
-import org.watto.io.converter.ByteConverter;
 import org.watto.io.converter.ShortConverter;
 
 /**
@@ -47,10 +48,11 @@ public class Viewer_NCGR_RGCN extends ViewerPlugin {
   **/
   public Viewer_NCGR_RGCN() {
     super("NCGR_RGCN", "Nintendo DS NCGR Image");
-    setExtensions("ncgr");
+    setExtensions("ncgr", "rgcn");
 
     setGames("Nintendo DS",
-        "Custom Robo Arena");
+        "Custom Robo Arena",
+        "Wizards of Waverly Place");
     setPlatforms("NDS");
     setStandardFileFormat(false);
   }
@@ -147,7 +149,7 @@ public class Viewer_NCGR_RGCN extends ViewerPlugin {
   **/
   public void extractAndAddPalette(Resource paletteResource) {
     try {
-      int paletteLength = (int) paletteResource.getLength();
+      int paletteLength = (int) paletteResource.getDecompressedLength();
 
       ByteBuffer buffer = new ByteBuffer(paletteLength);
       FileManipulator fm = new FileManipulator(buffer);
@@ -284,11 +286,26 @@ public class Viewer_NCGR_RGCN extends ViewerPlugin {
         int numResources = resources.length;
         for (int i = 0; i < numResources; i++) {
           Resource currentResource = resources[i];
-          if (currentResource.getExtension().equalsIgnoreCase("NCLR")) {
+          String extension = currentResource.getExtension();
+          if (extension.equalsIgnoreCase("NCLR") || extension.equalsIgnoreCase("RLCN")) {
             // found a color palette file - need to extract it and read the colors
             extractAndAddPalette(resources[i]);
           }
         }
+      }
+
+      // Find the preferred palette number
+      Object resourceObject = SingletonManager.get("CurrentResource");
+      if (resourceObject == null || !(resourceObject instanceof Resource)) {
+        return null;
+      }
+      Resource resource = (Resource) resourceObject;
+
+      try {
+        int paletteID = Integer.parseInt(resource.getProperty("PaletteID"));
+        PaletteManager.setCurrentPalette(paletteID);
+      }
+      catch (Throwable t) {
       }
 
       int[] palette = PaletteManager.getCurrentPalette().getPalette();
@@ -310,19 +327,20 @@ public class Viewer_NCGR_RGCN extends ViewerPlugin {
 
       //pixelData = ImageFormatReader.unswizzle(pixelData, width, height, 16);
 
-      int[] pixels = new int[numPixels];
-
+      /*
       fm.close();
       fm = new FileManipulator(new ByteBuffer(pixelData));
-
+      
+      int[] pixels = new int[numPixels];
+      
       if (imageFormat == 3) {
         // 4bpp
         for (int i = 0; i < numPixels; i += 2) {
           int pixel = ByteConverter.unsign(fm.readByte());
-
+      
           int pixel2 = (pixel >> 4) & 15;
           int pixel1 = (pixel & 15);
-
+      
           pixels[i] = pixel1;
           pixels[i + 1] = pixel2;
         }
@@ -333,10 +351,64 @@ public class Viewer_NCGR_RGCN extends ViewerPlugin {
           pixels[i] = ByteConverter.unsign(fm.readByte());
         }
       }
-
+      
       pixels = ImageFormatReader.reorderPixelBlocks(new ImageResource(pixels, width, height), 8, 8).getPixels();
+      */
 
-      PalettedImageResource imageResource = new PalettedImageResource(pixels, width, height, palette);
+      // This format doesn't store the image dimensions. So, what we'll do, is we'll generate them as frames, where each frame is a different
+      // width from 256,128,64,32,16 and that will let the user choose which one is correct in each case.
+      int[] widths = new int[] { 256, 128, 64, 32, 16 };
+      int numFrames = widths.length;
+
+      ImageResource[] frames = new ImageResource[numFrames];
+      for (int f = 0; f < numFrames; f++) {
+
+        width = widths[f];
+        height = numPixels / width;
+
+        byte[] sizedPixelData = null;
+
+        if (imageFormat == 3) {
+          sizedPixelData = ImageSwizzler.unswizzleBC4Bit(pixelData, width, height);
+        }
+        else {
+          sizedPixelData = ImageSwizzler.unswizzleBC8Bit(pixelData, width, height);
+        }
+
+        fm.close();
+        fm = new FileManipulator(new ByteBuffer(sizedPixelData));
+
+        ImageResource frame = null;
+        if (imageFormat == 3) {
+          // 4bpp
+          frame = ImageFormatReader.read4BitPaletted(fm, width, height, true);
+        }
+        else {
+          // 8bpp
+          frame = ImageFormatReader.read8BitPaletted(fm, width, height, true);
+        }
+
+        frames[f] = frame;
+      }
+
+      // set the frame transitions
+      ImageFormatReader.createFrameTransitions(frames);
+
+      TemporarySettings.set("PreviewPanel_Image_RetainCurrentFrame", true); // so that the next image will be the same dimensions
+
+      /*
+      // Get the currently-chosen frame (aka Dimension)
+      int currentFrameNum = Settings.getInt("PreviewPanel_Image_CurrentFrame");
+      if (currentFrameNum < 0 || currentFrameNum >= numFrames) {
+        currentFrameNum = 0;
+      }
+      
+      ImageResource imageResource = frames[currentFrameNum];
+      */
+      ImageResource imageResource = frames[0];
+      imageResource.setManualFrameTransition(true);
+
+      fm.close();
 
       return imageResource;
 

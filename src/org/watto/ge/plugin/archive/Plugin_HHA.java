@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -43,15 +44,20 @@ public class Plugin_HHA extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Penny Arcade: On The Rain-Slick Precipice of Darkness: Episode 1",
-        "Penny Arcade: On The Rain-Slick Precipice of Darkness: Episode 2",
+    setGames("Penny Arcade Adventures: On The Rain-Slick Precipice of Darkness: Episode 1",
+        "Penny Arcade Adventures: On The Rain-Slick Precipice of Darkness: Episode 2",
         "The Maw");
     setExtensions("hha"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
-    //setFileTypes("","",
-    //             "",""
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
     //             );
+
+    setTextPreviewExtensions("dml", "fnt", "lso", "mis"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 

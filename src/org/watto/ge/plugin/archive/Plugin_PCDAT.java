@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.watto.Language;
 import org.watto.Settings;
@@ -49,7 +50,7 @@ public class Plugin_PCDAT extends ArchivePlugin {
         "Conflict: Desert Storm",
         "The Great Escape");
     setExtensions("dat"); // MUST BE LOWER CASE
-    setPlatforms("PC");
+    setPlatforms("PC", "XBox");
 
     // MUST BE LOWER CASE !!!
     setFileTypes(new FileType("loc", "Language Archive", FileType.TYPE_ARCHIVE),
@@ -58,7 +59,8 @@ public class Plugin_PCDAT extends ArchivePlugin {
 
     setTextPreviewExtensions("ver", "csv"); // LOWER CASE
 
-    setCanScanForFileTypes(true);
+    // WE ONLY TURN THIS ON, in read(), IF SOME FILES DON'T HAVE PROPER FILENAMES
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -130,12 +132,42 @@ public class Plugin_PCDAT extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(arcSize);
 
+      // See if we have a file with the filenames in it, and if so, we need to read them in so the decryption works properly
+      HashMap<Integer, String> hashMap = new HashMap<Integer, String>(numFiles);
+      File hashFile = new File(Settings.get("HashesDirectory") + File.separatorChar + "PCDAT" + File.separatorChar + "filenames.txt");
+      if (hashFile.exists()) {
+        int hashFileLength = (int) hashFile.length();
+
+        FileManipulator hashFM = new FileManipulator(hashFile, false);
+        while (hashFM.getOffset() < hashFileLength) {
+          String name = hashFM.readLine();
+          if (name.equals("")) {
+            break; // EOF
+          }
+
+          int separatorPos = name.indexOf(' ');
+          if (separatorPos <= 0) {
+            continue; // no separator between hash and filename
+          }
+
+          String hash = name.substring(0, separatorPos);
+          name = name.substring(separatorPos + 1);
+
+          // Convert the unsigned hash to a signed hash
+          Integer intHash = Integer.parseUnsignedInt(hash);
+
+          hashMap.put(intHash, name);
+        }
+        hashFM.close();
+      }
+
       // Loop through directory
       int realNumFiles = 0;
+      boolean missingFilenames = false;
       while (fm.getOffset() < 49152) {
 
         // 4 - Hash
-        fm.skip(4);
+        int hash = fm.readInt();
 
         // 4 - File Offset
         int offset = fm.readInt();
@@ -149,7 +181,12 @@ public class Plugin_PCDAT extends ArchivePlugin {
           break; // end of directory
         }
 
-        String filename = Resource.generateFilename(realNumFiles);
+        //String filename = Resource.generateFilename(realNumFiles);
+        String filename = hashMap.get(hash);
+        if (filename == null) {
+          filename = Resource.generateFilename(realNumFiles);
+          missingFilenames = true;
+        }
 
         //path,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);
@@ -163,6 +200,13 @@ public class Plugin_PCDAT extends ArchivePlugin {
       }
 
       resources = resizeResources(resources, realNumFiles);
+
+      if (missingFilenames) {
+        setCanScanForFileTypes(true); // only scan for file types IF we have filenames that are missing
+      }
+      else {
+        setCanScanForFileTypes(false);
+      }
 
       fm.close();
 
@@ -273,14 +317,31 @@ public class Plugin_PCDAT extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
+    String extension = resource.getExtension();
+    if (extension != null && !extension.equals("")) {
+      return extension;
+    }
+
     if (headerInt1 == 1245859653) {
-      return "eobj";
+      return "EVO"; // EOBJ
     }
     else if (headerInt1 == 1718054249) {
-      return "imgf";
+      return "IMG"; // imgf
+    }
+    else if (headerInt1 == 131072) {
+      return "TGA";
+    }
+    else if (headerInt1 == 131072) {
+      return "RFX"; //REFX 
     }
     else if (headerInt1 == 2) {
-      return "mesh";
+      return "PRB"; // a mesh?
+    }
+    else if (headerInt1 == -65279 || headerInt1 == -65280) {
+      return "PSO";
+    }
+    else if (headerInt1 == -130815 || headerInt1 == -130816) {
+      return "VSO";
     }
     else if (headerInt1 == 1178750284) {
       return "lmbf";

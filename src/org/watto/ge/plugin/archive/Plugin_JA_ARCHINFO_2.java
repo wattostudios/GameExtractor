@@ -106,6 +106,7 @@ public class Plugin_JA_ARCHINFO_2 extends ArchivePlugin {
       addFileTypes();
 
       //ExporterPlugin exporter = Exporter_Custom_JA_ARCHINFO_CFIL.getInstance();
+      //ExporterPlugin exporter = Exporter_LZSS8.getInstance();
 
       // RESETTING THE GLOBAL VARIABLES
 

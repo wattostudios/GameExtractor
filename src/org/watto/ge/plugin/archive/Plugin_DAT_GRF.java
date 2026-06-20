@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@ import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.ByteConverter;
+import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -45,7 +46,8 @@ public class Plugin_DAT_GRF extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Fashion Assistant");
+    setGames("Fashion Assistant",
+        "CSI: NY");
     setExtensions("dat"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -79,15 +81,25 @@ public class Plugin_DAT_GRF extends ArchivePlugin {
       if (fm.readInt() == 88494663) {
         rating += 25;
       }
-      if (fm.readInt() == 21385799) {
-        rating += 25;
-      }
 
       long arcSize = fm.getLength();
 
-      // Directory Offset
-      if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
-        rating += 5;
+      int header2 = fm.readInt();
+      if (header2 == 21385799) {
+        rating += 25;
+
+        // Directory Offset
+        if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
+          rating += 5;
+        }
+      }
+      else if (header2 == 1196574209) {
+        rating += 25;
+
+        // Directory Offset
+        if (FieldValidator.checkOffset(IntConverter.changeFormat(fm.readInt()), arcSize)) {
+          rating += 5;
+        }
       }
 
       return rating;
@@ -121,10 +133,17 @@ public class Plugin_DAT_GRF extends ArchivePlugin {
       long arcSize = fm.getLength();
 
       // 8 - Header ("GRF" + (byte)5 + "GRF" + (byte)1)
-      fm.skip(8);
+      fm.skip(4);
+      boolean endianSwap = false;
+      if (fm.readInt() == 1196574209) { // header was actually ("GRF" + (byte)5,1 + "FRG")
+        endianSwap = true;
+      }
 
       // 4 - Directory Offset
       int dirOffset = fm.readInt();
+      if (endianSwap) {
+        dirOffset = IntConverter.changeFormat(dirOffset);
+      }
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       fm.seek(dirOffset);
@@ -152,8 +171,14 @@ public class Plugin_DAT_GRF extends ArchivePlugin {
 
       // open the decompressed data for processing
       fm.close();
+
+      //FileManipulator tempFM = new FileManipulator(new File("C:\\temp.txt"), true);
+      //tempFM.writeBytes(dirBytes);
+      //tempFM.close();
+
       fm = new FileManipulator(new ByteBuffer(dirBytes));
 
+      /*
       // 4 - Unknown
       while (fm.getOffset() < dirDecompLength) {
         if (fm.readByte() == 0) {
@@ -162,7 +187,44 @@ public class Plugin_DAT_GRF extends ArchivePlugin {
               if (fm.readByte() == 0) {
                 // found the first file
                 fm.seek(fm.getOffset() - 4);
+                found = true;
                 break;
+              }
+            }
+          }
+        }
+      }
+      */
+
+      fm.seek(0);
+
+      if (endianSwap) {
+        // Look for "EIR"
+        while (fm.getOffset() < dirDecompLength) {
+          if (fm.readByte() == 1) {
+            if (fm.readByte() == 69) {
+              if (fm.readByte() == 73) {
+                if (fm.readByte() == 82) {
+                  // found the first file
+                  fm.seek(fm.getOffset() - 9);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+      else {
+        // Look for "RIE"
+        while (fm.getOffset() < dirDecompLength) {
+          if (fm.readByte() == 82) {
+            if (fm.readByte() == 73) {
+              if (fm.readByte() == 69) {
+                if (fm.readByte() == 1) {
+                  // found the first file
+                  fm.seek(fm.getOffset() - 9);
+                  break;
+                }
               }
             }
           }
@@ -177,37 +239,75 @@ public class Plugin_DAT_GRF extends ArchivePlugin {
       // Loop through directory
       int realNumFiles = 0;
       long[] offsets = new long[numFiles];
-      while (fm.getOffset() < dirDecompLength) {
-        //System.out.println(fm.getOffset());
-        // 1 - null
-        // 4 - File ID (incremental from 0)
-        // 4 - Entry Header? ("RIE" + (byte)1)
-        // 1 - Unknown (18)
-        fm.skip(10);
 
-        // 1 - Filename Length
-        int filenameLength = ByteConverter.unsign(fm.readByte());
+      if (endianSwap) {
+        while (fm.getOffset() < dirDecompLength) {
+          //System.out.println(fm.getOffset());
+          // 1 - null
+          // 4 - File ID (incremental from 0)
+          // 4 - Entry Header? ((byte)1 + "EIR")
+          // 4 - String Header ((byte)1 + "rtS")
+          fm.skip(13);
 
-        // X - Filename
-        String filename = fm.readString(filenameLength);
+          // 4 - Filename Length
+          int filenameLength = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkFilenameLength(filenameLength);
 
-        // 4 - File Offset
-        int offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
-        offsets[realNumFiles] = offset;
+          // X - Filename
+          String filename = fm.readString(filenameLength);
 
-        // 4 - Decompressed File Length
-        int decompLength = fm.readInt();
-        FieldValidator.checkLength(decompLength, arcSize);
+          // 4 - File Offset
+          int offset = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkOffset(offset, arcSize);
+          offsets[realNumFiles] = offset;
 
-        // 1 - Unknown (1)
-        fm.skip(1);
+          // 4 - Decompressed File Length
+          int decompLength = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkLength(decompLength, arcSize);
 
-        //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, filename, offset, decompLength, decompLength, exporter);
-        realNumFiles++;
+          // 1 - Unknown (1)
+          fm.skip(1);
 
-        TaskProgressManager.setValue(offset);
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, decompLength, decompLength, exporter);
+          realNumFiles++;
+
+          TaskProgressManager.setValue(offset);
+        }
+      }
+      else {
+        while (fm.getOffset() < dirDecompLength) {
+          //System.out.println(fm.getOffset());
+          // 1 - null
+          // 4 - File ID (incremental from 0)
+          // 4 - Entry Header? ("RIE" + (byte)1)
+          // 1 - Unknown (18)
+          fm.skip(10);
+
+          // 1 - Filename Length
+          int filenameLength = ByteConverter.unsign(fm.readByte());
+
+          // X - Filename
+          String filename = fm.readString(filenameLength);
+
+          // 4 - File Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
+          offsets[realNumFiles] = offset;
+
+          // 4 - Decompressed File Length
+          int decompLength = fm.readInt();
+          FieldValidator.checkLength(decompLength, arcSize);
+
+          // 1 - Unknown (1)
+          fm.skip(1);
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, decompLength, decompLength, exporter);
+          realNumFiles++;
+
+          TaskProgressManager.setValue(offset);
+        }
       }
 
       resources = resizeResources(resources, realNumFiles);

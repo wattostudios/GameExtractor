@@ -20,8 +20,10 @@ import org.watto.component.PreviewPanel_Image;
 import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageSwizzler;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 
 /**
 **********************************************************************************************
@@ -224,15 +226,20 @@ public class Viewer_TM2_TIM2 extends ViewerPlugin {
       FieldValidator.checkHeight(height);
 
       // 8 - GsTEX0
+      long GsTEX0 = fm.readLong();
+      //int swizzle = (int) ((GsTEX0 >> 33) & 3);
+      int swizzle = (int) ((GsTEX0 >> 32) & 7);
+      //System.out.println("Swizzle = " + swizzle + " for GSTEX0 = " + GsTEX0 + " and bitsperpixel = " + bitsPerPixel);
+
       // 8 - GsTEX1
       // 4 - GsRegs
       // 4 - GsTexClut
-      fm.skip(24);
+      fm.skip(16);
 
       // X - User Data (optional) (length = HeaderLength-48)
       fm.skip(headerLength - 48);
 
-      boolean linearPalette = ((clutFormat & 0x80) != 0);
+      boolean linearPalette = (clutFormat < 0);
       clutFormat &= 0x7F;
       int colorSize = (bitsPerPixel > 8 ? bitsPerPixel / 8 : (clutFormat & 0x07) + 1);
 
@@ -241,8 +248,7 @@ public class Viewer_TM2_TIM2 extends ViewerPlugin {
       if (paletteLength > 0) {
         // ...
         // skip over the image data, so we can read the color palettes
-        long imageDataOffset = fm.getOffset();
-        fm.skip(imageDataLength);
+        byte[] imageBytes = fm.readBytes(imageDataLength);
 
         int numberOfPalettes = paletteLength / (colorEntries * colorSize);
         int singlePaletteSize = paletteLength / numberOfPalettes;
@@ -265,14 +271,16 @@ public class Viewer_TM2_TIM2 extends ViewerPlugin {
           numColors = singlePaletteSize / 4;
 
           ImageResource paletteResource = ImageFormatReader.readRGBA(fm, numColors, 1);
+          paletteResource = ImageFormatReader.doubleAlpha(paletteResource);
           //paletteResource = ImageFormatReader.doubleAlpha(paletteResource);
-          paletteResource = ImageFormatReader.removeAlpha(paletteResource);
+          //paletteResource = ImageFormatReader.removeAlpha(paletteResource);
           palette = paletteResource.getPixels();
 
         }
 
         // Now, if the palette isn't linear, perform the decoding...
-        if (!linearPalette && bitsPerPixel != 8) {
+        //if (!linearPalette && bitsPerPixel != 8) {
+        if (!linearPalette && bitsPerPixel == 8) {
 
           int currentPaletteLength = palette.length;
           int[] oldPalette = palette;
@@ -298,8 +306,19 @@ public class Viewer_TM2_TIM2 extends ViewerPlugin {
 
         // ...
         // Now go back to the image data, and read it
-        fm.seek(imageDataOffset);
+        fm.close();
 
+        if ((swizzle == 100) && bitsPerPixel == 8) { // still don't know how to detect swizzle properly, so dummy to =100
+          imageBytes = ImageSwizzler.unswizzlePS28BitSuba(imageBytes, width, height);
+        }
+
+        fm = new FileManipulator(new ByteBuffer(imageBytes));
+
+      }
+      else {
+        byte[] imageBytes = fm.readBytes(imageDataLength);
+        fm.close();
+        fm = new FileManipulator(new ByteBuffer(imageBytes));
       }
 
       ImageResource imageResource = null;
@@ -307,6 +326,7 @@ public class Viewer_TM2_TIM2 extends ViewerPlugin {
         // Indexed
         imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
         imageResource.addProperty("ImageFormat", "8BitPaletted");
+        //imageResource.setPixels(ImageSwizzler.swizzlePS28BitSuba(imageResource.getImagePixels(), width, height));
       }
       else if (bitsPerPixel == 4) {
         // Indexed
