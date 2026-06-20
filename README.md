@@ -74,6 +74,13 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.16.0006
+  * [I] Small incremental version, with the intention of primarily adding more supported games.
+  * [+] MOD, XM, and S3M audio can now be played
+  * [+] Added support for more console image swizzling and palette formats
+  * [B] GameCube audio in FSB archives can now be extracted and played using VGMStream
+  * [B] Fixed a bug where the BMP scanner would miss every second image in an archive
+
 * Version 3.16.0005
   * [I] Small incremental version, with the intention of primarily adding more supported games.
   * [+] Added a scanner for finding ZLib-compressed files in unknown archives
