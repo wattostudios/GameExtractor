@@ -1,30 +1,25 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.ReplacableResource;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,7 +39,6 @@ public class Plugin_GD extends ArchivePlugin {
 
     //         read write replace rename
     setProperties(true, false, false, false);
-    setCanImplicitReplace(true);
 
     setGames("Alien Nations: Amazons And Aliens");
     setExtensions("gd");
@@ -135,7 +129,8 @@ public class Plugin_GD extends ArchivePlugin {
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       // 4 - File Data Offset
-      fm.skip(4);
+      int fileDataOffset = fm.readInt();
+      FieldValidator.checkOffset(fileDataOffset, arcSize);
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
@@ -188,10 +183,7 @@ public class Plugin_GD extends ArchivePlugin {
         fm.skip(56);
 
         // 8 - File Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
-
-        long offset = fm.readInt();
+        long offset = fm.readInt() + fileDataOffset;
         FieldValidator.checkOffset(offset, arcSize);
 
         fm.skip(4);
@@ -199,7 +191,7 @@ public class Plugin_GD extends ArchivePlugin {
         String filename = names[i];
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, 0, 0, 0);
+        resources[i] = new Resource(path, filename, offset);
 
         TaskProgressManager.setValue(i);
       }

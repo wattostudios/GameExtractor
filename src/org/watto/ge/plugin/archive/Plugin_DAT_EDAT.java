@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -33,6 +34,8 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
 
   long maxEndPos = 0;
 
+  long dataOffset = 0;
+
   /**
   **********************************************************************************************
   
@@ -45,11 +48,13 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Act Of War",
+    setGames("Act Of War: Direct Action",
         "Act Of War: High Treason",
         "R.U.S.E");
     setExtensions("dat");
     setPlatforms("PC");
+
+    setTextPreviewExtensions("ccg", "cg", "ndf"); // LOWER CASE
 
   }
 
@@ -78,7 +83,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
         }
 
         // 4 - File Offset
-        long offset = fm.readInt() + maxEndPos;
+        long offset = fm.readInt() + dataOffset;
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
@@ -110,10 +115,10 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
         // Re-using an old filename (jump back)
 
         int currentPos = (int) fm.getOffset();
-        fm.seek(currentPos - 4 + fileGroupID);
+        fm.relativeSeek(currentPos - 4 + fileGroupID);
         // X - Filename
         String filename = dirName + fm.readNullString();
-        fm.seek(currentPos);
+        fm.relativeSeek(currentPos);
 
         // 4 - Last File Indicator (0=last file in this group, #=length of this file entry)
         if (fm.readInt() == 0) {
@@ -121,7 +126,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
         }
 
         // 4 - File Offset
-        long offset = fm.readInt() + maxEndPos;
+        long offset = fm.readInt() + dataOffset;
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
@@ -196,7 +201,7 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
         rating += 50;
       }
 
-      // 4 - Length of the header after the 10 nulls (18)
+      // Version (18)
       if (fm.readInt() == 18) {
         rating += 5;
       }
@@ -236,13 +241,14 @@ public class Plugin_DAT_EDAT extends ArchivePlugin {
 
       // RESETTING THE GLOBAL VARIABLES
       realNumFiles = 0;
+      dataOffset = 0;
 
       FileManipulator fm = new FileManipulator(path, false);
 
       long arcSize = fm.getLength();
 
       // 4 - Header (edat)
-      // 4 - Length of the header after the 10 nulls (18)
+      // 4 - Version (18)
       // 4 - Unknown
       // 10 - null
       // 2 - Unknown (1)

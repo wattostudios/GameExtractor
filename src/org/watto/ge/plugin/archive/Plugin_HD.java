@@ -1,30 +1,27 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,7 +32,7 @@ public class Plugin_HD extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_HD() {
@@ -53,7 +50,7 @@ public class Plugin_HD extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -93,7 +90,7 @@ public class Plugin_HD extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -104,54 +101,57 @@ public class Plugin_HD extends ArchivePlugin {
 
       FileManipulator fm = new FileManipulator(path, false);
 
-      // 2 - numFiles
-      int numFiles = fm.readShort();
-      FieldValidator.checkNumFiles(numFiles);
-
       long arcSize = fm.getLength();
+
+      // 2 - Number of Files
+      short numFiles = fm.readShort();
+      FieldValidator.checkNumFiles(numFiles);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // 4 - dirOffset
-      long dirOffset = fm.readInt();
+      // 4 - Directory Offset
+      int dirOffset = fm.readInt();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
-      // 4 - dirLength (includes all directory entries and filenames)
-      // X - fileData
+      // 4 - Directory Length
+      int dirLength = fm.readInt();
+      FieldValidator.checkLength(dirLength, arcSize);
 
       fm.seek(dirOffset);
-      int realNumFiles = 0;
+
+      byte[] nameBytes = fm.readBytes(dirLength);
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+
+      fm.relativeSeek(dirOffset);
+
       for (int i = 0; i < numFiles; i++) {
         // 4 - Data Offset (relative to the first file offset. ie 10)
-        long offset = fm.readInt() + 10;
+        int offset = fm.readInt() + 10;
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
-        long length = fm.readInt();
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         // 4 - Filename Offset (relative to dirOffset)
-        long filenameOffset = fm.readInt() + dirOffset;
-        FieldValidator.checkOffset(filenameOffset, arcSize);
+        int filenameOffset = fm.readInt();
+        FieldValidator.checkOffset(filenameOffset, dirLength);
 
-        if (offset != 0 && length != 0) {
-          //path,id,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new Resource(path, "", offset, length);
+        nameFM.seek(filenameOffset);
 
-          TaskProgressManager.setValue(i);
-          realNumFiles++;
-        }
-      }
-
-      for (int i = 0; i < realNumFiles; i++) {
-        // X - Filename (null)
-        String filename = fm.readNullString();
+        // X - Filename
+        // 1 - null Filename Terminator
+        String filename = nameFM.readNullString();
         FieldValidator.checkFilename(filename);
-        resources[i].setName(filename);
+
+        //path,id,name,offset,length,decompLength,exporter
+        resources[i] = new Resource(path, filename, offset, length);
+
+        TaskProgressManager.setValue(i);
       }
 
-      resources = resizeResources(resources, realNumFiles);
+      nameFM.close();
 
       fm.close();
 
@@ -167,7 +167,7 @@ public class Plugin_HD extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

@@ -159,16 +159,14 @@ public class ZLibXInputStream extends InputStream {
       if (decompLength > 0) {
         // we've run out of data in this block, need to read the next compressed block
 
-        // System.out.println(">>> STARTING. Read offset = " +
-        // sourceManipulator.getOffset());
+        //System.out.println(">>> STARTING. Read offset = " + sourceManipulator.getOffset());
 
         // Skip the first 2 bytes, as per reference in
         // http://aluigi.altervista.org/papers/quickbms.txt
         // These 2 bytes are the data length for this compressed block
         int blockLength = ShortConverter.unsign(sourceManipulator.readShort());
         long nextBlockOffset = sourceManipulator.getOffset() + blockLength;
-        // System.out.println(">>> Block length = " + blockLength + ", next block should
-        // start at " + nextBlockOffset);
+        //System.out.println(">>> Block length = " + blockLength + ", next block should start at " + nextBlockOffset);
 
         if (continueUntilDecompLength) {
           nextBlockOffset = Long.MAX_VALUE; // so that the while() down below will continue to repeat until getBufferLevel() >= decompLength instead of listening to the block offsets/lengths 
@@ -197,11 +195,20 @@ public class ZLibXInputStream extends InputStream {
                                    // bit, not reset it
         }
 
+        //System.out.println("Decomp Block Length = " + destManipulator.getLength());
+
         // Now that we've uncompressed all the data, we need to return the buffer to the
         // beginning,
         // ready for the read() by the extract() method when trying to export this file
         // to disk
         destManipulator.seek(0);
+
+        // If the length is a little larger than 32768, force it to the right size
+        int blockDecompLengthExtra = (int) (destManipulator.getLength() - 32768);
+        if (blockDecompLengthExtra > 0 && blockDecompLengthExtra < 128) {
+          // force to 32768
+          destManipulator.setLength(32768);
+        }
 
         decompLength -= (blockLength + 2);
       }
@@ -254,7 +261,8 @@ public class ZLibXInputStream extends InputStream {
   public void mark(int readLimit) {
     try {
       mark = (int) destManipulator.getOffset();
-    } catch (Throwable t) {
+    }
+    catch (Throwable t) {
       mark = 0;
     }
   }
@@ -312,7 +320,8 @@ public class ZLibXInputStream extends InputStream {
   public void reset() {
     try {
       destManipulator.seek(mark);
-    } catch (Throwable t) {
+    }
+    catch (Throwable t) {
     }
 
     mark = 0;
@@ -448,7 +457,8 @@ public class ZLibXInputStream extends InputStream {
 
       sum += t.getTableValue(len);
       cur -= t.getTableValue(len);
-    } while (cur >= 0);
+    }
+    while (cur >= 0);
 
     return t.getTransValue(sum + cur);
   }
@@ -497,17 +507,20 @@ public class ZLibXInputStream extends InputStream {
         for (int length = tinf_read_bits(2, 3); length != 0; --length) {
           lengths[num++] = prev;
         }
-      } else if (sym == 17) {
+      }
+      else if (sym == 17) {
         // repeat code length 0 for 3-10 times (read 3 bits)
         for (int length = tinf_read_bits(3, 3); length != 0; --length) {
           lengths[num++] = 0;
         }
-      } else if (sym == 18) {
+      }
+      else if (sym == 18) {
         // repeat code length 0 for 11-138 times (read 7 bits)
         for (int length = tinf_read_bits(7, 11); length != 0; --length) {
           lengths[num++] = 0;
         }
-      } else {
+      }
+      else {
         // values 0-15 represent the actual code lengths
         lengths[num++] = sym;
       }
@@ -557,7 +570,8 @@ public class ZLibXInputStream extends InputStream {
       if (sym < 256) {
         // System.out.println(" tinf_inflate_block_data: Raw Symbol = " + sym);
         destManipulator.writeByte((byte) sym);// *d->dest++ = sym;
-      } else {
+      }
+      else {
 
         sym -= 257;
 
@@ -738,11 +752,13 @@ public class ZLibXInputStream extends InputStream {
       // System.out.println("tinf_uncompress: Read Uncompressed Block. Read offset: "
       // + sourceManipulator.getOffset());
       result = tinf_inflate_uncompressed_block();
-    } else if (btype == 1) {
+    }
+    else if (btype == 1) {
       // Compressed Block with Fixed Huffman Trees
       // System.out.println("tinf_uncompress: Read Fixed Huffman Block");
       result = tinf_inflate_fixed_block();
-    } else if (btype == 2) {
+    }
+    else if (btype == 2) {
       // Compressed Block with Dynamic Huffman Trees
       // System.out.println("tinf_uncompress: Read Dynamic Huffman Block");
       result = tinf_inflate_dynamic_block();

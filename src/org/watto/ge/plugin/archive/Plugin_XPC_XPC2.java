@@ -19,9 +19,9 @@ import java.io.File;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.exporter.Exporter_BZIP2;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
-import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -29,22 +29,22 @@ import org.watto.task.TaskProgressManager;
 
 **********************************************************************************************
 **/
-public class Plugin_TXTR extends ArchivePlugin {
+public class Plugin_XPC_XPC2 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
   
   **********************************************************************************************
   **/
-  public Plugin_TXTR() {
+  public Plugin_XPC_XPC2() {
 
-    super("TXTR", "TXTR");
+    super("XPC_XPC2", "XPC_XPC2");
 
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Long And Hard Summer");
-    setExtensions("txtr"); // MUST BE LOWER CASE
+    setGames("Deadly Premonition");
+    setExtensions("xpc"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
@@ -54,7 +54,7 @@ public class Plugin_TXTR extends ArchivePlugin {
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
-    setCanScanForFileTypes(true);
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -73,8 +73,27 @@ public class Plugin_TXTR extends ArchivePlugin {
         rating += 25;
       }
 
-      // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
+      // Header
+      if (fm.readString(4).equals("XPC2")) {
+        rating += 50;
+      }
+
+      long arcSize = fm.getLength();
+
+      // Archive Size
+      if (FieldValidator.checkEquals(fm.readInt(), arcSize)) {
+        rating += 5;
+      }
+
+      fm.skip(24);
+
+      // Directory Offset
+      if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
+        rating += 5;
+      }
+
+      // File Data Offset
+      if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
         rating += 5;
       }
 
@@ -100,7 +119,7 @@ public class Plugin_TXTR extends ArchivePlugin {
 
       addFileTypes();
 
-      //ExporterPlugin exporter = Exporter_ZLib.getInstance();
+      ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 
@@ -108,47 +127,67 @@ public class Plugin_TXTR extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // 4 - Number Of Files
-      int numFiles = fm.readInt();
+      // 4 - Header (XPC2)
+      // 4 - File Length
+      // 2 - Unknown
+      // 2 - Unknown
+      // 4 - Unknown (1)
+      // 4 - Unknown (1)
+      // 12 - null
+      fm.skip(32);
+
+      // 4 - Directory Offset
+      int dirOffset = fm.readInt();
+      FieldValidator.checkOffset(dirOffset, arcSize);
+
+      // 4 - File Data Offset
+      int numFiles = (fm.readInt() - dirOffset) / 32;
       FieldValidator.checkNumFiles(numFiles);
+
+      // 24 - null
+      fm.seek(dirOffset);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // First file offset (read to work out relative offset)
-      long offsetDelta = IntConverter.unsign(fm.readInt()) - ((numFiles * 4) + 4);
-      fm.relativeSeek(4);
-
-      long[] entryOffsets = new long[numFiles];
       // Loop through directory
+      int realNumFiles = 0;
       for (int i = 0; i < numFiles; i++) {
+        // 16 - Filename (null terminated, filled with nulls)
+        String filename = fm.readNullString(16);
+
         // 4 - File Offset
-        long offset = IntConverter.unsign(fm.readInt()) - offsetDelta;
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
-        entryOffsets[i] = offset;
-      }
 
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        fm.relativeSeek(entryOffsets[i]);
-        //System.out.println(fm.getOffset());
+        // 4 - Compressed File Length
+        int length = fm.readInt();
+        FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Unknown (0)
+        // 4 - Unknown
         fm.skip(4);
 
-        // 4 - File Data Offset (absolute, offset to this file data in the original WIN archive)
-        long offset = IntConverter.unsign(fm.readInt()) - offsetDelta;
-        FieldValidator.checkOffset(offset, arcSize);
+        // 4 - Decompressed File Length [>>8]
+        int decompLength = fm.readInt() >> 8;
+        FieldValidator.checkLength(decompLength);
 
-        String filename = Resource.generateFilename(i);
+        if (length == 0 && offset == 0) {
+          // empty padding file
+          continue;
+        }
+
+        FieldValidator.checkFilename(filename);
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
+        resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+        realNumFiles++;
 
         TaskProgressManager.setValue(i);
       }
 
-      calculateFileSizes(resources, arcSize);
+      if (numFiles != realNumFiles) {
+        resources = resizeResources(resources, realNumFiles);
+      }
 
       fm.close();
 
@@ -172,18 +211,11 @@ public class Plugin_TXTR extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
-    if (headerInt1 == 1903131186) {
-
-      resource.setOffset(resource.getOffset() + 12);
-      resource.setLength(resource.getLength() + 12);
-      resource.setDecompressedLength(headerInt3);
-      resource.setExporter(Exporter_BZIP2.getInstance());
-
-      return "2zoq";
+    /*
+    if (headerInt1 == 2037149520) {
+      return "js";
     }
-    else if (headerInt1 == 1903126886) {
-      return "fioq";
-    }
+    */
 
     return null;
   }

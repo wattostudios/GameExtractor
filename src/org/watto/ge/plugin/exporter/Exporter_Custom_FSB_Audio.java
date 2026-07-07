@@ -147,6 +147,7 @@ public class Exporter_Custom_FSB_Audio extends ExporterPlugin {
 
     // Add the channel padding info
     // [3.16.0006] Fixed and working for GameCube games in FSB3
+    // [3.16.0007] Confirmed also working in Wii games in FSB5
     int extraDataSize = 0;
     if (extraData != null) {
       extraDataSize = extraData.length;

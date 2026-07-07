@@ -323,6 +323,9 @@ public class ByteBuffer implements ManipulatorBuffer {
     if (bufferLevel >= length) {
       bufferLevel = (int) length - 1;
     }
+    if (bufferSize > length) {
+      bufferSize = (int) length;
+    }
   }
 
   /***********************************************************************************************

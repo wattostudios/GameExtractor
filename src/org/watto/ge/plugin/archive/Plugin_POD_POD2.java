@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,12 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.component.WSPluginManager;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -51,26 +51,12 @@ public class Plugin_POD_POD2 extends ArchivePlugin {
         "Nocturne");
     setPlatforms("PC");
 
-    setFileTypes("lst", "File List",
-        "opa", "Encrypted Image?",
-        "act", "Color Palette",
-        "smf", "3D Model",
-        "rpl", "Replay File",
-        "tex", "Texture Listing",
-        "clr", "Clear Image?",
-        "rtd", "Unknown File",
-        "sdw", "Unknown File",
-        "lvl", "Level Descriptor",
-        "sit", "Race Settings",
-        "trk", "Truck Information",
-        "bin", "Binary Data",
-        "lte", "Unknown File",
-        "map", "Map File",
-        "pbm", "PBM Image",
-        "sfx", "Sound Settings",
-        "loc", "Text Description",
-        "vox", "Configuration List",
-        "rsp", "File List");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("act", "Color Palette", FileType.TYPE_PALETTE),
+        new FileType("smf", "3D Model", FileType.TYPE_MODEL),
+        new FileType("raw", "RAW Image", FileType.TYPE_IMAGE));
+
+    setTextPreviewExtensions("tex", "lvl", "msn", "sc", "sit", "smf", "veg", "wat", "rsp", "odl", "lst"); // LOWER CASE
 
   }
 
@@ -107,20 +93,6 @@ public class Plugin_POD_POD2 extends ArchivePlugin {
     catch (Throwable t) {
       return 0;
     }
-  }
-
-  /**
-   **********************************************************************************************
-   Provide hints to the previewer so that certain document types are displayed appropriately
-   **********************************************************************************************
-   **/
-  @Override
-  public ViewerPlugin previewHint(Resource resource) {
-    String extension = resource.getExtension();
-    if (extension.equalsIgnoreCase("lvl") || extension.equalsIgnoreCase("sit") || extension.equalsIgnoreCase("smf") || extension.equalsIgnoreCase("tex") || extension.equalsIgnoreCase("lst")) {
-      return (ViewerPlugin) WSPluginManager.getPlugin("Viewer", "TXT");
-    }
-    return null;
   }
 
   /**

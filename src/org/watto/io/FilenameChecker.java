@@ -1,25 +1,20 @@
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       WATTO STUDIOS                                        //
-//                             Java Code, Programs, and Software                              //
-//                                    http://www.watto.org                                    //
-//                                                                                            //
-//                           Copyright (C) 2004-2010  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+ * Application:  WSProgram
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2004-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 
 package org.watto.io;
 
 import java.io.File;
-
 
 /***********************************************************************************************
 Utilities for checking and correcting errors in filenames. For example, checks for and removes
@@ -30,9 +25,8 @@ public class FilenameChecker {
   /***********************************************************************************************
   Constructor
   ***********************************************************************************************/
-  public FilenameChecker(){
+  public FilenameChecker() {
   }
-
 
   /***********************************************************************************************
   Checks the <code>File</code> for any invalid characters
@@ -40,7 +34,7 @@ public class FilenameChecker {
   @return -1 if the <code>File</code> is valid. Otherwise, the <code>File</code> is not valid, and
   the value returned is the index of the first invalid character in the filename
   ***********************************************************************************************/
-  public static int checkFilename(File file){
+  public static int checkFilename(File file) {
     if (file.exists()) {
       return -1;
     }
@@ -48,7 +42,7 @@ public class FilenameChecker {
     String path = file.getAbsolutePath();
     int length = path.length();
 
-    for (int i = 0;i < length;i++) {
+    for (int i = 0; i < length; i++) {
       char currentChar = path.charAt(i);
       if ((currentChar >= 32 || currentChar < 0) && currentChar != 34 && currentChar != 42 && currentChar != 47 && currentChar != 58 && currentChar != 60 && currentChar != 62 && currentChar != 63 && currentChar != 92 && currentChar != 124) {
         //the character is valid
@@ -61,17 +55,15 @@ public class FilenameChecker {
     return -1;
   }
 
-
   /***********************************************************************************************
   Checks and corrects any invalid characters in the <code>File</code>. Invalid characters are
   replaced with the <i>_</i> character instead.
   @param file the <code>File</code> to check and correct
   @return the new valid <code>File</code>
   ***********************************************************************************************/
-  public static File correctFilename(File file){
-    return correctFilename(file,'_');
+  public static File correctFilename(File file) {
+    return correctFilename(file, '_');
   }
-
 
   /***********************************************************************************************
   Checks and corrects any invalid characters in the <code>File</code>. Invalid characters are
@@ -80,22 +72,31 @@ public class FilenameChecker {
   @param replaceCharacter the <code>char</code> to use as a replacement for invalid characters
   @return the new valid <code>File</code>
   ***********************************************************************************************/
-  public static File correctFilename(File file,char replaceCharacter){
+  public static File correctFilename(File file, char replaceCharacter) {
     if (file.exists()) {
       return file;
+    }
+
+    boolean everChanged = false;
+
+    // first strip out any double-dots followed by a slash
+    String originalPath = file.getAbsolutePath();
+    String cleanPath = originalPath.replaceAll("\\.\\.[\\\\/]", "");
+    if (!originalPath.equals(cleanPath)) {
+      everChanged = true;
+      file = new File(cleanPath);
     }
 
     String path = "";
     File parent = new File(file.getAbsolutePath());
 
-    boolean everChanged = false;
     while (parent != null && !parent.exists()) {
       String name = parent.getName();
       char[] chars = name.toCharArray();
       int charCount = chars.length;
 
       boolean changed = false;
-      for (int i = 0;i < charCount;i++) {
+      for (int i = 0; i < charCount; i++) {
         char currentChar = chars[i];
 
         if ((currentChar >= 32 || currentChar < 0) && currentChar != 34 && currentChar != 42 && currentChar != 47 && currentChar != 58 && currentChar != 60 && currentChar != 62 && currentChar != 63 && currentChar != 92 && currentChar != 124) {
@@ -135,7 +136,6 @@ public class FilenameChecker {
     }
   }
 
-
   /***********************************************************************************************
   Builds the next incremental filename after the given one. If the <code>File</code> does not exist,
   the <code>File</code> is returned. If the <code>File</code> does exist, an incremental number is
@@ -143,7 +143,7 @@ public class FilenameChecker {
   @param file the <code>File</code> to check
   @return the next valid <code>File</code>
   ***********************************************************************************************/
-  public static File incrementFilename(File file){
+  public static File incrementFilename(File file) {
     file = correctFilename(file);
 
     if (file.exists()) {

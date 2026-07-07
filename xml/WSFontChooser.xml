@@ -9,7 +9,7 @@
         <WSPanel layout="BorderLayout" position="center" opaque="false">
           <WSPanel layout="BorderLayout" position="north" opaque="false">
             <WSLabel code="FontNameLabel" position="north" opaque="false" />
-            <WSTextField code="FontName" position="center" />
+            <WSTextField code="FontName" position="center" opaque="false" />
           </WSPanel>
           <WSPanel showBorder="true" opaque="false">
             <WSScrollPane showBorder="false" width="400" height="200" opaque="false">
@@ -23,7 +23,7 @@
             <WSPanel layout="BorderLayout" position="center" opaque="false">
             <WSPanel layout="BorderLayout" position="north" opaque="false">
               <WSLabel code="FontStyleLabel" position="north" width="100" opaque="false" />
-               <WSTextField code="FontStyle" position="center" />
+               <WSTextField code="FontStyle" position="center" opaque="false" />
             </WSPanel>
             <WSPanel showBorder="true" opaque="false">
               <WSScrollPane showBorder="false" opaque="false">
@@ -35,7 +35,7 @@
           <WSPanel layout="BorderLayout" position="east" opaque="false">
             <WSPanel layout="BorderLayout" position="north" opaque="false">
               <WSLabel code="FontSizeLabel" position="north" width="50" opaque="false" />
-              <WSTextField code="FontSize" position="center" />
+              <WSTextField code="FontSize" position="center" opaque="false" />
             </WSPanel>
             <WSPanel showBorder="true" opaque="false">
               <WSScrollPane showBorder="false" opaque="false">
@@ -50,7 +50,7 @@
 <!-- TOP BAR - END -->
 
       <WSPanel layout="BorderLayout" position="south" vertical-gap="4">
-        <WSPanel layout="BorderLayout" position="north" vertical-gap="4">
+        <WSPanel layout="BorderLayout" position="north" vertical-gap="4" visible="false">
 
 <!-- STYLE BAR - START -->
           <WSPanel showBorder="true" layout="GridLayout" rows="1" columns="3" position="north">

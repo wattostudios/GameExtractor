@@ -116,6 +116,13 @@ website as well.
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+Version 3.16.0007
+[I] Small incremental version, with the intention of primarily adding more supported games.
+[B] Bug fixes for the interface font chooser
+[B] Fixed a bug preventing the preview of small OGG audio files
+[B] Fixed a bug which was flipping DDS images vertically
+[B] Now detecting and preventing parent directory double-dots in file paths when extracting
+
 Version 3.16.0006
 [I] Small incremental version, with the intention of primarily adding more supported games.
 [+] MOD, XM, and S3M audio can now be played

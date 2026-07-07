@@ -1,30 +1,26 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.ReplacableResource;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,27 +31,31 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_BMB_MAGIC() {
-
     super("BMB_MAGIC", "BMB_MAGIC");
 
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    allowImplicitReplacing = true;
-
     setGames("Armobiles");
-    setExtensions("bmb", "dmd", "wmw");
+    setExtensions("bmb");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("bmb_tex", "Texture Image", FileType.TYPE_IMAGE));
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+
+    setCanScanForFileTypes(true);
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -68,21 +68,12 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(8).equals("magic  " + (byte) 0)) {
+      if (fm.readString(7).equals("magic  ")) {
         rating += 50;
       }
+      fm.skip(1);
 
       fm.skip(16);
-
-      // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
-        rating += 5;
-      }
-
-      // null
-      if (fm.readInt() == 0) {
-        rating += 5;
-      }
 
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readInt())) {
@@ -125,16 +116,11 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
       fm.skip(24);
 
       // 4 - Number Of Files (including blank files)
-      int numFilesIncBlank = fm.readInt();
-      FieldValidator.checkNumFiles(numFilesIncBlank);
-
-      // 4 - null
-      fm.skip(4);
-
-      // 4 - Number Of Files
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
+      // 4 - null
+      // 4 - Unknown
       // 12 - null
       // 4 - Unknown (1)
       // 4 - File ID Starting Point [+1] (2199)
@@ -145,7 +131,7 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
       // 4 - Unknown (-1)
       // 4 - null
       // 4 - Unknown (24)
-      fm.skip(48);
+      fm.skip(56);
 
       // 4 - Files Directory Offset (156)
       long dirOffset = fm.readInt();
@@ -175,18 +161,12 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
 
       // Loop through directory
       int realNumFiles = 0;
-      for (int i = 0; i < numFilesIncBlank; i++) {
+      for (int i = 0; i < numFiles; i++) {
         // 4 - File Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
-
         long offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - File Length
-        long lengthPointerLocation = fm.getOffset();
-        long lengthPointerLength = 4;
-
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
@@ -210,11 +190,15 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
           String filename = Resource.generateFilename(realNumFiles);
 
           //path,id,name,offset,length,decompLength,exporter
-          resources[realNumFiles] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);
+          resources[realNumFiles] = new Resource(path, filename, offset, length);
 
           TaskProgressManager.setValue(i);
           realNumFiles++;
         }
+      }
+
+      if (realNumFiles < numFiles) {
+        resources = resizeResources(resources, realNumFiles);
       }
 
       fm.close();
@@ -226,6 +210,24 @@ public class Plugin_BMB_MAGIC extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    if (headerInt1 == 65538) {
+      return "bmb_tex";
+    }
+
+    return null;
   }
 
 }

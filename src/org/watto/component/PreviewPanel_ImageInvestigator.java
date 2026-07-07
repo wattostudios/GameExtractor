@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -332,6 +332,7 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
         "R16G16",
         "L8A8",
         "A8L8",
+        "L4A4",
         "U8V8",
         "16F16F16F16F_ARGB",
         "16F16F16F16F_ABGR",
@@ -1021,6 +1022,9 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       else if (format.equals("A8L8")) {
         imageResource = ImageFormatReader.readA8L8(fm, imageWidth, imageHeight);
       }
+      else if (format.equals("L4A4")) {
+        imageResource = ImageFormatReader.readL4A4(fm, imageWidth, imageHeight);
+      }
       else if (format.equals("16F16F16F16F_ARGB")) {
         imageResource = ImageFormatReader.read16F16F16F16F_ARGB(fm, imageWidth, imageHeight);
       }
@@ -1053,10 +1057,20 @@ public class PreviewPanel_ImageInvestigator extends PreviewPanel_Image implement
       }
       else if (format.equals("4BitPaletted")) {
         if (palette == null) {
-          imageResource = ImageFormatReader.read4BitPaletted(fm, imageWidth, imageHeight);
+          if (bigEndian) {
+            imageResource = ImageFormatReader.read4BitPalettedBigEndian(fm, imageWidth, imageHeight);
+          }
+          else {
+            imageResource = ImageFormatReader.read4BitPaletted(fm, imageWidth, imageHeight);
+          }
         }
         else {
-          imageResource = ImageFormatReader.read4BitPaletted(fm, imageWidth, imageHeight, palette);
+          if (bigEndian) {
+            imageResource = ImageFormatReader.read4BitPalettedBigEndian(fm, imageWidth, imageHeight, palette);
+          }
+          else {
+            imageResource = ImageFormatReader.read4BitPaletted(fm, imageWidth, imageHeight, palette);
+          }
         }
       }
       else if (format.equals("8BitPaletted")) {

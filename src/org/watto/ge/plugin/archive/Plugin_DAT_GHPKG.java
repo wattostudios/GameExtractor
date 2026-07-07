@@ -187,6 +187,7 @@ public class Plugin_DAT_GHPKG extends ArchivePlugin {
         }
         else {
           ErrorLogger.log("[DAT_GHPKG] Unknown entry type: " + entryType + " at " + (fm.getOffset() - 1));
+          return null;
         }
 
       }

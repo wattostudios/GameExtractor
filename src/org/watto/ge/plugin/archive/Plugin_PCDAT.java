@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 
 import org.watto.Language;
@@ -57,7 +58,7 @@ public class Plugin_PCDAT extends ArchivePlugin {
         new FileType("csv", "CSV Spreadsheet", FileType.TYPE_DOCUMENT),
         new FileType("dat_texarc", "Texture Archive", FileType.TYPE_ARCHIVE));
 
-    setTextPreviewExtensions("ver", "csv"); // LOWER CASE
+    setTextPreviewExtensions("ver", "csv", "env", "dyn", "fas", "mvs", "rfx", "sdl", "spl"); // LOWER CASE
 
     // WE ONLY TURN THIS ON, in read(), IF SOME FILES DON'T HAVE PROPER FILENAMES
     //setCanScanForFileTypes(true);
@@ -134,29 +135,56 @@ public class Plugin_PCDAT extends ArchivePlugin {
 
       // See if we have a file with the filenames in it, and if so, we need to read them in so the decryption works properly
       HashMap<Integer, String> hashMap = new HashMap<Integer, String>(numFiles);
+      /*
       File hashFile = new File(Settings.get("HashesDirectory") + File.separatorChar + "PCDAT" + File.separatorChar + "filenames.txt");
       if (hashFile.exists()) {
         int hashFileLength = (int) hashFile.length();
-
+      
         FileManipulator hashFM = new FileManipulator(hashFile, false);
         while (hashFM.getOffset() < hashFileLength) {
           String name = hashFM.readLine();
           if (name.equals("")) {
             break; // EOF
           }
-
+      
           int separatorPos = name.indexOf(' ');
           if (separatorPos <= 0) {
             continue; // no separator between hash and filename
           }
-
+      
           String hash = name.substring(0, separatorPos);
           name = name.substring(separatorPos + 1);
-
+      
           // Convert the unsigned hash to a signed hash
           Integer intHash = Integer.parseUnsignedInt(hash);
-
+      
           hashMap.put(intHash, name);
+        }
+        hashFM.close();
+      }
+      */
+
+      File hashFile = new File(Settings.get("HashesDirectory") + File.separatorChar + "PCDAT" + File.separatorChar + "filenamesonly.txt");
+      if (hashFile.exists()) {
+        int hashFileLength = (int) hashFile.length();
+
+        FileManipulator hashFM = new FileManipulator(hashFile, false);
+        while (hashFM.getOffset() < hashFileLength) {
+          String name = hashFM.readLine().trim();
+          if (name.equals("")) {
+            break; // EOF
+          }
+
+          // lowercase
+          name = name.toLowerCase();
+          int intHash = calculateHash(name);
+          hashMap.put(intHash, name);
+
+          // UPPERCASE
+          name = name.toUpperCase();
+          intHash = calculateHash(name);
+          hashMap.put(intHash, name);
+
         }
         hashFM.close();
       }
@@ -186,6 +214,7 @@ public class Plugin_PCDAT extends ArchivePlugin {
         if (filename == null) {
           filename = Resource.generateFilename(realNumFiles);
           missingFilenames = true;
+          //System.out.println(hash);
         }
 
         //path,name,offset,length,decompLength,exporter
@@ -217,6 +246,44 @@ public class Plugin_PCDAT extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+   **********************************************************************************************
+   
+   **********************************************************************************************
+   **/
+  public int calculateHash(String name) {
+    int dwHash = 1;
+    int j = 0;
+    int bCounter = 1;
+    int dwBlocks = 8 * name.length();
+
+    byte[] encoded = name.getBytes(Charset.forName("ASCII"));
+
+    for (int i = 0; i < dwBlocks; i++) {
+      boolean D = (dwHash & 0x80000000) != 0;
+      boolean A = (dwHash & 0x200000) != 0;
+      boolean B = (dwHash & 2) != 0;
+      boolean C = (dwHash & 1) != 0;
+      dwHash = (dwHash << 1) & 0xFFFFFFFF;
+
+      int current_char = 0;
+      if (j < encoded.length) {
+        current_char = encoded[j];
+      }
+
+      boolean X = ((current_char & bCounter) != 0);
+      if (D ^ (A ^ B ^ C ^ X)) {
+        dwHash |= 1;
+      }
+      bCounter <<= 1;
+      if (bCounter == 0 || bCounter > 0x80) {
+        j += 1;
+        bCounter = 1;
+      }
+    }
+    return dwHash & 0xFFFFFFFF;
   }
 
   /**
@@ -356,7 +423,7 @@ public class Plugin_PCDAT extends ArchivePlugin {
       return "loc"; // language archive
     }
     else if (headerInt1 == 1 && headerInt2 == 80) {
-      return "facetalk";
+      return "kan"; // facetalk
     }
     else if (headerInt3 == 4 || headerInt3 == 8) {
       return "dat_texarc"; // potentially a texture archive (PS2)
@@ -378,7 +445,7 @@ public class Plugin_PCDAT extends ArchivePlugin {
         }
       }
       if (ascii) {
-        return "csv";
+        return "txt";//"csv";
       }
     }
 

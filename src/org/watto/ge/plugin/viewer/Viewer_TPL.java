@@ -21,11 +21,13 @@ import org.watto.datatype.Archive;
 import org.watto.datatype.ImageResource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.helper.ImageFormatReader;
+import org.watto.ge.helper.ImageSwizzler;
 import org.watto.ge.plugin.AllFilesPlugin;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ViewerPlugin;
 import org.watto.ge.plugin.archive.Plugin_APP;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
 import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.ShortConverter;
 
@@ -220,7 +222,32 @@ public class Viewer_TPL extends ViewerPlugin {
           int originalHeight = height;
 
           // X - Image Data
-          if (imageFormat == 1) {
+          // Ref: https://wiki.tockdom.com/wiki/TPL_%28File_Format%29
+          if (imageFormat == 0) {
+            // I4
+
+            // ensure width and height are multiples of 8/4...
+            int heightMod = height % 8;
+            if (heightMod != 0) {
+              height += (8 - heightMod);
+            }
+            int widthMod = width % 8;
+            if (widthMod != 0) {
+              width += (8 - widthMod);
+            }
+
+            int numPixels = height * width / 2;
+            byte[] pixelBytes = fm.readBytes(numPixels);
+            pixelBytes = ImageSwizzler.unswizzleGameCube4Bit(pixelBytes, width, height);
+
+            FileManipulator pixelFM = new FileManipulator(new ByteBuffer(pixelBytes));
+            ImageResource imageResource = ImageFormatReader.read4BitPalettedBigEndian(pixelFM, width, height);
+            pixelFM.close();
+
+            imageResource.setHeight(originalHeight); // to ignore anything outside the 4-pixel block
+            imageResources[i] = imageResource;
+          }
+          else if (imageFormat == 1) {
             // I8
 
             // ensure width and height are multiples of 8/4...
@@ -235,6 +262,30 @@ public class Viewer_TPL extends ViewerPlugin {
 
             ImageResource imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
             imageResource = ImageFormatReader.reorderPixelBlocks(imageResource, 8, 4);
+            imageResource.setHeight(originalHeight); // to ignore anything outside the 4-pixel block
+            imageResources[i] = imageResource;
+          }
+          else if (imageFormat == 2) {
+            // IA4
+
+            // ensure width and height are multiples of 8/4...
+            int heightMod = height % 4;
+            if (heightMod != 0) {
+              height += (4 - heightMod);
+            }
+            int widthMod = width % 4;
+            if (widthMod != 0) {
+              width += (4 - widthMod);
+            }
+
+            int numPixels = height * width;
+            byte[] pixelBytes = fm.readBytes(numPixels);
+            pixelBytes = ImageSwizzler.unswizzleGameCube8Bit(pixelBytes, width, height);
+
+            FileManipulator pixelFM = new FileManipulator(new ByteBuffer(pixelBytes));
+            ImageResource imageResource = ImageFormatReader.readL4A4(pixelFM, width, height);
+            pixelFM.close();
+
             imageResource.setHeight(originalHeight); // to ignore anything outside the 4-pixel block
             imageResources[i] = imageResource;
           }

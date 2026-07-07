@@ -830,6 +830,64 @@ public class ImageFormatReader {
 
   /**
    **********************************************************************************************
+   * Reads an uncompressed 4bit image (eg paletted grayscale image with indexed values)
+   **********************************************************************************************
+   **/
+  public static ImageResource read4BitPalettedBigEndian(FileManipulator fm, int width, int height) {
+    int[] palette = PaletteGenerator.getGrayscale4BitPalette().getPalette();
+    return read4BitPalettedBigEndian(fm, width, height, palette);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads an uncompressed 4bit image (eg paletted grayscale image with indexed values)
+   **********************************************************************************************
+   **/
+  public static ImageResource read4BitPalettedBigEndian(FileManipulator fm, int width, int height, int[] palette) {
+    int numPixels = width * height;
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i += 2) {
+      int pixel = ByteConverter.unsign(fm.readByte());
+
+      int pixel1 = (pixel >> 4) & 15;
+      int pixel2 = (pixel & 15);
+
+      pixels[i] = palette[pixel1];
+      pixels[i + 1] = palette[pixel2];
+    }
+
+    return new ImageResource(pixels, width, height);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads an uncompressed 4bit image (eg paletted grayscale image with indexed values)
+   **********************************************************************************************
+   **/
+  public static ImageResource read4BitPalettedBigEndian(FileManipulator fm, int width, int height, boolean usePaletteManager) {
+    if (!usePaletteManager || PaletteManager.getNumPalettes() <= 0) {
+      return read4BitPalettedBigEndian(fm, width, height);
+    }
+
+    int numPixels = width * height;
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i += 2) {
+      int pixel = ByteConverter.unsign(fm.readByte());
+
+      int pixel1 = (pixel >> 4) & 15;
+      int pixel2 = (pixel & 15);
+
+      pixels[i] = pixel1;
+      pixels[i + 1] = pixel2;
+    }
+
+    return new PalettedImageResource(pixels, width, height, PaletteManager.getCurrentPalette().getPalette());
+  }
+
+  /**
+   **********************************************************************************************
    * Reads an uncompressed 8bit image (eg paletted grayscale image with indexed values)
    **********************************************************************************************
    **/
@@ -2809,6 +2867,28 @@ public class ImageFormatReader {
     for (int i = 0; i < numPixels; i++) {
       int luminence = ByteConverter.unsign(fm.readByte());
       int alpha = ByteConverter.unsign(fm.readByte());
+
+      pixels[i] = ((luminence << 16) | (luminence << 8) | luminence | (alpha << 24));
+    }
+
+    return new ImageResource(pixels, width, height);
+  }
+
+  /**
+   **********************************************************************************************
+   * Reads Luminance-4 Alpha-4 pixel data
+   **********************************************************************************************
+   **/
+  public static ImageResource readL4A4(FileManipulator fm, int width, int height) {
+
+    int numPixels = width * height;
+    int[] pixels = new int[numPixels];
+
+    for (int i = 0; i < numPixels; i++) {
+      int pixel = ByteConverter.unsign(fm.readByte());
+
+      int alpha = ((pixel >> 4) & 15) << 4;
+      int luminence = ((pixel & 15)) << 4;
 
       pixels[i] = ((luminence << 16) | (luminence << 8) | luminence | (alpha << 24));
     }

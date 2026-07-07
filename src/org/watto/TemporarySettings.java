@@ -61,7 +61,7 @@ public class TemporarySettings {
     try {
       String result = settings.get(code);
 
-      if (result.equals("true")) {
+      if (result != null && result.equals("true")) {
         return true;
       }
       else {

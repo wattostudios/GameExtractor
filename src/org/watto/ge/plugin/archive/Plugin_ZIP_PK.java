@@ -538,7 +538,7 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           TaskProgressManager.setValue(offset);
 
         }
-        else if (entryType == 513 || entryType == 1311233 || entryType == 2753025) {
+        else if (entryType == 513 || entryType == 1311233 || entryType == 2753025 || entryType == 185926145) {
           // Directory Entry
 
           // 2 - Unknown (20)
@@ -582,13 +582,19 @@ public class Plugin_ZIP_PK extends ArchivePlugin {
           int decompLength = fm.readInt();
           FieldValidator.checkLength(decompLength);
 
-          // 4 - Filename Length
+          // 2 - Filename Length
           int filenameLength = fm.readShort();
-          fm.skip(2);
           FieldValidator.checkFilenameLength(filenameLength);
+
+          // 2 - Extra Data Length
+          int extraLength = fm.readShort();
+          FieldValidator.checkLength(extraLength, arcSize);
 
           // X - Filename
           String filename = fm.readString(filenameLength);
+
+          // X - Extra Data
+          fm.skip(extraLength);
 
           // X - File Data
           if (length != 0) {

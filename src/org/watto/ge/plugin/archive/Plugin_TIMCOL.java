@@ -16,12 +16,11 @@ package org.watto.ge.plugin.archive;
 
 import java.io.File;
 
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.exporter.Exporter_BZIP2;
 import org.watto.io.FileManipulator;
-import org.watto.io.converter.IntConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -29,32 +28,30 @@ import org.watto.task.TaskProgressManager;
 
 **********************************************************************************************
 **/
-public class Plugin_TXTR extends ArchivePlugin {
+public class Plugin_TIMCOL extends ArchivePlugin {
 
   /**
   **********************************************************************************************
   
   **********************************************************************************************
   **/
-  public Plugin_TXTR() {
+  public Plugin_TIMCOL() {
 
-    super("TXTR", "TXTR");
+    super("TIMCOL", "TIMCOL");
 
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Long And Hard Summer");
-    setExtensions("txtr"); // MUST BE LOWER CASE
+    setGames("Actua Soccer 3");
+    setExtensions("timcol"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
     // MUST BE LOWER CASE !!!
-    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
-    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
-    //             );
+    setFileTypes(new FileType("tim", "TIM Texture Image", FileType.TYPE_IMAGE));
 
     //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
-    setCanScanForFileTypes(true);
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -73,8 +70,11 @@ public class Plugin_TXTR extends ArchivePlugin {
         rating += 25;
       }
 
-      // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
+      if (fm.readInt() + fm.readInt() == fm.readInt()) {
+        rating += 5;
+      }
+
+      if (fm.readLong() == 0) {
         rating += 5;
       }
 
@@ -108,47 +108,33 @@ public class Plugin_TXTR extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // 4 - Number Of Files
-      int numFiles = fm.readInt();
+      // 4 - Number of Files
+      int numFiles = fm.readInt() / 8;
       FieldValidator.checkNumFiles(numFiles);
+
+      fm.relativeSeek(0);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // First file offset (read to work out relative offset)
-      long offsetDelta = IntConverter.unsign(fm.readInt()) - ((numFiles * 4) + 4);
-      fm.relativeSeek(4);
-
-      long[] entryOffsets = new long[numFiles];
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
+
         // 4 - File Offset
-        long offset = IntConverter.unsign(fm.readInt()) - offsetDelta;
-        FieldValidator.checkOffset(offset, arcSize);
-        entryOffsets[i] = offset;
-      }
-
-      // Loop through directory
-      for (int i = 0; i < numFiles; i++) {
-        fm.relativeSeek(entryOffsets[i]);
-        //System.out.println(fm.getOffset());
-
-        // 4 - Unknown (0)
-        fm.skip(4);
-
-        // 4 - File Data Offset (absolute, offset to this file data in the original WIN archive)
-        long offset = IntConverter.unsign(fm.readInt()) - offsetDelta;
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        String filename = Resource.generateFilename(i);
+        // 4 - File Length
+        int length = fm.readInt();
+        FieldValidator.checkOffset(length, arcSize);
+
+        String filename = Resource.generateFilename(i) + ".tim";
 
         //path,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset);
+        resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
       }
-
-      calculateFileSizes(resources, arcSize);
 
       fm.close();
 
@@ -172,17 +158,8 @@ public class Plugin_TXTR extends ArchivePlugin {
   @Override
   public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
-    if (headerInt1 == 1903131186) {
-
-      resource.setOffset(resource.getOffset() + 12);
-      resource.setLength(resource.getLength() + 12);
-      resource.setDecompressedLength(headerInt3);
-      resource.setExporter(Exporter_BZIP2.getInstance());
-
-      return "2zoq";
-    }
-    else if (headerInt1 == 1903126886) {
-      return "fioq";
+    if (headerInt1 == 843925844) {
+      return "tm2";
     }
 
     return null;

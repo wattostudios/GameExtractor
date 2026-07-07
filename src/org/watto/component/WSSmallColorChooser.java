@@ -22,8 +22,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
+import java.io.File;
+
 import javax.swing.JButton;
 import javax.swing.JComponent;
+
 import org.watto.ErrorLogger;
 import org.watto.Settings;
 import org.watto.event.WSClickableInterface;
@@ -78,7 +81,10 @@ public class WSSmallColorChooser extends WSPanel implements WSClickableInterface
   ***********************************************************************************************/
   public void closePopup() {
     popupOpen = false;
-    popupMenu.setVisible(false);
+
+    if (popupMenu != null) {
+      popupMenu.setVisible(false);
+    }
   }
 
   /***********************************************************************************************
@@ -236,6 +242,14 @@ public class WSSmallColorChooser extends WSPanel implements WSClickableInterface
   ***********************************************************************************************/
   public void openPopup() {
     popupOpen = true;
+
+    if (popupMenu == null) {
+      XMLNode srcNode = XMLReader.read(new File(Settings.getString("WSSmallColorChooserXML")));
+      JComponent component = WSHelper.toComponent(srcNode);
+      popupMenu = new WSPopupMenu(XMLReader.read("<WSPopupMenu />"));
+      popupMenu.add(component);
+    }
+
     popupMenu.show(this, 0, arrowButton.getHeight());
   }
 
@@ -270,10 +284,22 @@ public class WSSmallColorChooser extends WSPanel implements WSClickableInterface
   public void toComponent(XMLNode node) {
     super.toComponent(node);
 
+    /*
+    if (popupMenu == null) {
+      XMLNode srcNode = XMLReader.read(new File(Settings.getString("WSSmallColorChooserXML")));
+      JComponent component = WSHelper.toComponent(srcNode);
+      popupMenu = new WSPopupMenu(XMLReader.read("<WSPopupMenu />"));
+      popupMenu.add(component);
+    }
+    */
+
+    //XMLNode srcNode = XMLReader.read(new File(Settings.getString("WSSmallColorChooserXML")));
+    //super.toComponent(srcNode);
+
     /* // TODO CHECK IF THIS IS NEEDED, AS PER BELOW COMMENT
     // Build an XMLNode tree containing all the elements on the screen
     TO DELETE!!!    XMLNode srcNode = XMLReader.read(new File(Settings.getString("WSSmallColorChooserXML")));
-
+    
     // Build the components from the XMLNode tree
     Component component = WSHelper.toComponent(srcNode);
     popupMenu = new WSPopupMenu(XMLReader.read("<WSPopupMenu />"));
@@ -293,6 +319,7 @@ public class WSSmallColorChooser extends WSPanel implements WSClickableInterface
     WSPanel bp = new WSPanel(XMLReader.read("<WSPanel showBorder=\"true\" />"));
     bp.setOpaque(false);
     bp.add(infoPanelMain, BorderLayout.CENTER);
+    //bp.add(infoPanel, BorderLayout.CENTER);
 
     add(bp, BorderLayout.CENTER);
     add(arrowButton, BorderLayout.EAST);

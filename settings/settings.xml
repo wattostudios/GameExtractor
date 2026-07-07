@@ -3,7 +3,7 @@
 	<settings>
 		<setting code="Popup_QuickBMSMissing_Show" value="true" />
 		<setting code="PreviewPanel_3DModel_BackgroundColor" value="GREY" />
-		<setting code="WSGradientColorChooser_Color_Selected" value="-9725853" />
+		<setting code="WSGradientColorChooser_Color_Selected" value="-12814286" />
 		<setting code="Popup_ExportFileList_NoColumnsSelected_Show" value="true" />
 		<setting code="DividerLocation" value="0.74375" />
 		<setting code="DragDropOption" value="DragDrop_Ask" />
@@ -13,7 +13,7 @@
 		<setting code="ShowTableColumn_CompressedLength" value="true" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" value="true" />
 		<setting code="Noesis_Path" value="external_bins\noesis" />
-		<setting code="PreviewPanel_ImageInvestigator_Offset" value="20" />
+		<setting code="PreviewPanel_ImageInvestigator_Offset" value="107" />
 		<setting code="Popup_Search_NoColumnsSelected_Show" value="true" />
 		<setting code="MaximumDirectoryFileLength" value="524800" />
 		<setting code="Popup_FileListViewChanged_Show" value="false" />
@@ -90,11 +90,11 @@
 		<setting code="WSTableColumn_R_Width" value="18" />
 		<setting code="ExportFileListColumn_DecompressedLength" value="true" />
 		<setting code="Scanner_gif" value="true" />
-		<setting code="SelectedRenamer" value="2" />
+		<setting code="SelectedRenamer" value="6" />
 		<setting code="WSGradientColorChooserXML" value="xml/WSGradientColorChooser.xml" />
 		<setting code="Popup_RemoveFiles_FilesAdded_Show" value="true" />
 		<setting code="ExtendedSettingsDebug" value="false" />
-		<setting code="PreviewPanel_ImageInvestigator_Format" value="DXT5" />
+		<setting code="PreviewPanel_ImageInvestigator_Format" value="BGRA" />
 		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
 		<setting code="Popup_AddFiles_NoFilesToAdd_Show" value="true" />
 		<setting code="ExtendedLanguageDebug" value="false" />
@@ -119,21 +119,21 @@
 		<setting code="Scanner_bmp" value="true" />
 		<setting code="ExportPreviewType_class PreviewPanel_Image" value="PNG Image" />
 		<setting code="Popup_AnalyzeDirectory_DirectoryAnalyzed_Show" value="true" />
-		<setting code="WSTableColumn_CompressedLength_Width" value="106" />
+		<setting code="WSTableColumn_CompressedLength_Width" value="97" />
 		<setting code="CopyFilenameOnRightClick" value="true" />
 		<setting code="ShowTableColumn_AddedIcon" value="true" />
 		<setting code="PluginListDisplayType" value="Game" />
 		<setting code="Popup_ConvertArchive_FilenameMissing_Show" value="true" />
-		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Fist of the North Star - Ken's Rage [XBox 360]\extracted\Unnamed File 000615.g1t" />
+		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Sabotain - Break the Rules\data03.sab" />
 		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
 		<setting code="ShowShortHexEditorField" value="true" />
 		<setting code="SearchColumn_Source" value="false" />
-		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\GOG Installers\setup_space_grunts_2_v2.0.1b_(80578).exe" />
-		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Space Grunts 2\spacegrunts2.dat" />
+		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Sabotain - Break the Rules\data04.sab" />
+		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\The Great Escape\Bug Report 21.06.2026.zip" />
 		<setting code="NumberOfRecentFiles" value="4" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" value="true" />
 		<setting code="SearchColumn_Extension" value="true" />
-		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Championship Manager 17 [Android]\packres-android_core" />
+		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Richard Burns Rally\audio.dat" />
 		<setting code="IdentifyUnknownFileTypes" value="true" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex" value="0" />
 		<setting code="Popup_WriteArchive_FilenameMissing_Show" value="true" />
@@ -161,7 +161,7 @@
 		<setting code="InterfaceColors" value="-65536" />
 		<setting code="PluginPathsFile" value="settings/plugins.xml" />
 		<setting code="WSTableColumn_T_Width" value="62" />
-		<setting code="WSTableColumn_Offset_Width" value="100" />
+		<setting code="WSTableColumn_Offset_Width" value="90" />
 		<setting code="LoadingHex" value="false" />
 		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_3DModel" value="OBJ Model" />
 		<setting code="Popup_ExportFiles_SomeFilesExported_Show" value="true" />
@@ -171,7 +171,7 @@
 		<setting code="SettingsFile" value="settings\settings.xml" />
 		<setting code="UE4AESKeysFile" value="settings/keys_ue4.xml" />
 		<setting code="WSTableColumn_c_Width" value="106" />
-		<setting code="PreviewPanel_ImageInvestigator_Height" value="1024" />
+		<setting code="PreviewPanel_ImageInvestigator_Height" value="512" />
 		<setting code="PreviewPanel_MeshInvestigator_VertexBlockSizeField" value="12" />
 		<setting code="ShowHexIfPreviewFailed" value="true" />
 		<setting code="Popup_ExportFiles_NoFilesSelected_Show" value="true" />
@@ -193,8 +193,8 @@
 		<setting code="ShowUnicodeHexEditorField" value="false" />
 		<setting code="TiledPreviewBackground" value="true" />
 		<setting code="WSTableColumn_RenamedIcon_Width" value="18" />
-		<setting code="PreviewPanel_ImageInvestigator_RemoveAlphaCheckboxSelected" value="false" />
-		<setting code="WSTableColumn_Time_Width" value="39" />
+		<setting code="PreviewPanel_ImageInvestigator_RemoveAlphaCheckboxSelected" value="true" />
+		<setting code="WSTableColumn_Time_Width" value="36" />
 		<setting code="AlwaysShowHexEditorSelectedTable" value="true" />
 		<setting code="InterfaceFile" value="interface/interface.xml" />
 		<setting code="Popup_WriteArchive_ArchiveSaved_Show" value="true" />
@@ -203,7 +203,7 @@
 		<setting code="PlayAudioOnLoad" value="true" />
 		<setting code="MaxAllowedScriptErrors" value="10" />
 		<setting code="PreviewPanel_Text_WordWrap" value="false" />
-		<setting code="PreviewPanel_Image_CurrentFrame" value="3" />
+		<setting code="PreviewPanel_Image_CurrentFrame" value="5" />
 		<setting code="Popup_SaveChanges_Show" value="true" />
 		<setting code="UpscaleSmallThumbnails" value="false" />
 		<setting code="ShowTableColumn_Value" value="true" />
@@ -222,7 +222,7 @@
 		<setting code="MaxImageDimension" value="2048" />
 		<setting code="PreviewPanel_ImageInvestigator_SwizzleSwitchCheckboxSelected" value="false" />
 		<setting code="CurrentLanguage" value="English" />
-		<setting code="WSTableColumn_DecompressedLength_Width" value="112" />
+		<setting code="WSTableColumn_DecompressedLength_Width" value="110" />
 		<setting code="HighQualityThumbnails" value="true" />
 		<setting code="SelectedOptionGroup" value="0" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanFilesInArchives" value="false" />
@@ -230,7 +230,7 @@
 		<setting code="WSTableColumn_ReplacedIcon_Width" value="18" />
 		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="PNG Image" />
 		<setting code="WSTableColumn_I_Width" value="203" />
-		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Championship Manager 17 [Android]\packres-android_core" />
+		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Richard Burns Rally\audio.dat" />
 		<setting code="Theme_ButterflyLookAndFeel_InterfaceColors" value="-9725853" />
 		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
 		<setting code="ShowTableColumn_Filename" value="false" />
@@ -258,14 +258,14 @@
 		<setting code="DefaultInterfaceColors" value="-12814286" />
 		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_ImageInvestigator" value="PNG Image (No Alpha)" />
 		<setting code="PreviewOnDoubleClick" value="true" />
-		<setting code="WSTableColumn_FilePath_Width" value="622" />
+		<setting code="WSTableColumn_FilePath_Width" value="654" />
 		<setting code="Popup_Search_MatchFound_Show" value="false" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_CheckViewerPlugins" value="false" />
 		<setting code="Popup_RenameFiles_FilesRestored_Show" value="true" />
 		<setting code="SidePanel_DirectoryList_CurrentControl" value="ReadPanel" />
 		<setting code="PreviewPanel_3DModel_CurrentMesh" value="-1" />
-		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Championship Manager 17 [Android]" />
-		<setting code="PreviewPanel_ImageInvestigator_PaletteOffset" value="7194" />
+		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Richard Burns Rally" />
+		<setting code="PreviewPanel_ImageInvestigator_PaletteOffset" value="0" />
 		<setting code="PreviewPanel_MeshInvestigator_FaceCountField" value="1410" />
 		<setting code="PreviewPanel_MeshInvestigator_TriangleStripCheckboxSelected" value="false" />
 		<setting code="ShowLongHexEditorField" value="true" />
@@ -285,7 +285,7 @@
 		<setting code="PreviewPanel_3DModel_Wireframe" value="false" />
 		<setting code="LargeButtonIcons" value="false" />
 		<setting code="AllowInlineFileListEditing" value="false" />
-		<setting code="WSTableColumn_CRC_Width" value="44" />
+		<setting code="WSTableColumn_CRC_Width" value="41" />
 		<setting code="InterfaceLookAndFeel" value="ButterflyLookAndFeel" />
 		<setting code="ExportFileListColumn_Compressed" value="true" />
 		<setting code="ShowTableColumn_Offset" value="true" />
@@ -301,7 +301,7 @@
 		<setting code="Popup_ReadArchive_MakeNewArchive_Show" value="false" />
 		<setting code="Popup_Search_NoMatchFound_Show" value="true" />
 		<setting code="TempDirectory" value="temp" />
-		<setting code="WSTableColumn_Description_Width" value="100" />
+		<setting code="WSTableColumn_Description_Width" value="89" />
 		<setting code="MaxNumberOfFiles4" value="100000" />
 		<setting code="Popup_AddBMSOnDoubleClick_Show" value="true" />
 		<setting code="Popup_ReadArchive_ArchiveOpenedWithScanner_Show" value="true" />
@@ -314,7 +314,7 @@
 		<setting code="ShowHexHexEditorField" value="false" />
 		<setting code="Popup_AddFiles_FilesRemoved_Show" value="true" />
 		<setting code="WSTableColumn_a_Width" value="18" />
-		<setting code="CurrentSidePanel" value="SidePanel_DirectoryList" />
+		<setting code="CurrentSidePanel" value="SidePanel_Preview" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

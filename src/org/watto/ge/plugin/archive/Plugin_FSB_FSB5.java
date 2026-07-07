@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,10 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
 import org.watto.datatype.Archive;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -65,6 +67,8 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
     setPlatforms("PC");
 
     //setFileTypes("spr", "Object Sprite");
+
+    setFileTypes(new FileType("genh", "Wii or GameCube Audio", FileType.TYPE_AUDIO));
 
   }
 
@@ -397,6 +401,7 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
 
         int[] sampleLengths = new int[numFiles];
         int[] dataOffsets = new int[numFiles];
+        byte[][] extraDatas = new byte[numFiles][0];
         for (int i = 0; i < numFiles; i++) {
           //000000000100001101010011011110 0000000000000000000000000000 1 1000 1
           long sampleDetails = fm.readLong();
@@ -473,8 +478,14 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
               // 4 - Unknown
               fm.skip(8);
             }
+            else if (chunkType == CHUNK_DSPCOEFF) {
+              // 46 - Extra Data for GCADPCM files
+              // [3.16.0007] Fixed for Wii games in FSB5
+              extraDatas[i] = fm.readBytes(chunkSize);
+            }
             else {
               // X - Unknown
+              //System.out.println(chunkType + "\t" + chunkSize);
               fm.skip(chunkSize);
             }
 
@@ -620,6 +631,11 @@ public class Plugin_FSB_FSB5 extends ArchivePlugin {
             resource.setChannels((short) channels[i]);
             resource.setFrequency(frequencies[i]);
             resource.setSamplesLength(sampleLengths[i]);
+
+            byte[] extraData = extraDatas[i];
+            if (extraData.length > 0) {
+              resource.setExtraData(extraData);
+            }
 
             //boolean multiChannel = ((mode & 0x04000000) == 0x04000000);
             //resource.addProperty("MultiChannel", multiChannel);
