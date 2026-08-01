@@ -1,29 +1,28 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
+import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -115,16 +114,21 @@ public class Plugin_AGG_AGGREGATE extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // 10 - Header (Aggregate )
+      // 10 - Header ("Aggregate ")
       // 2 - Unknown
       // 12 - null
-      fm.skip(22);
+      fm.skip(24);
 
       // 4 - Directory Offset
       int dirOffset = fm.readInt();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
-      fm.seek(dirOffset + 12);
+      fm.seek(dirOffset);
+
+      // 4 - null
+      // 4 - Directory Length (not including padding) [+12 for these first 3 fields (field 4 is included already)]
+      // 4 - Directory Length (including padding) [+12 for these first 3 fields (field 4 is included already)]
+      fm.skip(12);
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
@@ -143,13 +147,13 @@ public class Plugin_AGG_AGGREGATE extends ArchivePlugin {
         int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Hash?
+        // 4 - Timestamp or something?
         // 4 - null
         // 4 - null
         fm.skip(12);
 
         // 4 - File Offset
-        int offset = fm.readInt() + 12;
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
         // X - Filename
@@ -162,6 +166,70 @@ public class Plugin_AGG_AGGREGATE extends ArchivePlugin {
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
+      }
+
+      // read the data blocks
+      fm.getBuffer().setBufferSize(12);
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        long offset = resource.getOffset();
+
+        fm.seek(offset);
+
+        long endOffset = offset + resource.getLength();
+
+        int maxBlocks = 500; // guess
+        int numBlocks = 0;
+
+        long[] blockOffsets = new long[maxBlocks];
+        long[] blockLengths = new long[maxBlocks];
+
+        while (fm.getOffset() < endOffset) {
+          // 4 - Unknown (null = this is the last block)
+          int blockCheck = fm.readInt();
+
+          // 4 - Block Length
+          int length = fm.readInt();
+          FieldValidator.checkLength(length, arcSize);
+
+          // 4 - Block Length
+          fm.skip(4);
+          /*
+          int length2 = fm.readInt();
+          FieldValidator.checkLength(length2, arcSize);
+          
+          if (length != length2) {
+            ErrorLogger.log("[AGG_AGGREGATE] Block Lengths don't match: " + length + " vs " + length2 + " for file " + resource.getName());
+          }
+          */
+
+          // X - Block of File Data
+          long blockOffset = fm.getOffset();
+          fm.skip(length);
+
+          blockOffsets[numBlocks] = blockOffset;
+          blockLengths[numBlocks] = length;
+          numBlocks++;
+
+          if (blockCheck == 0) {
+            break;
+          }
+        }
+
+        long[] oldBlockOffsets = blockOffsets;
+        long[] oldBlockLengths = blockLengths;
+
+        blockOffsets = new long[numBlocks];
+        blockLengths = new long[numBlocks];
+
+        System.arraycopy(oldBlockOffsets, 0, blockOffsets, 0, numBlocks);
+        System.arraycopy(oldBlockLengths, 0, blockLengths, 0, numBlocks);
+
+        BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporterDefault, blockOffsets, blockLengths, blockLengths);
+        resource.setExporter(blockExporter);
       }
 
       fm.close();

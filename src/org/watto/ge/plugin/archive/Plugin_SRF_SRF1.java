@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,14 +15,15 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
-import org.watto.io.StringHelper;
 import org.watto.io.converter.IntConverter;
+import org.watto.io.converter.StringConverter;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -34,7 +35,7 @@ public class Plugin_SRF_SRF1 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_SRF_SRF1() {
@@ -68,7 +69,7 @@ public class Plugin_SRF_SRF1 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -146,7 +147,26 @@ public class Plugin_SRF_SRF1 extends ArchivePlugin {
       while (fm.getOffset() < dirLength) {
 
         // 4 - File Type/Extension (32 terminated)
-        String type = StringHelper.readTerminatedString(fm.getBuffer(), (byte) 32, 4);
+        byte[] typeBytes = fm.readBytes(4);
+        int typeLength = 4;
+        for (int t = 0; t < 4; t++) {
+          byte currentByte = typeBytes[t];
+          if (currentByte == 32) {
+            typeLength = t + 1;
+            break;
+          }
+          else if (currentByte < 32) {
+            typeLength = -1;
+            break;
+          }
+        }
+        String type = null;
+        if (typeLength > 0) {
+          type = StringConverter.convertLittle(typeBytes);
+          if (typeLength < 4) {
+            type = type.substring(0, typeLength);
+          }
+        }
 
         // 4 - Number Of Pieces
         int numPieces = IntConverter.changeFormat(fm.readInt());
@@ -155,7 +175,13 @@ public class Plugin_SRF_SRF1 extends ArchivePlugin {
         // for each piece
         for (int p = 0; p < numPieces; p++) {
           // 4 - File ID
-          String filename = IntConverter.changeFormat(fm.readInt()) + "." + type;
+          String filename = "" + IntConverter.changeFormat(fm.readInt());
+          if (type != null) {
+            filename += "." + type;
+          }
+          else {
+            filename = Resource.generateFilename(realNumFiles);
+          }
 
           // 4 - File Offset
           long offsetPointerLocation = fm.getOffset();

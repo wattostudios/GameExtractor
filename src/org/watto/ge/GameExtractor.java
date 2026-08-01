@@ -105,6 +105,7 @@ import javax.swing.JFrame;
 - AudioChannels
 - AudioSigned
 - AudioCodec
+- InterleaveBlockSize
 
 TemporarySettings.set("ForceVerticalImageFlip",true) set in an ArchivePlugin will cause Viewer_DDS_DDS to flip the images vertically when loading.
 
@@ -1376,6 +1377,7 @@ public class GameExtractor extends WSProgram implements WSClickableInterface,
         Settings.set("JavaFXPopupHasBeenShown", true);
       }
     }
+
   }
 
 }

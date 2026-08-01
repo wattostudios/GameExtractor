@@ -140,6 +140,20 @@ public class Plugin_BIN_39 extends ArchivePlugin {
 
       calculateFileSizes(resources, arcSize);
 
+      // To detect false positives
+      if (numFiles > 5) {
+        boolean allZero = true;
+        for (int i = 0; i < 5; i++) {
+          if (resources[i].getLength() != 0) {
+            allZero = false;
+            break;
+          }
+        }
+        if (allZero) {
+          return null;
+        }
+      }
+
       fm.close();
 
       return resources;

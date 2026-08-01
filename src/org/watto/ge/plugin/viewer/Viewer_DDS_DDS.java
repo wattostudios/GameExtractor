@@ -869,7 +869,31 @@ public class Viewer_DDS_DDS extends ViewerPlugin {
             imageResource = new PalettedImageResource(pixels, width, height, PaletteManager.getCurrentPalette().getPalette());
           }
           else {
-            imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
+
+            if (rBitMask == 0 && gBitMask == 0 && bBitMask == 0 && rgbAlphaBitMask == 0) {
+              // see if these is a palette before the image data (Game = Club Football 2005)
+
+              int calculatedLength = (int) (fm.getOffset()) + 1024 + (width * height);
+
+              int mipmapWidth = width / 2;
+              int mipmapHeight = height / 2;
+              for (int m = 1; m < mipMapCount; m++) {
+                calculatedLength += (mipmapWidth * mipmapHeight);
+                mipmapWidth /= 2;
+                mipmapHeight /= 2;
+              }
+
+              if (calculatedLength == fm.getLength()) {
+                // has a palette
+                int[] palette = ImageFormatReader.readPaletteRGBA(fm, 256);
+                imageResource = ImageFormatReader.read8BitPaletted(fm, width, height, palette);
+              }
+            }
+
+            if (imageResource == null) {
+              // didn't have a palette, so read as grayscale
+              imageResource = ImageFormatReader.read8BitPaletted(fm, width, height);
+            }
           }
 
           imageResource.addProperty("ImageFormat", "8BitPaletted");

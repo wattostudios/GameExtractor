@@ -2,7 +2,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.datatype.SplitChunkResource;
 import org.watto.ge.helper.FieldValidator;
@@ -25,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -73,6 +74,9 @@ public class Plugin_BIN_VPAK extends ArchivePlugin {
       // Header
       if (fm.readString(4).equals("VPAK")) {
         rating += 50;
+      }
+      else {
+        rating -= 10;
       }
 
       // Number Of Files

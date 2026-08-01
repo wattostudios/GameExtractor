@@ -1,29 +1,27 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.io.StringHelper;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -34,7 +32,7 @@ public class Plugin_PAK_13 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PAK_13() {
@@ -45,14 +43,21 @@ public class Plugin_PAK_13 extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setExtensions("pak");
-    setGames("Airbourne Troops");
+    setGames("Airborne Troops: Countdown to D-Day");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("pak", "PAK Archive", FileType.TYPE_ARCHIVE));
+
+    setTextPreviewExtensions("scr", "met", "py"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -65,7 +70,14 @@ public class Plugin_PAK_13 extends ArchivePlugin {
         rating += 25;
       }
 
-      fm.skip(8);
+      // 4 - Header (114,16,234,244)
+      if (fm.readInt() == -185986958) {
+        rating += 50;
+      }
+
+      if (fm.readInt() == 0) {
+        rating += 5;
+      }
 
       long arcSize = fm.getLength();
 
@@ -90,7 +102,7 @@ public class Plugin_PAK_13 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -102,14 +114,15 @@ public class Plugin_PAK_13 extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(path, false);
       long arcSize = fm.getLength();
 
-      // 8 - Unknown
+      // 4 - Unknown
+      // 4 - null
       fm.seek(8);
 
-      // 4 - dirOffset
-      long dirOffset = fm.readInt();
+      // 4 - Directory Offset
+      int dirOffset = fm.readInt();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
-      // 4 - numFiles
+      // 4 - Number Of Files
       int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
 
@@ -119,16 +132,22 @@ public class Plugin_PAK_13 extends ArchivePlugin {
       fm.seek(dirOffset);
 
       for (int i = 0; i < numFiles; i++) {
-        // 10 - Filename
-        String filename = fm.readNullString(10);
+        // X - Filename
+        // 1 - Filename Terminator (byte 10)
+        String filename = StringHelper.readTerminatedString(fm.getBuffer(), (byte) 10);
         FieldValidator.checkFilename(filename);
 
-        // 4 - fileOffset
-        long offset = fm.readInt();
+        int dotPos = filename.indexOf(':'); // remove the S:\ etc
+        if (dotPos > 0) {
+          filename = filename.substring(dotPos + 2);
+        }
+
+        // 4 - File Offset
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - fileLength
-        long length = fm.readInt();
+        // 4 - File Length
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter

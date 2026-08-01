@@ -1,28 +1,30 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.ErrorLogger;
+import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Explode;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.buffer.XORRepeatingKeyBufferWrapper;
 import org.watto.task.TaskProgressManager;
 
 /**
@@ -91,70 +93,95 @@ public class Plugin_PAK_3 extends ArchivePlugin {
 
       addFileTypes();
 
+      ExporterPlugin exporter = Exporter_Explode.getInstance();
+
       FileManipulator fm = new FileManipulator(path, false);
 
       long arcSize = fm.getLength();
 
-      // 4 - dirOffset
-      long dirOffset = fm.readInt();
+      // 4 - Directory Offset
+      int dirOffset = fm.readInt();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
       fm.seek(dirOffset);
 
-      // 4 - tailStart
-      int tailStart = fm.readInt();
-      FieldValidator.checkOffset(tailStart, arcSize);
+      // 4 - Directory Length (not including this field)
+      int dirLength = fm.readInt();
+      FieldValidator.checkLength(dirLength, arcSize);
 
-      // 5 - Unknown
-      fm.seek(13); // CHECK THIS!???
+      int[] keyDemo = new int[] { 78, 83, 73, 65, 82, 75, 80, 82, 81, 80, 72, 66, 84, 69, 53, 48, 71, 82, 73, 72, 51, 65, 89, 88, 74, 80, 50, 65, 77, 70, 51, 70, 67, 69, 89, 65, 86, 81, 79, 53, 81, 71, 65, 48, 74, 71, 73, 73, 72, 50, 65, 89, 88, 75, 86, 79, 65, 49, 86, 79, 71, 71, 85, 53, 71, 83, 81, 75, 75, 89, 69, 79, 73, 65, 81, 71, 49, 88, 82, 88, 48, 74, 52, 70, 53, 79, 69, 65, 69, 70, 73, 52, 68, 68, 51, 76, 76, 52, 53, 86, 74, 84, 86, 79, 65, 49, 86, 79, 71, 71, 85, 75, 69, 53, 48, 71, 82, 73 };
+      int[] keyFull = new int[] { 65, 86, 81, 70, 51, 70, 67, 75, 69, 53, 48, 71, 82, 73, 65, 89, 88, 74, 80, 50, 65, 77, 69, 89, 79, 53, 81, 71, 65, 48, 74, 71, 73, 73, 72, 50, 78, 72, 66, 84, 86, 79, 65, 49, 86, 79, 71, 71, 85, 53, 72, 51, 71, 83, 83, 73, 65, 82, 75, 80, 82, 81, 80, 81, 75, 75, 89, 69, 79, 73, 65, 81, 71, 49, 88, 82, 88, 48, 74, 52, 70, 53, 79, 69, 65, 69, 70, 73, 52, 68, 68, 51, 76, 76, 52, 53, 86, 74, 84, 86, 79, 65, 49, 86, 79, 71, 71, 85, 75, 69, 53, 48, 71, 82, 73, 65, 89, 88 };
 
-      // X - path (null)
-      //String filename = fm.readNullString();
-      long namePos = fm.getOffset();
-      String filename = fm.readNullString(512);
-      int nameLength = filename.length();
-      if (nameLength == 512) {
-        return null; // not the right kind of archive
+      int[] key = keyFull;
+
+      if (fm.readByte() == 78 && fm.readByte() == 83 && fm.readByte() == 73 && fm.readByte() == 65) {
+        key = keyDemo;
       }
-      else {
-        fm.relativeSeek(namePos + nameLength + 1);
-      }
+      fm.relativeSeek(dirOffset + 4);
 
-      // 4 - numFiles
-      int numFiles = fm.readInt();
-      FieldValidator.checkNumFiles(numFiles);
+      byte[] dirBytes = fm.readBytes(dirLength);
+
+      fm.close();
+      fm = new FileManipulator(new XORRepeatingKeyBufferWrapper(new ByteBuffer(dirBytes), key));
+
+      int numFiles = Archive.getMaxFiles();
 
       Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles);
+      TaskProgressManager.setMaximum(arcSize);
 
-      int readLength = 0;
-      for (int i = 0; i < numFiles; i++) {
-        // X - Filename (null)
-        filename = fm.readNullString();
-        FieldValidator.checkFilename(filename);
+      int realNumFiles = 0;
+      while (fm.getOffset() < dirLength) {
+        // X - Folder Name (can be null)
+        // 1 - null Folder Name Terminator
+        String dirName = fm.readNullString();
 
-        // 4 - fileOffset
-        long offset = fm.readInt();
-        FieldValidator.checkOffset(offset, arcSize);
+        // 4 - Number of Files in this Folder (can be null)
+        int numFilesInFolder = fm.readInt();
+        FieldValidator.checkNumFiles(numFilesInFolder + 1); // +1 to allow nulls
 
-        // 4 - compressedLength (zip?)
-        int compLength = fm.readInt();
-        FieldValidator.checkLength(compLength, arcSize);
+        for (int i = 0; i < numFilesInFolder; i++) {
+          // X - Filename
+          // 1 - null Filename Terminator
+          String filename = fm.readNullString();
+          FieldValidator.checkFilename(filename);
+          filename = dirName + filename;
 
-        // 4 - originalLength
-        int origLength = fm.readInt();
-        FieldValidator.checkLength(origLength, arcSize);
+          // 4 - File Offset
+          int offset = fm.readInt();
+          FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - fileLength
-        long length = fm.readInt();
-        FieldValidator.checkLength(length, arcSize);
+          // 4 - Compression Flags (0=uncompressed, 1=explode)
+          int compressionFlag = fm.readInt();
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+          // 4 - Decompressed Length
+          int decompLength = fm.readInt();
 
-        TaskProgressManager.setValue(readLength);
-        readLength += length;
+          // 4 - File Length
+          int length = fm.readInt();
+
+          if (compressionFlag == 0) {
+            // not compressed
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length);
+          }
+          else if (compressionFlag == 1) {
+            // compressed (explode)
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength, exporter);
+          }
+          else {
+            ErrorLogger.log("[PAK_3] Unknown compression type: " + compressionFlag);
+            //path,id,name,offset,length,decompLength,exporter
+            resources[realNumFiles] = new Resource(path, filename, offset, length, decompLength);
+
+          }
+          realNumFiles++;
+
+          TaskProgressManager.setValue(offset);
+        }
       }
+
+      resources = resizeResources(resources, realNumFiles);
 
       fm.close();
 

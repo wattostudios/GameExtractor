@@ -1,29 +1,27 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -45,8 +43,15 @@ public class Plugin_DFS_SFDX extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setGames("Area 51");
-    setExtensions("dfs");
+    setExtensions("000");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("xbmp", "Texture Image", FileType.TYPE_IMAGE));
+
+    setTextPreviewExtensions("h", "psh", "vsh"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -65,38 +70,8 @@ public class Plugin_DFS_SFDX extends ArchivePlugin {
         rating += 25;
       }
 
-      // Header
-      if (fm.readString(4).equals("SFDX")) {
-        rating += 50;
-      }
-
-      // Version
-      if (fm.readInt() == 3) {
-        rating += 5;
-      }
-
-      fm.skip(4);
-
-      // Padding Size
-      if (fm.readInt() == 2048) {
-        rating += 5;
-      }
-
-      fm.skip(4);
-
-      // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
-        rating += 5;
-      }
-
-      fm.skip(4);
-
-      long arcSize = fm.getLength();
-
-      // Archive Size
-      if (FieldValidator.checkLength(fm.readInt(), arcSize)) {
-        rating += 5;
-      }
+      getDirectoryFile(fm.getFile(), "dfs");
+      rating += 25;
 
       return rating;
 
@@ -122,13 +97,18 @@ public class Plugin_DFS_SFDX extends ArchivePlugin {
 
       // RESETTING THE GLOBAL VARIABLES
 
-      FileManipulator fm = new FileManipulator(path, false);
+      long arcSize = path.length();
+
+      File sourcePath = getDirectoryFile(path, "dfs");
+      FileManipulator fm = new FileManipulator(sourcePath, false);
+
+      long dirSize = sourcePath.length();
 
       // 4 - Header (SFDX)
       // 4 - Version (3)
       // 4 - Unknown
       // 4 - Padding Size (2048)
-      // 4 - Unknown
+      // 4 - Unknown (1000000000)
       fm.skip(20);
 
       // 4 - Number Of Files
@@ -136,59 +116,84 @@ public class Plugin_DFS_SFDX extends ArchivePlugin {
       FieldValidator.checkNumFiles(numFiles);
 
       // 4 - Unknown (1)
-      // 4 - Length Of Filename Directory
-      // 4 - Unknown (48)
-      // 4 - Archive Header Length (56)
-      // 4 - null
-      // 4 - Length Of Offset Directory + Archive Header
-      // 1 - null
-      // 4 - Archive Size?
-      // 2 - null
-      // 1 - null
-      fm.skip(32);
+      fm.skip(4);
 
-      long arcSize = (int) fm.getLength();
+      // 4 - Name Directory Length
+      int nameDirLength = fm.readInt();
+      FieldValidator.checkLength(nameDirLength, dirSize);
+
+      // 4 - Unknown (48)
+      fm.skip(4);
+
+      // 4 - Header Length (56)
+      int dirOffset = fm.readInt();
+      FieldValidator.checkOffset(dirOffset, dirSize);
+
+      // 4 - null
+      fm.skip(4);
+
+      // 4 - Name Directory Offset
+      int nameDirOffset = fm.readInt();
+      FieldValidator.checkOffset(nameDirOffset, dirSize);
+
+      // 4 - 000 File Length
+      // 4 - null
+      fm.seek(nameDirOffset);
+
+      byte[] nameBytes = fm.readBytes(nameDirLength);
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
 
       Resource[] resources = new Resource[numFiles];
 
       TaskProgressManager.setMaximum(numFiles);
 
-      // skip to the filename directory
-      /*
-       * fm.skip(numFiles*24);
-       * 
-       * String[] names = new String[numFiles];
-       * 
-       * for (int i=0;i<numFiles;i++){ names[i] = fm.readNullString(); }
-       */
-
       // skip back to the directory
-      fm.seek(56);
+      fm.relativeSeek(dirOffset);
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
-        // 4 - Unknown (Filename Length?)
-        // 4 - Unknown (Filename Length?)
-        // 4 - null
-        // 4 - Unknown (39)
-        fm.skip(16);
+        // 4 - Directory Name Offset (relative to the start of the Filename Directory)
+        int dirNameOffset = fm.readInt();
+        FieldValidator.checkOffset(dirNameOffset, nameDirLength);
 
-        // 4 - File Offset (Relative to the end of the archive)
-        long offset = fm.readInt();
+        // 4 - Filename Offset (relative to the start of the Filename Directory)
+        int filenameOffset = fm.readInt();
+        FieldValidator.checkOffset(filenameOffset, nameDirLength);
+
+        // 4 - null
+        fm.skip(4);
+
+        // 4 - File Extension Offset (relative to the start of the Filename Directory)
+        int extensionNameOffset = fm.readInt();
+        FieldValidator.checkOffset(extensionNameOffset, nameDirLength);
+
+        // 4 - File Offset (offset in the 000 file)
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - File Size
-        long length = fm.readInt();
+        // 4 - File Length
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         //String filename = names[i];
-        String filename = Resource.generateFilename(i);
+        String filename = "";
+
+        nameFM.seek(dirNameOffset);
+        filename += nameFM.readNullString();
+
+        nameFM.seek(filenameOffset);
+        filename += nameFM.readNullString();
+
+        nameFM.seek(extensionNameOffset);
+        filename += nameFM.readNullString();
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
       }
+
+      nameFM.close();
 
       fm.close();
 

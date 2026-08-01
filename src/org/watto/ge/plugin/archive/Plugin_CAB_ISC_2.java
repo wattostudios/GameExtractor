@@ -239,7 +239,10 @@ public class Plugin_CAB_ISC_2 extends ArchivePlugin {
         // X - Filename (null)
         String filename = fm.readNullString();
         FieldValidator.checkFilename(filename);
-        resources[i].setName(filename);
+
+        Resource resource = resources[i];
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       // Now get all the directory names

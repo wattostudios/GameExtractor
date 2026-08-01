@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -69,6 +70,9 @@ public class Plugin_BIN_LINK extends ArchivePlugin {
       // Header
       if (fm.readString(4).equals("LINK")) {
         rating += 50;
+      }
+      else {
+        rating -= 10;
       }
 
       // Number Of Files

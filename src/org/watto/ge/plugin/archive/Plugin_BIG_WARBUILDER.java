@@ -1,32 +1,28 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -127,13 +123,36 @@ public class Plugin_BIG_WARBUILDER extends ArchivePlugin {
 
       long arcSize = fm.getLength();
 
-      // 4 - Version (10)
+      // 4 - Version (11)
       // 1 - Number Of Headers (1)
       // 4 - Header Length (11) [*2 for unicode]
       // 22 - Header (WAR-BUILDER) (unicode)
-      // 4 - null
+      fm.skip(31);
+
+      // 4 - Filename Count
+      int filenameCount = fm.readInt();
+      //String[] filenames = new String[filenameCount];
+      if (filenameCount != 0) {
+        // 4 - Unknown (4)
+        // 3 - Padding (255,255,0)
+        fm.skip(7);
+
+        for (int i = 0; i < filenameCount; i++) {
+          // 4 - Filename Length [*2 for unicode]
+          int headerNameLength = fm.readInt() * 2;
+          FieldValidator.checkFilenameLength(headerNameLength);
+
+          // X - Filename (unicode) (including .\ at the start)
+          fm.skip(headerNameLength);
+
+          // 4 - Hash?
+          fm.skip(4);
+        }
+
+      }
+
       // 4 - Number Of Files
-      fm.skip(39);
+      fm.skip(4);
 
       // 4 - Number Of Files
       int numFiles = fm.readInt();
@@ -147,13 +166,15 @@ public class Plugin_BIG_WARBUILDER extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
+        //System.out.println(fm.getOffset());
+
         // 4 - Filename Length [*2 for unicode]
-        int filenameLength = fm.readInt() * 2;
+        int filenameLength = fm.readInt();
         FieldValidator.checkFilenameLength(filenameLength);
 
         // X - Filename (unicode) (including .\ at the start)
         String filename = fm.readUnicodeString(filenameLength);
-        if (filename.length() > 2 && filename.substring(0, 2).equals(".\"")) {
+        if (filename.length() > 2 && filename.startsWith(".\\")) {
           filename = filename.substring(2);
         }
 
@@ -170,14 +191,25 @@ public class Plugin_BIG_WARBUILDER extends ArchivePlugin {
 
         // 4 - null
         // 4 - Hash?
-        // 6 - null
-        fm.skip(14);
+        fm.skip(8);
+
+        // 4 - Extra Unicode Text Length (usually null) [*2 for unicode]
+        int extraUnicodeLength = fm.readInt() * 2;
+        FieldValidator.checkLength(extraUnicodeLength, arcSize);
+
+        // X - Extra Unicode Text
+        fm.skip(extraUnicodeLength);
+
+        // 2 - null
+        fm.skip(2);
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, 0, decompLength, exporter);
 
         TaskProgressManager.setValue(i);
       }
+
+      fm.getBuffer().setBufferSize(4);
 
       // get the compressed lengths
       for (int i = 0; i < numFiles; i++) {

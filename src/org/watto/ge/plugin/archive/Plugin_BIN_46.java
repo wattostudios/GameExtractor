@@ -24,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.BlockExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_Custom_VAG_Audio;
+import org.watto.ge.plugin.exporter.Exporter_Custom_VAG_Audio_Interleaved;
 import org.watto.ge.plugin.exporter.Exporter_Default;
 import org.watto.ge.plugin.exporter.Exporter_RNC2;
 import org.watto.io.FileManipulator;
@@ -336,26 +337,30 @@ public class Plugin_BIN_46 extends ArchivePlugin {
       return "20xt";
     }
     else if ((headerInt3 == 22050 || headerInt3 == 44100) && (headerInt2 == 1 || headerInt2 == 2)) {
-      /*
+
       long offset = resource.getOffset();
       offset += 2048;
-      
+
       long length = resource.getDecompressedLength();
       length -= 2048;
-      
+
       if (resource.getExporter() instanceof Exporter_Default) {
         // can't do this, if we're already exporting with a RNC2 decompressor
         resource.setOffset(offset);
         resource.setLength(length);
         resource.setDecompressedLength(length);
-        resource.setExporter(Exporter_Custom_VAG_Audio.getInstance());
-      
+        resource.setExporter(Exporter_Custom_VAG_Audio_Interleaved.getInstance());
+        //resource.setExporter(Exporter_Custom_VAG_Audio.getInstance());
+
         resource.addProperty("Frequency", headerInt3);
         resource.addProperty("Bitrate", 16);
-        resource.addProperty("Channels", headerInt2);
+        //resource.addProperty("Channels", headerInt2);
         //resource.addProperty("AudioSigned", false);
+
+        // A large block size, and convert to mono
+        resource.addProperty("InterleaveBlockSize", 12288);
+        resource.addProperty("Channels", 1);
       }
-      */
 
       return "vag_audio_interleaved";
     }

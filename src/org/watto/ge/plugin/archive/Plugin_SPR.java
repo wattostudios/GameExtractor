@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,13 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -32,7 +33,7 @@ public class Plugin_SPR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_SPR() {
@@ -50,7 +51,7 @@ public class Plugin_SPR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -108,10 +109,15 @@ public class Plugin_SPR extends ArchivePlugin {
       int realNumFiles = 0;
       while (fm.getOffset() + 4 < arcSize) {
         // 4 - File Length
-        long length = fm.readInt() - 4;
+        long length = fm.readInt() - 12;
         FieldValidator.checkLength(length, arcSize);
 
-        // X - File Data
+        // 4 - Unknown
+        // 2 - Image Width
+        // 2 - Image Height
+        fm.skip(8);
+
+        // X - File Data (TGA Image)
         long offset = fm.getOffset();
         fm.skip(length);
 

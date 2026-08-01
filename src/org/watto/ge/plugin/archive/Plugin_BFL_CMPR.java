@@ -1,30 +1,29 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.ErrorLogger;
 import org.watto.Language;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.exporter.Exporter_GZip;
 import org.watto.io.FileManipulator;
+import org.watto.io.FilenameSplitter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,7 +34,7 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_BFL_CMPR() {
@@ -81,7 +80,7 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -97,6 +96,16 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
       // Header
       if (fm.readString(4).equals("CMPR")) {
         rating += 50;
+      }
+      else {
+        // maybe a compressed file
+        fm.relativeSeek(0);
+
+        // GZIP Header
+        if (fm.readInt() == 559903) {
+          rating += 50;
+          return rating;
+        }
       }
 
       // Archive Size
@@ -125,7 +134,7 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -136,31 +145,42 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
 
       FileManipulator fm = new FileManipulator(path, false);
 
-      // 4 - Header
-      // 4 - Archive Length (+8 header)
-      // X - Data
+      if (fm.readInt() == 559903) {
+        // decompress the archive first
 
-      fm.seek((int) path.length() - 4);
+        FileManipulator decompFM = decompressArchive(fm);
+        if (decompFM != null) {
+          fm.close(); // close the original archive
+          fm = decompFM; // now we're going to read from the decompressed file instead
+          fm.seek(0); // go to the same point in the decompressed file as in the compressed file
 
-      // dirOffset
+          path = fm.getFile(); // So the resources are stored against the decompressed file
+        }
+
+      }
+
+      long arcSize = fm.getLength();
+
+      // 4 - Header (CMPR)
+      // 4 - Archive Size [+8]
+      fm.seek((int) arcSize - 4);
+
+      // 4 - Directory Offset [+8]
       long dirOffset = fm.readInt();
       fm.seek(dirOffset + 8);
 
       int numFiles = (int) ((path.length() - dirOffset) / 16);
 
-      long arcSize = fm.getLength();
-
       Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles);
+      TaskProgressManager.setMaximum(arcSize);
 
-      int i = 0;
-      int readLength = 0;
-      while (fm.getOffset() < path.length() - 4) {
+      int realNumFiles = 0;
+      while (fm.getOffset() < arcSize - 4) {
         // 4 - File Length
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Data Offset
+        // 4 - File Offset [+8]
         long offset = fm.readInt() + 8;
         FieldValidator.checkOffset(offset, arcSize);
 
@@ -173,22 +193,18 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
         FieldValidator.checkFilename(filename);
 
         // 0-3 - Filename Length Filler (fill to a multiple of 4)
-        //double temp = ((double)filenameLength) / 4;
-        int fillerLength = ((filenameLength / 4 + 1) * 4) - filenameLength;
-        if (fillerLength == 4) {
-          fillerLength = 0;
-        }
-        fm.skip(fillerLength);
+        fm.skip(calculatePadding(filenameLength, 4));
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        Resource resource = new Resource(path, filename, offset, length);
+        resource.forceNotAdded(true);
+        resources[realNumFiles] = resource;
 
-        TaskProgressManager.setValue(readLength);
-        readLength += length;
-        i++;
+        TaskProgressManager.setValue(offset);
+        realNumFiles++;
       }
 
-      resources = resizeResources(resources, i);
+      resources = resizeResources(resources, realNumFiles);
 
       fm.close();
 
@@ -203,8 +219,81 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
   }
 
   /**
-  **********************************************************************************************
+   **********************************************************************************************
+   Decompresses an archive, where the whole archive is compressed.
+   Reads the compressed block information first, then processes the compressed blocks themselves.
+   Writes the output to a file with the same name, but with "_ge_decompressed" at the end of it.
+   The decompressed file contains the same header as the compressed file, so you can open
+   the decompressed file in GE directly, without needing to re-decompress anything.
+   If the decompressed file already exists, we use that, we don't re-decompress.
+   **********************************************************************************************
+   **/
+  public FileManipulator decompressArchive(FileManipulator fm) {
+    try {
+      // Build a new "_ge_decompressed" archive file in the current directory
+      File origFile = fm.getFile();
 
+      String pathOnly = FilenameSplitter.getDirectory(origFile);
+      String filenameOnly = FilenameSplitter.getFilename(origFile);
+      String extensionOnly = FilenameSplitter.getExtension(origFile);
+
+      File decompFile = new File(pathOnly + File.separatorChar + filenameOnly + "_ge_decompressed" + "." + extensionOnly);
+      if (decompFile.exists()) {
+        // we've already decompressed this file before - open and return it
+        return new FileManipulator(decompFile, false);
+      }
+
+      FileManipulator decompFM = new FileManipulator(decompFile, true);
+
+      long arcSize = fm.getLength();
+
+      int compLength = (int) arcSize;
+
+      // read the footer
+      fm.seek(arcSize - 4);
+
+      int decompLength = fm.readInt();
+      if (decompLength < arcSize) {
+        // decomp length is less than the comp length;
+        return fm;
+      }
+
+      fm.seek(0); // back to the start
+
+      // Now decompress the block into the decompressed file
+      TaskProgressManager.setMessage(Language.get("Progress_DecompressingArchive")); // progress bar
+      TaskProgressManager.setMaximum(arcSize); // progress bar
+      TaskProgressManager.setIndeterminate(true);
+
+      Exporter_GZip exporter = Exporter_GZip.getInstance();
+      exporter.open(fm, compLength, decompLength);
+
+      for (int i = 0; i < decompLength; i++) {
+        if (exporter.available()) {
+          decompFM.writeByte(exporter.read());
+        }
+      }
+
+      // Force-write out the decompressed file to write it to disk, then change the buffer to read-only.
+      decompFM.close();
+      decompFM = new FileManipulator(decompFile, false);
+
+      TaskProgressManager.setMessage(Language.get("Progress_ReadingArchive")); // progress bar
+      TaskProgressManager.setIndeterminate(false);
+
+      // Return the file pointer to the beginning, and return the decompressed file
+      decompFM.seek(0);
+      return decompFM;
+    }
+    catch (Throwable t) {
+      ErrorLogger.log(t);
+      return null;
+    }
+  }
+
+  /**
+  **********************************************************************************************
+  
   **********************************************************************************************
   **/
   @Override
@@ -221,32 +310,40 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
       fm.writeString("CMPR");
 
       //Loop 1 to calculate sizes
+
       TaskProgressManager.setMessage(Language.get("Progress_PerformingCalculations"));
       int totalLengthOfData = 0;
       int totalLengthOfHeader = 8;
       int totalLengthOfDirectory = 0;
       for (int i = 0; i < numFiles; i++) {
-        totalLengthOfData += resources[i].getDecompressedLength();
-        int nameLength = resources[i].getName().length();
-        int fillerLength = ((nameLength / 4 + 1) * 4) - nameLength;
-        if (fillerLength == 4) {
-          fillerLength = 0;
-        }
-        totalLengthOfDirectory += 12 + nameLength + fillerLength;
+        Resource resource = resources[i];
+
+        int fileLength = (int) resource.getDecompressedLength();
+        fileLength += calculatePadding(fileLength, 4);
+        totalLengthOfData += fileLength;
+
+        int nameLength = resource.getName().length();
+        nameLength += calculatePadding(nameLength, 4);
+        totalLengthOfDirectory += 12 + nameLength;
       }
 
       // 4 - Archive Length (-8 header)
       fm.writeInt(totalLengthOfData + totalLengthOfDirectory);
 
       // Loop 2 - Build archive
+      // for each file
+      //   X - File Data
+      //   0-3 - Padding to a multiple of 4 bytes
       TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
-      write(resources, fm);
+      write(resources, fm, 4);
 
       // Loop 3 - Build directory
       TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
       int currentPos = 0;
       for (int i = 0; i < numFiles; i++) {
         String name = resources[i].getName();
+        int nameLength = name.length();
+
         long length = resources[i].getDecompressedLength();
 
         // 4 - File Length
@@ -256,21 +353,19 @@ public class Plugin_BFL_CMPR extends ArchivePlugin {
         fm.writeInt(currentPos);
 
         // 4 - Filename Length
-        fm.writeInt(name.length());
+        fm.writeInt(nameLength);
 
         // X - Filename
         fm.writeString(name);
 
         // 1-3 - Filename Length Filler (fill to a multiple of 4)
-        int fillerLength = ((name.length() / 4 + 1) * 4) - name.length();
-        if (fillerLength == 4) {
-          fillerLength = 0;
-        }
-        for (int j = 0; j < fillerLength; j++) {
+        int paddingSize = calculatePadding(nameLength, 4);
+        for (int j = 0; j < paddingSize; j++) {
           fm.writeByte(0);
         }
 
         currentPos += length;
+        currentPos += calculatePadding(length, 4);
       }
 
       // 4 - Directory Offset

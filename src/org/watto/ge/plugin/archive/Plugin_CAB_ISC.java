@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -32,7 +33,7 @@ public class Plugin_CAB_ISC extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_CAB_ISC() {
@@ -203,7 +204,10 @@ public class Plugin_CAB_ISC extends ArchivePlugin {
         // X - Filename (null)
         String filename = fm.readNullString();
         FieldValidator.checkFilename(filename);
-        resources[i].setName(filename);
+
+        Resource resource = resources[i];
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       resources = resizeResources(resources, realNumFiles);

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -21,8 +21,7 @@ import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
-import org.watto.ge.plugin.exporter.Exporter_Default;
-import org.watto.ge.plugin.exporter.Exporter_QuickBMS_DLL;
+import org.watto.ge.plugin.exporter.Exporter_JCALG1;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -47,7 +46,8 @@ public class Plugin_PAK_55 extends ArchivePlugin {
 
     setGames("Neon Brood",
         "Psychical Madness",
-        "Spaceguy 2");
+        "Spaceguy 2",
+        "Restricted Area");
     setExtensions("pak"); // MUST BE LOWER CASE
     setPlatforms("PC");
 
@@ -113,14 +113,9 @@ public class Plugin_PAK_55 extends ArchivePlugin {
 
       addFileTypes();
 
-      // If QuickBMS is available, use it to perform the decompression
-      ExporterPlugin exporter = Exporter_Default.getInstance();
-      /*
-      if (QuickBMSHelper.checkAndShowPopup() != null) {
-        exporter = new Exporter_QuickBMS_Decompression("JCALG");
-      }
-      */
-      exporter = new Exporter_QuickBMS_DLL("JCALG");
+      //ExporterPlugin exporter = new Exporter_QuickBMS_DLL("JCALG");
+      // [3.16.0008] We have our own implementation of JCALG1 now
+      ExporterPlugin exporter = Exporter_JCALG1.getInstance();
 
       // RESETTING GLOBAL VARIABLES
 

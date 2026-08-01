@@ -15,7 +15,9 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -42,6 +44,7 @@ public class Plugin_BIG_BIGF_2 extends ArchivePlugin {
     setProperties(true, true, false, true);
 
     setGames("Toca Race Driver 3: Honda Civic 2006",
+        "Club Football 2005",
         "Colin McRae Rally 04",
         "Colin McRae Rally 05",
         "Colin McRae Rally 3",
@@ -53,6 +56,14 @@ public class Plugin_BIG_BIGF_2 extends ArchivePlugin {
         "Sensible Soccer 2006");
     setExtensions("big", "b2k", "b64");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("big", "BIG Archive", FileType.TYPE_ARCHIVE),
+        new FileType("b64", "B64 Archive", FileType.TYPE_ARCHIVE));
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 

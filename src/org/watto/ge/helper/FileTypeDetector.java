@@ -31,6 +31,7 @@ import org.watto.ge.plugin.exporter.Exporter_LZO_SingleBlock;
 import org.watto.ge.plugin.exporter.Exporter_Oodle;
 import org.watto.ge.plugin.exporter.Exporter_QuickBMSWrapper;
 import org.watto.ge.plugin.exporter.Exporter_QuickBMS_Decompression;
+import org.watto.ge.plugin.exporter.Exporter_RAGE_XFS;
 import org.watto.io.FileManipulator;
 import org.watto.io.FilenameChecker;
 import org.watto.io.buffer.ExporterByteBuffer;
@@ -185,6 +186,11 @@ public class FileTypeDetector {
         if (clonedExporter instanceof Exporter_Oodle || clonedExporter instanceof Exporter_LZO_SingleBlock) {
           // These decompressions only works when you specify the actual decompLength.
           // (we can't just extract a few bytes, we need to extract the full file)
+        }
+        else if (clonedExporter instanceof Exporter_RAGE_XFS) {
+          if (decompLength > 512) {
+            clonedResource.setLength(512); // 512 byte minimum for this exporter
+          }
         }
         else {
           // small quick extract

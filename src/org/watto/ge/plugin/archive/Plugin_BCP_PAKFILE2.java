@@ -1,30 +1,29 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.ErrorLogger;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_BZIP2;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -48,6 +47,15 @@ public class Plugin_BCP_PAKFILE2 extends ArchivePlugin {
     setGames("Warrior Kings: Battles");
     setExtensions("bcp");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+    setTextPreviewExtensions("anim", "cam", "cpp", "dat", "font", "gsf", "h", "lvl", "mesh", "psh", "psystem", "rc", "vsh"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -104,6 +112,8 @@ public class Plugin_BCP_PAKFILE2 extends ArchivePlugin {
 
       addFileTypes();
 
+      ExporterPlugin exporterBZip2 = Exporter_BZIP2.getInstance();
+
       // RESETTING THE GLOBAL VARIABLES
 
       FileManipulator fm = new FileManipulator(path, false);
@@ -131,27 +141,61 @@ public class Plugin_BCP_PAKFILE2 extends ArchivePlugin {
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
         // 4 - File Offset
-        long offset = fm.readInt();
+        int offset = fm.readInt();
         if (offset == -1) {
           offset = 0;
         }
         FieldValidator.checkOffset(offset, arcSize);
 
         // 4 - Offset To Next File
-        fm.skip(4);
-
-        // 4 - File Size
-        long length = fm.readInt();
+        int length = fm.readInt() - offset;
+        if (length == -1) {
+          length = 0;
+        }
         FieldValidator.checkLength(length, arcSize);
 
+        // 4 - Decompressed File Length
+        int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
+
         // 4 - Unknown (Hash?)
-        // 4 - File Type ID?
-        fm.skip(8);
+        fm.skip(4);
+
+        // 4 - Compression Type (1=uncompressed, 3=BZip2)
+        int compressionType = fm.readInt();
 
         String filename = Resource.generateFilename(i);
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        if (compressionType == 1) {
+          // uncompressed
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else if (compressionType == 2) {
+          // Empty File
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else if (compressionType == 3) {
+          // BZip2
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength, exporterBZip2);
+        }
+        else if (compressionType == 4) {
+          // Unknown compression
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else {
+          ErrorLogger.log("[BCP_PAKFILE2] Unknown compression type: " + compressionType + " for file number " + (i + 1));
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
 
         TaskProgressManager.setValue(i);
       }
@@ -174,7 +218,9 @@ public class Plugin_BCP_PAKFILE2 extends ArchivePlugin {
         String filename = fm.readString(filenameLength * 2);
         filename = new String(filename.getBytes(), "UTF-16LE");
 
-        resources[fileID].setName(filename);
+        Resource resource = resources[fileID];
+        resource.setName(filename);
+        resource.setOriginalName(filename);
       }
 
       while (fm.getOffset() < fm.getLength()) {
@@ -226,7 +272,11 @@ public class Plugin_BCP_PAKFILE2 extends ArchivePlugin {
       String filename = fm.readString(filenameLength * 2);
       filename = new String(filename.getBytes(), "UTF-16LE");
 
-      resources[fileID].setName(dirName + thisDirName + "\\" + filename);
+      String newName = dirName + thisDirName + "\\" + filename;
+
+      Resource resource = resources[fileID];
+      resource.setName(newName);
+      resource.setOriginalName(newName);
     }
 
     // read the sub-directories

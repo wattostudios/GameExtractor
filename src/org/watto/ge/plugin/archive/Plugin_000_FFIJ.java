@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,14 +15,12 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.Language;
-import org.watto.task.TaskProgressManager;
-import org.watto.component.WSTableColumn;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-import org.watto.ge.plugin.resource.Resource_000_FFIJ;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -33,7 +31,7 @@ public class Plugin_000_FFIJ extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_000_FFIJ() {
@@ -41,68 +39,26 @@ public class Plugin_000_FFIJ extends ArchivePlugin {
     super("000_FFIJ", "000_FFIJ");
 
     //         read write replace rename
-    setProperties(true, true, true, false);
+    setProperties(true, false, false, false);
 
     setGames("Afterlife");
     setExtensions("000");
     setPlatforms("PC");
 
-  }
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
 
-  /**
-   **********************************************************************************************
-   * Gets a blank resource of this type, for use when adding resources
-   **********************************************************************************************
-   **/
-  @Override
-  public Resource getBlankResource(File file, String name) {
-    return new Resource_000_FFIJ(file, name);
-  }
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
 
-  /**
-   **********************************************************************************************
-   * Gets all the columns
-   **********************************************************************************************
-   **/
-  @Override
-  public WSTableColumn[] getColumns() {
-    WSTableColumn[] baseColumns = super.getColumns();
-    int numColumns = baseColumns.length;
+    setCanScanForFileTypes(true);
 
-    // copy the base columns into a new array
-    WSTableColumn[] columns = new WSTableColumn[numColumns + 1];
-    System.arraycopy(baseColumns, 0, columns, 0, numColumns);
-
-    // add the additional columns...
-
-    // used codes: a,c,C,d,D,E,F,i,I,N,O,P,r,R,S,z,Z
-    //code,languageCode,class,editable,sortable
-    columns[numColumns] = new WSTableColumn("ID", 'I', Integer.class, true, true);
-
-    return columns;
   }
 
   /**
   **********************************************************************************************
-
-  **********************************************************************************************
-  **/
-  @Override
-  public Object getColumnValue(Resource text, char code) {
-    if (text instanceof Resource_000_FFIJ) {
-      Resource_000_FFIJ resource = (Resource_000_FFIJ) text;
-
-      if (code == 'I') {
-        return new Integer(resource.getID());
-      }
-    }
-
-    return super.getColumnValue(text, code);
-  }
-
-  /**
-  **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -210,20 +166,23 @@ public class Plugin_000_FFIJ extends ArchivePlugin {
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
         long offset = offsets[i];
-        int fileID = fileIDs[i];
+        //int fileID = fileIDs[i];
 
         fm.seek(offset + 4);
 
         // 4 - File Length
-        long length = fm.readInt() - 8;
+        long length = fm.readInt() - 24;
         FieldValidator.checkLength(length, arcSize);
 
-        offset += 8;
+        // 4 - Unknown (2)
+        // 4 - File Length
+        // 8 - null
+        offset += 24;
 
         String filename = Resource.generateFilename(i);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource_000_FFIJ(path, filename, offset, length, fileID);
+        resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
       }
@@ -241,111 +200,32 @@ public class Plugin_000_FFIJ extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
   **********************************************************************************************
   **/
   @Override
-  public void setColumnValue(Resource text, char code, Object value) {
-    try {
-      if (text instanceof Resource_000_FFIJ) {
-        Resource_000_FFIJ resource = (Resource_000_FFIJ) text;
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
 
-        if (code == 'I') {
-          resource.setID(((Integer) value).intValue());
-          return;
-        }
-      }
+    if (headerInt1 == 1162627412) {
+      return "tile";
     }
-    catch (Throwable t) {
+    else if (headerInt1 == 1397705537) {
+      return "akos";
+    }
+    else if (headerInt1 == 1398099305) {
+      return "imus";
+    }
+    else if (headerInt1 == 1448299585) {
+      return "alsv";
+    }
+    else if (headerInt1 == 1346455619) {
+      return "txt";
     }
 
-    super.setColumnValue(text, code, value);
-  }
-
-  /**
-   **********************************************************************************************
-   * Writes an [archive] File with the contents of the Resources
-   **********************************************************************************************
-   **/
-  @Override
-  public void write(Resource[] resources, File path) {
-    try {
-
-      FileManipulator fm = new FileManipulator(path, true);
-      int numFiles = resources.length;
-      TaskProgressManager.setMaximum(numFiles);
-
-      TaskProgressManager.setMessage(Language.get("Progress_WritingDirectory"));
-
-      // 4 - Archive Header (FFIJ)
-      // 4 - Archive Header Size (null)
-      fm.writeString("FFIJ");
-      fm.writeInt(0);
-
-      // 4 - Head Header (DAEH)
-      // 4 - Header Section Size (4)
-      // 4 - Number Of Files
-      fm.writeString("DAEH");
-      fm.writeInt(4);
-      fm.writeInt(numFiles);
-
-      // 4 - Offsets Header (TSFO)
-      // 4 - Offsets Section Size
-      fm.writeString("TSFO");
-      fm.writeInt(numFiles * 4);
-
-      // Write Directory
-      long offset = 0;
-      for (int i = 0; i < numFiles; i++) {
-        // 4 - File Offset (relative to the start of the file data)
-        fm.writeInt((int) offset);
-
-        offset += resources[i].getDecompressedLength() + 8; // +8 for the file header
-      }
-
-      // 4 - ID Header (DICR)
-      // 4 - ID Section Size
-      fm.writeString("DICR");
-      fm.writeInt(numFiles * 4);
-
-      // Write Directory
-      for (int i = 0; i < numFiles; i++) {
-        Resource resource = resources[i];
-
-        // 4 - File ID
-        if (resource instanceof Resource_000_FFIJ) {
-          fm.writeInt(((Resource_000_FFIJ) resource).getID());
-        }
-        else {
-          fm.writeInt(0);
-        }
-      }
-
-      TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
-
-      // Write Files
-      for (int i = 0; i < numFiles; i++) {
-        Resource resource = resources[i];
-        long decompLength = resource.getDecompressedLength();
-
-        // 4 - Resource Header (CSER)
-        fm.writeString("CSER");
-
-        // 4 - File Length (including these 2 fields)
-        fm.writeInt((int) decompLength + 8);
-
-        // X - File Data
-        write(resources[i], fm);
-
-        TaskProgressManager.setValue(i);
-      }
-
-      fm.close();
-
-    }
-    catch (Throwable t) {
-      logError(t);
-    }
+    return null;
   }
 
 }

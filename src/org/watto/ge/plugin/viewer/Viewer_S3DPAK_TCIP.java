@@ -41,7 +41,7 @@ public class Viewer_S3DPAK_TCIP extends ViewerPlugin {
   **/
   public Viewer_S3DPAK_TCIP() {
     super("S3DPAK_TCIP", "S3DPAK_TCIP");
-    setExtensions(""); // no extension
+    setExtensions("", "tcip"); // no extension
 
     setGames("TimeShift");
     setPlatforms("PC");
@@ -278,7 +278,7 @@ public class Viewer_S3DPAK_TCIP extends ViewerPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

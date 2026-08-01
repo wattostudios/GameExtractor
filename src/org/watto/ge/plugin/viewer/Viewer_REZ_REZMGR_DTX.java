@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2025 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -241,7 +241,7 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
             }
           }
           else if (imageType == 3) {
-            imageFormat = "RGBA";
+            imageFormat = "BGRA";
           }
           else if (imageType == 4) {
             imageFormat = "DXT1";
@@ -250,7 +250,7 @@ public class Viewer_REZ_REZMGR_DTX extends ViewerPlugin {
             imageFormat = "DXT3";
           }
           else if (imageType == 6) {
-            imageFormat = "DXT3"; // think it's actually DXT3 (some as DXT5 are just all blank)
+            imageFormat = "DXT5";
           }
           else if (imageType == 136 || imageType == 236) {
             imageFormat = "8bitPaletted";

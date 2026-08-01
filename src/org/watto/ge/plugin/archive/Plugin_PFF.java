@@ -2,7 +2,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -24,6 +24,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -45,7 +46,7 @@ public class Plugin_PFF extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setExtensions("pff");
-    setGames("Commanche 4",
+    setGames("Comanche 4",
         "Delta Force",
         "Delta Force 2",
         "Delta Force Land Warrior",

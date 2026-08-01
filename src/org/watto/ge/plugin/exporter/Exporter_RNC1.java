@@ -93,7 +93,7 @@ public class Exporter_RNC1 extends ExporterPlugin {
   **/
   @Override
   public String getDescription() {
-    return "This exporter decompresses RNC2 files when exporting\n\n" + super.getDescription();
+    return "This exporter decompresses RNC1 files when exporting\n\n" + super.getDescription();
   }
 
   /**

@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Settings;
 import org.watto.component.WSPluginManager;
 import org.watto.datatype.Resource;
@@ -546,6 +547,9 @@ public class Plugin_DAT_DBPF extends ArchivePlugin {
       // 4 - Header
       if (fm.readString(4).equals("DBPF")) {
         rating += 50;
+      }
+      else {
+        rating -= 10;
       }
 
       // 4 - Version (1)

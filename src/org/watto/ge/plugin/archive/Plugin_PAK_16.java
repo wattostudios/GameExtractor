@@ -2,6 +2,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -48,6 +49,9 @@ public class Plugin_PAK_16 extends ArchivePlugin {
     setGames("Restricted Area");
     setExtensions("pak");
     setPlatforms("PC");
+
+    // REPLACED WITH PAK_55, which also contains the decompression code - this plugin is no longer needed.
+    setEnabled(false);
 
   }
 

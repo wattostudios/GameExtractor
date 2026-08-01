@@ -1,29 +1,28 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_ANCO;
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -34,7 +33,7 @@ public class Plugin_PKD_CMP0 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PKD_CMP0() {
@@ -48,11 +47,20 @@ public class Plugin_PKD_CMP0 extends ArchivePlugin {
     setExtensions("pkd");
     setPlatforms("PC");
 
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+    setTextPreviewExtensions("c"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
+
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -87,12 +95,13 @@ public class Plugin_PKD_CMP0 extends ArchivePlugin {
    **********************************************************************************************
    **/
   @Override
-  @SuppressWarnings("unused")
   public Resource[] read(File path) {
     try {
 
       // NOTE - Compressed files MUST know their DECOMPRESSED LENGTH
       //      - Uncompressed files MUST know their LENGTH
+
+      ExporterPlugin exporter = Exporter_ANCO.getInstance();
 
       addFileTypes();
 
@@ -103,6 +112,8 @@ public class Plugin_PKD_CMP0 extends ArchivePlugin {
       File sourcePath = getDirectoryFile(path, "pki");
 
       FileManipulator fm = new FileManipulator(sourcePath, false);
+
+      long dirFileLength = fm.getLength();
 
       // 4 - Header (PAK0)
       // 4 - Directory Offset (24)
@@ -117,23 +128,19 @@ public class Plugin_PKD_CMP0 extends ArchivePlugin {
 
       // 4 - Filename Directory Offset
       int filenameDirOffset = fm.readInt();
-      FieldValidator.checkOffset(filenameDirOffset, arcSize);
+      FieldValidator.checkOffset(filenameDirOffset, dirFileLength);
 
       // 4 - Filename Directory Length
-      fm.seek(filenameDirOffset);
+      int filenameDirLength = fm.readInt();
+      FieldValidator.checkLength(filenameDirLength, dirFileLength);
 
       Resource[] resources = new Resource[numFiles];
-
       TaskProgressManager.setMaximum(numFiles);
 
-      // Loop through directory
-      String[] names = new String[numFiles];
-      for (int i = 0; i < numFiles; i++) {
-        // X - Filename (null)
-        String filename = fm.readNullString();
-        FieldValidator.checkFilename(filename);
-        names[i] = filename;
-      }
+      fm.seek(filenameDirOffset);
+      byte[] nameBytes = fm.readBytes(filenameDirLength);
+
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
 
       fm.seek(24);
 
@@ -150,24 +157,41 @@ public class Plugin_PKD_CMP0 extends ArchivePlugin {
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - File ID?
-        fm.skip(4);
+        // 4 - Filename Offset (relative to the start of the Filename Directory)
+        int filenameOffset = fm.readInt();
+        FieldValidator.checkOffset(filenameOffset, filenameDirLength);
+
+        nameFM.seek(filenameOffset);
+        String filename = nameFM.readNullString();
 
         // 4 - Decompressed File Length
         int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
 
-        String filename = names[i];
-
+        /*
         if (comp == 1) {
           offset += 16;
           length -= 16;
         }
+        */
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        if (comp == 0) {
+          // uncompressed
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else {
+          // compressed
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+        }
 
         TaskProgressManager.setValue(i);
       }
+
+      nameFM.close();
 
       fm.close();
 

@@ -1,29 +1,26 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -48,7 +45,8 @@ public class Plugin_BIN_16 extends ArchivePlugin {
     setExtensions("bin");
     setPlatforms("PC");
 
-    setFileTypes("image", "Image (Grayscale)");
+    setFileTypes(new FileType("bin_pal", "Color Palette", FileType.TYPE_PALETTE),
+        new FileType("bin_tex", "Texture Image", FileType.TYPE_IMAGE));
 
   }
 
@@ -67,7 +65,7 @@ public class Plugin_BIN_16 extends ArchivePlugin {
         rating += 25;
       }
 
-      if (fm.getFile().getName().equals("Displace.bin")) {
+      if (fm.getFile().getName().equalsIgnoreCase("Displace.bin")) {
         rating += 25;
       }
 
@@ -115,6 +113,8 @@ public class Plugin_BIN_16 extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
+        long offset = fm.getOffset();
+
         // 4 - Image Width
         int imageWidth = fm.readInt();
         FieldValidator.checkPositive(imageWidth);
@@ -123,14 +123,17 @@ public class Plugin_BIN_16 extends ArchivePlugin {
         int imageHeight = fm.readInt();
         FieldValidator.checkPositive(imageHeight);
 
-        // w*h - Pixel Data (Palette Index)
-        long offset = fm.getOffset();
-        FieldValidator.checkOffset(offset);
+        //System.out.println((fm.getOffset() - 8) + "\t" + imageWidth + "\t" + imageHeight);
 
+        // w*h - Pixel Data (Palette Index)
         long length = imageWidth * imageHeight;
         FieldValidator.checkLength(length, arcSize);
 
-        String filename = Resource.generateFilename(i) + ".image";
+        fm.skip(length);
+
+        length += 8;
+
+        String filename = Resource.generateFilename(i) + ".bin_tex";
 
         //path,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

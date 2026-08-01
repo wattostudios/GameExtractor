@@ -13,7 +13,7 @@
 		<setting code="ShowTableColumn_CompressedLength" value="true" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ScanSubDirectories" value="true" />
 		<setting code="Noesis_Path" value="external_bins\noesis" />
-		<setting code="PreviewPanel_ImageInvestigator_Offset" value="107" />
+		<setting code="PreviewPanel_ImageInvestigator_Offset" value="3647" />
 		<setting code="Popup_Search_NoColumnsSelected_Show" value="true" />
 		<setting code="MaximumDirectoryFileLength" value="524800" />
 		<setting code="Popup_FileListViewChanged_Show" value="false" />
@@ -59,7 +59,7 @@
 		<setting code="FileListView" value="TreeTable" />
 		<setting code="Popup_Preview_PreviewSaved_Show" value="false" />
 		<setting code="Popup_ReplaceFiles_FilesReplaced_Show" value="true" />
-		<setting code="PreviewPanel_ImageInvestigator_Width" value="512" />
+		<setting code="PreviewPanel_ImageInvestigator_Width" value="52" />
 		<setting code="AutoImportModifiedExportFiles" value="false" />
 		<setting code="Popup_ImageInvestigator_PreviewSaved_Show" value="true" />
 		<setting code="DirectoryListDoubleClickDoesOpenArchive" value="true" />
@@ -94,7 +94,7 @@
 		<setting code="WSGradientColorChooserXML" value="xml/WSGradientColorChooser.xml" />
 		<setting code="Popup_RemoveFiles_FilesAdded_Show" value="true" />
 		<setting code="ExtendedSettingsDebug" value="false" />
-		<setting code="PreviewPanel_ImageInvestigator_Format" value="BGRA" />
+		<setting code="PreviewPanel_ImageInvestigator_Format" value="8BitPaletted" />
 		<setting code="PreviewPanel_Text_MonospacedFont" value="true" />
 		<setting code="Popup_AddFiles_NoFilesToAdd_Show" value="true" />
 		<setting code="ExtendedLanguageDebug" value="false" />
@@ -112,7 +112,7 @@
 		<setting code="ExtractDirectory" value="extract" />
 		<setting code="SavedPreviewDirectory" value="previews" />
 		<setting code="OnlyShowStandardConverters" value="true" />
-		<setting code="PreviewPanel_Image_BackgroundColor" value="BLACK" />
+		<setting code="PreviewPanel_Image_BackgroundColor" value="WHITE" />
 		<setting code="WSFontChooser_FontName_Selected" value="Arial" />
 		<setting code="DefaultSettingsFile" value="settings/default.xml" />
 		<setting code="SearchColumn_FilePath" value="false" />
@@ -124,16 +124,16 @@
 		<setting code="ShowTableColumn_AddedIcon" value="true" />
 		<setting code="PluginListDisplayType" value="Game" />
 		<setting code="Popup_ConvertArchive_FilenameMissing_Show" value="true" />
-		<setting code="RecentFile4" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Sabotain - Break the Rules\data03.sab" />
+		<setting code="RecentFile4" value="C:\Demos\Zoria Age of Shattering\Zoria AoS_Data\sharedassets0.resource" />
 		<setting code="Theme_ButterflyLookAndFeel_UseAntiAlias" value="true" />
 		<setting code="ShowShortHexEditorField" value="true" />
 		<setting code="SearchColumn_Source" value="false" />
-		<setting code="RecentFile3" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Sabotain - Break the Rules\data04.sab" />
-		<setting code="RecentFile2" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\The Great Escape\Bug Report 21.06.2026.zip" />
+		<setting code="RecentFile3" value="C:\Demos\Zoria Age of Shattering\Zoria AoS_Data\sharedassets1.resource" />
+		<setting code="RecentFile2" value="C:\Demos\Zoria Age of Shattering\Zoria AoS_Data\sharedassets1.assets.resS" />
 		<setting code="NumberOfRecentFiles" value="4" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExtractAllFiles" value="true" />
 		<setting code="SearchColumn_Extension" value="true" />
-		<setting code="RecentFile1" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Richard Burns Rally\audio.dat" />
+		<setting code="RecentFile1" value="C:\Demos\Zoria Age of Shattering\Zoria AoS_Data\StreamingAssets\aa\StandaloneWindows64\weaponitems_assets_shield.bundle" />
 		<setting code="IdentifyUnknownFileTypes" value="true" />
 		<setting code="SidePanel_DirectoryList_AnalyzeDirectory_ExporterPlugins_CurrentSelectionIndex" value="0" />
 		<setting code="Popup_WriteArchive_FilenameMissing_Show" value="true" />
@@ -171,7 +171,7 @@
 		<setting code="SettingsFile" value="settings\settings.xml" />
 		<setting code="UE4AESKeysFile" value="settings/keys_ue4.xml" />
 		<setting code="WSTableColumn_c_Width" value="106" />
-		<setting code="PreviewPanel_ImageInvestigator_Height" value="512" />
+		<setting code="PreviewPanel_ImageInvestigator_Height" value="76" />
 		<setting code="PreviewPanel_MeshInvestigator_VertexBlockSizeField" value="12" />
 		<setting code="ShowHexIfPreviewFailed" value="true" />
 		<setting code="Popup_ExportFiles_NoFilesSelected_Show" value="true" />
@@ -193,7 +193,7 @@
 		<setting code="ShowUnicodeHexEditorField" value="false" />
 		<setting code="TiledPreviewBackground" value="true" />
 		<setting code="WSTableColumn_RenamedIcon_Width" value="18" />
-		<setting code="PreviewPanel_ImageInvestigator_RemoveAlphaCheckboxSelected" value="true" />
+		<setting code="PreviewPanel_ImageInvestigator_RemoveAlphaCheckboxSelected" value="false" />
 		<setting code="WSTableColumn_Time_Width" value="36" />
 		<setting code="AlwaysShowHexEditorSelectedTable" value="true" />
 		<setting code="InterfaceFile" value="interface/interface.xml" />
@@ -230,7 +230,7 @@
 		<setting code="WSTableColumn_ReplacedIcon_Width" value="18" />
 		<setting code="ExportPreviewType_class org.watto.component.PreviewPanel_Image" value="PNG Image" />
 		<setting code="WSTableColumn_I_Width" value="203" />
-		<setting code="CurrentArchive" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Richard Burns Rally\audio.dat" />
+		<setting code="CurrentArchive" value="C:\Demos\Zoria Age of Shattering\Zoria AoS_Data\StreamingAssets\aa\StandaloneWindows64\weaponitems_assets_shield.bundle" />
 		<setting code="Theme_ButterflyLookAndFeel_InterfaceColors" value="-9725853" />
 		<setting code="WSCalculatorXML" value="xml/WSCalculator.xml" />
 		<setting code="ShowTableColumn_Filename" value="false" />
@@ -264,8 +264,8 @@
 		<setting code="Popup_RenameFiles_FilesRestored_Show" value="true" />
 		<setting code="SidePanel_DirectoryList_CurrentControl" value="ReadPanel" />
 		<setting code="PreviewPanel_3DModel_CurrentMesh" value="-1" />
-		<setting code="CurrentDirectory" value="C:\_WATTOz\_Game_Archives_For_Home\_TO_ANALYSE\Richard Burns Rally" />
-		<setting code="PreviewPanel_ImageInvestigator_PaletteOffset" value="0" />
+		<setting code="CurrentDirectory" value="C:\Demos\Zoria Age of Shattering\Zoria AoS_Data\StreamingAssets\aa\StandaloneWindows64" />
+		<setting code="PreviewPanel_ImageInvestigator_PaletteOffset" value="128" />
 		<setting code="PreviewPanel_MeshInvestigator_FaceCountField" value="1410" />
 		<setting code="PreviewPanel_MeshInvestigator_TriangleStripCheckboxSelected" value="false" />
 		<setting code="ShowLongHexEditorField" value="true" />
@@ -314,7 +314,7 @@
 		<setting code="ShowHexHexEditorField" value="false" />
 		<setting code="Popup_AddFiles_FilesRemoved_Show" value="true" />
 		<setting code="WSTableColumn_a_Width" value="18" />
-		<setting code="CurrentSidePanel" value="SidePanel_Preview" />
+		<setting code="CurrentSidePanel" value="SidePanel_DirectoryList" />
 		<setting code="" value="" />
 	</settings>
 </settingsStore>

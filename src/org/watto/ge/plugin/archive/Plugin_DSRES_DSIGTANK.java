@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2024 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -353,7 +353,7 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
             blockSize = fm.readInt();
           }
 
-          //System.out.println(filename + "\t" + blockSize + "\t" + decompLength);
+          //System.out.println(filename + "\t" + blockSize + "\t" + length + "\t" + decompLength);
 
           int numBlocks = (int) (decompLength / blockSize) * 2; // *2 to allow for "extra bytes" between each compressed chunk
           if (decompLength % blockSize != 0) {
@@ -365,6 +365,7 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
           long[] blockDecompLengths = new long[numBlocks];
           ExporterPlugin[] blockExporters = new ExporterPlugin[numBlocks];
 
+          int totalDecomp = 0;
           for (int b = 0; b < numBlocks; b++) {
             // 4 - Decompressed Block Length
             int blockDecompLength = fm.readInt();
@@ -378,6 +379,10 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
             int extraBytes = fm.readInt();
             //blockDecompLength += extraBytes;
             //blockLength += extraBytes;
+
+            totalDecomp += blockDecompLength;
+
+            //System.out.println("    blockLength=" + blockLength + "\tdecompBlockLength=" + blockDecompLength + "\textraBytes=" + extraBytes);
 
             blockDecompLengths[b] = blockDecompLength;
             blockLengths[b] = blockLength;
@@ -400,6 +405,34 @@ public class Plugin_DSRES_DSIGTANK extends ArchivePlugin {
               blockLengths[b] = extraBytes;
               blockDecompLengths[b] = extraBytes;
               blockExporters[b] = exporterDefault;
+            }
+
+            if (totalDecomp >= decompLength) {
+              // read all the blocks, might be finishing prematurely
+
+              if (b + 1 < numBlocks) {
+                // shrink the arrays
+
+                numBlocks = b + 1;
+
+                long[] oldBlockOffsets = blockOffsets;
+                long[] oldBlockLengths = blockLengths;
+                long[] oldBlockDecompLengths = blockDecompLengths;
+                ExporterPlugin[] oldBlockExporters = blockExporters;
+
+                blockOffsets = new long[numBlocks];
+                blockLengths = new long[numBlocks];
+                blockDecompLengths = new long[numBlocks];
+                blockExporters = new ExporterPlugin[numBlocks];
+
+                System.arraycopy(oldBlockOffsets, 0, blockOffsets, 0, numBlocks);
+                System.arraycopy(oldBlockLengths, 0, blockLengths, 0, numBlocks);
+                System.arraycopy(oldBlockDecompLengths, 0, blockDecompLengths, 0, numBlocks);
+                System.arraycopy(oldBlockExporters, 0, blockExporters, 0, numBlocks);
+
+              }
+
+              break;
             }
 
           }

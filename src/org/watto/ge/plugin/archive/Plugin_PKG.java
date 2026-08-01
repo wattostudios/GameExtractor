@@ -1,32 +1,30 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.ErrorLogger;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.BlockExporterWrapper;
 import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -177,10 +175,9 @@ public class Plugin_PKG extends ArchivePlugin {
       // 4 - Entry Length
       fm.skip(4);
 
+      //System.out.println(fm.getOffset());
       // 4 - Decompressed Length (or unknown, if it is a sub-directory entry)
       long length = fm.readInt();
-      FieldValidator.checkLength(length, arcSize);
-      lengths[i] = length;
 
       // 63 - Directory Name (null terminated, filled with junk) (Uppercase)
       fm.skip(63);
@@ -193,6 +190,11 @@ public class Plugin_PKG extends ArchivePlugin {
       // 4 - Entry Type? (3=Sub-Directory, 2=Compressed File, 1=Uncompressed File)
       int type = fm.readInt();
       types[i] = type;
+
+      if (type != 3) {
+        FieldValidator.checkLength(length);
+      }
+      lengths[i] = length;
 
       // 4 - Entry Type? (3=Sub-Directory, 2=Compressed File, 1=Uncompressed File)
       // 8 - null
@@ -219,20 +221,63 @@ public class Plugin_PKG extends ArchivePlugin {
       }
       else if (type == 2) {
         // file (compressed)
-        // 4 - Compressed Length (including all these 4 fields)
-        long length = fm.readInt() - 16;
+        long offset = fm.getOffset();
+
+        // 4 - Total Compressed Length
+        long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         long decompLength = lengths[i];
 
-        // 4 - Unknown
-        // 4 - Compression Header (ZL02)
-        // 4 - Unknown (65536)
-        // X - File Data (ZLib Compressed)
-        long offset = fm.getOffset() + 12;
+        int blockSize = 65536;
+        int numBlocks = (int) decompLength / blockSize;
+        int lastBlock = (int) decompLength % blockSize;
+        if (lastBlock != 0) {
+          numBlocks++;
+        }
+
+        long[] blockOffsets = new long[numBlocks];
+        long[] blockLengths = new long[numBlocks];
+        long[] blockDecompLengths = new long[numBlocks];
+
+        long totalCompLength = 0;
+        long totalDecompLength = 0;
+
+        for (int b = 0; b < numBlocks; b++) {
+          // 4 - Block Compressed Length (including the next 2 fields, but not including this field)
+          int blockCompLength = fm.readInt();
+          FieldValidator.checkLength(blockCompLength, arcSize);
+          blockLengths[b] = blockCompLength;
+
+          totalCompLength += blockCompLength;
+
+          // 4 - Compression Header (ZL02)
+          String compHeader = fm.readString(4);
+          if (!compHeader.equals("ZL02")) {
+            ErrorLogger.log("[PKG] Unknown compression type: " + compHeader);
+          }
+
+          // 4 - Block Decompressed Length
+          int blockDecompLength = fm.readInt();
+          FieldValidator.checkLength(blockDecompLength);
+          blockDecompLengths[b] = blockDecompLength;
+
+          totalDecompLength += blockDecompLength;
+
+          // X - File Data (ZLib Compressed)
+          long blockOffset = fm.getOffset();
+          blockOffsets[b] = blockOffset;
+
+          fm.skip(blockCompLength - 8);
+        }
+
+        length = totalCompLength;
+        decompLength = totalDecompLength;
+
+        BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
 
         //path,name,offset,length,decompLength,exporter
-        resources[realNumFiles] = new Resource(path, dirName + filenames[i], offset, length, decompLength, exporter);
+        resources[realNumFiles] = new Resource(path, dirName + filenames[i], offset, length, decompLength, blockExporter);
         realNumFiles++;
 
         TaskProgressManager.setValue(offset);
@@ -244,7 +289,7 @@ public class Plugin_PKG extends ArchivePlugin {
         FieldValidator.checkLength(length, arcSize);
 
         // X - File Data
-        long offset = fm.getOffset() + 4;
+        long offset = fm.getOffset();
 
         //path,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, dirName + filenames[i], offset, length);

@@ -1,29 +1,25 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -34,7 +30,7 @@ public class Plugin_CNT extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_CNT() {
@@ -56,7 +52,7 @@ public class Plugin_CNT extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -89,7 +85,7 @@ public class Plugin_CNT extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -119,10 +115,20 @@ public class Plugin_CNT extends ArchivePlugin {
       // 1 - XOR Value
       byte xorVal = fm.readByte();
 
+      String[] dirNames = new String[numFolders];
       for (int i = 0; i < numFolders; i++) {
         // 4 - Folder Name Length
+        int dirNameLength = fm.readInt();
+        FieldValidator.checkFilenameLength(dirNameLength);
+
         // X - Encrypted Folder Name
-        fm.skip(fm.readInt());
+        byte[] dirNameBytes = fm.readBytes(dirNameLength);
+        for (int b = 0; b < dirNameLength; b++) {
+          dirNameBytes[b] = (byte) (dirNameBytes[b] ^ xorVal);
+        }
+        String dirName = new String(dirNameBytes) + "\\";
+
+        dirNames[i] = dirName;
       }
 
       // 1 - End Of Directory Marker (1)
@@ -131,8 +137,16 @@ public class Plugin_CNT extends ArchivePlugin {
       // Files Directory
       for (int i = 0; i < numFiles; i++) {
 
-        // 4 - null
-        fm.skip(4);
+        // 4 - Directory ID
+        int directoryID = fm.readInt();
+        String dirName = null;
+        if (directoryID == -1) {
+          dirName = "";
+        }
+        else {
+          FieldValidator.checkRange(directoryID, 0, numFolders);
+          dirName = dirNames[directoryID];
+        }
 
         // 4 - Filename Length
         int filenameLength = fm.readInt();
@@ -145,6 +159,8 @@ public class Plugin_CNT extends ArchivePlugin {
         }
         String filename = new String(filenameBytes);
 
+        filename = dirName + filename;
+
         // 4 - Unknown
         // 4 - Unknown
         fm.skip(8);
@@ -156,8 +172,6 @@ public class Plugin_CNT extends ArchivePlugin {
         // 4 - File Length
         long length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
-
-        //String filename = Resource.generateFilename(i);
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);

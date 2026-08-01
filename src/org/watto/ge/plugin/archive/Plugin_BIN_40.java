@@ -171,6 +171,11 @@ public class Plugin_BIN_40 extends ArchivePlugin {
         realNumFiles++;
       }
 
+      // to detect false positives
+      if (realNumFiles <= 1) {
+        return null;
+      }
+
       resources = resizeResources(resources, realNumFiles);
       calculateFileSizes(resources, arcSize);
 

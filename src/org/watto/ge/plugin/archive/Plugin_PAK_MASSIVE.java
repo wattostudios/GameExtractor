@@ -1,30 +1,28 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.converter.IntConverter;
 import org.watto.io.converter.StringConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -35,7 +33,7 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_PAK_MASSIVE() {
@@ -46,14 +44,16 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
     setProperties(true, false, false, false);
 
     setExtensions("pak");
-    setGames("Spellforce");
+    setGames("SpellForce");
     setPlatforms("PC");
+
+    setTextPreviewExtensions("bor", "des", "msh"); // LOWER CASE
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -72,11 +72,11 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
       }
 
       // Header
-      if (fm.readString(24).equals("MASSIVE PAKFILE V 4.0 " + (char) 13 + (char) 10)) {
+      if (fm.readString(21).equals("MASSIVE PAKFILE V 4.0")) {
         rating += 50;
       }
 
-      fm.skip(48);
+      fm.skip(51);
 
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readInt())) {
@@ -93,7 +93,7 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -105,7 +105,7 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
       FileManipulator fm = new FileManipulator(path, false);
 
       // 4 - Version (4)
-      // 24 - header ("MASSIVE PAKFILE V 4.0" 13 10)
+      // 24 - header ("MASSIVE PAKFILE V 4.0" 13 10 null)
       // 44 - Unknown
       // 4 - Unknown
       fm.skip(76);
@@ -122,38 +122,57 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
       // 4 - Unknown
       fm.skip(4);
 
-      // 4 - Data Offset
-      int headDataOffset = fm.readInt();
-      FieldValidator.checkOffset(headDataOffset, arcSize);
+      // 4 - File Data Offset
+      int dataOffset = fm.readInt();
+      FieldValidator.checkOffset(dataOffset, arcSize);
 
-      // 4 - File Length
+      // 4 - Archive Length
       fm.skip(4);
+
+      // read the filename directory
+      int filenameDirOffset = 92 + (numFiles * 16);
+      int filenameDirLength = dataOffset - filenameDirOffset;
+
+      fm.seek(filenameDirOffset);
+      byte[] nameBytes = fm.readBytes(filenameDirLength);
+
+      FileManipulator nameFM = new FileManipulator(new ByteBuffer(nameBytes));
+
+      fm.seek(92);
 
       for (int i = 0; i < numFiles; i++) {
         // 4 - File Length
-        long length = fm.readInt();
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Data Offset + headDataOffset
-        long offset = fm.readInt() + headDataOffset;
+        // 4 - File Offset (relative to the start of the file data)
+        int offset = fm.readInt() + dataOffset;
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - Name Offset
-        int filenameOffset = fm.readInt();
+        // 3 - Filename Offset (relative to the start of the filename directory)
+        // 1 - Unknown
+        byte[] filenameBytes = fm.readBytes(4);
+        //System.out.println(filenameBytes[3]);
+        filenameBytes[3] = 0;
+        int filenameOffset = IntConverter.convertLittle(filenameBytes);
+        FieldValidator.checkOffset(filenameOffset, filenameDirLength);
 
-        // 4 - Unknown
-        fm.skip(4);
+        // 3 - Directory Name Offset (relative to the start of the filename directory)
+        // 1 - Unknown
+        byte[] dirNameBytes = fm.readBytes(4);
+        //System.out.println(dirNameBytes[3]);
+        dirNameBytes[3] = 0;
+        int dirNameOffset = IntConverter.convertLittle(dirNameBytes);
+        FieldValidator.checkOffset(dirNameOffset, filenameDirLength);
 
-        if ((filenameOffset & 0xFF000000) != 0) {
-          filenameOffset = filenameOffset & 0xFFFFFF;
-        }
+        nameFM.seek(dirNameOffset);
+        String dirName = nameFM.readNullString();
+        dirName = StringConverter.reverse(dirName) + "\\";
 
-        FieldValidator.checkOffset(filenameOffset, arcSize);
-
-        fm.seek(filenameOffset + (94 + (numFiles * 16)));
-        // X - filename (reversed)
-        String filename = StringConverter.reverse(fm.readNullString());
-        FieldValidator.checkFilename(filename);
+        nameFM.seek(filenameOffset);
+        nameFM.skip(2);
+        String filename = nameFM.readNullString();
+        filename = dirName + StringConverter.reverse(filename);
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);
@@ -161,6 +180,7 @@ public class Plugin_PAK_MASSIVE extends ArchivePlugin {
         TaskProgressManager.setValue(i);
       }
 
+      nameFM.close();
       fm.close();
 
       return resources;

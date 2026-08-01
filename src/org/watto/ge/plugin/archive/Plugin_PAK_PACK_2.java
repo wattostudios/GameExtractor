@@ -1,31 +1,30 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
+import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.Settings;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Custom_PAK_PACK_2;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -49,6 +48,15 @@ public class Plugin_PAK_PACK_2 extends ArchivePlugin {
     setExtensions("pak");
     setGames("Daikatana");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+    setTextPreviewExtensions("ion", "sca"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -105,12 +113,14 @@ public class Plugin_PAK_PACK_2 extends ArchivePlugin {
 
       FileManipulator fm = new FileManipulator(path, false);
 
+      ExporterPlugin exporter = Exporter_Custom_PAK_PACK_2.getInstance();
+
       long arcSize = fm.getLength();
 
       // 4 - Header (PACK)
       fm.skip(4);
 
-      // 4 - dirOffset
+      // 4 - Directory Offset
       long dirOffset = fm.readInt();
       FieldValidator.checkOffset(dirOffset, arcSize);
 
@@ -128,24 +138,43 @@ public class Plugin_PAK_PACK_2 extends ArchivePlugin {
 
       int readLength = 0;
       for (int i = 0; i < numFiles; i++) {
-        // 56 - Filename
+        // 56 - Filename (null terminated, filled with nulls)
         String filename = fm.readNullString(56);
         FieldValidator.checkFilename(filename);
 
-        // 4 - fileOffset
-        long offset = fm.readInt();
+        // 4 - File Offset
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - fileLength
-        long length = fm.readInt();
+        // 4 - Decompressed File Length
+        int decompLength = fm.readInt();
+        FieldValidator.checkLength(decompLength);
+
+        // 4 - Compressed File Length
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
-        // 4 - Unknown
-        // 4 - Unknown
-        fm.skip(8);
+        // 4 - Compression Flag (0=uncompressed, 1=compressed)
+        int compressionFlag = fm.readInt();
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        if (compressionFlag == 0) {
+          // uncompressed
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
+        else if (compressionFlag == 1) {
+          // compressed
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength, exporter);
+        }
+        else {
+          ErrorLogger.log("[PAK_PACK_2] Unknown compression type: " + compressionFlag);
+
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offset, length, decompLength);
+        }
 
         TaskProgressManager.setValue(readLength);
         readLength += length;

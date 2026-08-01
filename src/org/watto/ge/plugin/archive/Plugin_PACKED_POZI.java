@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,10 +15,14 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_Default;
+import org.watto.ge.plugin.exporter.Exporter_ZLib;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -41,10 +45,19 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, true, true, true);
 
-    setGames("American McGees Scrapland",
-        "Clive Barkers Jericho");
+    setGames("American McGee's Scrapland",
+        "Clive Barker's Jericho");
     setExtensions("packed");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+    setTextPreviewExtensions("fnt", "txa"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -114,6 +127,8 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
 
       addFileTypes();
 
+      ExporterPlugin exporterZLib = Exporter_ZLib.getInstance();
+
       // RESETTING THE GLOBAL VARIABLES
 
       FileManipulator fm = new FileManipulator(path, false);
@@ -134,6 +149,9 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       // Loop through directory
+      long[] offsets = new long[numFiles + 1]; // to calculate the compressed lengths, and therefore work out which files are compressed
+      offsets[numFiles] = arcSize;
+
       for (int i = 0; i < numFiles; i++) {
         // 4 - Filename Length
         int filenameLength = fm.readInt();
@@ -149,11 +167,62 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
         // 4 - File Offset
         int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
+        offsets[i] = offset;
 
         //path,id,name,offset,length,decompLength,exporter
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
+      }
+
+      /*
+      // now go through and look for compressed files
+      fm.getBuffer().setBufferSize(5);
+      
+      for (int i = 0; i < numFiles; i++) {
+        try {
+          Resource resource = resources[i];
+      
+          long offset = resource.getOffset();
+          fm.seek(offset);
+      
+          int decompLength = (int) resource.getDecompressedLength();
+      
+          // 4 - Compressed Length
+          int length = fm.readInt();
+      
+          // 1 - ZLib Compression Header
+          int compressionHeader = fm.readByte();
+      
+          if (compressionHeader == 120 && length < decompLength) {
+            if (FieldValidator.checkLength(length, arcSize)) {
+              offset += 4;
+              resource.setOffset(offset);
+              resource.setLength(length);
+              resource.setDecompressedLength(decompLength);
+              resource.setExporter(exporterZLib);
+            }
+          }
+        }
+        catch (Throwable t) {
+          // not a compressed file, carry on
+        }
+      }
+      */
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+        int decompLength = (int) resource.getDecompressedLength();
+        int compLength = (int) (offsets[i + 1] - offsets[i]);
+
+        if (compLength != decompLength) {
+          compLength -= 4; // to remove the compression header
+
+          resource.setOffset(resource.getOffset() + 4);
+          resource.setLength(compLength);
+          resource.setDecompressedLength(decompLength);
+          resource.setExporter(exporterZLib);
+        }
       }
 
       fm.close();
@@ -227,12 +296,39 @@ public class Plugin_PACKED_POZI extends ArchivePlugin {
         // 4 - Data Offset
         fm.writeInt((int) offset);
 
-        offset += length;
+        if (!resource.isReplaced() && resource.isCompressed()) {
+          offset += (4 + resource.getLength());
+        }
+        else {
+          offset += length;
+        }
       }
 
       // Write Files
       TaskProgressManager.setMessage(Language.get("Progress_WritingFiles"));
-      write(resources, fm);
+
+      ExporterPlugin exporterDefault = Exporter_Default.getInstance();
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        if (!resource.isReplaced() && resource.isCompressed()) {
+          // 4 - Compressed Length
+          fm.writeInt(resource.getLength());
+
+          // X - Compressed Data
+          ExporterPlugin originalExporter = resource.getExporter();
+          resource.setExporter(exporterDefault);
+          write(resource, fm);
+          resource.setExporter(originalExporter);
+        }
+        else {
+          // write the uncompressed file
+          write(resource, fm);
+        }
+
+        TaskProgressManager.setValue(i);
+      }
 
       fm.close();
 

@@ -2,6 +2,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -68,13 +69,6 @@ public class Plugin_BIN_9 extends ArchivePlugin {
 
       // Number Of Files
       if (FieldValidator.checkNumFiles(fm.readInt() / 4)) {
-        rating += 5;
-      }
-
-      long arcSize = fm.getLength();
-
-      // Second File Offset
-      if (FieldValidator.checkOffset(fm.readInt(), arcSize)) {
         rating += 5;
       }
 

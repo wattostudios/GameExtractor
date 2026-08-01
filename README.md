@@ -74,6 +74,9 @@ There is a Contact Form on our website, if you need to contact us for any furthe
 
 ## Version History
 
+* Version 3.16.0008
+  * [I] Small incremental version, with the intention of primarily adding more supported games.
+
 * Version 3.16.0007
   * [I] Small incremental version, with the intention of primarily adding more supported games.
   * [B] Bug fixes for the interface font chooser

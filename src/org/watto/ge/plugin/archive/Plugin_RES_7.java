@@ -1,29 +1,26 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Settings;
-import org.watto.datatype.ReplacableResource;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_XOR;
 import org.watto.io.FileManipulator;
 import org.watto.task.TaskProgressManager;
 
@@ -45,11 +42,19 @@ public class Plugin_RES_7 extends ArchivePlugin {
 
     //         read write replace rename
     setProperties(true, false, false, false);
-    setCanImplicitReplace(true);
 
     setGames("Cybermercs");
-    setExtensions("res");
+    setExtensions("pak", "res");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+    setTextPreviewExtensions("brj", "h", "inc", "scr"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -73,7 +78,7 @@ public class Plugin_RES_7 extends ArchivePlugin {
         rating += 5;
       }
 
-      // Unknown (0/1)
+      // Encryption Flag (0/1)
       int unknownField = fm.readShort();
       if (unknownField == 0 || unknownField == 1) {
         rating += 5;
@@ -88,7 +93,7 @@ public class Plugin_RES_7 extends ArchivePlugin {
 
       // Encryption (0/101)
       int encryption = fm.readShort();
-      if (encryption == 0 || encryption == 101) {
+      if (encryption == 0 || encryption == 101 || encryption == 118) {
         rating += 5;
       }
 
@@ -113,14 +118,18 @@ public class Plugin_RES_7 extends ArchivePlugin {
 
       FileManipulator fm = new FileManipulator(path, false);
 
+      ExporterPlugin exporterXOR = new Exporter_XOR(170);
+
       // 2 - Number Of Files
-      int numFiles = fm.readShort();
+      short numFiles = fm.readShort();
       FieldValidator.checkNumFiles(numFiles);
 
       // 2 - Unknown (0/1)
+      int encryptionFlag = fm.readShort();
+
       // 4 - Unknown
       // 4 - Unknown
-      fm.skip(10);
+      fm.skip(8);
 
       long arcSize = fm.getLength();
 
@@ -129,38 +138,42 @@ public class Plugin_RES_7 extends ArchivePlugin {
 
       // Loop through directory
       int[] filenameLengths = new int[numFiles];
+      int[] entryOffsets = new int[numFiles];
       for (int i = 0; i < numFiles; i++) {
-        // 4 - File ID?
-        fm.skip(4);
+        // 4 - File Entry Offset (pointer into the Details Directory)
+        int entryOffset = fm.readInt();
+        FieldValidator.checkOffset(entryOffset, arcSize);
+        entryOffsets[i] = entryOffset;
 
         // 2 - Filename Length
         filenameLengths[i] = fm.readShort();
 
-        // 2 - Encrypted? (0=normal, 101=encrypted)
+        // 2 - Unknown
         fm.skip(2);
       }
 
       for (int i = 0; i < numFiles; i++) {
+        fm.relativeSeek(entryOffsets[i]);
+
         // X - Filename (the length is obtained from the directory above)
         String filename = fm.readString(filenameLengths[i]);
         FieldValidator.checkFilename(filename);
 
-        // 4 - Data Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
-
-        long offset = fm.readInt();
+        // 4 - File Offset
+        int offset = fm.readInt();
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - File Size
-        long lengthPointerLocation = fm.getOffset();
-        long lengthPointerLength = 4;
-
-        long length = fm.readInt();
+        // 4 - File Length
+        int length = fm.readInt();
         FieldValidator.checkLength(length, arcSize);
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength, length, lengthPointerLocation, lengthPointerLength);
+        Resource resource = new Resource(path, filename, offset, length);
+        resources[i] = resource;
+
+        if (encryptionFlag == 1) {
+          resource.setExporter(exporterXOR);
+        }
 
         TaskProgressManager.setValue(i);
       }

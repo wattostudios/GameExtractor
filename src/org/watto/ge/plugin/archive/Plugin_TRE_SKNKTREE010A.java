@@ -1,29 +1,27 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,9 +42,13 @@ public class Plugin_TRE_SKNKTREE010A extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Longbow 2");
+    setGames("Jane's Combat Simulations: AH-64D Longbow 2");
     setExtensions("tre");
     setPlatforms("PC");
+
+    setFileTypes(new FileType("raw", "RAW Audio", FileType.TYPE_AUDIO));
+
+    setTextPreviewExtensions("lst"); // LOWER CASE
 
   }
 
@@ -146,11 +148,19 @@ public class Plugin_TRE_SKNKTREE010A extends ArchivePlugin {
         String filename = fm.readNullString();
 
         if (filename.length() > 3 && filename.charAt(2) == '\\') {
-          filename = filename.substring(2);
+          filename = filename.substring(3);
         }
 
-        //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offsets[i], lengths[i]);
+        if (filename.toLowerCase().endsWith("raw")) {
+          //path,id,name,offset,length,decompLength,exporter
+          Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offsets[i], lengths[i]);
+          resource.setAudioProperties(22050, 8, 1);
+          resources[i] = resource;
+        }
+        else {
+          //path,id,name,offset,length,decompLength,exporter
+          resources[i] = new Resource(path, filename, offsets[i], lengths[i]);
+        }
 
         TaskProgressManager.setValue(i);
       }

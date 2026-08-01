@@ -1,29 +1,26 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.resource.Resource_WAV_RawAudio;
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,8 +41,8 @@ public class Plugin_WAD_AFHI extends ArchivePlugin {
     //         read write replace rename
     setProperties(true, false, false, false);
 
-    setGames("Starsky And Hutch");
-    setExtensions("wad");
+    setGames("Starsky And Hutch (2003)");
+    setExtensions("wad", "wd");
     setPlatforms("PC");
 
   }
@@ -75,18 +72,10 @@ public class Plugin_WAD_AFHI extends ArchivePlugin {
         rating += 5;
       }
 
-      // Number Of Files
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
-        rating += 5;
-      }
+      fm.skip(4);
 
       // null
       if (fm.readInt() == 0) {
-        rating += 5;
-      }
-
-      // Version (1)
-      if (fm.readInt() == 1) {
         rating += 5;
       }
 
@@ -152,7 +141,12 @@ public class Plugin_WAD_AFHI extends ArchivePlugin {
       FieldValidator.checkOffset(firstFileOffset, arcSize);
 
       // 4 - Length Of File Data
+      fm.skip(4);
+
       // 4 - Sound Quality Directory Offset
+      int audioDirOffset = fm.readInt();
+      FieldValidator.checkOffset(audioDirOffset, arcSize);
+
       // 4 - Length Of Sound Quality Directory
       // 4 - ID Directory Offset
       // 4 - Length Of ID Directory
@@ -171,6 +165,31 @@ public class Plugin_WAD_AFHI extends ArchivePlugin {
         // 1 - null Filename Terminator
         names[i] = fm.readNullString();
         FieldValidator.checkFilename(names[i]);
+      }
+
+      // loop through the audio data
+      fm.seek(audioDirOffset);
+
+      int[] channels = new int[numFiles];
+      int[] frequency = new int[numFiles];
+      int[] bitrate = new int[numFiles];
+      for (int i = 0; i < numFiles; i++) {
+        // 2 - Unknown (1)
+        fm.skip(2);
+
+        // 2 - Channels (1/2)
+        channels[i] = fm.readShort();
+
+        // 4 - Sound Quality (11025/22050)
+        frequency[i] = fm.readInt();
+
+        // 4 - Unknown
+        // 2 - Unknown
+        fm.skip(6);
+
+        // 4 - Bitrate? (16)
+        bitrate[i] = fm.readShort();
+        fm.skip(2);
       }
 
       Resource[] resources = new Resource[numFiles];
@@ -202,10 +221,12 @@ public class Plugin_WAD_AFHI extends ArchivePlugin {
         // 8 - null
         fm.skip(20);
 
-        String filename = names[i];
+        String filename = names[i] + ".wav";
 
         //path,id,name,offset,length,decompLength,exporter
-        resources[i] = new Resource(path, filename, offset, length);
+        Resource_WAV_RawAudio resource = new Resource_WAV_RawAudio(path, filename, offset, length);
+        resource.setAudioProperties(frequency[i], bitrate[i], channels[i]);
+        resources[i] = resource;
 
         TaskProgressManager.setValue(i);
       }

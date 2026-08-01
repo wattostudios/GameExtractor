@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2021 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -169,6 +170,9 @@ public class Plugin_NoExt_1 extends ArchivePlugin {
 
         // see if the file spans over multiple archives 
         long remainingArcLength = arcSize - offset;
+        if (remainingArcLength < 0) {
+          return null; // false positive
+        }
         if (remainingArcLength < length) {
           // spanned - use a MultiBlockExporter for storing both pieces
 

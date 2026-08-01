@@ -1,30 +1,30 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
+import org.watto.ge.plugin.ExporterPlugin;
+import org.watto.ge.plugin.exporter.Exporter_RNC1;
+import org.watto.ge.plugin.exporter.Exporter_RNC2;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.IntConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -50,13 +50,9 @@ public class Plugin_WAD extends ArchivePlugin {
         "Firestorm: Thunderhawk 2");
     setPlatforms("PC");
 
-    setFileTypes("pal", "Image Color Palette",
-        "dat", "Data File",
-        "map", "Map Image?",
-        "bkg", "Background Image",
-        "mdt", "Map Data?",
-        "img", "Image File",
-        "spr", "Image Sprite");
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("img", "Texture Image", FileType.TYPE_IMAGE),
+        new FileType("spr", "Animated Image", FileType.TYPE_IMAGE));
 
   }
 
@@ -111,10 +107,13 @@ public class Plugin_WAD extends ArchivePlugin {
 
       addFileTypes();
 
+      ExporterPlugin exporterRNC1 = Exporter_RNC1.getInstance();
+      ExporterPlugin exporterRNC2 = Exporter_RNC2.getInstance();
+
       FileManipulator fm = new FileManipulator(path, false);
       long arcSize = fm.getLength();
 
-      // 4 - directoryLength (big)
+      // 4 - First Filename Offset
       int dirLength = IntConverter.changeFormat(fm.readInt());
       FieldValidator.checkLength(dirLength, arcSize);
 
@@ -122,7 +121,7 @@ public class Plugin_WAD extends ArchivePlugin {
       FieldValidator.checkNumFiles(numFiles);
 
       // JUMP TO FILENAME DIRECTORY
-      fm.seek(dirLength);
+      fm.relativeSeek(dirLength);
 
       String[] names = new String[numFiles];
       for (int i = 0; i < numFiles; i++) {
@@ -139,14 +138,14 @@ public class Plugin_WAD extends ArchivePlugin {
       TaskProgressManager.setMaximum(numFiles);
 
       for (int i = 0; i < numFiles; i++) {
-        // 4 - FilenameOffset (big)
+        // 4 - Filename Offset
         fm.skip(4);
 
-        // 4 - offset (big)
+        // 4 - File Offset
         long offset = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkOffset(offset, arcSize);
 
-        // 4 - fileLength (big)
+        // 4 - File Length
         long length = IntConverter.changeFormat(fm.readInt());
         FieldValidator.checkLength(length, arcSize);
 
@@ -156,6 +155,47 @@ public class Plugin_WAD extends ArchivePlugin {
         resources[i] = new Resource(path, filename, offset, length);
 
         TaskProgressManager.setValue(i);
+      }
+
+      // Now check for compression
+      fm.getBuffer().setBufferSize(12);
+
+      for (int i = 0; i < numFiles; i++) {
+        Resource resource = resources[i];
+
+        long offset = resource.getOffset();
+        fm.relativeSeek(offset);
+
+        // 3 - RNC Compression Header
+        if (fm.readString(3).equals("RNC")) {
+          // RNC2 compression
+
+          // 1 - Compression Version (2)
+          int version = fm.readByte();
+
+          // 4 - Decompressed Length
+          int decompLength = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkLength(decompLength);
+
+          // 4 - Compressed Length
+          int length = IntConverter.changeFormat(fm.readInt());
+          FieldValidator.checkLength(length, arcSize);
+
+          // 6 - CRC
+          offset += 18;
+
+          resource.setOffset(offset);
+          resource.setLength(length);
+          resource.setDecompressedLength(decompLength);
+
+          if (version == 2) {
+            resource.setExporter(exporterRNC2);
+          }
+          else if (version == 1) {
+            resource.setExporter(exporterRNC1);
+          }
+
+        }
       }
 
       fm.close();

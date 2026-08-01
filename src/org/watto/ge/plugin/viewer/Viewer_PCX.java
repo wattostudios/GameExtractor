@@ -18,6 +18,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.component.PreviewPanel;
 import org.watto.component.PreviewPanel_3DModel;
@@ -142,7 +143,6 @@ public class Viewer_PCX extends ViewerPlugin {
   **********************************************************************************************
   **/
   @Override
-  @SuppressWarnings("unused")
   /*public PreviewPanel read(FileManipulator fm) {
     try {
       long arcSize = fm.getLength();
@@ -369,7 +369,7 @@ public class Viewer_PCX extends ViewerPlugin {
       fm.skip(4);
 
       // 48 - Colormap (16 colors * 3x RGB)
-      if (version < 5) {
+      if (version < 5 || bitCount == 1) {
         numColors = 16;
 
         palette = new int[numColors];
@@ -381,7 +381,9 @@ public class Viewer_PCX extends ViewerPlugin {
           int g = ByteConverter.unsign(fm.readByte());
           int b = ByteConverter.unsign(fm.readByte());
 
-          palette[i] = ((255 << 24) | (b << 16) | (g << 8) | (r));
+          //System.out.println(r + "\t" + g + "\t" + b);
+
+          palette[i] = ((255 << 24) | (r << 16) | (g << 8) | (b));
         }
       }
       else {
@@ -425,7 +427,7 @@ public class Viewer_PCX extends ViewerPlugin {
       */
 
       // X - Pixels
-      int numPixels = width * height;
+      int numPixels = width * (height + 1); // +1 to add an extra line of pixels, for the scanline decoding, in case we overflow. It doesn't appear on the image, as we'll still be restricted by the "height" value.
       int[] pixels = new int[numPixels];
 
       int totalBytes = numPlanes * numScanBytes;
@@ -483,15 +485,71 @@ public class Viewer_PCX extends ViewerPlugin {
           }
         }
 
-        // convert into RGB
-        if (numPlanes == 3) {
-          for (int i = 0, j = numScanBytes, k = numScanBytes * 2; i < numScanBytes; i++, j++, k++) {
-            scanline[i] = ((255 << 24) | (scanline[i] << 16) | (scanline[j] << 8) | (scanline[k]));
-          }
-        }
+        if (numPlanes == 4 && bitCount == 1) {
+          // 16 colors (EGA)
+          // Ref: https://www.fileformat.info/format/pcx/egff.htm
 
-        // copy to the pixel array
-        System.arraycopy(scanline, 0, pixels, y * width, width);
+          // build the line using the color palette
+
+          /*
+          int startPos = y * width;
+          for (int i = 0; i < totalBytes; i++) {
+            
+            // read 1 scan line byte, split it in to 2 4bpp values, then map to the palette
+            int pixel = scanline[i];
+          
+            int pixel1 = (pixel >> 4) & 15;
+            int pixel2 = pixel & 15;
+          
+            pixels[startPos] = palette[pixel1];
+            startPos++;
+            pixels[startPos] = palette[pixel2];
+            startPos++;
+          }
+          */
+
+          int startPos = y * width;
+          // Pull each individual RGBA byte from a scan line like RRRRRRRRRRGGGGGGGGGBBBBBBBBBIIIIIIIII
+          // Then merge the bits from each of those bytes together to get a palette index  
+          for (int r = 0, g = numScanBytes, b = numScanBytes * 2, i = numScanBytes * 3; r < numScanBytes; r++, g++, b++, i++) {
+            int rPixel = scanline[r];
+            int gPixel = scanline[g];
+            int bPixel = scanline[b];
+            int iPixel = scanline[i];
+
+            // for each "bit"
+            int repeatCount = 8;
+            if (r + 1 == numScanBytes) {
+              // this is the last byte in the scanline, so it might not be complete
+              repeatCount = width % 8;
+            }
+            for (int c = 0; c < repeatCount; c++) {
+              int paletteIndex = (((rPixel >> 7) & 1) << 0) + (((gPixel >> 7) & 1) << 1) + (((bPixel >> 7) & 1) << 2) + (((iPixel >> 7) & 1) << 3);
+              pixels[startPos] = palette[paletteIndex];
+              startPos++;
+
+              // prepare for the next loop
+              rPixel <<= 1;
+              gPixel <<= 1;
+              bPixel <<= 1;
+              iPixel <<= 1;
+            }
+          }
+
+        }
+        else {
+          // assume 1 (or 3) planes at 8bpp
+
+          // convert into RGB
+          if (numPlanes == 3) {
+            for (int i = 0, j = numScanBytes, k = numScanBytes * 2; i < numScanBytes; i++, j++, k++) {
+              scanline[i] = ((255 << 24) | (scanline[i] << 16) | (scanline[j] << 8) | (scanline[k]));
+            }
+          }
+
+          // copy to the pixel array
+          System.arraycopy(scanline, 0, pixels, y * width, width);
+        }
       }
 
       if (version == 5 && numPlanes == 1) {
@@ -518,7 +576,7 @@ public class Viewer_PCX extends ViewerPlugin {
       fm.close();
 
       if (numPlanes == 1) {
-        // Paletted
+        // 8-bit paletted
         for (int i = 0; i < numPixels; i++) {
           pixels[i] = palette[pixels[i]];
         }
@@ -526,6 +584,10 @@ public class Viewer_PCX extends ViewerPlugin {
       }
       else if (numPlanes == 3) {
         // RGB
+        return new ImageResource(pixels, width, height);
+      }
+      else if (numPlanes == 4 && bitCount == 1) {
+        // 4-bit paletted (already mapped to the palette values above)
         return new ImageResource(pixels, width, height);
       }
       else {

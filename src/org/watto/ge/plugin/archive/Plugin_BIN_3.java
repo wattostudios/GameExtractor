@@ -1,30 +1,25 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
-import org.watto.datatype.ReplacableResource;
+
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -44,11 +39,19 @@ public class Plugin_BIN_3 extends ArchivePlugin {
 
     //         read write replace rename
     setProperties(true, false, false, false);
-    setCanImplicitReplace(true);
 
     setExtensions("bin");
     setGames("Apache Longbow");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    //setFileTypes(new FileType("txt", "Text Document", FileType.TYPE_DOCUMENT),
+    //             new FileType("bmp", "Bitmap Image", FileType.TYPE_IMAGE)
+    //             );
+
+    //setTextPreviewExtensions("colours", "rat", "screen", "styles"); // LOWER CASE
+
+    //setCanScanForFileTypes(true);
 
   }
 
@@ -67,16 +70,15 @@ public class Plugin_BIN_3 extends ArchivePlugin {
         rating += 25;
       }
 
-      fm.skip(4);
-
-      // 8 - null
-      if (FieldValidator.checkEquals((int) fm.readLong(), 0)) {
+      // 4 - Number Of Files
+      int numFiles = fm.readInt();
+      if (FieldValidator.checkNumFiles(numFiles)) {
         rating += 5;
       }
 
-      // 4 - Number Of Files
-      if (FieldValidator.checkNumFiles((fm.readInt() - 4) / 24)) {
-        rating += 5;
+      // 4 - First File Offset
+      if (FieldValidator.checkEquals(fm.readInt(), (numFiles * 4) + 4)) {
+        rating += 15;
       }
 
       return rating;
@@ -98,47 +100,29 @@ public class Plugin_BIN_3 extends ArchivePlugin {
 
       addFileTypes();
 
-      long arcSize = (int) path.length() + 1;
+      long arcSize = path.length();
 
       FileManipulator fm = new FileManipulator(path, false);
 
-      fm.skip(12);
-
       // 4 - Number Of Files
-      int numFiles = (fm.readInt() - 4) / 24;
+      int numFiles = fm.readInt();
       FieldValidator.checkNumFiles(numFiles);
-
-      fm.seek(4);
 
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
       for (int i = 0; i < numFiles; i++) {
-        // 8 - null
-        fm.skip(8);
+        // 4 - File Offset
 
-        // 4 - Data Offset
-        long offsetPointerLocation = fm.getOffset();
-        long offsetPointerLength = 4;
+        int offset = fm.readInt();
+        FieldValidator.checkOffset(offset, arcSize);
 
-        long offset = fm.readInt();
-        if (offset == 0) {
-          resources = resizeResources(resources, i);
-          numFiles = i;
-        }
-        else {
-          FieldValidator.checkOffset(offset, arcSize);
+        String filename = Resource.generateFilename(i);
 
-          // 12 - unknown
-          fm.skip(12);
+        //path,id,name,offset,length,decompLength,exporter
+        resources[i] = new Resource(path, filename, offset);
 
-          String filename = Resource.generateFilename(i);
-
-          //path,id,name,offset,length,decompLength,exporter
-          resources[i] = new ReplacableResource(path, filename, offset, offsetPointerLocation, offsetPointerLength);
-
-          TaskProgressManager.setValue(i);
-        }
+        TaskProgressManager.setValue(i);
       }
 
       fm.close();
@@ -152,6 +136,26 @@ public class Plugin_BIN_3 extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    /*
+    if (headerInt1 == 2037149520) {
+      return "js";
+    }
+    */
+
+    return null;
   }
 
 }

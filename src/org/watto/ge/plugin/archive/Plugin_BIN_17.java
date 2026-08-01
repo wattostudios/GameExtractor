@@ -2,7 +2,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -25,6 +25,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -71,12 +72,12 @@ public class Plugin_BIN_17 extends ArchivePlugin {
       }
 
       // Image Width
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
+      if (FieldValidator.checkWidth(fm.readInt())) {
         rating += 5;
       }
 
       // Image Height
-      if (FieldValidator.checkNumFiles(fm.readInt())) {
+      if (FieldValidator.checkHeight(fm.readInt())) {
         rating += 5;
       }
 
@@ -106,28 +107,27 @@ public class Plugin_BIN_17 extends ArchivePlugin {
 
       // RESETTING GLOBAL VARIABLES
 
-      FileManipulator fm = new FileManipulator(path, false);
+      FileManipulator fm = new FileManipulator(path, false, 8); // small quick reads
 
       long arcSize = fm.getLength();
 
       int numFiles = Archive.getMaxFiles();
 
       Resource[] resources = new Resource[numFiles];
-      TaskProgressManager.setMaximum(numFiles);
+      TaskProgressManager.setMaximum(arcSize);
 
       // Loop through directory
       int realNumFiles = 0;
       while (fm.getOffset() < arcSize) {
+        long offset = fm.getOffset();
+
         // 4 - Image Width
         int imageWidth = fm.readInt();
-        FieldValidator.checkNumFiles(imageWidth);
+        FieldValidator.checkWidth(imageWidth);
 
         // 4 - Image Height
         int imageHeight = fm.readInt();
-        FieldValidator.checkNumFiles(imageHeight);
-
-        long offset = fm.getOffset();
-        FieldValidator.checkOffset(offset, arcSize); // checks for files past the end of the archive
+        FieldValidator.checkHeight(imageHeight);
 
         // for each pixel
         //   1 - Color Index
@@ -135,8 +135,11 @@ public class Plugin_BIN_17 extends ArchivePlugin {
         //   1 - Alpha Value
         long length = imageWidth * imageHeight * 2;
         FieldValidator.checkLength(length, arcSize);
+        fm.skip(length);
 
-        String filename = Resource.generateFilename(realNumFiles);
+        length += 8;
+
+        String filename = Resource.generateFilename(realNumFiles) + ".bin_tex";
 
         //path,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);

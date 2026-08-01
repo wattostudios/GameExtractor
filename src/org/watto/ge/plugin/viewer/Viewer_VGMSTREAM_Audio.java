@@ -427,6 +427,10 @@ public class Viewer_VGMSTREAM_Audio extends ViewerPlugin {
       return null;
     }
 
+    if (Settings.getBoolean("DebugMode")) {
+      System.out.println("Converted using VGMStream");
+    }
+
     return new Viewer_WAV_RIFF().read(convertedFile);
     //return new Viewer_FFMPEG_Audio_WAV().read(convertedFile); (for files with more then 2 channels - eg some GameCube audio)
 

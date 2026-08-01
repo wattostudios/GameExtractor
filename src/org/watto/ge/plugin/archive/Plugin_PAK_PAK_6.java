@@ -148,6 +148,10 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       unknownEntryTypeCount = 0;
       while (fm.getOffset() < dataOffset - 4) {
         readDirectory(fm, path, resources, "", dataOffset, arcSize);
+
+        if (unknownEntryTypeCount > 50) {
+          break; // stop false positives
+        }
       }
 
       //
@@ -243,6 +247,10 @@ public class Plugin_PAK_PAK_6 extends ArchivePlugin {
       else {
         ErrorLogger.log("[PAK_PAK_6] Unknown entry type: " + entryType);
         unknownEntryTypeCount++;
+
+        if (unknownEntryTypeCount > 50) { //early exit
+          return;
+        }
       }
 
     }

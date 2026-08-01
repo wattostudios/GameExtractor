@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -14,13 +14,14 @@
 
 package org.watto.ge.plugin.exporter;
 
-import java.io.File;
 import java.util.zip.InflaterInputStream;
+
 import org.watto.datatype.Resource;
 import org.watto.datatype.SplitChunkResource;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.io.FileManipulator;
-import org.watto.io.stream.ManipulatorInputStream;
+import org.watto.io.buffer.ByteBuffer;
+import org.watto.io.stream.ManipulatorUnclosableInputStream;
 
 public class Exporter_Custom_VFS extends ExporterPlugin {
 
@@ -31,7 +32,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public static Exporter_Custom_VFS getInstance() {
@@ -45,7 +46,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Exporter_Custom_VFS() {
@@ -54,7 +55,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -81,7 +82,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
           return false;
         }
 
-        readSource = new InflaterInputStream(new ManipulatorInputStream(fm));
+        readSource = new InflaterInputStream(new ManipulatorUnclosableInputStream(fm));
         nextByte = readSource.read();
       }
     }
@@ -94,7 +95,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -104,6 +105,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
       readSource = null;
 
       fm.close();
+      fm = null;
     }
     catch (Throwable t) {
       readSource = null;
@@ -112,7 +114,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -122,7 +124,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -137,6 +139,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
       //numWritten = 0;
 
+      /*
       FileManipulator temp = new FileManipulator(new File("temp" + File.separator + "vfs-compressed-temp.txt"), true);
       for (int i = 0; i < readOffsets.length; i++) {
         fm.seek(readOffsets[i]);
@@ -144,12 +147,29 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
       }
       File usedFile = temp.getFile();
       temp.close();
-
+      
       fm = new FileManipulator(usedFile, false);
+      */
+
+      long totalLength = 0;
+      for (int i = 0; i < readLengths.length; i++) {
+        totalLength += readLengths[i];
+      }
+
+      byte[] dataBytes = new byte[(int) totalLength];
+      FileManipulator compFM = new FileManipulator(new ByteBuffer(dataBytes));
+      for (int i = 0; i < readOffsets.length; i++) {
+        fm.seek(readOffsets[i]);
+        compFM.writeBytes(fm.readBytes((int) readLengths[i]));
+      }
+      compFM.seek(0);
+
+      fm.close();
+      fm = compFM;
 
       nextOffset = fm.readInt() + 4;
 
-      readSource = new InflaterInputStream(new ManipulatorInputStream(fm));
+      readSource = new InflaterInputStream(new ManipulatorUnclosableInputStream(fm));
 
     }
     catch (Throwable t) {
@@ -158,7 +178,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -169,7 +189,7 @@ public class Exporter_Custom_VFS extends ExporterPlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

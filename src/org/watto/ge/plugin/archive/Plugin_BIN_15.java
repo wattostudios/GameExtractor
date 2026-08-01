@@ -1,29 +1,29 @@
-
+/*
+ * Application:  Game Extractor
+ * Author:       wattostudios
+ * Website:      http://www.watto.org
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
+ *
+ * License Information:
+ * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
+ * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later versions. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at http://www.gnu.org for more
+ * details. For further information on this application, refer to the authors' website.
+ */
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
-import org.watto.task.TaskProgressManager;
+
+import org.watto.datatype.FileType;
+import org.watto.datatype.Palette;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
+import org.watto.ge.helper.PaletteManager;
 import org.watto.ge.plugin.ArchivePlugin;
-////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                            //
-//                                       GAME EXTRACTOR                                       //
-//                               Extensible Game Archive Editor                               //
-//                                http://www.watto.org/extract                                //
-//                                                                                            //
-//                           Copyright (C) 2002-2009  WATTO Studios                           //
-//                                                                                            //
-// This program is free software; you can redistribute it and/or modify it under the terms of //
-// the GNU General Public License published by the Free Software Foundation; either version 2 //
-// of the License, or (at your option) any later versions. This program is distributed in the //
-// hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties //
-// of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License //
-// at http://www.gnu.org for more details. For updates and information about this program, go //
-// to the WATTO Studios website at http://www.watto.org or email watto@watto.org . Thanks! :) //
-//                                                                                            //
-////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.io.converter.ByteConverter;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -34,7 +34,7 @@ public class Plugin_BIN_15 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_BIN_15() {
@@ -48,14 +48,14 @@ public class Plugin_BIN_15 extends ArchivePlugin {
     setExtensions("bin");
     setPlatforms("PC");
 
-    setFileTypes("image", "Image (Indexed Color)",
-        "palette", "Color Palette");
+    setFileTypes(new FileType("bin_pal", "Color Palette", FileType.TYPE_PALETTE),
+        new FileType("bin_tex", "Texture Image", FileType.TYPE_IMAGE));
 
   }
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -68,7 +68,7 @@ public class Plugin_BIN_15 extends ArchivePlugin {
         rating += 25;
       }
 
-      if (fm.getFile().getName().equals("Textures.bin")) {
+      if (fm.getFile().getName().equalsIgnoreCase("Textures.bin")) {
         rating += 25;
       }
 
@@ -102,6 +102,7 @@ public class Plugin_BIN_15 extends ArchivePlugin {
       //ExporterPlugin exporter = Exporter_ZLib.getInstance();
 
       // RESETTING GLOBAL VARIABLES
+      PaletteManager.clear();
 
       FileManipulator fm = new FileManipulator(path, false);
 
@@ -133,7 +134,26 @@ public class Plugin_BIN_15 extends ArchivePlugin {
       // Loop through the palettes
       long offset = 4;
       for (int i = 0; i < numPalettes; i++) {
-        String filename = "Palette " + (i + 1) + ".palette";
+        fm.relativeSeek(offset);
+
+        // X - Palette (256*4) RGBA (although alpha is always 0)
+        int[] palette = new int[256];
+
+        for (int p = 0; p < 256; p++) {
+          // INPUT = RGBA
+          int rPixel = ByteConverter.unsign(fm.readByte());
+          int gPixel = ByteConverter.unsign(fm.readByte());
+          int bPixel = ByteConverter.unsign(fm.readByte());
+          int aPixel = ByteConverter.unsign(fm.readByte());
+          aPixel = 255;
+
+          // OUTPUT = ARGB
+          palette[p] = ((rPixel << 16) | (gPixel << 8) | bPixel | (aPixel << 24));
+        }
+
+        PaletteManager.addPalette(new Palette(palette));
+
+        String filename = "Palette " + (i + 1) + ".bin_pal";
 
         //path,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, paletteSize);
@@ -144,16 +164,36 @@ public class Plugin_BIN_15 extends ArchivePlugin {
         offset += paletteSize;
       }
 
+      fm.seek(dirOffset + 4);
+
       // Loop through the images
       for (int i = 0; i < numImages; i++) {
+        offset = fm.getOffset();
+
         // 128 - Filename (null) (no extension)
         String filename = fm.readNullString(128);
         FieldValidator.checkFilename(filename);
-        filename += ".image";
+        filename += ".bin_tex";
 
-        // 4 - Unknown (1)
-        // 4 - Color Palette Number?
-        fm.skip(8);
+        //System.out.println((fm.getOffset() - 128) + "\t" + filename);
+
+        // 4 - Unknown (1/3)
+        int imageType = fm.readInt();
+
+        if (imageType == 4) {
+          // empty file
+
+          //path,name,offset,length,decompLength,exporter
+          resources[realNumFiles] = new Resource(path, filename, offset, 128 + 4);
+
+          TaskProgressManager.setValue(realNumFiles);
+          realNumFiles++;
+
+          continue;
+        }
+
+        // 4 - Color Palette Number
+        fm.skip(4);
 
         // 4 - Image Width
         int imageWidth = fm.readInt();
@@ -163,7 +203,7 @@ public class Plugin_BIN_15 extends ArchivePlugin {
         int imageHeight = fm.readInt();
         FieldValidator.checkPositive(imageHeight);
 
-        // 4 - null
+        // 4 - Number of Frames? [+1]
         fm.skip(4);
 
         // 4 - Number Of Mipmaps
@@ -172,22 +212,23 @@ public class Plugin_BIN_15 extends ArchivePlugin {
 
         // for each mipmap
         //   w*h - Pixel Data (Palette Index)
-        offset = fm.getOffset();
-        FieldValidator.checkOffset(offset);
 
         long length = 0;
-        while (imageWidth > 1 && imageHeight > 1) {
+        for (int m = 0; m < numMipmaps; m++) {
           length += (imageWidth * imageHeight);
 
           imageWidth /= 2;
           imageHeight /= 2;
         }
 
-        // add 1 for the last mipmap (1x1)
-        length += 1;
+        if (imageType == 3) {
+          length *= 2;
+        }
 
         FieldValidator.checkLength(length, arcSize);
         fm.skip(length);
+
+        length += (128 + 24);
 
         //path,name,offset,length,decompLength,exporter
         resources[realNumFiles] = new Resource(path, filename, offset, length);

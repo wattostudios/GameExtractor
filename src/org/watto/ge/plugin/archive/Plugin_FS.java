@@ -15,6 +15,7 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Resource;
@@ -22,7 +23,7 @@ import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
 import org.watto.ge.plugin.ExporterPlugin;
 import org.watto.ge.plugin.exporter.BlockExporterWrapper;
-import org.watto.ge.plugin.exporter.Exporter_LZSS;
+import org.watto.ge.plugin.exporter.Exporter_LZSS_XOR;
 import org.watto.io.FileManipulator;
 import org.watto.io.converter.ShortConverter;
 import org.watto.task.TaskProgressManager;
@@ -50,7 +51,7 @@ public class Plugin_FS extends ArchivePlugin {
     setGames("Chaser", "Gene Troopers");
     setPlatforms("PC");
 
-    setTextPreviewExtensions("cew", "cpp", "sc", "sca", "scs", "def", "mtl"); // LOWER CASE
+    setTextPreviewExtensions("cew", "cpp", "sc", "sca", "scs", "def", "mtl", "eng", "xxx"); // LOWER CASE
 
   }
 
@@ -105,7 +106,7 @@ public class Plugin_FS extends ArchivePlugin {
 
       addFileTypes();
 
-      ExporterPlugin exporter = new Exporter_LZSS();
+      ExporterPlugin exporterLZSS = new Exporter_LZSS_XOR(68);
 
       FileManipulator fm = new FileManipulator(path, false);
       long arcSize = fm.getLength();
@@ -123,15 +124,15 @@ public class Plugin_FS extends ArchivePlugin {
 
       // 4 - Directory Length
       // 4 - Unknown (8192)
-      fm.skip(8);
+      // 4 - Directory List Length
+      fm.skip(12);
 
-      // 4 - Archive Name Length
-      int arcNameLength = fm.readInt();
-      FieldValidator.checkLength(arcNameLength, arcSize);
+      // 4 - Number of Directories
+      int numDirectories = fm.readInt();
+      FieldValidator.checkNumFiles(numDirectories);
 
-      // 4 - Version (1)
       // 4 - Filename Directory Length
-      fm.skip(8);
+      fm.skip(4);
 
       // 4 - Number of Files
       int numFiles = fm.readInt();
@@ -140,15 +141,23 @@ public class Plugin_FS extends ArchivePlugin {
       Resource[] resources = new Resource[numFiles];
       TaskProgressManager.setMaximum(numFiles);
 
-      // X - Archive Name (null)
-      fm.skip(arcNameLength);
+      // loop through the directory names
+      String[] dirNames = new String[numDirectories];
+      for (int i = 0; i < numDirectories; i++) {
+        // X - Directory Name
+        // 1 - null Directory Name Terminator
+        String dirName = fm.readNullString() + "\\";
+        dirNames[i] = dirName;
+      }
 
       // loop through filename directory
       String[] names = new String[numFiles];
       for (int i = 0; i < numFiles; i++) {
-        // X - Filename (null)
-        names[i] = fm.readNullString();
-        FieldValidator.checkFilename(names[i]);
+        // X - Filename
+        // 1 - null Filename Terminator
+        String name = fm.readNullString();
+        FieldValidator.checkFilename(name);
+        names[i] = name;
       }
 
       short[] compressionFlags = new short[numFiles];
@@ -165,14 +174,15 @@ public class Plugin_FS extends ArchivePlugin {
         int decompLength = fm.readInt();
         FieldValidator.checkLength(decompLength);
 
-        // 2 - Folder Number
-        fm.skip(2);
+        // 2 - Directory ID
+        int dirID = fm.readShort();
+        FieldValidator.checkRange(dirID, 0, numDirectories);
 
         // 2 - Compression Flag
         short compression = fm.readShort();
         compressionFlags[i] = compression;
 
-        String filename = names[i];
+        String filename = dirNames[dirID] + names[i];
 
         //path,id,name,offset,length,decompLength,exporter
         if (compression == 0) {
@@ -236,7 +246,22 @@ public class Plugin_FS extends ArchivePlugin {
             blockDecompLengths[numBlocks - 1] = lastDecompLength;
           }
 
-          BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+          /*
+          // see if it's using ZLib or ZLSS
+          fm.seek(blockOffsets[0]);
+          
+          ExporterPlugin currentExporter = null;
+          if (fm.readByte() == 120) {
+            // ZLib
+            currentExporter = exporterZLib;
+          }
+          else {
+            // LZSS
+            currentExporter = exporterLZSS;
+          }
+          */
+
+          BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporterLZSS, blockOffsets, blockLengths, blockDecompLengths);
           resource.setExporter(blockExporter);
         }
         else if (compression == 3) {
@@ -274,7 +299,22 @@ public class Plugin_FS extends ArchivePlugin {
             blockDecompLengths[numBlocks - 1] = lastDecompLength;
           }
 
-          BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporter, blockOffsets, blockLengths, blockDecompLengths);
+          /*
+          // see if it's using ZLib or ZLSS
+          fm.seek(blockOffsets[0]);
+          
+          ExporterPlugin currentExporter = null;
+          if (fm.readByte() == 120) {
+            // ZLib
+            currentExporter = exporterZLib;
+          }
+          else {
+            // LZSS
+            currentExporter = exporterLZSS;
+          }
+          */
+
+          BlockExporterWrapper blockExporter = new BlockExporterWrapper(exporterLZSS, blockOffsets, blockLengths, blockDecompLengths);
           resource.setExporter(blockExporter);
         }
       }

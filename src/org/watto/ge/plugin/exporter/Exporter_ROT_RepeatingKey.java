@@ -21,7 +21,7 @@ import org.watto.io.converter.ByteConverter;
 
 /**
 **********************************************************************************************
-Exports a file, where the data is XOR with a repeating key
+Exports a file, where the data is Rotated (added) with a repeating key
 **********************************************************************************************
 **/
 public class Exporter_ROT_RepeatingKey extends ExporterPlugin {
@@ -227,7 +227,9 @@ public class Exporter_ROT_RepeatingKey extends ExporterPlugin {
       readLength--;
       //int returnByte = (readSource.readByte() + rotKey[currentKeyPos++]);
 
-      int byteValue = ByteConverter.unsign(readSource.readByte()) + rotKey[currentKeyPos++];
+      int byteValue = ByteConverter.unsign(readSource.readByte());
+      byteValue += rotKey[currentKeyPos++];
+
       if (byteValue < 0) {
         byteValue = 256 + byteValue;
       }

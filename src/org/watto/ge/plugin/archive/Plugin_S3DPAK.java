@@ -2,7 +2,7 @@
  * Application:  Game Extractor
  * Author:       wattostudios
  * Website:      http://www.watto.org
- * Copyright:    Copyright (c) 2002-2020 wattostudios
+ * Copyright:    Copyright (c) 2002-2026 wattostudios
  *
  * License Information:
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -15,9 +15,11 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.ErrorLogger;
 import org.watto.Language;
 import org.watto.datatype.Archive;
+import org.watto.datatype.FileType;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
 import org.watto.ge.plugin.ArchivePlugin;
@@ -35,7 +37,7 @@ public class Plugin_S3DPAK extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_S3DPAK() {
@@ -48,6 +50,13 @@ public class Plugin_S3DPAK extends ArchivePlugin {
     setGames("TimeShift");
     setExtensions("s3dpak");
     setPlatforms("PC");
+
+    // MUST BE LOWER CASE !!!
+    setFileTypes(new FileType("tcip", "Texture Image", FileType.TYPE_IMAGE));
+
+    setTextPreviewExtensions("vsh", "psh", "fx", "ui"); // LOWER CASE
+
+    setCanScanForFileTypes(true);
 
   }
 
@@ -113,7 +122,7 @@ public class Plugin_S3DPAK extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -160,19 +169,19 @@ public class Plugin_S3DPAK extends ArchivePlugin {
       if (fm.readString(1).equals("x")) {
         /*
         fm.close();
-
+        
         ExporterPlugin exporter = Exporter_ZLib_CompressedSizeOnly.getInstance();
         //decompress the file first
         FileManipulator extDir = new FileManipulator(new File("temp" + File.separator + "s3dpak_decompressed.dat"), true);
         String dirName = extDir.getFilePath();
         Resource directory = new Resource(path, dirName, 0, (int) path.length(), (int) path.length() * 20);
-
+        
         exporter.extract(directory, extDir);
-
+        
         extDir.close();
-
+        
         path = new File(dirName);
-
+        
         // important for repacking!
         Settings.set("CurrentArchive", path.getAbsolutePath());
         fm = new FileManipulator(path, false);
@@ -213,12 +222,17 @@ public class Plugin_S3DPAK extends ArchivePlugin {
 
         // 4 - Filename Length
         int filenameLength = fm.readInt();
-        FieldValidator.checkFilenameLength(filenameLength);
+        FieldValidator.checkFilenameLength(filenameLength + 1); // +1 to allow nulls
 
         // X - Filename
         String filename = fm.readString(filenameLength);
-        FieldValidator.checkFilename(filename);
-        filename = filename.replaceAll("#", "\\\\");
+        if (filenameLength != 0) {
+          FieldValidator.checkFilename(filename);
+          filename = filename.replaceAll("#", "\\\\");
+        }
+        else {
+          filename = Resource.generateFilename(realNumFiles);
+        }
         //System.out.println(filename);
 
         // 4 - Unknown (4)
@@ -253,6 +267,43 @@ public class Plugin_S3DPAK extends ArchivePlugin {
       logError(t);
       return null;
     }
+  }
+
+  /**
+  **********************************************************************************************
+  If an archive doesn't have filenames stored in it, the scanner can come here to try to work out
+  what kind of file a Resource is. This method allows the plugin to provide additional plugin-specific
+  extensions, which will be tried before any standard extensions.
+  @return null if no extension can be determined, or the extension if one can be found
+  **********************************************************************************************
+  **/
+  @Override
+  public String guessFileExtension(Resource resource, byte[] headerBytes, int headerInt1, int headerInt2, int headerInt3, short headerShort1, short headerShort2, short headerShort3, short headerShort4, short headerShort5, short headerShort6) {
+
+    String extension = resource.getExtension();
+    if (extension != null && !extension.equals("")) {
+      if (extension.equals("ui") && headerInt1 == resource.getDecompressedLength() - 4) {
+        resource.setOffset(resource.getOffset() + 4);
+        resource.setLength(headerInt1);
+        resource.setDecompressedLength(headerInt1);
+      }
+      return extension;
+    }
+
+    if (headerBytes[6] == 84 && headerBytes[7] == 67 && headerBytes[8] == 73 && headerBytes[9] == 80) {
+      return "tcip";
+    }
+    else if (headerInt1 == resource.getDecompressedLength() - 4) {
+      resource.setOffset(resource.getOffset() + 4);
+      resource.setLength(headerInt1);
+      resource.setDecompressedLength(headerInt1);
+      return "ui";
+    }
+    else if (headerShort1 == -257) {
+      return "txt";
+    }
+
+    return null;
   }
 
 }

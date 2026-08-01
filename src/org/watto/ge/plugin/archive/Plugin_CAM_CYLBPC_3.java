@@ -2,9 +2,9 @@
 package org.watto.ge.plugin.archive;
 
 import java.io.File;
+
 import org.watto.Language;
 import org.watto.Settings;
-import org.watto.task.TaskProgressManager;
 import org.watto.datatype.Archive;
 import org.watto.datatype.Resource;
 import org.watto.ge.helper.FieldValidator;
@@ -27,6 +27,7 @@ import org.watto.ge.plugin.ArchivePlugin;
 //                                                                                            //
 ////////////////////////////////////////////////////////////////////////////////////////////////
 import org.watto.io.FileManipulator;
+import org.watto.task.TaskProgressManager;
 
 /**
 **********************************************************************************************
@@ -37,7 +38,7 @@ public class Plugin_CAM_CYLBPC_3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   public Plugin_CAM_CYLBPC_3() {
@@ -55,7 +56,7 @@ public class Plugin_CAM_CYLBPC_3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -99,7 +100,7 @@ public class Plugin_CAM_CYLBPC_3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override
@@ -156,7 +157,22 @@ public class Plugin_CAM_CYLBPC_3 extends ArchivePlugin {
         for (int j = 0; j < numFilesOfType; j++) {
 
           // 20 - Filename? File ID?
-          String filename = fm.readNullString(20) + "." + fileTypes[i];
+          String filename = fm.readNullString(20);
+          byte[] filenameBytes = filename.getBytes();
+          boolean allAscii = true;
+          int numBytes = filenameBytes.length;
+          for (int f = 0; f < numBytes; f++) {
+            if (filenameBytes[f] < 32) {
+              allAscii = false;
+              break;
+            }
+          }
+          if (!allAscii || numBytes <= 1) {
+            // not a real filename, generate one instead
+            filename = Resource.generateFilename(j);
+          }
+
+          filename += "." + fileTypes[i];
 
           // 4 - File Offset
           long offset = fm.readInt();
@@ -190,7 +206,7 @@ public class Plugin_CAM_CYLBPC_3 extends ArchivePlugin {
 
   /**
   **********************************************************************************************
-
+  
   **********************************************************************************************
   **/
   @Override

@@ -135,7 +135,7 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
 
   /**
    **********************************************************************************************
-   Decompressed an archive, where the whole archive is compressed.
+   Decompresses an archive, where the whole archive is compressed.
    Reads the compressed block information first, then processes the compressed blocks themselves.
    Writes the output to a file with the same name, but with "_ge_decompressed" at the end of it.
    The decompressed file contains the same header as the compressed file, so you can open
@@ -314,11 +314,22 @@ public class Plugin_BIG_BIGF extends ArchivePlugin {
 
       // Loop through directory
       for (int i = 0; i < numFiles; i++) {
+        //System.out.println(fm.getOffset() + "\t" + i + "\t" + numFiles);
         // 4 Bytes - Data Offset
         int offset = IntConverter.changeFormat(fm.readInt());
 
         // 4 Bytes - File Size
         int length = IntConverter.changeFormat(fm.readInt());
+
+        if (offset == -842150451 || length == -842150451) {
+          // end of directory
+          numFiles = i;
+
+          // resize
+          resources = resizeResources(resources, numFiles);
+
+          break;
+        }
 
         if (offset == arcSize && (length == -1 || length == 0)) {
           length = 0;
